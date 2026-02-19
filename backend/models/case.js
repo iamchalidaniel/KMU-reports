@@ -21,12 +21,12 @@ if (dbType === 'mongo') {
         attachments: [String],
         created_by: String,
         case_type: { type: String, enum: ['single_student', 'group_student', 'single_staff', 'group_staff'], default: 'single_student' }, // Updated field to distinguish case types
-        appealStatus: { type: String, enum: ['pending', 'approved', 'rejected'], default: null },
-        appealReason: String,
-        appealDate: Date,
-        appealDecision: String,
-        createdAt: { type: Date, default: Date.now },
-        updatedAt: { type: Date, default: Date.now },
+        appeal_status: { type: String, enum: ['pending', 'approved', 'rejected'], default: null },
+        appeal_reason: String,
+        appeal_date: Date,
+        appeal_decision: String,
+        created_at: { type: Date, default: Date.now },
+        updated_at: { type: Date, default: Date.now },
     });
     CaseModel = mongoose.models.Case || mongoose.model('Case', caseSchema);
 } else if (dbType === 'mysql') {

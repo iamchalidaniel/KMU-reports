@@ -87,8 +87,12 @@ export async function listCases(req, res) {
                     incidentDate: cases[i].incident_date,
                     offenseType: cases[i].offense_type,
                     createdBy: cases[i].created_by,
-                    createdAt: cases[i].createdAt,
-                    updatedAt: cases[i].updatedAt
+                    createdAt: cases[i].created_at,
+                    updatedAt: cases[i].updated_at,
+                    appealStatus: cases[i].appeal_status,
+                    appealReason: cases[i].appeal_reason,
+                    appealDate: cases[i].appeal_date,
+                    appealDecision: cases[i].appeal_decision
                 };
             }
         } else if (dbType === 'mysql') {
@@ -144,6 +148,12 @@ export async function listCases(req, res) {
                 incidentDate: row.incident_date,
                 offenseType: row.offense_type,
                 createdBy: row.created_by,
+                createdAt: row.created_at,
+                updatedAt: row.updated_at,
+                appealStatus: row.appeal_status,
+                appealReason: row.appeal_reason,
+                appealDate: row.appeal_date,
+                appealDecision: row.appeal_decision,
                 student: row.studentId ? {
                     studentId: row.studentId,
                     fullName: row.studentFullName,
@@ -225,8 +235,12 @@ export async function getCase(req, res) {
                     incidentDate: caseItem.incident_date,
                     offenseType: caseItem.offense_type,
                     createdBy: caseItem.created_by,
-                    createdAt: caseItem.createdAt,
-                    updatedAt: caseItem.updatedAt
+                    createdAt: caseItem.created_at,
+                    updatedAt: caseItem.updated_at,
+                    appealStatus: caseItem.appeal_status,
+                    appealReason: caseItem.appeal_reason,
+                    appealDate: caseItem.appeal_date,
+                    appealDecision: caseItem.appeal_decision
                 };
             }
         } else if (dbType === 'mysql') {
@@ -247,6 +261,12 @@ export async function getCase(req, res) {
                     incidentDate: caseItem.incident_date,
                     offenseType: caseItem.offense_type,
                     createdBy: caseItem.created_by,
+                    createdAt: caseItem.created_at,
+                    updatedAt: caseItem.updated_at,
+                    appealStatus: caseItem.appeal_status,
+                    appealReason: caseItem.appeal_reason,
+                    appealDate: caseItem.appeal_date,
+                    appealDecision: caseItem.appeal_decision,
                     student: caseItem.studentId ? {
                         studentId: caseItem.studentId,
                         fullName: caseItem.studentFullName,
@@ -537,6 +557,19 @@ export async function updateCase(req, res) {
                 } else {
                     caseItem.student = null; // Set to null if student not found
                 }
+                // Transform field names to camelCase for frontend
+                caseItem = {
+                    ...caseItem,
+                    incidentDate: caseItem.incident_date,
+                    offenseType: caseItem.offense_type,
+                    createdBy: caseItem.created_by,
+                    createdAt: caseItem.created_at,
+                    updatedAt: caseItem.updated_at,
+                    appealStatus: caseItem.appeal_status,
+                    appealReason: caseItem.appeal_reason,
+                    appealDate: caseItem.appeal_date,
+                    appealDecision: caseItem.appeal_decision
+                };
             }
         } else if (dbType === 'mysql') {
             // Fetch old case for status comparison
@@ -560,6 +593,12 @@ export async function updateCase(req, res) {
                     incidentDate: caseItem.incident_date,
                     offenseType: caseItem.offense_type,
                     createdBy: caseItem.created_by,
+                    createdAt: caseItem.created_at,
+                    updatedAt: caseItem.updated_at,
+                    appealStatus: caseItem.appeal_status,
+                    appealReason: caseItem.appeal_reason,
+                    appealDate: caseItem.appeal_date,
+                    appealDecision: caseItem.appeal_decision,
                     student: caseItem.studentId ? {
                         studentId: caseItem.studentId,
                         fullName: caseItem.fullName,
