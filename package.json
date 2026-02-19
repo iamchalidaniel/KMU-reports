@@ -4,7 +4,7 @@
     "description": "KMU Discipline Desk - Complete Desktop Application",
     "main": "frontend/main.js",
     "scripts": {
-        "install-all": "rm -rf node_modules frontend/node_modules backend/node_modules && npm install && cd frontend && npm install && cd ../backend && npm install",
+        "install-all": "rm -rf node_modules frontend/node_modules && npm install && cd frontend && npm install",
         "dev": "npm run install-all && cd frontend && npm run dev",
         "build": "node scripts/build-exe.js",
         "build-exe": "node scripts/build-exe.js",
