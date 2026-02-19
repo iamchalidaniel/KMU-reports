@@ -24,6 +24,10 @@ const StudentReportSchema = new mongoose.Schema({
         enum: ['Pending', 'Reviewed', 'Approved', 'Rejected', 'Converted'],
         default: 'Pending',
     },
+    is_anonymous: {
+        type: Boolean,
+        default: false,
+    },
     admin_comments: String,
     assigned_case_id: {
         type: mongoose.Schema.Types.ObjectId,

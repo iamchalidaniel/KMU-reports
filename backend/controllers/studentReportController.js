@@ -65,7 +65,7 @@ export const getStudentReport = async (req, res) => {
 // Create new student report (students only)
 export const createStudentReport = async (req, res) => {
     try {
-        const { incident_date, description, offense_type, severity } = req.body;
+        const { incident_date, description, offense_type, severity, is_anonymous } = req.body;
 
         if (!description) {
             return res.status(400).json({ error: 'Description is required' });
@@ -73,11 +73,12 @@ export const createStudentReport = async (req, res) => {
 
         const report = new StudentReport({
             student_id: req.user._id,
-            student_name: req.user.fullName,
-            student_email: req.user.email,
+            student_name: is_anonymous ? 'Anonymous' : req.user.fullName,
+            student_email: is_anonymous ? null : req.user.email,
             incident_date: incident_date || new Date(),
             description,
             offense_type: offense_type || 'General',
+            is_anonymous: is_anonymous || false,
             severity: severity || 'Medium',
             status: 'Pending',
         });

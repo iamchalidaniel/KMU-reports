@@ -87,8 +87,12 @@ export async function listCases(req, res) {
                     incidentDate: cases[i].incident_date,
                     offenseType: cases[i].offense_type,
                     createdBy: cases[i].created_by,
-                    createdAt: cases[i].createdAt,
-                    updatedAt: cases[i].updatedAt
+                    createdAt: cases[i].created_at,
+                    updatedAt: cases[i].updated_at,
+                    appealStatus: cases[i].appeal_status,
+                    appealReason: cases[i].appeal_reason,
+                    appealDate: cases[i].appeal_date,
+                    appealDecision: cases[i].appeal_decision
                 };
             }
         } else if (dbType === 'mysql') {
@@ -138,26 +142,7 @@ export async function listCases(req, res) {
             total = count;
             const [rows] = await db.execute(selectQuery, queryParams);
 
-            // Transform the data to match the expected format
-            cases = rows.map(row => ({
-                ...row,
-                incidentDate: row.incident_date,
-                offenseType: row.offense_type,
-                createdBy: row.created_by,
-                student: row.studentId ? {
-                    studentId: row.studentId,
-                    fullName: row.studentFullName,
-                    department: row.studentDepartment,
-                    year: row.year,
-                    gender: row.gender
-                } : null,
-                staff: row.staffId ? {
-                    staffId: row.staffId,
-                    fullName: row.staffFullName,
-                    department: row.staffDepartment,
-                    position: row.position
-                } : null
-            }));
+
         }
         res.json({ cases, total });
     } catch (err) {
@@ -225,8 +210,12 @@ export async function getCase(req, res) {
                     incidentDate: caseItem.incident_date,
                     offenseType: caseItem.offense_type,
                     createdBy: caseItem.created_by,
-                    createdAt: caseItem.createdAt,
-                    updatedAt: caseItem.updatedAt
+                    createdAt: caseItem.created_at,
+                    updatedAt: caseItem.updated_at,
+                    appealStatus: caseItem.appeal_status,
+                    appealReason: caseItem.appeal_reason,
+                    appealDate: caseItem.appeal_date,
+                    appealDecision: caseItem.appeal_decision
                 };
             }
         } else if (dbType === 'mysql') {
@@ -240,41 +229,6 @@ export async function getCase(req, res) {
                 WHERE c.id = ?
             `, [req.params.id]);
             caseItem = rows[0];
-            if (caseItem) {
-                // Transform the data to match the expected format
-                caseItem = {
-                    ...caseItem,
-                    incidentDate: caseItem.incident_date,
-                    offenseType: caseItem.offense_type,
-                    createdBy: caseItem.created_by,
-                    student: caseItem.studentId ? {
-                        studentId: caseItem.studentId,
-                        fullName: caseItem.studentFullName,
-                        department: caseItem.studentDepartment,
-                        year: caseItem.year,
-                        gender: caseItem.gender
-                    } : null,
-                    students: caseItem.studentId ? [{
-                        studentId: caseItem.studentId,
-                        fullName: caseItem.studentFullName,
-                        department: caseItem.studentDepartment,
-                        year: caseItem.year,
-                        gender: caseItem.gender
-                    }] : [],
-                    staff: caseItem.staffId ? {
-                        staffId: caseItem.staffId,
-                        fullName: caseItem.staffFullName,
-                        department: caseItem.staffDepartment,
-                        position: caseItem.position
-                    } : null,
-                    staffMembers: caseItem.staffId ? [{
-                        staffId: caseItem.staffId,
-                        fullName: caseItem.staffFullName,
-                        department: caseItem.staffDepartment,
-                        position: caseItem.position
-                    }] : []
-                };
-            }
         }
         if (!caseItem) return res.status(404).json({ error: 'Case not found' });
         res.json(caseItem);
@@ -537,6 +491,19 @@ export async function updateCase(req, res) {
                 } else {
                     caseItem.student = null; // Set to null if student not found
                 }
+                // Transform field names to camelCase for frontend
+                caseItem = {
+                    ...caseItem,
+                    incidentDate: caseItem.incident_date,
+                    offenseType: caseItem.offense_type,
+                    createdBy: caseItem.created_by,
+                    createdAt: caseItem.created_at,
+                    updatedAt: caseItem.updated_at,
+                    appealStatus: caseItem.appeal_status,
+                    appealReason: caseItem.appeal_reason,
+                    appealDate: caseItem.appeal_date,
+                    appealDecision: caseItem.appeal_decision
+                };
             }
         } else if (dbType === 'mysql') {
             // Fetch old case for status comparison
@@ -553,22 +520,6 @@ export async function updateCase(req, res) {
                 WHERE c.id = ?
             `, [req.params.id]);
             caseItem = rows[0];
-            if (caseItem) {
-                // Transform the data to match the expected format
-                caseItem = {
-                    ...caseItem,
-                    incidentDate: caseItem.incident_date,
-                    offenseType: caseItem.offense_type,
-                    createdBy: caseItem.created_by,
-                    student: caseItem.studentId ? {
-                        studentId: caseItem.studentId,
-                        fullName: caseItem.fullName,
-                        department: caseItem.department,
-                        year: caseItem.year,
-                        gender: caseItem.gender
-                    } : null
-                };
-            }
         }
         // Audit log for status change
         if (req.body.status && oldStatus && req.body.status !== oldStatus) {
