@@ -89,7 +89,6 @@ export default function StudentDashboardPage() {
     setLoadingReports(true);
     try {
       const params = new URLSearchParams({
-        studentId: user?.studentId || '',
         page: page.toString(),
         limit: limit.toString(),
       });
@@ -97,13 +96,13 @@ export default function StudentDashboardPage() {
       if (statusFilter) params.append('status', statusFilter);
       if (search) params.append('search', search);
 
-      const res = await fetch(`${API_BASE_URL}/api/cases?${params}`, {
+      const res = await fetch(`${API_BASE_URL}/api/student-reports?${params}`, {
         headers: { ...authHeaders() },
       });
 
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
-      setReports(data.cases || []);
+      setReports(data.reports || []);
       setTotal(data.total || 0);
     } catch (err: any) {
       console.error('Failed to fetch reports:', err);
@@ -166,14 +165,43 @@ export default function StudentDashboardPage() {
 
     if (!validateForm()) return;
 
-    showNotification('info', 'Please contact the administration office or dean of students to submit a formal report with details about the incident.');
-    
-    // Reset form
-    setIncidentDate('');
-    setOffenseType('');
-    setSeverity('');
-    setDescription('');
-    setErrors({});
+    setSubmitting(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/student-reports`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders(),
+        },
+        body: JSON.stringify({
+          incident_date: incidentDate,
+          offense_type: offenseType,
+          severity,
+          description: description.trim(),
+        }),
+      });
+
+      if (!res.ok) throw new Error(await res.text());
+
+      showNotification('success', 'Report submitted successfully! Admin will review your report shortly.');
+      
+      // Reset form
+      setIncidentDate('');
+      setOffenseType('');
+      setSeverity('');
+      setDescription('');
+      setErrors({});
+
+      // Refresh reports
+      setPage(1);
+      await fetchReports();
+      setActiveTab('myReports');
+    } catch (err: any) {
+      console.error('Failed to submit report:', err);
+      showNotification('error', 'Failed to submit report. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // Submit appeal

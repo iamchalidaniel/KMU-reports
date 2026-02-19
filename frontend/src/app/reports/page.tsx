@@ -27,15 +27,18 @@ interface Student {
 
 interface StudentReport {
   _id: string;
-  student?: Student;
-  student_id?: string;
-  incidentDate: string;
+  student_id?: string | Student;
+  student_name?: string;
+  student_email?: string;
+  incident_date: string;
   description: string;
-  offenseType: string;
+  offense_type?: string;
   severity: string;
   status: string;
-  createdAt: string;
-  updatedAt: string;
+  admin_comments?: string;
+  assigned_case_id?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export default function ReportsPage() {
@@ -120,19 +123,50 @@ export default function ReportsPage() {
       if (severityFilter) params.append('severity', severityFilter);
       if (search) params.append('search', search);
 
-      const res = await fetch(`${API_BASE_URL}/api/cases?${params}`, {
+      const res = await fetch(`${API_BASE_URL}/api/student-reports?${params}`, {
         headers: { ...authHeaders() },
       });
 
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
-      setStudentReports(data.cases || []);
+      setStudentReports(data.reports || []);
       setTotal(data.total || 0);
     } catch (err: any) {
       console.error('Failed to fetch student reports:', err);
       showNotification('error', 'Failed to load student reports');
     } finally {
       setLoadingReports(false);
+    }
+  };
+
+  const handleApproveReport = async (reportId: string) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/student-reports/${reportId}`, {
+        method: 'PUT',
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'Approved' }),
+      });
+
+      if (!res.ok) throw new Error(await res.text());
+      showNotification('success', 'Report approved');
+      await fetchStudentReports();
+    } catch (err: any) {
+      showNotification('error', 'Failed to approve report');
+    }
+  };
+
+  const handleConvertToCase = async (reportId: string) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/student-reports/${reportId}/convert-to-case`, {
+        method: 'POST',
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+      });
+
+      if (!res.ok) throw new Error(await res.text());
+      showNotification('success', 'Report converted to case');
+      await fetchStudentReports();
+    } catch (err: any) {
+      showNotification('error', 'Failed to convert report to case');
     }
   };
 
@@ -429,10 +463,11 @@ export default function ReportsPage() {
                 className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="">All Statuses</option>
-                <option value="Open">Open</option>
                 <option value="Pending">Pending</option>
-                <option value="Closed">Closed</option>
-                <option value="In Appeal">In Appeal</option>
+                <option value="Reviewed">Reviewed</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
+                <option value="Converted">Converted to Case</option>
               </select>
               <select
                 value={severityFilter}
@@ -482,6 +517,9 @@ export default function ReportsPage() {
                         <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
                           Severity
                         </th>
+                        <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
+                          Actions
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -491,16 +529,16 @@ export default function ReportsPage() {
                           className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
                         >
                           <td className="px-4 py-2 text-gray-900 dark:text-white">
-                            {report.student?.fullName || 'N/A'}
+                            {report.student_name || 'N/A'}
                           </td>
                           <td className="px-4 py-2 text-gray-900 dark:text-white">
-                            {formatDate(report.incidentDate)}
+                            {formatDate(report.incident_date)}
                           </td>
                           <td className="px-4 py-2 text-gray-900 dark:text-white truncate max-w-xs">
                             {report.description}
                           </td>
                           <td className="px-4 py-2 text-gray-900 dark:text-white text-xs">
-                            {report.offenseType}
+                            {report.offense_type}
                           </td>
                           <td className="px-4 py-2">
                             <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(report.status)}`}>
@@ -517,6 +555,32 @@ export default function ReportsPage() {
                             }`}>
                               {report.severity}
                             </span>
+                          </td>
+                          <td className="px-4 py-2 text-sm space-x-2">
+                            {report.status === 'Pending' && (
+                              <>
+                                <button
+                                  onClick={() => handleApproveReport(report._id)}
+                                  className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600"
+                                >
+                                  Approve
+                                </button>
+                                <button
+                                  onClick={() => handleConvertToCase(report._id)}
+                                  className="px-2 py-1 bg-kmuGreen text-white rounded text-xs hover:bg-kmuGreen/90"
+                                >
+                                  Convert
+                                </button>
+                              </>
+                            )}
+                            {report.status === 'Approved' && (
+                              <button
+                                onClick={() => handleConvertToCase(report._id)}
+                                className="px-2 py-1 bg-kmuGreen text-white rounded text-xs hover:bg-kmuGreen/90"
+                              >
+                                Create Case
+                              </button>
+                            )}
                           </td>
                         </tr>
                       ))}
