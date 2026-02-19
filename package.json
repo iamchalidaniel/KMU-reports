@@ -1,7 +1,7 @@
 {
-    "name": "kmu-discipline-desk",
+    "name": "kmu-reports",
     "version": "1.0.0",
-    "description": "KMU Discipline Desk - Complete Desktop Application",
+    "description": "KMU Reports - Comprehensive Reporting Management System",
     "main": "frontend/main.js",
     "scripts": {
         "install-all": "rm -rf node_modules frontend/node_modules && npm install && cd frontend && npm install",
