@@ -166,45 +166,14 @@ export default function StudentDashboardPage() {
 
     if (!validateForm()) return;
 
-    setSubmitting(true);
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/cases`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...authHeaders(),
-        },
-        body: JSON.stringify({
-          student_id: user?.studentId,
-          incident_date: incidentDate,
-          offense_type: offenseType,
-          severity,
-          description: description.trim(),
-          status: 'Open',
-        }),
-      });
-
-      if (!res.ok) throw new Error(await res.text());
-
-      showNotification('success', 'Report submitted successfully');
-      
-      // Reset form
-      setIncidentDate('');
-      setOffenseType('');
-      setSeverity('');
-      setDescription('');
-      setErrors({});
-
-      // Refresh reports
-      setPage(1);
-      await fetchReports();
-      setActiveTab('myReports');
-    } catch (err: any) {
-      console.error('Failed to submit report:', err);
-      showNotification('error', 'Failed to submit report. Please try again.');
-    } finally {
-      setSubmitting(false);
-    }
+    showNotification('info', 'Please contact the administration office or dean of students to submit a formal report with details about the incident.');
+    
+    // Reset form
+    setIncidentDate('');
+    setOffenseType('');
+    setSeverity('');
+    setDescription('');
+    setErrors({});
   };
 
   // Submit appeal
