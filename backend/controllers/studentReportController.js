@@ -67,16 +67,33 @@ export const createStudentReport = async (req, res) => {
     try {
         const { incident_date, description, offense_type, severity, is_anonymous } = req.body;
 
+        // Validation
         if (!description) {
             return res.status(400).json({ error: 'Description is required' });
         }
 
+        if (description.trim().length < 10) {
+            return res.status(400).json({ error: 'Description must be at least 10 characters' });
+        }
+
+        const validSeverities = ['Low', 'Medium', 'High'];
+        if (severity && !validSeverities.includes(severity)) {
+            return res.status(400).json({ error: 'Invalid severity level' });
+        }
+
+        if (incident_date) {
+            const date = new Date(incident_date);
+            if (isNaN(date.getTime())) {
+                return res.status(400).json({ error: 'Invalid incident date format' });
+            }
+        }
+
         const report = new StudentReport({
-            student_id: req.user._id,
+            student_id: is_anonymous ? null : req.user._id,
             student_name: is_anonymous ? 'Anonymous' : req.user.fullName,
             student_email: is_anonymous ? null : req.user.email,
             incident_date: incident_date || new Date(),
-            description,
+            description: description.trim(),
             offense_type: offense_type || 'General',
             is_anonymous: is_anonymous || false,
             severity: severity || 'Medium',
@@ -98,11 +115,17 @@ export const updateStudentReport = async (req, res) => {
     try {
         const { status, admin_comments } = req.body;
 
+        // Validation
+        const validStatuses = ['Pending', 'Reviewed', 'Approved', 'Rejected', 'Converted'];
+        if (status && !validStatuses.includes(status)) {
+            return res.status(400).json({ error: 'Invalid status value' });
+        }
+
         const report = await StudentReport.findByIdAndUpdate(
             req.params.id,
             {
                 status,
-                admin_comments,
+                admin_comments: admin_comments ? admin_comments.trim() : undefined,
                 updated_at: Date.now(),
             },
             { new: true }
