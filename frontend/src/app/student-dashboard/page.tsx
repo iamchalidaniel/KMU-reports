@@ -57,6 +57,7 @@ export default function StudentDashboardPage() {
   const [offenseType, setOffenseType] = useState('');
   const [severity, setSeverity] = useState('');
   const [description, setDescription] = useState('');
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
@@ -178,6 +179,7 @@ export default function StudentDashboardPage() {
           offense_type: offenseType,
           severity,
           description: description.trim(),
+          is_anonymous: isAnonymous,
         }),
       });
 
@@ -190,6 +192,7 @@ export default function StudentDashboardPage() {
       setOffenseType('');
       setSeverity('');
       setDescription('');
+      setIsAnonymous(false);
       setErrors({});
 
       // Refresh reports
@@ -396,6 +399,24 @@ export default function StudentDashboardPage() {
                 )}
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   Minimum 10 characters required
+                </p>
+              </div>
+
+              {/* Anonymous Report Option */}
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isAnonymous}
+                    onChange={(e) => setIsAnonymous(e.target.checked)}
+                    className="w-4 h-4 rounded border-gray-300 text-kmuGreen focus:ring-kmuGreen cursor-pointer"
+                  />
+                  <span className="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Submit as Anonymous Report
+                  </span>
+                </label>
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 ml-7">
+                  Your identity will be kept confidential. Your report will be reviewed without revealing your student information.
                 </p>
               </div>
 
