@@ -5,7 +5,7 @@
     "main": "frontend/main.js",
     "scripts": {
         "install-all": "npm install && cd frontend && npm install && cd ../backend && npm install",
-        "dev": "cd backend && npm run dev & cd frontend && npm run dev",
+        "dev": "npm run install-all && cd frontend && npm run dev",
         "build": "node scripts/build-exe.js",
         "build-exe": "node scripts/build-exe.js",
         "package": "cd frontend && npm run package-win",
