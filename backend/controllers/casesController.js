@@ -142,32 +142,7 @@ export async function listCases(req, res) {
             total = count;
             const [rows] = await db.execute(selectQuery, queryParams);
 
-            // Transform the data to match the expected format
-            cases = rows.map(row => ({
-                ...row,
-                incidentDate: row.incident_date,
-                offenseType: row.offense_type,
-                createdBy: row.created_by,
-                createdAt: row.created_at,
-                updatedAt: row.updated_at,
-                appealStatus: row.appeal_status,
-                appealReason: row.appeal_reason,
-                appealDate: row.appeal_date,
-                appealDecision: row.appeal_decision,
-                student: row.studentId ? {
-                    studentId: row.studentId,
-                    fullName: row.studentFullName,
-                    department: row.studentDepartment,
-                    year: row.year,
-                    gender: row.gender
-                } : null,
-                staff: row.staffId ? {
-                    staffId: row.staffId,
-                    fullName: row.staffFullName,
-                    department: row.staffDepartment,
-                    position: row.position
-                } : null
-            }));
+
         }
         res.json({ cases, total });
     } catch (err) {
@@ -254,47 +229,6 @@ export async function getCase(req, res) {
                 WHERE c.id = ?
             `, [req.params.id]);
             caseItem = rows[0];
-            if (caseItem) {
-                // Transform the data to match the expected format
-                caseItem = {
-                    ...caseItem,
-                    incidentDate: caseItem.incident_date,
-                    offenseType: caseItem.offense_type,
-                    createdBy: caseItem.created_by,
-                    createdAt: caseItem.created_at,
-                    updatedAt: caseItem.updated_at,
-                    appealStatus: caseItem.appeal_status,
-                    appealReason: caseItem.appeal_reason,
-                    appealDate: caseItem.appeal_date,
-                    appealDecision: caseItem.appeal_decision,
-                    student: caseItem.studentId ? {
-                        studentId: caseItem.studentId,
-                        fullName: caseItem.studentFullName,
-                        department: caseItem.studentDepartment,
-                        year: caseItem.year,
-                        gender: caseItem.gender
-                    } : null,
-                    students: caseItem.studentId ? [{
-                        studentId: caseItem.studentId,
-                        fullName: caseItem.studentFullName,
-                        department: caseItem.studentDepartment,
-                        year: caseItem.year,
-                        gender: caseItem.gender
-                    }] : [],
-                    staff: caseItem.staffId ? {
-                        staffId: caseItem.staffId,
-                        fullName: caseItem.staffFullName,
-                        department: caseItem.staffDepartment,
-                        position: caseItem.position
-                    } : null,
-                    staffMembers: caseItem.staffId ? [{
-                        staffId: caseItem.staffId,
-                        fullName: caseItem.staffFullName,
-                        department: caseItem.staffDepartment,
-                        position: caseItem.position
-                    }] : []
-                };
-            }
         }
         if (!caseItem) return res.status(404).json({ error: 'Case not found' });
         res.json(caseItem);
@@ -586,28 +520,6 @@ export async function updateCase(req, res) {
                 WHERE c.id = ?
             `, [req.params.id]);
             caseItem = rows[0];
-            if (caseItem) {
-                // Transform the data to match the expected format
-                caseItem = {
-                    ...caseItem,
-                    incidentDate: caseItem.incident_date,
-                    offenseType: caseItem.offense_type,
-                    createdBy: caseItem.created_by,
-                    createdAt: caseItem.created_at,
-                    updatedAt: caseItem.updated_at,
-                    appealStatus: caseItem.appeal_status,
-                    appealReason: caseItem.appeal_reason,
-                    appealDate: caseItem.appeal_date,
-                    appealDecision: caseItem.appeal_decision,
-                    student: caseItem.studentId ? {
-                        studentId: caseItem.studentId,
-                        fullName: caseItem.fullName,
-                        department: caseItem.department,
-                        year: caseItem.year,
-                        gender: caseItem.gender
-                    } : null
-                };
-            }
         }
         // Audit log for status change
         if (req.body.status && oldStatus && req.body.status !== oldStatus) {
