@@ -370,8 +370,8 @@ export default function StudentDashboardPage() {
                 >
                   <option value="">Select severity level...</option>
                   {SEVERITY_LEVELS.map((sv) => (
-                    <option key={sv} value={sv}>
-                      {sv}
+                    <option key={sv.value} value={sv.value}>
+                      {sv.label}
                     </option>
                   ))}
                 </select>
