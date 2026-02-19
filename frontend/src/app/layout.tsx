@@ -62,7 +62,7 @@ function TopNavbar() {
       <div className="px-4 py-3 flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-            KMU Discipline Desk
+            KMU Reports
           </h1>
         </div>
         
@@ -148,7 +148,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="description" content="KMU Discipline Desk - Student Discipline Management System" />
+        <meta name="description" content="KMU Reports - Comprehensive Reporting Management System" />
         <meta name="theme-color" content="#10B981" />
         
         {/* Preload critical resources */}
@@ -161,7 +161,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Preconnect to API */}
         <link rel="preconnect" href="https://kmu-disciplinedesk.onrender.com" />
         
-        <title>KMU Discipline Desk</title>
+        <title>KMU Reports</title>
       </head>
       <body className="min-h-screen">
         {syncError && (
