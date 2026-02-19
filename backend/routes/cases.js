@@ -5,16 +5,41 @@ import ExcelJS from 'exceljs';
 import { Document, Packer, Paragraph, Table, TableCell, TableRow, TextRun, WidthType, AlignmentType } from 'docx';
 const router = express.Router();
 
-router.use(authenticate, authorize(['admin', 'academic_office', 'security_officer']));
+// Authenticate all requests, but authorize based on route
+router.use(authenticate);
 
-router.get('/', listCases);
+// Middleware to check if user is admin/staff
+const isAdminOrStaff = (req, res, next) => {
+    if (req.user && ['admin', 'academic_office', 'security_officer', 'chief_security_officer', 'dean_of_students', 'assistant_dean', 'secretary'].includes(req.user.role)) {
+        next();
+    } else {
+        res.status(403).json({ error: 'Forbidden' });
+    }
+};
+
+// GET all cases (admin/staff only) or student's own cases
+router.get('/', (req, res, next) => {
+    if (req.user && req.user.role === 'student') {
+        // Students can only see their own cases
+        req.query.studentId = req.user.studentId;
+    }
+    next();
+}, listCases);
+
+// GET specific case
 router.get('/:id', getCase);
-router.post('/', createCase);
-router.put('/:id', updateCase);
-router.delete('/:id', deleteCase);
 
-// Excel export
-router.get('/export-excel', async(req, res) => {
+// POST new case (admin/staff only)
+router.post('/', isAdminOrStaff, createCase);
+
+// PUT update case (admin/staff only)
+router.put('/:id', isAdminOrStaff, updateCase);
+
+// DELETE case (admin/staff only)
+router.delete('/:id', isAdminOrStaff, deleteCase);
+
+// Excel export (admin/staff only)
+router.get('/export-excel', isAdminOrStaff, async(req, res) => {
     try {
         const cases = await listCasesRaw();
         const workbook = new ExcelJS.Workbook();
@@ -41,8 +66,8 @@ router.get('/export-excel', async(req, res) => {
     }
 });
 
-// DOCX export
-router.post('/export-docx', async(req, res) => {
+// DOCX export (admin/staff only)
+router.post('/export-docx', isAdminOrStaff, async(req, res) => {
     try {
         const cases = await listCasesRaw();
 

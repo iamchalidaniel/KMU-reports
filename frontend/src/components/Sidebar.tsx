@@ -127,6 +127,14 @@ export default function Sidebar() {
       { icon: navIcons.help, label: 'Help', path: '/help' },
       { icon: navIcons.logout, label: 'Logout', path: '/logout', danger: true, mobileOnly: true },
     ];
+  } else if (user?.role === 'student') {
+    navLinks = [
+      { icon: navIcons.dashboard, label: 'My Dashboard', path: '/student-dashboard' },
+      { icon: navIcons.cases, label: 'My Reports', path: '/student-dashboard' },
+      { icon: navIcons.profile, label: 'Profile & Settings', path: '/profile' },
+      { icon: navIcons.help, label: 'Help', path: '/help' },
+      { icon: navIcons.logout, label: 'Logout', path: '/logout', danger: true, mobileOnly: true },
+    ];
   } else {
     navLinks = [
       { icon: navIcons.logout, label: 'Logout', path: '/logout', danger: true, mobileOnly: true },

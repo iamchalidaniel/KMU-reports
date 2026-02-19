@@ -18,6 +18,29 @@ import { prepareChartExport } from '../../utils/chartExport';
 import { saveAs } from 'file-saver';
 import Notification, { useNotification } from '../../components/Notification';
 
+interface Student {
+  _id: string;
+  studentId: string;
+  fullName: string;
+  department?: string;
+}
+
+interface StudentReport {
+  _id: string;
+  student_id?: string | Student;
+  student_name?: string;
+  student_email?: string;
+  incident_date: string;
+  description: string;
+  offense_type?: string;
+  severity: string;
+  status: string;
+  admin_comments?: string;
+  assigned_case_id?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export default function ReportsPage() {
   const { user, token, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -25,11 +48,20 @@ export default function ReportsPage() {
   
   const [offenseTrends, setOffenseTrends] = useState<{ _id: string; count: number }[]>([]);
   const [departmentStats, setDepartmentStats] = useState<{ _id: string; count: number }[]>([]);
+  const [studentReports, setStudentReports] = useState<StudentReport[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingReports, setLoadingReports] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [exportingExcel, setExportingExcel] = useState(false);
   const [exportingDocx, setExportingDocx] = useState(false);
   const [exportingWithCharts, setExportingWithCharts] = useState(false);
+  const [activeTab, setActiveTab] = useState<'analytics' | 'studentReports'>('analytics');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [severityFilter, setSeverityFilter] = useState('');
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(20);
+  const [total, setTotal] = useState(0);
   
   // Handle authentication like profile page - only on client side
   if (typeof window !== 'undefined') {
@@ -71,6 +103,72 @@ export default function ReportsPage() {
     }
     if (user) fetchAnalytics();
   }, [token, user, API_BASE_URL]);
+
+  // Fetch student reports
+  useEffect(() => {
+    if (activeTab === 'studentReports' && user) {
+      fetchStudentReports();
+    }
+  }, [activeTab, user, page, statusFilter, severityFilter, search]);
+
+  const fetchStudentReports = async () => {
+    setLoadingReports(true);
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+      });
+
+      if (statusFilter) params.append('status', statusFilter);
+      if (severityFilter) params.append('severity', severityFilter);
+      if (search) params.append('search', search);
+
+      const res = await fetch(`${API_BASE_URL}/api/student-reports?${params}`, {
+        headers: { ...authHeaders() },
+      });
+
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      setStudentReports(data.reports || []);
+      setTotal(data.total || 0);
+    } catch (err: any) {
+      console.error('Failed to fetch student reports:', err);
+      showNotification('error', 'Failed to load student reports');
+    } finally {
+      setLoadingReports(false);
+    }
+  };
+
+  const handleApproveReport = async (reportId: string) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/student-reports/${reportId}`, {
+        method: 'PUT',
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'Approved' }),
+      });
+
+      if (!res.ok) throw new Error(await res.text());
+      showNotification('success', 'Report approved');
+      await fetchStudentReports();
+    } catch (err: any) {
+      showNotification('error', 'Failed to approve report');
+    }
+  };
+
+  const handleConvertToCase = async (reportId: string) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/student-reports/${reportId}/convert-to-case`, {
+        method: 'POST',
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+      });
+
+      if (!res.ok) throw new Error(await res.text());
+      showNotification('success', 'Report converted to case');
+      await fetchStudentReports();
+    } catch (err: any) {
+      showNotification('error', 'Failed to convert report to case');
+    }
+  };
 
   async function handleExcelExport() {
     setExportingExcel(true);
@@ -208,12 +306,74 @@ export default function ReportsPage() {
 
   ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'open':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'closed':
+      case 'resolved':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'in appeal':
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+      case 'appeal rejected':
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+    }
+  };
+
+  const totalPages = Math.ceil(total / limit);
+
   return (
     <>
       <section>
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-kmuGreen">Reports & Analytics</h1>
+          <h1 className="text-2xl font-bold text-kmuGreen">Reports</h1>
         </div>
+
+        {/* Tabs */}
+        <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700">
+          <button
+            onClick={() => {
+              setActiveTab('analytics');
+              setPage(1);
+            }}
+            className={`px-4 py-2 font-medium transition-colors ${
+              activeTab === 'analytics'
+                ? 'border-b-2 border-kmuGreen text-kmuGreen'
+                : 'text-gray-600 dark:text-gray-400 hover:text-kmuGreen'
+            }`}
+          >
+            Analytics
+          </button>
+          <button
+            onClick={() => {
+              setActiveTab('studentReports');
+              setPage(1);
+            }}
+            className={`px-4 py-2 font-medium transition-colors ${
+              activeTab === 'studentReports'
+                ? 'border-b-2 border-kmuGreen text-kmuGreen'
+                : 'text-gray-600 dark:text-gray-400 hover:text-kmuGreen'
+            }`}
+          >
+            Student Reports ({total})
+          </button>
+        </div>
+
+        {/* Analytics Tab */}
+        {activeTab === 'analytics' && (
+          <>
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
           <h2 className="text-lg font-semibold mb-2 text-kmuOrange">Offense Trends</h2>
           {loading ? (
@@ -250,6 +410,7 @@ export default function ReportsPage() {
             </div>
           )}
         </div>
+        {/* Export buttons for analytics */}
         <div className="flex gap-4">
           <button
             className="bg-kmuOrange text-white px-4 py-2 rounded hover:bg-kmuGreen transition disabled:opacity-50"
@@ -273,6 +434,196 @@ export default function ReportsPage() {
             {exportingWithCharts ? 'Exporting...' : 'Export with Charts (DOCX)'}
           </button>
         </div>
+          </>
+        )}
+
+        {/* Student Reports Tab */}
+        {activeTab === 'studentReports' && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h2 className="text-2xl font-bold text-kmuGreen mb-6">Student-Submitted Reports</h2>
+
+            {/* Filters */}
+            <div className="flex flex-col md:flex-row gap-4 mb-6">
+              <input
+                type="text"
+                placeholder="Search by student name or description..."
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+              <select
+                value={statusFilter}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value);
+                  setPage(1);
+                }}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="">All Statuses</option>
+                <option value="Pending">Pending</option>
+                <option value="Reviewed">Reviewed</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
+                <option value="Converted">Converted to Case</option>
+              </select>
+              <select
+                value={severityFilter}
+                onChange={(e) => {
+                  setSeverityFilter(e.target.value);
+                  setPage(1);
+                }}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="">All Severity Levels</option>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+              </select>
+            </div>
+
+            {/* Reports Table */}
+            {loadingReports ? (
+              <div className="text-center py-8">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-kmuGreen"></div>
+              </div>
+            ) : studentReports.length === 0 ? (
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                No student reports found.
+              </div>
+            ) : (
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                      <tr>
+                        <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
+                          Student
+                        </th>
+                        <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
+                          Date
+                        </th>
+                        <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
+                          Description
+                        </th>
+                        <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
+                          Type
+                        </th>
+                        <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
+                          Status
+                        </th>
+                        <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
+                          Severity
+                        </th>
+                        <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {studentReports.map((report) => (
+                        <tr
+                          key={report._id}
+                          className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                        >
+                          <td className="px-4 py-2 text-gray-900 dark:text-white">
+                            {report.student_name || 'N/A'}
+                          </td>
+                          <td className="px-4 py-2 text-gray-900 dark:text-white">
+                            {formatDate(report.incident_date)}
+                          </td>
+                          <td className="px-4 py-2 text-gray-900 dark:text-white truncate max-w-xs">
+                            {report.description}
+                          </td>
+                          <td className="px-4 py-2 text-gray-900 dark:text-white text-xs">
+                            {report.offense_type}
+                          </td>
+                          <td className="px-4 py-2">
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(report.status)}`}>
+                              {report.status}
+                            </span>
+                          </td>
+                          <td className="px-4 py-2">
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              report.severity === 'High'
+                                ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                                : report.severity === 'Medium'
+                                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                                : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                            }`}>
+                              {report.severity}
+                            </span>
+                          </td>
+                          <td className="px-4 py-2 text-sm space-x-2">
+                            {report.status === 'Pending' && (
+                              <>
+                                <button
+                                  onClick={() => handleApproveReport(report._id)}
+                                  className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600"
+                                >
+                                  Approve
+                                </button>
+                                <button
+                                  onClick={() => handleConvertToCase(report._id)}
+                                  className="px-2 py-1 bg-kmuGreen text-white rounded text-xs hover:bg-kmuGreen/90"
+                                >
+                                  Convert
+                                </button>
+                              </>
+                            )}
+                            {report.status === 'Approved' && (
+                              <button
+                                onClick={() => handleConvertToCase(report._id)}
+                                className="px-2 py-1 bg-kmuGreen text-white rounded text-xs hover:bg-kmuGreen/90"
+                              >
+                                Create Case
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex justify-center gap-2 mt-6">
+                    <button
+                      onClick={() => setPage(Math.max(1, page - 1))}
+                      disabled={page === 1}
+                      className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    >
+                      Previous
+                    </button>
+                    {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + Math.max(1, page - 2)).map((p) => (
+                      <button
+                        key={p}
+                        onClick={() => setPage(p)}
+                        className={`px-4 py-2 rounded-lg ${
+                          page === p
+                            ? 'bg-kmuGreen text-white'
+                            : 'border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => setPage(Math.min(totalPages, page + 1))}
+                      disabled={page === totalPages}
+                      className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
       </section>
       
       {/* Notification */}

@@ -21,6 +21,10 @@ if (dbType === 'mongo') {
         attachments: [String],
         created_by: String,
         case_type: { type: String, enum: ['single_student', 'group_student', 'single_staff', 'group_staff'], default: 'single_student' }, // Updated field to distinguish case types
+        appealStatus: { type: String, enum: ['pending', 'approved', 'rejected'], default: null },
+        appealReason: String,
+        appealDate: Date,
+        appealDecision: String,
         createdAt: { type: Date, default: Date.now },
         updatedAt: { type: Date, default: Date.now },
     });
