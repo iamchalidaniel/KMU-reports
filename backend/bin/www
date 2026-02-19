@@ -1,0 +1,159 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+import app from '../app.js';
+//import debugLib from 'debug';
+import http from 'http';
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+import User from '../models/user.js';
+
+//const debug = debugLib('backend:server');
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+const port = process.env.PORT;
+app.set('port', port);
+
+/**
+ * Create HTTP server.
+ */
+
+const server = http.createServer(app);
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+server.listen(port);
+/*server.on('error', onError);
+server.on('listening', onListening);
+*/
+// Create default users if they don't exist
+async function createDefaultUsers() {
+    try {
+        // Always create default users in non-production environments or when explicitly requested
+        // This makes first-time deployments easier
+        const shouldCreateDefaultUsers = process.env.CREATE_DEFAULT_USERS === 'true' || 
+                                        process.env.NODE_ENV !== 'production' || 
+                                        process.env.CREATE_DEFAULT_USERS === undefined;
+                                        
+        if (shouldCreateDefaultUsers) {
+            console.log('Checking for default users...');
+
+            // Check if admin user exists
+            const existingAdmin = await User.findOne({ username: 'admin' });
+            if (!existingAdmin) {
+                const hashedPassword = await bcrypt.hash('admin123', 10);
+                const adminUser = new User({
+                    username: 'admin',
+                    password: hashedPassword,
+                    name: 'System Administrator',
+                    role: 'admin'
+                });
+                await adminUser.save();
+                console.log('✅ Admin user created: admin / admin123');
+            }
+
+            // Check if security user exists
+            const existingSecurity = await User.findOne({ username: 'security' });
+            if (!existingSecurity) {
+                const hashedPassword = await bcrypt.hash('admin123', 10);
+                const securityUser = new User({
+                    username: 'security',
+                    password: hashedPassword,
+                    name: 'Security Officer',
+                    role: 'security_officer'
+                });
+                await securityUser.save();
+                console.log('✅ Security user created: security / admin123');
+            }
+
+            // Check if academic user exists
+            const existingAcademic = await User.findOne({ username: 'academic' });
+            if (!existingAcademic) {
+                const hashedPassword = await bcrypt.hash('admin123', 10);
+                const academicUser = new User({
+                    username: 'academic',
+                    password: hashedPassword,
+                    name: 'Academic Office',
+                    role: 'academic_office'
+                });
+                await academicUser.save();
+                console.log('✅ Academic user created: academic / admin123');
+            }
+        }
+    } catch (error) {
+        console.error('Error creating default users:', error);
+    }
+}
+
+// Run user creation after server starts
+server.on('listening', async() => {
+    await createDefaultUsers();
+});
+
+/*
+ * Normalize a port into a number, string, or false.
+ */
+/*
+function normalizePort(val) {
+    const port = parseInt(val, 10);
+
+    if (isNaN(port)) {
+        // named pipe
+        return val;
+    }
+
+    if (port >= 0) {
+        // port number
+        return port;
+    }
+
+    return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+
+
+function onError(error) {
+    if (error.syscall !== 'listen') {
+        throw error;
+    }
+
+    const bind = typeof port === 'string' ?
+        'Pipe ' + port :
+        'Port ' + port;
+
+    // handle specific listen errors with friendly messages
+    switch (error.code) {
+        case 'EACCES':
+            console.error(bind + ' requires elevated privileges');
+            process.exit(1);
+            break;
+        case 'EADDRINUSE':
+            console.error(bind + ' is already in use');
+            process.exit(1);
+            break;
+        default:
+            throw error;
+    }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+
+
+function onListening() {
+    const addr = server.address();
+    const bind = typeof addr === 'string' ?
+        'pipe ' + addr :
+        'port ' + addr.port;
+    debug('Listening on ' + bind);
+}*/
