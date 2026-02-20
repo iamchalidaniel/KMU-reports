@@ -109,38 +109,74 @@ export default function PublicReportPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-8 max-w-md w-full text-center">
-          <div className="text-6xl mb-4">✅</div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Report Submitted Successfully!</h1>
-          <p className="text-gray-600 dark:text-gray-300 mb-6">
-            Thank you for submitting your report. Our team will review it and take appropriate action.
-          </p>
-          
-          {reportId && (
-            <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4 mb-6">
-              <p className="text-sm text-gray-600 dark:text-gray-300">Report ID (for reference):</p>
-              <p className="font-mono text-lg font-bold text-kmuGreen break-all">{reportId}</p>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        {/* Navigation Bar */}
+        <nav className="bg-white dark:bg-gray-800 shadow-sm">
+          <div className="container mx-auto px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <Link href="/home" className="flex items-center space-x-2">
+                  <img 
+                    src="/kmu_logo.svg" 
+                    alt="KMU Logo" 
+                    width={40} 
+                    height={40} 
+                    className="h-10 w-10 object-contain"
+                  />
+                  <span className="text-xl font-bold text-gray-900 dark:text-white">KMU Reports</span>
+                </Link>
+              </div>
+              <div className="flex items-center space-x-4">
+                <Link 
+                  href="/home"
+                  className="text-kmuGreen hover:text-green-700 font-medium text-sm"
+                >
+                  Home
+                </Link>
+                <Link 
+                  href="/login"
+                  className="px-4 py-2 bg-kmuGreen text-white rounded-lg text-sm hover:bg-green-700 transition-colors"
+                >
+                  Login
+                </Link>
+              </div>
             </div>
-          )}
-          
-          <div className="space-y-3">
-            <button
-              onClick={() => {
-                setSuccess(false);
-                setReportId(null);
-              }}
-              className="w-full px-4 py-2 bg-kmuGreen text-white rounded-lg hover:bg-green-700 transition-colors"
-            >
-              Submit Another Report
-            </button>
+          </div>
+        </nav>
+
+        <div className="flex items-center justify-center p-4 min-h-[calc(100vh-73px)]">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-8 max-w-md w-full text-center">
+            <div className="text-6xl mb-4">✅</div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Report Submitted Successfully!</h1>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
+              Thank you for submitting your report. Our team will review it and take appropriate action.
+            </p>
             
-            <Link 
-              href="/home"
-              className="block w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-center"
-            >
-              Back to Homepage
-            </Link>
+            {reportId && (
+              <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4 mb-6">
+                <p className="text-sm text-gray-600 dark:text-gray-300">Report ID (for reference):</p>
+                <p className="font-mono text-lg font-bold text-kmuGreen break-all">{reportId}</p>
+              </div>
+            )}
+            
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  setSuccess(false);
+                  setReportId(null);
+                }}
+                className="w-full px-4 py-2 bg-kmuGreen text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                Submit Another Report
+              </button>
+              
+              <Link 
+                href="/home"
+                className="block w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-center"
+              >
+                Back to Homepage
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -149,29 +185,39 @@ export default function PublicReportPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
-            <Link href="/home" className="flex items-center space-x-2">
-              <img 
-                src="/kmu_logo.svg" 
-                alt="KMU Logo" 
-                width={40} 
-                height={40} 
-                className="h-10 w-10 object-contain"
-              />
-              <span className="text-xl font-bold text-gray-900 dark:text-white">KMU Reports</span>
-            </Link>
-            <Link 
-              href="/home"
-              className="text-kmuGreen hover:text-green-700 font-medium"
-            >
-              ← Back to Home
-            </Link>
+      {/* Navigation Bar */}
+      <nav className="bg-white dark:bg-gray-800 shadow-sm">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Link href="/home" className="flex items-center space-x-2">
+                <img 
+                  src="/kmu_logo.svg" 
+                  alt="KMU Logo" 
+                  width={40} 
+                  height={40} 
+                  className="h-10 w-10 object-contain"
+                />
+                <span className="text-xl font-bold text-gray-900 dark:text-white">KMU Reports</span>
+              </Link>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Link 
+                href="/home"
+                className="text-kmuGreen hover:text-green-700 font-medium text-sm"
+              >
+                Home
+              </Link>
+              <Link 
+                href="/login"
+                className="px-4 py-2 bg-kmuGreen text-white rounded-lg text-sm hover:bg-green-700 transition-colors"
+              >
+                Login
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
+      </nav>
 
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 md:p-8">

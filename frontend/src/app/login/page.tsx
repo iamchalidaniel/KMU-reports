@@ -214,6 +214,19 @@ export default function LoginPage() {
                 'Sign In'
               )}
             </button>
+                    
+            {/* Register Link */}
+            <div className="mt-4 text-center text-sm">
+              <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                No account?{' '}
+                <a 
+                  href="/student-register" 
+                  className="text-kmuGreen hover:text-kmuOrange font-medium underline"
+                >
+                  Register here
+                </a>
+              </p>
+            </div>
           </form>
         </div>
       </div>
