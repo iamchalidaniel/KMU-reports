@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { API_BASE_URL } from '../../../config/constants';
+import AIAssistant from '../../../components/AIAssistant';
 
 interface FormData {
   incident_date: string;
@@ -220,8 +221,11 @@ export default function PublicReportPage() {
       </nav>
 
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 md:p-8">
-          <div className="text-center mb-8">
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-xl shadow-lg p-6 md:p-8">
+          <div className="text-center mb-8 relative">
+            <div className="absolute top-0 right-0">
+              <AIAssistant formType="case" />
+            </div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Anonymous Incident Report</h1>
             <p className="text-gray-600 dark:text-gray-300">
               Submit a report about an incident you witnessed or experienced. All information is kept confidential.
