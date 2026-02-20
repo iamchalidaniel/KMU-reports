@@ -53,11 +53,19 @@ export default function StudentDashboardPage() {
   }
 
   // Form state
+  const [reportType, setReportType] = useState<'security' | 'maintenance'>('security');
   const [incidentDate, setIncidentDate] = useState('');
   const [offenseType, setOffenseType] = useState('');
   const [severity, setSeverity] = useState('');
   const [description, setDescription] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
+  // Maintenance-specific fields
+  const [category, setCategory] = useState('');
+  const [priority, setPriority] = useState('Medium');
+  const [hall, setHall] = useState('');
+  const [room, setRoom] = useState('');
+  const [floor, setFloor] = useState('');
+  const [building, setBuilding] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
@@ -133,21 +141,32 @@ export default function StudentDashboardPage() {
     const newErrors: Record<string, string> = {};
 
     if (!incidentDate) {
-      newErrors.incidentDate = 'Incident date is required';
+      newErrors.incidentDate = 'Date is required';
     } else {
       const selectedDate = new Date(incidentDate);
       const today = new Date();
       if (selectedDate > today) {
-        newErrors.incidentDate = 'Incident date cannot be in the future';
+        newErrors.incidentDate = 'Date cannot be in the future';
       }
     }
 
-    if (!offenseType) {
-      newErrors.offenseType = 'Please select an offense type';
-    }
-
-    if (!severity) {
-      newErrors.severity = 'Please select severity level';
+    if (reportType === 'security') {
+      if (!offenseType) {
+        newErrors.offenseType = 'Please select an offense type';
+      }
+      if (!severity) {
+        newErrors.severity = 'Please select severity level';
+      }
+    } else if (reportType === 'maintenance') {
+      if (!category) {
+        newErrors.category = 'Please select a maintenance category';
+      }
+      if (!priority) {
+        newErrors.priority = 'Please select priority level';
+      }
+      if (!hall) {
+        newErrors.hall = 'Hall name is required';
+      }
     }
 
     if (!description.trim()) {
@@ -168,30 +187,72 @@ export default function StudentDashboardPage() {
 
     setSubmitting(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/api/student-reports`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...authHeaders(),
-        },
-        body: JSON.stringify({
-          incident_date: incidentDate,
-          offense_type: offenseType,
-          severity,
-          description: description.trim(),
-          is_anonymous: isAnonymous,
-        }),
-      });
+      let res;
+      
+      if (reportType === 'maintenance') {
+        // Submit as maintenance report
+        res = await fetch(`${API_BASE_URL}/api/maintenance`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeaders(),
+          },
+          body: JSON.stringify({
+            report_type: 'maintenance',
+            category,
+            priority,
+            description: description.trim(),
+            location: {
+              hall,
+              room: room || undefined,
+              floor: floor || undefined,
+              building: building || undefined,
+            },
+            reported_by: {
+              student_id: isAnonymous ? undefined : user?.studentId,
+              name: isAnonymous ? 'Anonymous' : (user?.name || user?.username),
+              contact: isAnonymous ? undefined : user?.email,
+            },
+            status: 'Reported',
+          }),
+        });
+      } else {
+        // Submit as security report
+        res = await fetch(`${API_BASE_URL}/student-reports`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeaders(),
+          },
+          body: JSON.stringify({
+            incident_date: incidentDate,
+            offense_type: offenseType,
+            severity,
+            description: description.trim(),
+            is_anonymous: isAnonymous,
+          }),
+        });
+      }
 
       if (!res.ok) throw new Error(await res.text());
 
-      showNotification('success', 'Report submitted successfully! Admin will review your report shortly.');
+      const message = reportType === 'maintenance' 
+        ? 'Maintenance report submitted successfully! Hall warden will review your report shortly.'
+        : 'Report submitted successfully! Admin will review your report shortly.';
+      showNotification('success', message);
       
       // Reset form
+      setReportType('security');
       setIncidentDate('');
       setOffenseType('');
       setSeverity('');
       setDescription('');
+      setCategory('');
+      setPriority('Medium');
+      setHall('');
+      setRoom('');
+      setFloor('');
+      setBuilding('');
       setIsAnonymous(false);
       setErrors({});
 
@@ -314,10 +375,51 @@ export default function StudentDashboardPage() {
             <h2 className="text-2xl font-bold text-kmuGreen mb-6">Submit a Report</h2>
 
             <form onSubmit={handleSubmitReport} className="space-y-6">
-              {/* Incident Date */}
+              {/* Report Type Selector */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Incident Date *
+                  Report Type *
+                </label>
+                <div className="flex gap-4">
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="reportType"
+                      value="security"
+                      checked={reportType === 'security'}
+                      onChange={(e) => {
+                        setReportType('security');
+                        setErrors({});
+                      }}
+                      className="w-4 h-4 text-kmuGreen focus:ring-kmuGreen"
+                    />
+                    <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Security/Disciplinary Report
+                    </span>
+                  </label>
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="reportType"
+                      value="maintenance"
+                      checked={reportType === 'maintenance'}
+                      onChange={(e) => {
+                        setReportType('maintenance');
+                        setErrors({});
+                      }}
+                      className="w-4 h-4 text-kmuGreen focus:ring-kmuGreen"
+                    />
+                    <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Maintenance Report
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Date */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {reportType === 'security' ? 'Incident Date' : 'Report Date'} *
                 </label>
                 <input
                   type="date"
@@ -332,53 +434,171 @@ export default function StudentDashboardPage() {
                 )}
               </div>
 
-              {/* Offense Type */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Offense Type *
-                </label>
-                <select
-                  value={offenseType}
-                  onChange={(e) => setOffenseType(e.target.value)}
-                  className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
-                    errors.offenseType ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                  }`}
-                >
-                  <option value="">Select offense type...</option>
-                  {OFFENSE_TYPES.map((ot) => (
-                    <option key={ot.value} value={ot.value}>
-                      {ot.label}
-                    </option>
-                  ))}
-                </select>
-                {errors.offenseType && (
-                  <p className="text-red-500 text-sm mt-1">{errors.offenseType}</p>
-                )}
-              </div>
+              {/* Security Report Fields */}
+              {reportType === 'security' && (
+                <>
+                  {/* Offense Type */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Offense Type *
+                    </label>
+                    <select
+                      value={offenseType}
+                      onChange={(e) => setOffenseType(e.target.value)}
+                      className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                        errors.offenseType ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                      }`}
+                    >
+                      <option value="">Select offense type...</option>
+                      {OFFENSE_TYPES.map((ot) => (
+                        <option key={ot.value} value={ot.value}>
+                          {ot.label}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.offenseType && (
+                      <p className="text-red-500 text-sm mt-1">{errors.offenseType}</p>
+                    )}
+                  </div>
 
-              {/* Severity */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Severity Level *
-                </label>
-                <select
-                  value={severity}
-                  onChange={(e) => setSeverity(e.target.value)}
-                  className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
-                    errors.severity ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                  }`}
-                >
-                  <option value="">Select severity level...</option>
-                  {SEVERITY_LEVELS.map((sv) => (
-                    <option key={sv.value} value={sv.value}>
-                      {sv.label}
-                    </option>
-                  ))}
-                </select>
-                {errors.severity && (
-                  <p className="text-red-500 text-sm mt-1">{errors.severity}</p>
-                )}
-              </div>
+                  {/* Severity */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Severity Level *
+                    </label>
+                    <select
+                      value={severity}
+                      onChange={(e) => setSeverity(e.target.value)}
+                      className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                        errors.severity ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                      }`}
+                    >
+                      <option value="">Select severity level...</option>
+                      {SEVERITY_LEVELS.map((sv) => (
+                        <option key={sv.value} value={sv.value}>
+                          {sv.label}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.severity && (
+                      <p className="text-red-500 text-sm mt-1">{errors.severity}</p>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {/* Maintenance Report Fields */}
+              {reportType === 'maintenance' && (
+                <>
+                  {/* Category */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Maintenance Category *
+                    </label>
+                    <select
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                      className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                        errors.category ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                      }`}
+                    >
+                      <option value="">Select category...</option>
+                      <option value="fridge">Refrigerator</option>
+                      <option value="light">Lighting</option>
+                      <option value="socket">Electrical Socket</option>
+                      <option value="plumbing">Plumbing</option>
+                      <option value="furniture">Furniture</option>
+                      <option value="door">Door</option>
+                      <option value="window">Window</option>
+                      <option value="ac">Air Conditioning</option>
+                      <option value="fan">Fan</option>
+                      <option value="other">Other</option>
+                    </select>
+                    {errors.category && (
+                      <p className="text-red-500 text-sm mt-1">{errors.category}</p>
+                    )}
+                  </div>
+
+                  {/* Priority */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Priority Level *
+                    </label>
+                    <select
+                      value={priority}
+                      onChange={(e) => setPriority(e.target.value)}
+                      className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                        errors.priority ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                      }`}
+                    >
+                      <option value="Low">Low</option>
+                      <option value="Medium">Medium</option>
+                      <option value="High">High</option>
+                      <option value="Urgent">Urgent</option>
+                    </select>
+                    {errors.priority && (
+                      <p className="text-red-500 text-sm mt-1">{errors.priority}</p>
+                    )}
+                  </div>
+
+                  {/* Location Fields */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Hall Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={hall}
+                        onChange={(e) => setHall(e.target.value)}
+                        placeholder="e.g., Hall A, Hall B"
+                        className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                          errors.hall ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                        }`}
+                      />
+                      {errors.hall && (
+                        <p className="text-red-500 text-sm mt-1">{errors.hall}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Room Number
+                      </label>
+                      <input
+                        type="text"
+                        value={room}
+                        onChange={(e) => setRoom(e.target.value)}
+                        placeholder="e.g., 101, 205"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Floor
+                      </label>
+                      <input
+                        type="text"
+                        value={floor}
+                        onChange={(e) => setFloor(e.target.value)}
+                        placeholder="e.g., 1st Floor, Ground Floor"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Building
+                      </label>
+                      <input
+                        type="text"
+                        value={building}
+                        onChange={(e) => setBuilding(e.target.value)}
+                        placeholder="e.g., Building A, Main Building"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
 
               {/* Description */}
               <div>
@@ -388,7 +608,9 @@ export default function StudentDashboardPage() {
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Describe the incident in detail..."
+                  placeholder={reportType === 'maintenance' 
+                    ? "Describe the maintenance issue in detail (e.g., what's broken, when did you notice it, etc.)..."
+                    : "Describe the incident in detail..."}
                   rows={5}
                   className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
                     errors.description ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
@@ -426,7 +648,7 @@ export default function StudentDashboardPage() {
                 disabled={submitting}
                 className="w-full bg-kmuGreen text-white py-2 rounded-lg font-medium hover:bg-kmuGreen/90 transition disabled:opacity-50"
               >
-                {submitting ? 'Submitting...' : 'Submit Report'}
+                {submitting ? 'Submitting...' : reportType === 'maintenance' ? 'Submit Maintenance Report' : 'Submit Security Report'}
               </button>
             </form>
           </div>

@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
+console.log('🚀 KMU Reports - PWA Deployment Script\n');
+
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-
-console.log('🚀 KMU Discipline Desk - PWA Deployment Script\n');
 
 // Check if we're in the right directory
 if (!fs.existsSync('frontend') || !fs.existsSync('backend')) {

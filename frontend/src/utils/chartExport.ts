@@ -67,7 +67,7 @@ export const prepareChartExport = async (): Promise<{
 }> => {
   const timestamp = new Date().toISOString();
   const pageInfo = {
-    title: document.title || 'KMU Discipline Desk Report',
+    title: document.title || 'KMU Reports',
     url: window.location.href
   };
 
@@ -83,3 +83,15 @@ export const prepareChartExport = async (): Promise<{
     pageInfo
   };
 }; 
+
+export const exportChartAsImage = async (chart: any, filename?: string) => {
+    try {
+        const canvas = chart.canvas;
+        const link = document.createElement('a');
+        link.download = filename || `${document.title || 'KMU Reports'}_${new Date().toISOString().slice(0, 10)}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    } catch (error) {
+        console.error('Export failed:', error);
+    }
+};

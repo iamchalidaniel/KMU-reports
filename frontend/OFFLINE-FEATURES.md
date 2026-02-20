@@ -1,6 +1,6 @@
-# KMU Discipline Desk - Offline-First Features
+# KMU Reports - Offline-First Features
 
-This document describes the comprehensive offline-first functionality implemented in the KMU Discipline Desk application.
+This document describes the comprehensive offline-first functionality implemented in the KMU Reports application.
 
 ## 🚀 Features Implemented
 

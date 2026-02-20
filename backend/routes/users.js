@@ -16,10 +16,14 @@ router.get('/me', (req, res, next) => {
 router.put('/me', updateOwnProfile);
 router.put('/me/password', changeOwnPassword);
 
-// Admin-only routes (must be after user self routes)
-router.use(authorize(['admin']));
-
-router.get('/', listUsers);
+// Routes accessible by admin and hall wardens (for assigning electricians)
+router.get('/', (req, res, next) => {
+    if (req.user && (req.user.role === 'admin' || req.user.role === 'hall_warden')) {
+        next();
+    } else {
+        authorize(['admin'])(req, res, next);
+    }
+}, listUsers);
 router.get('/:id', getUser);
 router.post('/', createUser);
 router.put('/:id', updateUser);

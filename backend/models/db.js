@@ -1,25 +1,28 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import mongoose from 'mongoose';
-import mysql from 'mysql2/promise';
 
-const dbType = process.env.DB_TYPE || 'mongo';
+const MONGO_URI = process.env.MONGO_URI;
 
-let db = null;
-
-if (dbType === 'mongo') {
-    mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
-    mongoose.connection.on('connected', () => {
-        console.log('MongoDB connected successfully!');
-    });
-    db = mongoose;
-} else if (dbType === 'mysql') {
-    db = await mysql.createPool({
-        host: process.env.MYSQL_HOST,
-        user: process.env.MYSQL_USER,
-        password: process.env.MYSQL_PASS,
-        database: process.env.MYSQL_DB,
-    });
+if (!MONGO_URI) {
+    console.error('Error: MONGO_URI is not defined in environment variables');
+    console.error('Please create a .env file in the backend directory with:');
+    console.error('MONGO_URI=mongodb://localhost:27017/kmu-reports');
+    process.exit(1);
 }
 
-export default db;
+mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+
+mongoose.connection.on('connected', () => {
+    console.log('MongoDB connected successfully!');
+});
+
+mongoose.connection.on('error', (err) => {
+    console.error('MongoDB connection error:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+    console.log('MongoDB disconnected');
+});
+
+export default mongoose;

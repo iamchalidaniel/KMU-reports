@@ -11,10 +11,12 @@ import casesRouter from './routes/cases.js';
 import appealsRouter from './routes/appeals.js';
 import studentReportsRouter from './routes/studentReports.js';
 import reportsRouter from './routes/reports.js';
+import maintenanceRouter from './routes/maintenance.js';
 import authRouter from './routes/auth.js';
 import evidenceRouter from './routes/evidence.js';
 import auditRouter from './routes/audit.js';
 import healthRouter from './routes/health.js';
+import publicRouter from './routes/public.js';
 
 const app = express();
 
@@ -45,10 +47,12 @@ app.use('/api/cases', casesRouter);
 app.use('/api/appeals', appealsRouter);
 app.use('/api/student-reports', studentReportsRouter);
 app.use('/api/reports', reportsRouter);
+app.use('/api/maintenance', maintenanceRouter);
 app.use('/api', authRouter);
 app.use('/api/evidence', evidenceRouter);
 app.use('/api/audit', auditRouter);
 app.use('/api/health', healthRouter);
+app.use('/api/public', publicRouter);
 
 // Health check endpoint (legacy)
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
@@ -56,7 +60,7 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 // Root endpoint
 app.get('/', (req, res) => {
     res.json({
-        message: 'KMU Discipline Desk Backend API',
+        message: 'KMU Reports Backend API',
         status: 'running',
         timestamp: new Date().toISOString()
     });

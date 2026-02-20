@@ -836,7 +836,7 @@ router.post('/with-charts', async(req, res) => {
         // Title section
         sections.push(
             new Paragraph({
-                children: [new TextRun({ text: (pageInfo && pageInfo.title) ? pageInfo.title : 'KMU Discipline Desk Report', bold: true, size: 32 })],
+                children: [new TextRun({ text: (pageInfo && pageInfo.title) ? pageInfo.title : 'KMU Reports', bold: true, size: 32 })],
                 spacing: { after: 400 },
                 alignment: AlignmentType.CENTER
             }),
@@ -1040,7 +1040,7 @@ router.post('/dashboard-cases', async(req, res) => {
         // Title section
         sections.push(
             new Paragraph({
-                children: [new TextRun({ text: (pageInfo && pageInfo.title) ? pageInfo.title : 'KMU Discipline Desk - All Cases Report', bold: true, size: 32 })],
+                children: [new TextRun({ text: (pageInfo && pageInfo.title) ? pageInfo.title : 'KMU Reports - All Cases', bold: true, size: 32 })],
                 spacing: { after: 400 },
                 alignment: AlignmentType.CENTER
             }),

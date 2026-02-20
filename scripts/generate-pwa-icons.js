@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const path = require('path');
+console.log('🎨 KMU Reports - PWA Icon Generator\n');
 
-console.log('🎨 KMU Discipline Desk - PWA Icon Generator\n');
+const sharp = require('sharp');
+const path = require('path');
+const fs = require('fs');
 
 // Check if we're in the right directory
 if (!fs.existsSync('frontend') || !fs.existsSync('backend')) {

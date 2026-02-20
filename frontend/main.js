@@ -38,21 +38,24 @@ function startBackend() {
 }
 
 function createWindow() {
-    mainWindow = new BrowserWindow({
-        width: 1280,
-        height: 900,
-        title: 'KMU Discipline Desk',
-        icon: path.join(__dirname, 'public', 'kmu_logo.ico'),
+    // Create window
+    const win = new BrowserWindow({
+        width: 1200,
+        height: 800,
         webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false
+            nodeIntegration: false,
+            contextIsolation: true,
+            preload: path.join(__dirname, 'preload.js')
         },
-        show: false // Don't show until ready
+        icon: path.join(__dirname, 'public/kmu_logo.png')
     });
+    
+    // Set window title
+    win.setTitle('KMU Reports');
 
     // Show window when ready to prevent visual flash
-    mainWindow.once('ready-to-show', () => {
-        mainWindow.show();
+    win.once('ready-to-show', () => {
+        win.show();
     });
 
     // Load the app
@@ -60,23 +63,23 @@ function createWindow() {
         // Development: load from Next.js dev server
         const startUrl = 'http://localhost:3000';
         console.log('Loading app from:', startUrl);
-        mainWindow.loadURL(startUrl);
+        win.loadURL(startUrl);
     } else {
         // Production: load from backend server
         setTimeout(() => {
             const startUrl = 'http://localhost:5000';
             console.log('Loading app from:', startUrl);
-            mainWindow.loadURL(startUrl);
+            win.loadURL(startUrl);
         }, 5000); // Give backend 5 seconds to start
     }
 
     // Open DevTools in development
     if (isDev) {
-        mainWindow.webContents.openDevTools();
+        win.webContents.openDevTools();
     }
 
     // Handle window closed
-    mainWindow.on('closed', () => {
+    win.on('closed', () => {
         mainWindow = null;
     });
 }

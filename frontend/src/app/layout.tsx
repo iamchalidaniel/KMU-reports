@@ -82,11 +82,11 @@ function TopNavbar() {
   );
 }
 
-function AppContent({ isLogin, children }: { isLogin: boolean; children: React.ReactNode }) {
+function AppContent({ isLogin, isPublic, children }: { isLogin: boolean; isPublic: boolean; children: React.ReactNode }) {
   const { user } = useAuth();
   const { sidebarWidth } = useSidebar();
   const [isMobile, setIsMobile] = useState(false);
-  const shouldShowNav = !isLogin && user;
+  const shouldShowNav = !isLogin && !isPublic && user;
 
   useEffect(() => {
     const checkMobile = () => {
@@ -122,15 +122,16 @@ function AppContent({ isLogin, children }: { isLogin: boolean; children: React.R
             {children}
           </Suspense>
         </main>
-        </div>
-              </div>
+      </div>
+    </div>
     );
   }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { theme } = useTheme();
-  const isLogin = pathname === "/login" || pathname === "/";
+  const isLogin = pathname === "/login";
+  const isPublic = pathname === "/" || pathname.startsWith("/home") || pathname.startsWith("/public");
   const [syncError, setSyncError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -156,10 +157,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preload" href="/api/health" as="fetch" crossOrigin="anonymous" />
         
         {/* DNS prefetch for external domains */}
-        <link rel="dns-prefetch" href="//kmu-disciplinedesk.onrender.com" />
+        <link rel="dns-prefetch" href="//kmu-reports.onrender.com" />
         
         {/* Preconnect to API */}
-        <link rel="preconnect" href="https://kmu-disciplinedesk.onrender.com" />
+        <link rel="preconnect" href="https://kmu-reports.onrender.com" />
         
         <title>KMU Reports</title>
       </head>
@@ -174,7 +175,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <SyncProvider>
             <ThemeProvider>
               <SidebarProvider>
-                <AppContent isLogin={isLogin}>
+                <AppContent isLogin={isLogin} isPublic={isPublic}>
                     {children}
                 </AppContent>
               

@@ -4,7 +4,7 @@ const StudentReportSchema = new mongoose.Schema({
     student_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true,
+        required: false,
     },
     student_name: String,
     student_email: String,

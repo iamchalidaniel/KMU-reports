@@ -6,10 +6,7 @@
     "scripts": {
         "install-all": "rm -rf node_modules frontend/node_modules && npm install && cd frontend && npm install",
         "dev": "npm run install-all && cd frontend && npm run dev",
-        "build": "node scripts/build-exe.js",
-        "build-exe": "node scripts/build-exe.js",
         "package": "cd frontend && npm run package-win",
-        "electron-dev": "cd frontend && npm run electron-dev",
         "deploy-pwa": "node scripts/deploy-pwa.js",
         "deploy-backend": "node scripts/deploy-pwa.js --backend",
         "fix-permissions": "node scripts/fix-permissions.js",

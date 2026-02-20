@@ -1,80 +1,34 @@
 # Scripts Directory
 
-This directory contains utility scripts for building, deploying, and managing the KMU Discipline Desk application.
+This directory contains utility scripts for building, deploying, and managing the KMU Reports application.
 
 ## Available Scripts
 
-### `build-exe.js`
-Builds the application into a Windows executable (.exe) file.
-- Installs dependencies for both frontend and backend
-- Builds the frontend application
-- Packages the application with Electron
-- Output: `frontend/dist/KMUDisciplineDesk-win32-x64/`
-
-**Usage:**
-```bash
-npm run build
-# or
-npm run build-exe
-```
+### `generate-pwa-icons.js`
+Generates PWA icons from the source logo file.
+- Converts SVG to multiple PNG sizes
+- Creates optimized icons for different devices
+- Usage: `node generate-pwa-icons.js`
 
 ### `deploy-pwa.js`
-Deploys the application as a Progressive Web App (PWA) to Vercel.
-- Builds the frontend for production
-- Deploys to Vercel platform
-- Provides backend deployment guidance
-
-**Usage:**
-```bash
-npm run deploy-pwa
-```
-
-**Backend deployment guide:**
-```bash
-npm run deploy-backend
-```
-
-### `fix-permissions.js`
-Fixes upload directory permissions on Windows systems.
-- Creates upload directories if they don't exist
-- Sets proper write permissions for file uploads
-- Tests write access to ensure functionality
-
-**Usage:**
-```bash
-npm run fix-permissions
-```
+Automates the PWA deployment process.
+- Builds the production frontend
+- Optimizes assets
+- Generates deployment package
+- Usage: `node deploy-pwa.js`
 
 ### `test-database.js`
-Tests database connectivity and configuration.
-- Verifies database connection settings
-- Tests write operations
-- Provides detailed error messages for troubleshooting
+Database connection and testing utility.
+- Tests MongoDB connectivity
+- Validates database schema
+- Usage: `node test-database.js`
 
-**Usage:**
-```bash
-npm run test-db
-```
+### `fix-permissions.js`
+File permission management for Linux/Unix systems.
+- Sets appropriate file permissions
+- Fixes ownership issues
+- Usage: `node fix-permissions.js`
 
-## Script Dependencies
+## Usage Notes
 
-These scripts require:
-- Node.js and npm installed
-- Vercel CLI (for PWA deployment)
-- Electron (for desktop app building)
-- Access to the project's frontend and backend directories
-
-## Troubleshooting
-
-### Upload Issues
-If you encounter "Server error" when uploading evidence:
-1. Run `npm run fix-permissions` to fix directory permissions
-2. Run `npm run test-db` to verify database connectivity
-3. Check server logs for detailed error messages
-4. Ensure the backend server is running properly
-
-## Notes
-
-- All scripts should be run from the project root directory
-- Build artifacts are automatically cleaned up and excluded from version control
-- Scripts handle dependency installation automatically 
+All scripts are designed to run from the project root directory. Make sure you have the required dependencies installed before running any scripts.

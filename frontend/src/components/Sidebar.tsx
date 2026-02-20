@@ -26,6 +26,9 @@ const navIcons = {
   security: '🔒',
   assistant: '👨‍💼',
   secretary: '📋',
+  maintenance: '🔧',
+  hall: '🏠',
+  electrician: '⚡',
 };
 
 export default function Sidebar() {
@@ -123,6 +126,22 @@ export default function Sidebar() {
       { icon: navIcons.students, label: 'Students', path: '/students' },
       { icon: navIcons.cases, label: 'Cases', path: '/cases' },
       { icon: navIcons.reports, label: 'Reports', path: '/reports' },
+      { icon: navIcons.profile, label: 'Profile & Settings', path: '/profile' },
+      { icon: navIcons.help, label: 'Help', path: '/help' },
+      { icon: navIcons.logout, label: 'Logout', path: '/logout', danger: true, mobileOnly: true },
+    ];
+  } else if (user?.role === 'hall_warden') {
+    navLinks = [
+      { icon: navIcons.hall, label: 'Dashboard', path: '/hall-warden-dashboard' },
+      { icon: navIcons.maintenance, label: 'Maintenance Reports', path: '/hall-warden-dashboard' },
+      { icon: navIcons.profile, label: 'Profile & Settings', path: '/profile' },
+      { icon: navIcons.help, label: 'Help', path: '/help' },
+      { icon: navIcons.logout, label: 'Logout', path: '/logout', danger: true, mobileOnly: true },
+    ];
+  } else if (user?.role === 'electrician') {
+    navLinks = [
+      { icon: navIcons.electrician, label: 'Dashboard', path: '/electrician-dashboard' },
+      { icon: navIcons.maintenance, label: 'Electrical Reports', path: '/electrician-dashboard' },
       { icon: navIcons.profile, label: 'Profile & Settings', path: '/profile' },
       { icon: navIcons.help, label: 'Help', path: '/help' },
       { icon: navIcons.logout, label: 'Logout', path: '/logout', danger: true, mobileOnly: true },

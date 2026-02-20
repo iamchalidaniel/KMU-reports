@@ -1,6 +1,6 @@
 # KMU DisciplineDesk Frontend
 
-A modern Next.js 14 frontend for the KMU Discipline Desk system.
+A modern Next.js 14 frontend for the KMU Reports system.
 
 ## Features
 - Secure login (email/password) with offline authentication support

@@ -2,6 +2,16 @@ import express from 'express';
 import db from '../models/db.js';
 const router = express.Router();
 
+const healthCheck = (req, res) => {
+    res.status(200).json({
+        status: 'OK',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        service: 'KMU Reports Backend',
+        version: '1.0.0'
+    });
+};
+
 // Health check endpoint for monitoring
 router.get('/', async (req, res) => {
     try {
@@ -29,7 +39,7 @@ router.get('/', async (req, res) => {
         res.json({
             status: 'ok',
             timestamp: new Date().toISOString(),
-            service: 'KMU Discipline Desk Backend',
+            service: 'KMU Reports Backend',
             version: '1.0.0',
             uptime: `${Math.floor(uptime / 60)} minutes`,
             database: {
