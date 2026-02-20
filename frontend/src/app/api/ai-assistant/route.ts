@@ -23,9 +23,9 @@ export async function POST(request: NextRequest) {
 
     // Validate API key
     if (!process.env.GEMINI_API_KEY && !process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
-      return Response.json(
-        { error: 'Gemini API key not configured' },
-        { status: 500 }
+      return new Response(
+        JSON.stringify({ error: 'Gemini API key not configured' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
@@ -49,12 +49,15 @@ export async function POST(request: NextRequest) {
     const response = await result.response;
     const text = response.text();
 
-    return Response.json({ response: text });
+    return new Response(JSON.stringify({ response: text }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
   } catch (error: any) {
     console.error('Error in AI assistant API:', error);
-    return Response.json(
-      { error: 'Failed to get response from AI assistant', details: error.message },
-      { status: 500 }
+    return new Response(
+      JSON.stringify({ error: 'Failed to get response from AI assistant', details: error.message }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 }
