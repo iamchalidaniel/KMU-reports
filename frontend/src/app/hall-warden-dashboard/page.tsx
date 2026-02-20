@@ -893,7 +893,6 @@ export default function HallWardenDashboard() {
           </table>
         </div>
       </div>
-      </div>
-    </div>
+    </section>
   );
 }
