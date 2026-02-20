@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import SmartStudentSearch from './SmartStudentSearch';
+import AIAssistant from './AIAssistant';
 import { API_BASE_URL } from '../config/constants';
 import { authHeaders } from '../utils/api';
 import { OFFENSE_TYPES, SEVERITY_LEVELS } from '../config/constants';
@@ -137,7 +138,10 @@ export default function SmartCaseForm({ onSubmit, loading = false }: SmartCaseFo
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-      <h2 className="text-lg font-semibold text-kmuOrange mb-4">Create New Case</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold text-kmuOrange">Create New Case</h2>
+        <AIAssistant formType="case" />
+      </div>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Smart Student Search */}

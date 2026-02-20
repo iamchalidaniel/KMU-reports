@@ -1,6 +1,8 @@
 {
     "name": "kmu-discipline-desk-backend",
     "version": "1.0.0",
+    "author": "Daniel Chali",
+    "description": "KMU Reports - Comprehensive Reporting Management System Backend",
     "main": "app.js",
     "type": "module",
     "scripts": {

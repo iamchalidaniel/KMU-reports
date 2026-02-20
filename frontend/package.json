@@ -3,6 +3,9 @@
     "version": "1.0.0",
     "private": true,
     "main": "main.js",
+    "author": "Daniel Chali",
+    "author": "Daniel Chali <iamdanielchali@gmail.com>",
+    
     "scripts": {
         "dev": "next dev",
         "build": "next build --no-lint",
@@ -24,6 +27,7 @@
         "lowdb": "^6.0.1",
         "next": "14.0.0",
         "papaparse": "^5.5.3",
+        "@google/generative-ai": "^0.1.3",
         "react": "18.2.0",
         "react-chartjs-2": "^5.2.0",
         "react-dom": "18.2.0",

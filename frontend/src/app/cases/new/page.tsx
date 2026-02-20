@@ -12,6 +12,7 @@ import SmartStaffSearch from '../../../components/SmartStaffSearch';
 import QuickCaseTemplates from '../../../components/QuickCaseTemplates';
 import RecentStudents from '../../../components/RecentStudents';
 import RecentStaff from '../../../components/RecentStaff';
+import AIAssistant from '../../../components/AIAssistant';
 
 interface Student {
   _id: string;
@@ -279,6 +280,7 @@ export default function NewCasePage() {
       <section className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-kmuGreen">Create New Case</h1>
+          <AIAssistant formType="case" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Sidebar: Templates and Recent Students/Staff */}

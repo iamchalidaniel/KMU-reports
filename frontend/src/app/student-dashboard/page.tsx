@@ -7,6 +7,7 @@ import { API_BASE_URL } from '../../config/constants';
 import { authHeaders } from '../../utils/api';
 import { OFFENSE_TYPES, SEVERITY_LEVELS } from '../../config/constants';
 import Notification, { useNotification } from '../../components/Notification';
+import AIAssistant from '../../components/AIAssistant';
 
 interface Report {
   _id: string;
@@ -436,7 +437,8 @@ export default function StudentDashboardPage() {
 
               {/* Security Report Fields */}
               {reportType === 'security' && (
-                <>
+                <div className="relative">
+                  <AIAssistant formType="case" />
                   {/* Offense Type */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -484,12 +486,13 @@ export default function StudentDashboardPage() {
                       <p className="text-red-500 text-sm mt-1">{errors.severity}</p>
                     )}
                   </div>
-                </>
+                </div>
               )}
 
               {/* Maintenance Report Fields */}
               {reportType === 'maintenance' && (
-                <>
+                <div className="relative">
+                  <AIAssistant formType="maintenance" />
                   {/* Category */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -597,7 +600,7 @@ export default function StudentDashboardPage() {
                       />
                     </div>
                   </div>
-                </>
+                </div>
               )}
 
               {/* Description */}
@@ -646,9 +649,12 @@ export default function StudentDashboardPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full bg-kmuGreen text-white py-2 rounded-lg font-medium hover:bg-kmuGreen/90 transition disabled:opacity-50"
+                className="w-full bg-kmuGreen text-white py-2 rounded-lg font-medium hover:bg-kmuGreen/90 transition disabled:opacity-50 relative"
               >
                 {submitting ? 'Submitting...' : reportType === 'maintenance' ? 'Submit Maintenance Report' : 'Submit Security Report'}
+                <div className="absolute -top-14 right-0">
+                  <AIAssistant formType="appeal" />
+                </div>
               </button>
             </form>
           </div>
