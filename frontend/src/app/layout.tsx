@@ -131,7 +131,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
   const { theme } = useTheme();
   const isLogin = pathname === "/login";
-  const isPublic = pathname === "/" || pathname.startsWith("/home") || pathname.startsWith("/public");
+  const isSplash = pathname === "/" || pathname === "/splash";
+  const isPublic = isSplash || pathname.startsWith("/home") || pathname.startsWith("/public");
   const [syncError, setSyncError] = useState<string | null>(null);
 
   useEffect(() => {
