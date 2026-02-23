@@ -49,16 +49,30 @@ export default function CasesPage() {
   const { token, user, loading: authLoading } = useAuth();
   const router = useRouter();
   
-  // Handle authentication like profile page - only on client side
-  if (typeof window !== 'undefined') {
-    if (!authLoading && !token) {
-      router.replace('/login');
-      return <div className="text-center text-kmuGreen">Redirecting to login...</div>;
+  // Handle authentication - moved useState hooks before any conditional logic
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  
+  useEffect(() => {
+    // Handle authentication on client side only
+    if (typeof window !== 'undefined') {
+      if (!authLoading && !token) {
+        router.replace('/login');
+        setIsCheckingAuth(false);
+        return;
+      }
+      
+      if (authLoading) {
+        setIsCheckingAuth(true);
+        return;
+      }
+      
+      setIsCheckingAuth(false);
     }
-    
-    if (authLoading) {
-      return <div className="text-center text-kmuGreen">Loading...</div>;
-    }
+  }, [authLoading, token, router]);
+
+  // Show loading state while checking auth
+  if (isCheckingAuth) {
+    return <div className="text-center text-kmuGreen">Loading...</div>;
   }
 
   const [cases, setCases] = useState<Case[]>([]);
