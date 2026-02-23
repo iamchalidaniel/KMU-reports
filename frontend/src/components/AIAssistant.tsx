@@ -80,11 +80,11 @@ export default function AIAssistant({ formType, onSuggestionReceived }: AIAssist
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-6 right-6 z-50 sm:bottom-4 sm:right-4 sm:right-auto sm:left-4">
       {isOpen ? (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-96 h-[500px] flex flex-col border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl w-11/12 max-w-md sm:max-w-sm h-[80vh] sm:h-[70vh] flex flex-col border border-gray-200 dark:border-gray-700">
           {/* Header */}
-          <div className="bg-kmuGreen text-white p-4 rounded-t-xl flex justify-between items-center">
+          <div className="bg-kmuGreen dark:bg-kmuGreen/90 text-white p-4 rounded-t-xl flex justify-between items-center">
             <h3 className="font-semibold">AI Assistant</h3>
             <button 
               onClick={toggleAssistant}
@@ -164,7 +164,7 @@ export default function AIAssistant({ formType, onSuggestionReceived }: AIAssist
       ) : (
         <button
           onClick={toggleAssistant}
-          className="bg-kmuGreen text-white p-4 rounded-full shadow-lg hover:bg-kmuOrange transition-transform transform hover:scale-105 flex items-center justify-center"
+          className="bg-kmuGreen dark:bg-kmuGreen/90 text-white p-3 sm:p-4 rounded-full shadow-lg hover:bg-kmuGreen/80 transition-transform transform hover:scale-105 flex items-center justify-center"
           aria-label="Open AI Assistant"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
