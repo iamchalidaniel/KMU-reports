@@ -27,25 +27,22 @@ export default function AdminPage() {
   const router = useRouter();
   const { notification, showNotification, hideNotification } = useNotification();
   
-  // Handle authentication like profile page - only on client side
-  if (typeof window !== 'undefined') {
-    if (!authLoading && !token) {
-      router.replace('/login');
-      return <div className="text-center text-kmuGreen">Redirecting to login...</div>;
-    }
-    
-    if (authLoading) {
-      return <div className="text-center text-kmuGreen">Loading...</div>;
-    }
-    
-    if (!user || user.role !== 'admin') return <div className="text-red-600">Access denied.</div>;
-  }
-
   const [search, setSearch] = useState('');
   const [cases, setCases] = useState([]);
   const [students, setStudents] = useState([]);
   const [filteredCases, setFilteredCases] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
+  
+  // Handle authentication redirection
+  useEffect(() => {
+    if (!authLoading) {
+      if (!token) {
+        router.replace('/login');
+      } else if (!user || user.role !== 'admin') {
+        router.replace('/');
+      }
+    }
+  }, [authLoading, token, user, router]);
 
   useEffect(() => {
     async function fetchData() {
@@ -163,6 +160,14 @@ export default function AdminPage() {
       },
     ],
   };
+
+  if (authLoading) {
+    return <div className="text-center text-kmuGreen p-8">Loading...</div>;
+  }
+
+  if (!token || !user || user.role !== 'admin') {
+    return <div className="text-center text-red-600 p-8">Access denied.</div>;
+  }
 
   return (
     <>
