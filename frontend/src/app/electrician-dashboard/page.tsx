@@ -83,22 +83,9 @@ const STATUSES = [
 export default function ElectricianDashboard() {
   const { user, token, loading: authLoading } = useAuth();
   const router = useRouter();
-  
-  if (typeof window !== 'undefined') {
-    if (!authLoading && !token) {
-      router.replace('/login');
-      return <div className="text-center text-kmuGreen">Redirecting to login...</div>;
-    }
-    
-    if (authLoading) {
-      return <div className="text-center text-kmuGreen">Loading...</div>;
-    }
-    
-    if (!user || user.role !== 'electrician') {
-      return <div className="text-red-600">Access denied. Electrician access only.</div>;
-    }
-  }
 
+  // all state hooks must be declared unconditionally at the top
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [reports, setReports] = useState<MaintenanceReport[]>([]);
   const [filteredReports, setFilteredReports] = useState<MaintenanceReport[]>([]);
   const [analytics, setAnalytics] = useState<any>(null);
@@ -107,6 +94,33 @@ export default function ElectricianDashboard() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (!authLoading && !token) {
+        router.replace('/login');
+        setIsCheckingAuth(false);
+        return;
+      }
+      if (authLoading) {
+        setIsCheckingAuth(true);
+        return;
+      }
+      if (!user || user.role !== 'electrician') {
+        setIsCheckingAuth(false);
+        return;
+      }
+      setIsCheckingAuth(false);
+    }
+  }, [authLoading, token, user, router]);
+
+  if (isCheckingAuth) {
+    return <div className="text-center text-kmuGreen">Loading...</div>;
+  }
+
+  if (!user || user.role !== 'electrician') {
+    return <div className="text-red-600">Access denied. Electrician access only.</div>;
+  }
 
   useEffect(() => {
     fetchReports();

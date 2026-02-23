@@ -46,6 +46,9 @@ export default function ReportsPage() {
   const router = useRouter();
   const { notification, showNotification, hideNotification } = useNotification();
   
+  // authentication state should come first
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
   const [offenseTrends, setOffenseTrends] = useState<{ _id: string; count: number }[]>([]);
   const [departmentStats, setDepartmentStats] = useState<{ _id: string; count: number }[]>([]);
   const [studentReports, setStudentReports] = useState<StudentReport[]>([]);
@@ -62,9 +65,6 @@ export default function ReportsPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
   const [total, setTotal] = useState(0);
-  
-  // Handle authentication - moved useState hooks before any conditional logic
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   
   useEffect(() => {
     // Handle authentication on client side only

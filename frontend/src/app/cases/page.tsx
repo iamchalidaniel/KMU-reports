@@ -50,31 +50,8 @@ export default function CasesPage() {
   const router = useRouter();
   
   // Handle authentication - moved useState hooks before any conditional logic
+  // authentication / general state hooks up front
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  
-  useEffect(() => {
-    // Handle authentication on client side only
-    if (typeof window !== 'undefined') {
-      if (!authLoading && !token) {
-        router.replace('/login');
-        setIsCheckingAuth(false);
-        return;
-      }
-      
-      if (authLoading) {
-        setIsCheckingAuth(true);
-        return;
-      }
-      
-      setIsCheckingAuth(false);
-    }
-  }, [authLoading, token, router]);
-
-  // Show loading state while checking auth
-  if (isCheckingAuth) {
-    return <div className="text-center text-kmuGreen">Loading...</div>;
-  }
-
   const [cases, setCases] = useState<Case[]>([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -90,6 +67,27 @@ export default function CasesPage() {
   const [showExportDropdown, setShowExportDropdown] = useState(false);
   const { apiCall, isLoading: apiLoading, error: apiError } = useOfflineApi();
   const { notification, showNotification, hideNotification } = useNotification();
+
+  useEffect(() => {
+    // Handle authentication on client side only
+    if (typeof window !== 'undefined') {
+      if (!authLoading && !token) {
+        router.replace('/login');
+        setIsCheckingAuth(false);
+        return;
+      }
+      if (authLoading) {
+        setIsCheckingAuth(true);
+        return;
+      }
+      setIsCheckingAuth(false);
+    }
+  }, [authLoading, token, router]);
+
+  // Show loading state while checking auth
+  if (isCheckingAuth) {
+    return <div className="text-center text-kmuGreen">Loading...</div>;
+  }
 
   const searchParams = useSearchParams();
   const studentIdFilter = searchParams?.get('studentId') || '';

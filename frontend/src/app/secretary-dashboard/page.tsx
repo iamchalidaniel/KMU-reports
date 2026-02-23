@@ -30,26 +30,39 @@ export default function SecretaryDashboard() {
   const { user, token, loading: authLoading } = useAuth();
   const router = useRouter();
   const { notification, showNotification, hideNotification } = useNotification();
-  
-  // Handle authentication like profile page - only on client side
-  if (typeof window !== 'undefined') {
-    if (!authLoading && !token) {
-      router.replace('/login');
-      return <div className="text-center text-kmuGreen">Redirecting to login...</div>;
-    }
-    
-    if (authLoading) {
-      return <div className="text-center text-kmuGreen">Loading...</div>;
-    }
-    
-    if (!user || user.role !== 'secretary') return <div className="text-red-600">Access denied.</div>;
-  }
 
+  // declare all state variables before any conditional returns
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [search, setSearch] = useState('');
   const [cases, setCases] = useState<Case[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [filteredCases, setFilteredCases] = useState<Case[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (!authLoading && !token) {
+        router.replace('/login');
+        setIsCheckingAuth(false);
+        return;
+      }
+      if (authLoading) {
+        setIsCheckingAuth(true);
+        return;
+      }
+      if (!user || user.role !== 'secretary') {
+        setIsCheckingAuth(false);
+        return;
+      }
+      setIsCheckingAuth(false);
+    }
+  }, [authLoading, token, user, router]);
+
+  if (isCheckingAuth) {
+    return <div className="text-center text-kmuGreen">Loading...</div>;
+  }
+
+  if (!user || user.role !== 'secretary') return <div className="text-red-600">Access denied.</div>;
 
   useEffect(() => {
     async function fetchData() {

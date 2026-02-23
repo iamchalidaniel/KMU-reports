@@ -27,28 +27,33 @@ export default function AdminPage() {
   const router = useRouter();
   const { notification, showNotification, hideNotification } = useNotification();
   
-  // Handle authentication - moved useState hooks before any conditional logic
+  // all state hooks must be declared unconditionally at the top
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  
+  const [search, setSearch] = useState('');
+  const [cases, setCases] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [filteredCases, setFilteredCases] = useState([]);
+  const [filteredStudents, setFilteredStudents] = useState([]);
+
   useEffect(() => {
-    // Handle authentication on client side only
+    // authentication logic runs in effect so hooks stay in order
     if (typeof window !== 'undefined') {
       if (!authLoading && !token) {
         router.replace('/login');
         setIsCheckingAuth(false);
         return;
       }
-      
+
       if (authLoading) {
         setIsCheckingAuth(true);
         return;
       }
-      
+
       if (!user || user.role !== 'admin') {
         setIsCheckingAuth(false);
         return;
       }
-      
+
       setIsCheckingAuth(false);
     }
   }, [authLoading, token, user, router]);
@@ -62,12 +67,6 @@ export default function AdminPage() {
   if (!user || user.role !== 'admin') {
     return <div className="text-red-600">Access denied.</div>;
   }
-
-  const [search, setSearch] = useState('');
-  const [cases, setCases] = useState([]);
-  const [students, setStudents] = useState([]);
-  const [filteredCases, setFilteredCases] = useState([]);
-  const [filteredStudents, setFilteredStudents] = useState([]);
 
   useEffect(() => {
     async function fetchData() {

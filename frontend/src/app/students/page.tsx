@@ -25,19 +25,9 @@ const GENDERS = ['Male', 'Female', 'Other'];
 export default function StudentsPage() {
   const { user, token, loading: authLoading } = useAuth();
   const router = useRouter();
-  
-  // Handle authentication like profile page - only on client side
-  if (typeof window !== 'undefined') {
-    if (!authLoading && !token) {
-      router.replace('/login');
-      return <div className="text-center text-kmuGreen">Redirecting to login...</div>;
-    }
-    
-    if (authLoading) {
-      return <div className="text-center text-kmuGreen">Loading...</div>;
-    }
-  }
 
+  // unconditional top-level hooks
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [students, setStudents] = useState<Student[]>([]);
   const [studentId, setStudentId] = useState('');
   const [fullName, setFullName] = useState('');
@@ -57,6 +47,25 @@ export default function StudentsPage() {
   const [total, setTotal] = useState(0);
   const [offlineMode, setOfflineMode] = useState(false);
   const { apiCall, isLoading: apiLoading, error: apiError } = useOfflineApi();
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (!authLoading && !token) {
+        router.replace('/login');
+        setIsCheckingAuth(false);
+        return;
+      }
+      if (authLoading) {
+        setIsCheckingAuth(true);
+        return;
+      }
+      setIsCheckingAuth(false);
+    }
+  }, [authLoading, token, router]);
+
+  if (isCheckingAuth) {
+    return <div className="text-center text-kmuGreen">Loading...</div>;
+  }
 
   async function loadStudents(pageNum = page) {
     setLoading(true);

@@ -51,25 +51,34 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
     
     const { token, user, loading: authLoading } = useAuth();
     const router = useRouter();
-    
-    // Handle authentication like profile page - only on client side
-    if (typeof window !== 'undefined') {
-        if (!authLoading && !token) {
-            router.replace('/login');
-            return <div className="text-center text-kmuGreen">Redirecting to login...</div>;
-        }
-        
-        if (authLoading) {
-            return <div className="text-center text-kmuGreen">Loading...</div>;
-        }
-    }
 
+    // unconditional state hooks
+    const [isCheckingAuth, setIsCheckingAuth] = useState(true);
     const [caseData, setCaseData] = useState<Case | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [actionLoading, setActionLoading] = useState(false);
     const [actionMessage, setActionMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            if (!authLoading && !token) {
+                router.replace('/login');
+                setIsCheckingAuth(false);
+                return;
+            }
+            if (authLoading) {
+                setIsCheckingAuth(true);
+                return;
+            }
+            setIsCheckingAuth(false);
+        }
+    }, [authLoading, token, router]);
+
+    if (isCheckingAuth) {
+        return <div className="text-center text-kmuGreen">Loading...</div>;
+    }
 
     useEffect(() => {
         async function fetchCase() {

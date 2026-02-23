@@ -23,21 +23,9 @@ interface AuditLog {
 export default function AuditPage() {
   const router = useRouter();
   const { user, token, loading: authLoading } = useAuth();
-  
-  // Handle authentication like profile page - only on client side
-  if (typeof window !== 'undefined') {
-    if (!authLoading && !token) {
-      router.replace('/login');
-      return <div className="text-center text-kmuGreen">Redirecting to login...</div>;
-    }
-    
-    if (authLoading) {
-      return <div className="text-center text-kmuGreen">Loading...</div>;
-    }
-    
-    if (!user || !['admin', 'chief_security_officer', 'dean_of_students'].includes(user.role)) return <div className="text-red-600">Access denied.</div>;
-  }
 
+  // all hooks unconditionally at top
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,6 +34,31 @@ export default function AuditPage() {
   const [total, setTotal] = useState(0);
   const [stats, setStats] = useState<{[key: string]: number}>({});
   const limit = 20;
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (!authLoading && !token) {
+        router.replace('/login');
+        setIsCheckingAuth(false);
+        return;
+      }
+      if (authLoading) {
+        setIsCheckingAuth(true);
+        return;
+      }
+      if (!user || !['admin', 'chief_security_officer', 'dean_of_students'].includes(user.role)) {
+        setIsCheckingAuth(false);
+        return;
+      }
+      setIsCheckingAuth(false);
+    }
+  }, [authLoading, token, user, router]);
+
+  if (isCheckingAuth) {
+    return <div className="text-center text-kmuGreen">Loading...</div>;
+  }
+
+  if (!user || !['admin', 'chief_security_officer', 'dean_of_students'].includes(user.role)) return <div className="text-red-600">Access denied.</div>;
 
   useEffect(() => {
     async function fetchLogs() {
