@@ -63,20 +63,40 @@ export default function ReportsPage() {
   const [limit, setLimit] = useState(20);
   const [total, setTotal] = useState(0);
   
-  // Handle authentication like profile page - only on client side
-  if (typeof window !== 'undefined') {
-    if (!authLoading && !token) {
-      router.replace('/login');
-      return <div className="text-center text-kmuGreen">Redirecting to login...</div>;
+  // Handle authentication - moved useState hooks before any conditional logic
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  
+  useEffect(() => {
+    // Handle authentication on client side only
+    if (typeof window !== 'undefined') {
+      if (!authLoading && !token) {
+        router.replace('/login');
+        setIsCheckingAuth(false);
+        return;
+      }
+      
+      if (authLoading) {
+        setIsCheckingAuth(true);
+        return;
+      }
+      
+      if (!user || !['admin','chief_security_officer','dean_of_students','assistant_dean','secretary','security_officer'].includes(user.role)) {
+        setIsCheckingAuth(false);
+        return;
+      }
+      
+      setIsCheckingAuth(false);
     }
-    
-    if (authLoading) {
-      return <div className="text-center text-kmuGreen">Loading...</div>;
-    }
-    
-    if (!user || !['admin','chief_security_officer','dean_of_students','assistant_dean','secretary','security_officer'].includes(user.role)) {
-      return <div className="text-red-600">Access denied.</div>;
-    }
+  }, [authLoading, token, user, router]);
+
+  // Show loading state while checking auth
+  if (isCheckingAuth) {
+    return <div className="text-center text-kmuGreen">Loading...</div>;
+  }
+
+  // Show access denied if not authorized
+  if (!user || !['admin','chief_security_officer','dean_of_students','assistant_dean','secretary','security_officer'].includes(user.role)) {
+    return <div className="text-red-600">Access denied.</div>;
   }
 
   useEffect(() => {

@@ -27,18 +27,40 @@ export default function AdminPage() {
   const router = useRouter();
   const { notification, showNotification, hideNotification } = useNotification();
   
-  // Handle authentication like profile page - only on client side
-  if (typeof window !== 'undefined') {
-    if (!authLoading && !token) {
-      router.replace('/login');
-      return <div className="text-center text-kmuGreen">Redirecting to login...</div>;
+  // Handle authentication - moved useState hooks before any conditional logic
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  
+  useEffect(() => {
+    // Handle authentication on client side only
+    if (typeof window !== 'undefined') {
+      if (!authLoading && !token) {
+        router.replace('/login');
+        setIsCheckingAuth(false);
+        return;
+      }
+      
+      if (authLoading) {
+        setIsCheckingAuth(true);
+        return;
+      }
+      
+      if (!user || user.role !== 'admin') {
+        setIsCheckingAuth(false);
+        return;
+      }
+      
+      setIsCheckingAuth(false);
     }
-    
-    if (authLoading) {
-      return <div className="text-center text-kmuGreen">Loading...</div>;
-    }
-    
-    if (!user || user.role !== 'admin') return <div className="text-red-600">Access denied.</div>;
+  }, [authLoading, token, user, router]);
+
+  // Show loading state while checking auth
+  if (isCheckingAuth) {
+    return <div className="text-center text-kmuGreen">Loading...</div>;
+  }
+
+  // Show access denied if not admin
+  if (!user || user.role !== 'admin') {
+    return <div className="text-red-600">Access denied.</div>;
   }
 
   const [search, setSearch] = useState('');
