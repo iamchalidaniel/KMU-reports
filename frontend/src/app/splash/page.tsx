@@ -77,9 +77,9 @@ export default function SplashPage() {
           ></div>
         </div>
 
-        {/* Powered By */}
+        {/* Created By */}
         <div className="mt-8 text-gray-500 dark:text-gray-400 text-sm animate-fade-in" style={{ animationDelay: '1s' }}>
-          <p>Powered by DredLabs</p>
+          <p>by chali Daniel and Namonje Grace</p>
           <p className="text-xs mt-2">Kapasa Makasa University</p>
         </div>
       </div>
