@@ -1,8 +1,17 @@
 "use client";
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function HomePage() {
+  const router = useRouter();
+
+  // always show splash screen on visit/reload
+  useEffect(() => {
+    router.push('/splash');
+  }, [router]);
+
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
       {/* Navigation Bar */}

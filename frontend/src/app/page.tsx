@@ -6,9 +6,9 @@ import { useRouter } from 'next/navigation';
 export default function Home() {
   const router = useRouter();
 
+  // simply forward to /home; the home page will handle splash logic
   useEffect(() => {
-    // Always redirect to splash screen like Facebook - no localStorage check
-    router.push('/splash');
+    router.push('/home');
   }, [router]);
 
   return null;
