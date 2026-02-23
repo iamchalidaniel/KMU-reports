@@ -113,17 +113,17 @@ export default function PublicReportPage() {
       <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col">
         {/* Header */}
         <div className="border-b border-gray-200 dark:border-gray-800">
-          <div className="container mx-auto px-4 py-4">
-            <Link href="/home" className="flex items-center space-x-3">
+          <div className="container mx-auto px-4 py-2">
+            <Link href="/home" className="flex items-center space-x-2">
               <img 
                 src="/kmu_logo.svg" 
                 alt="KMU Logo" 
-                width={40}
-                height={40}
-                className="h-10 w-10 object-contain"
+                width={32}
+                height={32}
+                className="h-8 w-8 object-contain"
               />
               <div>
-                <div className="text-lg font-bold text-gray-900 dark:text-white">CampusCare</div>
+                <div className="text-base font-bold text-gray-900 dark:text-white">CampusCare</div>
                 <div className="text-xs text-gray-600 dark:text-gray-400">AI-Powered Campus Safety</div>
               </div>
             </Link>
@@ -177,23 +177,23 @@ export default function PublicReportPage() {
     <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col">
       {/* Header */}
       <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/home" className="flex items-center space-x-3">
+        <div className="container mx-auto px-4 py-2 flex items-center justify-between">
+          <Link href="/home" className="flex items-center space-x-2">
             <img 
               src="/kmu_logo.svg" 
               alt="KMU Logo" 
-              width={40}
-              height={40}
-              className="h-10 w-10 object-contain"
+              width={32}
+              height={32}
+              className="h-8 w-8 object-contain"
             />
             <div>
-              <div className="text-lg font-bold text-gray-900 dark:text-white">CampusCare</div>
+              <div className="text-base font-bold text-gray-900 dark:text-white">CampusCare</div>
               <div className="text-xs text-gray-600 dark:text-gray-400">AI-Powered Campus Safety</div>
             </div>
           </Link>
           <Link 
             href="/home"
-            className="px-6 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+            className="px-4 py-1 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
           >
             Back
           </Link>

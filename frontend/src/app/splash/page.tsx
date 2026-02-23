@@ -16,41 +16,41 @@ export default function SplashPage() {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-kmuGreen to-green-600 dark:from-green-800 dark:to-green-900 flex items-center justify-center">
+    <div className="min-h-screen bg-white dark:bg-gray-950 flex items-center justify-center">
       <div className="text-center">
         {/* Logo */}
         <div className="mb-8 animate-fade-in">
           <img 
             src="/kmu_logo.svg" 
             alt="KMU Logo" 
-            className="h-32 w-32 mx-auto object-contain drop-shadow-lg"
+            className="h-28 w-28 mx-auto object-contain drop-shadow-lg"
           />
         </div>
 
         {/* Main Text */}
-        <div className="text-white mb-12">
-          <h1 className="text-6xl md:text-7xl font-bold mb-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+        <div className="text-gray-900 dark:text-white mb-12">
+          <h1 className="text-5xl md:text-6xl font-bold mb-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
             CampusCare
           </h1>
-          <p className="text-xl md:text-2xl text-green-100 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+          <p className="text-lg md:text-xl text-gray-700 dark:text-gray-300 animate-fade-in" style={{ animationDelay: '0.4s' }}>
             AI-Powered Campus Safety Reporting
           </p>
         </div>
 
         {/* Tagline */}
-        <div className="text-green-100 text-lg md:text-xl mb-12 animate-fade-in" style={{ animationDelay: '0.6s' }}>
+        <div className="text-gray-700 dark:text-gray-300 text-lg md:text-xl mb-12 animate-fade-in" style={{ animationDelay: '0.6s' }}>
           <p>Secure • Anonymous • Powered by AI</p>
         </div>
 
         {/* Loading Indicator */}
         <div className="flex justify-center items-center gap-2 animate-fade-in" style={{ animationDelay: '0.8s' }}>
-          <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
-          <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-          <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+          <div className="w-2 h-2 bg-gray-900 dark:bg-gray-200 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
+          <div className="w-2 h-2 bg-gray-900 dark:bg-gray-200 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+          <div className="w-2 h-2 bg-gray-900 dark:bg-gray-200 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
         </div>
 
         {/* Powered By */}
-        <div className="mt-16 text-green-200 text-sm animate-fade-in" style={{ animationDelay: '1s' }}>
+        <div className="mt-16 text-gray-500 dark:text-gray-400 text-sm animate-fade-in" style={{ animationDelay: '1s' }}>
           <p>Powered by DredLabs</p>
           <p className="text-xs mt-2">Kapasa Makasa University</p>
         </div>
