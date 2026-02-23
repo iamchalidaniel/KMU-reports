@@ -122,10 +122,8 @@ export default function LoginPage() {
                   e.currentTarget.style.display = 'none';
                 }}
               />
-              <h1 className={`text-3xl md:text-4xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                Welcome Back
-              </h1>
-              <p className={`text-base ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+              {/* title removed as per request */}
+              <p className={`text-base font-bold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                 Log in to your account
               </p>
             </div>
