@@ -115,7 +115,10 @@ export default function LoginPage() {
               height={40}
               className="h-10 w-10 object-contain"
             />
-            <span className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>KMU Reports</span>
+            <div>
+              <div className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>CampusCare</div>
+              <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>AI-Powered Campus Safety</div>
+            </div>
           </Link>
         </div>
       </div>
