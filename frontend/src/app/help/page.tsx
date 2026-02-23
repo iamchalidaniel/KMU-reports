@@ -10,7 +10,7 @@ export default function HelpPage() {
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold mb-4 text-kmuGreen">Help & Documentation</h1>
         <p className="text-gray-700 dark:text-gray-300 text-lg">
-          Welcome to KMU DisciplineDesk! Your comprehensive disciplinary case management system.
+          Welcome to CampusCare! Your comprehensive campus incident reporting and tracking system.
         </p>
       </div>
 
@@ -119,9 +119,9 @@ export default function HelpPage() {
         <h2 className="text-2xl font-semibold mb-4 text-kmuOrange">👥 Staff Cases</h2>
         <div className="space-y-4">
           <p className="text-gray-600 dark:text-gray-400">
-            KMU DisciplineDesk now supports disciplinary cases for both students and staff members. 
-            This feature allows you to manage workplace conduct issues, policy violations, and other 
-            disciplinary matters involving university staff.
+            CampusCare now supports incident reports for both students and staff members. 
+            This feature allows you to manage security concerns, facility issues, conduct violations, and other 
+            campus safety matters involving all university community members.
           </p>
           
           <div className="grid md:grid-cols-2 gap-6">
@@ -161,10 +161,10 @@ export default function HelpPage() {
       <footer className="bg-gray-100 dark:bg-gray-900 rounded-lg shadow p-6 text-center">
         <div className="text-gray-600 dark:text-gray-400">
           <p className="mb-2">
-            <strong>KMU DisciplineDesk</strong> - Comprehensive Disciplinary Case Management System
+            <strong>CampusCare</strong> - AI-Powered Campus Safety Reporting System
           </p>
           <p className="text-sm">
-            Developed by: <strong>Chali Daniel</strong> | 2025 ICT with Education | Third Year of Study
+            Developed by: <strong>Chali Daniel & Grace Namonje</strong> | 2025
           </p>
           <p className="text-xs mt-2">
             © 2025 Kapasa Makasa University. All rights reserved.

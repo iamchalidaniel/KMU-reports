@@ -122,7 +122,10 @@ export default function PublicReportPage() {
                 height={40}
                 className="h-10 w-10 object-contain"
               />
-              <span className="text-lg font-bold text-gray-900 dark:text-white">KMU Reports</span>
+              <div>
+                <div className="text-lg font-bold text-gray-900 dark:text-white">CampusCare</div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">AI-Powered Campus Safety</div>
+              </div>
             </Link>
           </div>
         </div>
@@ -183,7 +186,10 @@ export default function PublicReportPage() {
               height={40}
               className="h-10 w-10 object-contain"
             />
-            <span className="text-lg font-bold text-gray-900 dark:text-white">KMU Reports</span>
+            <div>
+              <div className="text-lg font-bold text-gray-900 dark:text-white">CampusCare</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400">AI-Powered Campus Safety</div>
+            </div>
           </Link>
           <Link 
             href="/home"

@@ -14,7 +14,7 @@ export interface IndexedDBConfig {
 }
 
 const DB_CONFIG: IndexedDBConfig = {
-  name: 'KMUDisciplineDesk',
+  name: 'CampusCare',
   version: 1,
   stores: {
     students: {
