@@ -123,7 +123,7 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-300 py-12">
+      <footer className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-300 py-12">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center mb-4">
             <img 
@@ -131,12 +131,12 @@ export default function HomePage() {
               alt="KMU Logo" 
               className="w-8 h-8 mr-3"
             />
-            <span className="text-lg font-bold text-white">CampusCare</span>
+            <span className="text-lg font-bold">CampusCare</span>
           </div>
           <p className="text-sm mb-4">
             &copy; 2026 CampusCare - AI-Powered Campus Safety Reporting
           </p>
-          <p className="text-gray-500 text-xs">
+          <p className="text-gray-500 dark:text-gray-400 text-xs">
             Powered by DredLabs
           </p>
         </div>

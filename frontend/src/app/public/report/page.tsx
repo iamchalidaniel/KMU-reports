@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { API_BASE_URL } from '../../../config/constants';
 import AIAssistant from '../../../components/AIAssistant';
+import DarkModeToggle from '../../../components/DarkModeToggle';
 
 interface FormData {
   incident_date: string;
@@ -191,12 +192,15 @@ export default function PublicReportPage() {
               <div className="text-xs text-gray-600 dark:text-gray-400">AI-Powered Campus Safety</div>
             </div>
           </Link>
-          <Link 
-            href="/home"
-            className="px-4 py-1 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
-          >
-            Back
-          </Link>
+          <div className="flex items-center space-x-2">
+            <Link 
+              href="/home"
+              className="px-4 py-1 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+            >
+              Back
+            </Link>
+            <DarkModeToggle />
+          </div>
         </div>
       </div>
 
