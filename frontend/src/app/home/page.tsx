@@ -1,16 +1,32 @@
 "use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useRef } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
 export default function HomePage() {
   const router = useRouter();
 
-  // always show splash screen on visit/reload
+  // redirect to splash screen when the user first lands on /home. once
+  // they've been sent there we add a query parameter (`from=splash`) so the
+  // effect won't fire again when they return. this also means a hard reload
+  // of `/home` without the param will show the splash anew (behaviour similar
+  // to "every visit").
+  const searchParams = useSearchParams();
+  const firstRun = useRef(true);
+
   useEffect(() => {
-    router.push('/splash');
-  }, [router]);
+    if (!firstRun.current) return;
+    firstRun.current = false;
+
+    const fromSplash = searchParams.get('from');
+    if (fromSplash === 'splash') {
+      // clean up the URL so it doesn't persist if they reload
+      router.replace('/home');
+    } else {
+      router.push('/splash');
+    }
+  }, [router, searchParams]);
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">

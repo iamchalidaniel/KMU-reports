@@ -24,9 +24,11 @@ export default function SplashPage() {
       });
     }, 30); // Complete in ~3 seconds (100 * 30ms = 3000ms)
 
-    // Redirect to home after 3 seconds
+    // Redirect to home after 3 seconds. include a query parameter so the
+    // home page knows the splash has already been shown and doesn't loop back
+    // (avoiding an infinite push-home->push-splash cycle).
     const timer = setTimeout(() => {
-      router.push('/home');
+      router.push('/home?from=splash');
     }, 3000);
 
     return () => {
