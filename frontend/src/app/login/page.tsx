@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -102,132 +103,152 @@ export default function LoginPage() {
   };
 
   return (
-    <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
-      <div className="max-w-md w-full">
-        {/* Login Form Card */}
-        <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-xl p-8 min-h-[500px] flex flex-col justify-center`}>
-          {/* Logo and Title */}
-          <div className="text-center mb-8">
-            <img
-              src="/kmu_logo.svg"
-              alt="KMU Logo"
-              width={80}
-              height={80}
-              className="mx-auto mb-4 h-20 w-20 object-contain"
-              onError={(e) => {
-                console.error('Logo failed to load');
-                e.currentTarget.style.display = 'none';
-                // Show fallback text
-                const fallback = document.createElement('div');
-                fallback.className = 'text-4xl font-bold text-kmuGreen mb-4';
-                fallback.textContent = 'KMU';
-                e.currentTarget.parentNode?.appendChild(fallback);
-              }}
-              onLoad={() => console.log('Logo loaded successfully')}
+    <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-gray-950' : 'bg-white'}`}>
+      {/* Header */}
+      <div className={`border-b ${theme === 'dark' ? 'border-gray-800 bg-gray-900' : 'border-gray-200 bg-gray-50'}`}>
+        <div className="container mx-auto px-4 py-4">
+          <Link href="/home" className="flex items-center space-x-3">
+            <img 
+              src="/kmu_logo.svg" 
+              alt="KMU Logo" 
+              width={40}
+              height={40}
+              className="h-10 w-10 object-contain"
             />
-            <h2 className="text-3xl font-bold text-kmuGreen mb-2">
-              Log in to KMU DisciplineDesk
-            </h2>
-          </div>
+            <span className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>KMU Reports</span>
+          </Link>
+        </div>
+      </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
-            {/* Username Field */}
-            <div>
-              <label htmlFor="username" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
-                Username
-              </label>
-              <input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-kmuGreen focus:border-transparent ${
-                  theme === 'dark' 
-                    ? 'border-gray-600 bg-gray-700 text-white placeholder-gray-400' 
-                    : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500'
-                }`}
-                placeholder="Enter your username"
-                autoComplete="off"
-                autoCorrect="off"
-                autoCapitalize="off"
-                spellCheck="false"
+      {/* Main Content */}
+      <div className={`flex-1 flex items-center justify-center px-4 py-12`}>
+        <div className="w-full max-w-md">
+          {/* Login Card */}
+          <div className={`${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} rounded-2xl p-8 md:p-12 shadow-xl`}>
+            {/* Logo and Title */}
+            <div className="text-center mb-12">
+              <img
+                src="/kmu_logo.svg"
+                alt="KMU Logo"
+                width={64}
+                height={64}
+                className="mx-auto mb-6 h-16 w-16 object-contain"
+                onError={(e) => {
+                  console.error('Logo failed to load');
+                  e.currentTarget.style.display = 'none';
+                }}
               />
-            </div>
-
-            {/* Password Field */}
-            <div>
-              <label htmlFor="password" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-kmuGreen focus:border-transparent ${
-                  theme === 'dark' 
-                    ? 'border-gray-600 bg-gray-700 text-white placeholder-gray-400' 
-                    : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500'
-                }`}
-                placeholder="Enter your password"
-                autoComplete="new-password"
-                autoCorrect="off"
-                autoCapitalize="off"
-                spellCheck="false"
-              />
-            </div>
-
-            {/* Error Message */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
-                {error}
-              </div>
-            )}
-
-            {/* Connection Status */}
-            <div className="flex items-center justify-between text-sm">
-              <span className={`flex items-center ${isOnline ? 'text-green-600' : 'text-red-600'}`}>
-                <div className={`w-2 h-2 rounded-full mr-2 ${isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                {isOnline ? 'Online' : 'Offline'}
-              </span>
-              {!isOnline && (
-                <span className="text-orange-600 text-xs">
-                  Offline mode available
-                </span>
-              )}
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-kmuGreen text-white py-2 px-4 rounded-md hover:bg-kmuGreen/90 focus:outline-none focus:ring-2 focus:ring-kmuGreen focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {loading ? (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Signing in...
-                </div>
-              ) : (
-                'Sign In'
-              )}
-            </button>
-                    
-            {/* Register Link */}
-            <div className="mt-4 text-center text-sm">
-              <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                No account?{' '}
-                <a 
-                  href="/student-register" 
-                  className="text-kmuGreen hover:text-kmuOrange font-medium underline"
-                >
-                  Register here
-                </a>
+              <h1 className={`text-3xl md:text-4xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                Welcome Back
+              </h1>
+              <p className={`text-base ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                Log in to your account
               </p>
             </div>
-          </form>
+
+            <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
+              {/* Username Field */}
+              <div>
+                <label htmlFor="username" className={`block text-sm font-semibold mb-3 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Username
+                </label>
+                <input
+                  id="username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                  className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-0 focus:border-kmuGreen transition-colors ${
+                    theme === 'dark' 
+                      ? 'border-gray-700 bg-gray-800 text-white placeholder-gray-500' 
+                      : 'border-gray-300 bg-gray-50 text-gray-900 placeholder-gray-500'
+                  }`}
+                  placeholder="Enter your username"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck="false"
+                />
+              </div>
+
+              {/* Password Field */}
+              <div>
+                <label htmlFor="password" className={`block text-sm font-semibold mb-3 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Password
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-0 focus:border-kmuGreen transition-colors ${
+                    theme === 'dark' 
+                      ? 'border-gray-700 bg-gray-800 text-white placeholder-gray-500' 
+                      : 'border-gray-300 bg-gray-50 text-gray-900 placeholder-gray-500'
+                  }`}
+                  placeholder="Enter your password"
+                  autoComplete="new-password"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck="false"
+                />
+              </div>
+
+              {/* Error Message */}
+              {error && (
+                <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-200 px-4 py-3 rounded-lg text-sm font-medium">
+                  {error}
+                </div>
+              )}
+
+              {/* Connection Status */}
+              <div className="flex items-center justify-between text-sm">
+                <span className={`flex items-center ${isOnline ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                  <div className={`w-2 h-2 rounded-full mr-2 ${isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                  <span className="font-medium">{isOnline ? 'Online' : 'Offline'}</span>
+                </span>
+                {!isOnline && (
+                  <span className="text-orange-600 dark:text-orange-400 text-xs font-medium">
+                    Offline mode available
+                  </span>
+                )}
+            </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className={`w-full py-3 px-4 rounded-lg font-bold text-lg transition-all duration-200 ${
+                  loading 
+                    ? 'bg-gray-400 text-white cursor-not-allowed' 
+                    : 'bg-kmuGreen text-white hover:bg-green-700 active:scale-95'
+                }`}
+              >
+                {loading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2"></div>
+                    Signing in...
+                  </div>
+                ) : (
+                  'Sign In'
+                )}
+              </button>
+                      
+              {/* Register Link */}
+              <div className="text-center text-sm">
+                <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                  No account?{' '}
+                  <a 
+                    href="/student-register" 
+                    className="text-kmuGreen hover:text-green-700 font-semibold transition-colors"
+                  >
+                    Register here
+                  </a>
+                </p>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
