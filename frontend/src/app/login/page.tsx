@@ -104,25 +104,6 @@ export default function LoginPage() {
 
   return (
     <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-gray-950' : 'bg-white'}`}>
-      {/* Header */}
-      <div className={`border-b ${theme === 'dark' ? 'border-gray-800 bg-gray-900' : 'border-gray-200 bg-gray-50'}`}>
-        <div className="container mx-auto px-4 py-4">
-          <Link href="/home" className="flex items-center space-x-3">
-            <img 
-              src="/kmu_logo.svg" 
-              alt="KMU Logo" 
-              width={40}
-              height={40}
-              className="h-10 w-10 object-contain"
-            />
-            <div>
-              <div className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>CampusCare</div>
-              <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>AI-Powered Campus Safety</div>
-            </div>
-          </Link>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className={`flex-1 flex items-center justify-center px-4 py-12`}>
         <div className="w-full max-w-md">

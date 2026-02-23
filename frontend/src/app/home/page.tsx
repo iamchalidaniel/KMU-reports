@@ -43,11 +43,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
             <div className="mb-8">
-              <img 
-                src="/kmu_logo.svg" 
-                alt="Kapasa Makasa University Logo" 
-                className="h-20 w-20 mx-auto object-contain mb-4"
-              />
+              {/* Logo removed from hero; navbar already shows it */}
               <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-2">CampusCare</h1>
               <p className="text-gray-600 dark:text-gray-400 text-lg">Secure Campus Safety Reporting</p>
             </div>
