@@ -45,7 +45,7 @@ export default function ReportsPage() {
   const { user, token, loading: authLoading } = useAuth();
   const router = useRouter();
   const { notification, showNotification, hideNotification } = useNotification();
-  
+
   // authentication state should come first
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
@@ -65,7 +65,7 @@ export default function ReportsPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
   const [total, setTotal] = useState(0);
-  
+
   useEffect(() => {
     // Handle authentication on client side only
     if (typeof window !== 'undefined') {
@@ -74,30 +74,22 @@ export default function ReportsPage() {
         setIsCheckingAuth(false);
         return;
       }
-      
+
       if (authLoading) {
         setIsCheckingAuth(true);
         return;
       }
-      
-      if (!user || !['admin','chief_security_officer','dean_of_students','assistant_dean','secretary','security_officer'].includes(user.role)) {
+
+      if (!user || !['admin', 'chief_security_officer', 'dean_of_students', 'assistant_dean', 'secretary', 'security_officer'].includes(user.role)) {
         setIsCheckingAuth(false);
         return;
       }
-      
+
       setIsCheckingAuth(false);
     }
   }, [authLoading, token, user, router]);
 
-  // Show loading state while checking auth
-  if (isCheckingAuth) {
-    return <div className="text-center text-kmuGreen">Loading...</div>;
-  }
 
-  // Show access denied if not authorized
-  if (!user || !['admin','chief_security_officer','dean_of_students','assistant_dean','secretary','security_officer'].includes(user.role)) {
-    return <div className="text-red-600">Access denied.</div>;
-  }
 
   useEffect(() => {
     async function fetchAnalytics() {
@@ -248,7 +240,7 @@ export default function ReportsPage() {
       console.log('Preparing chart export...');
       const chartExportData = await prepareChartExport();
       console.log('Chart export data:', chartExportData);
-      
+
       // Check payload size
       const payloadSize = JSON.stringify(chartExportData).length;
       console.log('Payload size:', payloadSize, 'bytes');
@@ -256,15 +248,15 @@ export default function ReportsPage() {
         showNotification('error', 'Chart data too large. Please try again with fewer charts.');
         return;
       }
-      
+
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-      
+
       const res = await fetch(`${API_BASE_URL}/reports/with-charts`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          ...authHeaders() 
+          ...authHeaders()
         },
         body: JSON.stringify({
           charts: chartExportData.charts,
@@ -273,9 +265,9 @@ export default function ReportsPage() {
         }),
         signal: controller.signal
       });
-      
+
       clearTimeout(timeoutId);
-      
+
       if (!res.ok) {
         const errorText = await res.text();
         console.error('Server error:', errorText);
@@ -297,6 +289,14 @@ export default function ReportsPage() {
   }
 
 
+
+  if (isCheckingAuth) {
+    return <div className="text-center text-kmuGreen">Loading...</div>;
+  }
+
+  if (!user || !['admin', 'chief_security_officer', 'dean_of_students', 'assistant_dean', 'secretary', 'security_officer'].includes(user.role)) {
+    return <div className="text-red-600">Access denied.</div>;
+  }
 
   const safeOffenseTrends = Array.isArray(offenseTrends) ? offenseTrends : [];
   const safeDepartmentStats = Array.isArray(departmentStats) ? departmentStats : [];
@@ -368,11 +368,10 @@ export default function ReportsPage() {
               setActiveTab('analytics');
               setPage(1);
             }}
-            className={`px-4 py-2 font-medium transition-colors ${
-              activeTab === 'analytics'
+            className={`px-4 py-2 font-medium transition-colors ${activeTab === 'analytics'
                 ? 'border-b-2 border-kmuGreen text-kmuGreen'
                 : 'text-gray-600 dark:text-gray-400 hover:text-kmuGreen'
-            }`}
+              }`}
           >
             Analytics
           </button>
@@ -381,11 +380,10 @@ export default function ReportsPage() {
               setActiveTab('studentReports');
               setPage(1);
             }}
-            className={`px-4 py-2 font-medium transition-colors ${
-              activeTab === 'studentReports'
+            className={`px-4 py-2 font-medium transition-colors ${activeTab === 'studentReports'
                 ? 'border-b-2 border-kmuGreen text-kmuGreen'
                 : 'text-gray-600 dark:text-gray-400 hover:text-kmuGreen'
-            }`}
+              }`}
           >
             Student Reports ({total})
           </button>
@@ -394,66 +392,66 @@ export default function ReportsPage() {
         {/* Analytics Tab */}
         {activeTab === 'analytics' && (
           <>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-2 text-kmuOrange">Offense Trends</h2>
-          {loading ? (
-            <div className="text-gray-500 dark:text-gray-400">Loading...</div>
-          ) : error ? (
-            <div className="text-red-600">{error}</div>
-          ) : (
-            <div 
-              id="offense-trends-chart"
-              data-chart-export="true"
-              data-chart-title="Offense Trends"
-              data-chart-description="Distribution of disciplinary cases by offense type"
-              style={{ height: 300 }}
-            >
-              <Bar data={offenseData} options={{ responsive: true, plugins: { legend: { display: false }, title: { display: false } } }} />
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
+              <h2 className="text-lg font-semibold mb-2 text-kmuOrange">Offense Trends</h2>
+              {loading ? (
+                <div className="text-gray-500 dark:text-gray-400">Loading...</div>
+              ) : error ? (
+                <div className="text-red-600">{error}</div>
+              ) : (
+                <div
+                  id="offense-trends-chart"
+                  data-chart-export="true"
+                  data-chart-title="Offense Trends"
+                  data-chart-description="Distribution of disciplinary cases by offense type"
+                  style={{ height: 300 }}
+                >
+                  <Bar data={offenseData} options={{ responsive: true, plugins: { legend: { display: false }, title: { display: false } } }} />
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-2 text-kmuOrange">Department Stats</h2>
-          {loading ? (
-            <div className="text-gray-500 dark:text-gray-400">Loading...</div>
-          ) : error ? (
-            <div className="text-red-600">{error}</div>
-          ) : (
-            <div 
-              id="department-stats-chart"
-              data-chart-export="true"
-              data-chart-title="Department Statistics"
-              data-chart-description="Distribution of disciplinary cases by department"
-              style={{ height: 300 }}
-            >
-              <Bar data={deptData} options={{ responsive: true, plugins: { legend: { display: false }, title: { display: false } } }} />
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
+              <h2 className="text-lg font-semibold mb-2 text-kmuOrange">Department Stats</h2>
+              {loading ? (
+                <div className="text-gray-500 dark:text-gray-400">Loading...</div>
+              ) : error ? (
+                <div className="text-red-600">{error}</div>
+              ) : (
+                <div
+                  id="department-stats-chart"
+                  data-chart-export="true"
+                  data-chart-title="Department Statistics"
+                  data-chart-description="Distribution of disciplinary cases by department"
+                  style={{ height: 300 }}
+                >
+                  <Bar data={deptData} options={{ responsive: true, plugins: { legend: { display: false }, title: { display: false } } }} />
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        {/* Export buttons for analytics */}
-        <div className="flex gap-4">
-          <button
-            className="bg-kmuOrange text-white px-4 py-2 rounded hover:bg-kmuGreen transition disabled:opacity-50"
-            onClick={handleExcelExport}
-            disabled={exportingExcel}
-          >
-            {exportingExcel ? 'Exporting...' : 'Export to Excel'}
-          </button>
-          <button
-            className="bg-gray-200 text-kmuGreen px-4 py-2 rounded hover:bg-kmuOrange/20 transition disabled:opacity-50"
-            onClick={handleDocxExport}
-            disabled={exportingDocx}
-          >
-            {exportingDocx ? 'Exporting...' : 'Export to DOCX'}
-          </button>
-          <button
-            className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition disabled:opacity-50"
-            onClick={handleExportWithCharts}
-            disabled={exportingWithCharts}
-          >
-            {exportingWithCharts ? 'Exporting...' : 'Export with Charts (DOCX)'}
-          </button>
-        </div>
+            {/* Export buttons for analytics */}
+            <div className="flex gap-4">
+              <button
+                className="bg-kmuOrange text-white px-4 py-2 rounded hover:bg-kmuGreen transition disabled:opacity-50"
+                onClick={handleExcelExport}
+                disabled={exportingExcel}
+              >
+                {exportingExcel ? 'Exporting...' : 'Export to Excel'}
+              </button>
+              <button
+                className="bg-gray-200 text-kmuGreen px-4 py-2 rounded hover:bg-kmuOrange/20 transition disabled:opacity-50"
+                onClick={handleDocxExport}
+                disabled={exportingDocx}
+              >
+                {exportingDocx ? 'Exporting...' : 'Export to DOCX'}
+              </button>
+              <button
+                className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition disabled:opacity-50"
+                onClick={handleExportWithCharts}
+                disabled={exportingWithCharts}
+              >
+                {exportingWithCharts ? 'Exporting...' : 'Export with Charts (DOCX)'}
+              </button>
+            </div>
           </>
         )}
 
@@ -566,13 +564,12 @@ export default function ReportsPage() {
                             </span>
                           </td>
                           <td className="px-4 py-2">
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                              report.severity === 'High'
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${report.severity === 'High'
                                 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                                 : report.severity === 'Medium'
-                                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                                : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                            }`}>
+                                  ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                                  : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                              }`}>
                               {report.severity}
                             </span>
                           </td>
@@ -622,11 +619,10 @@ export default function ReportsPage() {
                       <button
                         key={p}
                         onClick={() => setPage(p)}
-                        className={`px-4 py-2 rounded-lg ${
-                          page === p
+                        className={`px-4 py-2 rounded-lg ${page === p
                             ? 'bg-kmuGreen text-white'
                             : 'border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
-                        }`}
+                          }`}
                       >
                         {p}
                       </button>
@@ -645,7 +641,7 @@ export default function ReportsPage() {
           </div>
         )}
       </section>
-      
+
       {/* Notification */}
       {notification?.isVisible && (
         <Notification

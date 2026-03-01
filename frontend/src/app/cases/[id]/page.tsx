@@ -45,10 +45,6 @@ interface Case {
 }
 
 export default function CaseDetailsPage({ params }: { params: { id: string } }) {
-    if (params.id === "new") {
-        return null;
-    }
-    
     const { token, user, loading: authLoading } = useAuth();
     const router = useRouter();
 
@@ -76,9 +72,7 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
         }
     }, [authLoading, token, router]);
 
-    if (isCheckingAuth) {
-        return <div className="text-center text-kmuGreen">Loading...</div>;
-    }
+
 
     useEffect(() => {
         async function fetchCase() {
@@ -112,7 +106,7 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
     const handleStatusUpdate = async (newStatus: string) => {
         setActionLoading(true);
         setActionMessage(null);
-        
+
         try {
             const res = await fetch(`${API_BASE_URL}/cases/${params.id}`, {
                 method: 'PUT',
@@ -124,7 +118,7 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
             });
 
             if (!res.ok) throw new Error(await res.text());
-            
+
             const updatedCase = await res.json();
             setCaseData(updatedCase);
             setActionMessage({ type: 'success', text: `Case ${newStatus} successfully!` });
@@ -138,7 +132,7 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
     const handleDeleteCase = async () => {
         setActionLoading(true);
         setActionMessage(null);
-        
+
         try {
             const res = await fetch(`${API_BASE_URL}/cases/${params.id}`, {
                 method: 'DELETE',
@@ -146,7 +140,7 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
             });
 
             if (!res.ok) throw new Error(await res.text());
-            
+
             setActionMessage({ type: 'success', text: 'Case deleted successfully!' });
             setTimeout(() => {
                 router.push('/cases');
@@ -158,6 +152,14 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
             setShowDeleteConfirm(false);
         }
     };
+
+    if (params.id === "new") {
+        return null;
+    }
+
+    if (isCheckingAuth) {
+        return <div className="text-center text-kmuGreen">Loading...</div>;
+    }
 
     if (loading) {
         return (
@@ -206,7 +208,7 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
     // Determine if this is a student or staff case
     const isStudentCase = caseData.student || caseData.students;
     const isStaffCase = caseData.staff || caseData.staffMembers;
-    
+
     // Get the primary person associated with the case
     const primaryPerson = isStudentCase ? caseData.student : caseData.staff;
     const personType = isStudentCase ? 'Student' : 'Staff';
@@ -234,7 +236,7 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
                                 {caseData.status}
                             </span>
                         </div>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Case ID</label>
@@ -255,14 +257,14 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
                                 </span>
                             </div>
                         </div>
-                        
+
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Description</label>
                             <div className="mt-1 bg-gray-50 dark:bg-gray-700 p-3 rounded whitespace-pre-wrap">
                                 {caseData.description || 'N/A'}
                             </div>
                         </div>
-                        
+
                         {caseData.sanctions && (
                             <div className="mb-4">
                                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Sanctions</label>
@@ -271,20 +273,19 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
                                 </div>
                             </div>
                         )}
-                        
+
                         <div className="flex flex-wrap gap-2">
                             <button
                                 onClick={() => handleStatusUpdate(caseData.status === 'Open' ? 'Closed' : 'Open')}
                                 disabled={actionLoading}
-                                className={`px-4 py-2 rounded ${
-                                    caseData.status === 'Open' 
-                                        ? 'bg-green-600 hover:bg-green-700 text-white' 
+                                className={`px-4 py-2 rounded ${caseData.status === 'Open'
+                                        ? 'bg-green-600 hover:bg-green-700 text-white'
                                         : 'bg-red-600 hover:bg-red-700 text-white'
-                                } transition disabled:opacity-50`}
+                                    } transition disabled:opacity-50`}
                             >
                                 {actionLoading ? 'Updating...' : (caseData.status === 'Open' ? 'Close Case' : 'Reopen Case')}
                             </button>
-                            
+
                             <button
                                 onClick={() => setShowDeleteConfirm(true)}
                                 disabled={actionLoading}
@@ -294,13 +295,13 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
                             </button>
                         </div>
                     </div>
-                    
+
                     {/* Associated Person Information */}
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                         <h2 className="text-lg font-semibold mb-4 text-kmuOrange">
                             {personType} Information
                         </h2>
-                        
+
                         {primaryPerson ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
@@ -308,7 +309,7 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
                                         {personType} Name
                                     </label>
                                     <div className="mt-1 font-medium">
-                                        <Link 
+                                        <Link
                                             href={isStudentCase ? `/students/${caseData.student?._id}` : `/staff/${caseData.staff?._id}`}
                                             className="text-kmuGreen hover:underline"
                                         >
@@ -316,21 +317,21 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
                                         </Link>
                                     </div>
                                 </div>
-                                
+
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">
                                         {personType} ID
                                     </label>
                                     <div className="mt-1">{personId || 'N/A'}</div>
                                 </div>
-                                
+
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">
                                         Department
                                     </label>
                                     <div className="mt-1">{personDepartment || 'N/A'}</div>
                                 </div>
-                                
+
                                 {personYear && (
                                     <div>
                                         <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -339,7 +340,7 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
                                         <div className="mt-1">{personYear}</div>
                                     </div>
                                 )}
-                                
+
                                 {personPosition && (
                                     <div>
                                         <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -354,10 +355,10 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
                                 No {personType.toLowerCase()} information available
                             </div>
                         )}
-                        
+
                         {/* For group cases, show all associated people */}
-                        {(caseData.students && caseData.students.length > 1) || 
-                         (caseData.staffMembers && caseData.staffMembers.length > 1) ? (
+                        {(caseData.students && caseData.students.length > 1) ||
+                            (caseData.staffMembers && caseData.staffMembers.length > 1) ? (
                             <div className="mt-4">
                                 <h3 className="text-md font-medium mb-2">
                                     All {personType}s in this Case
@@ -377,33 +378,33 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
                         ) : null}
                     </div>
                 </div>
-                
+
                 {/* Sidebar Information */}
                 <div className="space-y-6">
                     {/* Case Metadata */}
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                         <h2 className="text-lg font-semibold mb-4 text-kmuOrange">Case Metadata</h2>
-                        
+
                         <div className="space-y-3">
                             <div>
                                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Created By</label>
                                 <div className="mt-1">{caseData.createdBy || 'N/A'}</div>
                             </div>
-                            
+
                             <div>
                                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Created At</label>
                                 <div className="mt-1">
                                     {caseData.createdAt ? new Date(caseData.createdAt).toLocaleString() : 'N/A'}
                                 </div>
                             </div>
-                            
+
                             <div>
                                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Last Updated</label>
                                 <div className="mt-1">
                                     {caseData.updatedAt ? new Date(caseData.updatedAt).toLocaleString() : 'N/A'}
                                 </div>
                             </div>
-                            
+
                             <div>
                                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Case Type</label>
                                 <div className="mt-1 capitalize">
@@ -412,11 +413,11 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
                             </div>
                         </div>
                     </div>
-                    
+
                     {/* Actions */}
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                         <h2 className="text-lg font-semibold mb-4 text-kmuOrange">Actions</h2>
-                        
+
                         <div className="space-y-3">
                             <Link
                                 href="/cases"
@@ -424,7 +425,7 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
                             >
                                 Back to Cases
                             </Link>
-                            
+
                             <button
                                 onClick={() => router.push(`/cases/new?${isStudentCase ? 'studentId' : 'staffId'}=${personId}`)}
                                 className="block w-full text-center px-4 py-2 bg-kmuGreen text-white rounded hover:bg-kmuOrange transition"
@@ -435,7 +436,7 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
                     </div>
                 </div>
             </div>
-            
+
             {/* Delete Confirmation Modal */}
             {showDeleteConfirm && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -463,14 +464,13 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
                     </div>
                 </div>
             )}
-            
+
             {/* Action Message Toast */}
             {actionMessage && (
-                <div className={`fixed bottom-4 right-4 px-4 py-2 rounded shadow-lg z-50 ${
-                    actionMessage.type === 'success' 
-                        ? 'bg-green-500 text-white' 
+                <div className={`fixed bottom-4 right-4 px-4 py-2 rounded shadow-lg z-50 ${actionMessage.type === 'success'
+                        ? 'bg-green-500 text-white'
                         : 'bg-red-500 text-white'
-                }`}>
+                    }`}>
                     {actionMessage.text}
                 </div>
             )}

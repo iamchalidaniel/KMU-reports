@@ -39,20 +39,24 @@ interface Case {
 export default function StaffDetailsPage({ params }: { params: { id: string } }) {
     const { token, user, loading: authLoading } = useAuth();
     const router = useRouter();
-    
-    // Handle authentication like profile page - only on client side
-    if (typeof window !== 'undefined') {
-        if (!authLoading && !token) {
-            router.replace('/login');
-            return <div className="text-center text-kmuGreen">Redirecting to login...</div>;
-        }
-        
-        if (authLoading) {
-            return <div className="text-center text-kmuGreen">Loading...</div>;
-        }
-    }
-    
+
+    const [isCheckingAuth, setIsCheckingAuth] = useState(true);
     const [staff, setStaff] = useState<Staff | null>(null);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            if (!authLoading && !token) {
+                router.replace('/login');
+                setIsCheckingAuth(false);
+                return;
+            }
+            if (authLoading) {
+                setIsCheckingAuth(true);
+                return;
+            }
+            setIsCheckingAuth(false);
+        }
+    }, [authLoading, token, router]);
     const [cases, setCases] = useState<Case[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -107,6 +111,10 @@ export default function StaffDetailsPage({ params }: { params: { id: string } })
         }
     }
 
+    if (isCheckingAuth) {
+        return <div className="text-center text-kmuGreen">Loading...</div>;
+    }
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -141,13 +149,13 @@ export default function StaffDetailsPage({ params }: { params: { id: string } })
             <div className="flex items-center justify-between mb-6">
                 <h1 className="text-2xl font-bold text-kmuGreen">Staff Details</h1>
                 <div className="flex gap-2">
-                    <Link 
+                    <Link
                         href={`/cases/new?staffId=${staff.staffId}`}
                         className="bg-kmuGreen text-white px-4 py-2 rounded hover:bg-kmuOrange transition"
                     >
                         + New Case
                     </Link>
-                    <Link 
+                    <Link
                         href="/staff"
                         className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition"
                     >
@@ -161,7 +169,7 @@ export default function StaffDetailsPage({ params }: { params: { id: string } })
                     {error}
                 </div>
             )}
-            
+
             {success && (
                 <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md mb-6">
                     {success}
@@ -223,9 +231,9 @@ export default function StaffDetailsPage({ params }: { params: { id: string } })
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div className="mt-6 flex gap-3">
-                            <Link 
+                            <Link
                                 href={`/staff/edit/${staff.staffId}`}
                                 className="bg-kmuGreen text-white px-4 py-2 rounded hover:bg-kmuOrange transition"
                             >
@@ -240,7 +248,7 @@ export default function StaffDetailsPage({ params }: { params: { id: string } })
                         </div>
                     </div>
                 </div>
-                
+
                 {/* Case Statistics */}
                 <div>
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
@@ -263,7 +271,7 @@ export default function StaffDetailsPage({ params }: { params: { id: string } })
                                 <span className="text-lg font-semibold text-red-600">{highSeverityCases}</span>
                             </div>
                         </div>
-                        
+
                         {totalCases > 0 && (
                             <button
                                 onClick={() => router.push(`/cases?staffId=${staff.staffId}`)}
@@ -275,7 +283,7 @@ export default function StaffDetailsPage({ params }: { params: { id: string } })
                     </div>
                 </div>
             </div>
-            
+
             {/* Cases History */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div className="flex items-center justify-between mb-4">
@@ -286,11 +294,11 @@ export default function StaffDetailsPage({ params }: { params: { id: string } })
                         </span>
                     )}
                 </div>
-                
+
                 {cases.length === 0 ? (
                     <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                         <p>No cases found for this staff member.</p>
-                        <Link 
+                        <Link
                             href={`/cases/new?staffId=${staff.staffId}`}
                             className="inline-block mt-4 text-kmuGreen hover:underline"
                         >
@@ -314,8 +322,8 @@ export default function StaffDetailsPage({ params }: { params: { id: string } })
                                 {cases.map((c) => (
                                     <tr key={c._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                                         <td className="py-2 px-2">
-                                            <Link 
-                                                href={`/cases/${c._id}`} 
+                                            <Link
+                                                href={`/cases/${c._id}`}
                                                 className="text-kmuGreen hover:underline font-medium"
                                             >
                                                 {c._id.substring(0, 8)}...
@@ -326,27 +334,25 @@ export default function StaffDetailsPage({ params }: { params: { id: string } })
                                             {c.incidentDate ? new Date(c.incidentDate).toLocaleDateString() : 'N/A'}
                                         </td>
                                         <td className="py-2 px-2">
-                                            <span className={`px-2 py-1 rounded text-xs ${
-                                                c.severity === 'Critical' ? 'bg-red-100 text-red-800' :
-                                                c.severity === 'High' ? 'bg-orange-100 text-orange-800' :
-                                                c.severity === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                                                'bg-green-100 text-green-800'
-                                            }`}>
+                                            <span className={`px-2 py-1 rounded text-xs ${c.severity === 'Critical' ? 'bg-red-100 text-red-800' :
+                                                    c.severity === 'High' ? 'bg-orange-100 text-orange-800' :
+                                                        c.severity === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                                                            'bg-green-100 text-green-800'
+                                                }`}>
                                                 {c.severity || 'N/A'}
                                             </span>
                                         </td>
                                         <td className="py-2 px-2">
-                                            <span className={`px-2 py-1 rounded text-xs ${
-                                                c.status === 'Open' ? 'bg-blue-100 text-blue-800' :
-                                                c.status === 'Closed' ? 'bg-green-100 text-green-800' :
-                                                'bg-gray-100 text-gray-800'
-                                            }`}>
+                                            <span className={`px-2 py-1 rounded text-xs ${c.status === 'Open' ? 'bg-blue-100 text-blue-800' :
+                                                    c.status === 'Closed' ? 'bg-green-100 text-green-800' :
+                                                        'bg-gray-100 text-gray-800'
+                                                }`}>
                                                 {c.status || 'N/A'}
                                             </span>
                                         </td>
                                         <td className="py-2 px-2">
-                                            <Link 
-                                                href={`/cases/${c._id}`} 
+                                            <Link
+                                                href={`/cases/${c._id}`}
                                                 className="text-kmuGreen hover:underline text-sm"
                                             >
                                                 View Details

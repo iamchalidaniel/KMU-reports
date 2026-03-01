@@ -38,20 +38,28 @@ export default function StudentDashboardPage() {
   const { notification, showNotification, hideNotification } = useNotification();
 
   // Authentication checks
-  if (typeof window !== 'undefined') {
-    if (!authLoading && !token) {
-      router.replace('/login');
-      return <div className="text-center text-kmuGreen">Redirecting to login...</div>;
-    }
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
-    if (authLoading) {
-      return <div className="text-center text-kmuGreen">Loading...</div>;
-    }
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (!authLoading && !token) {
+        router.replace('/login');
+        setIsCheckingAuth(false);
+        return;
+      }
 
-    if (!user || user.role !== 'student') {
-      return <div className="text-red-600">Access denied. This page is for students only.</div>;
+      if (authLoading) {
+        setIsCheckingAuth(true);
+        return;
+      }
+
+      if (!user || user.role !== 'student') {
+        setIsCheckingAuth(false);
+        return;
+      }
+      setIsCheckingAuth(false);
     }
-  }
+  }, [authLoading, token, user, router]);
 
   // Form state
   const [reportType, setReportType] = useState<'security' | 'maintenance'>('security');
@@ -94,6 +102,14 @@ export default function StudentDashboardPage() {
       fetchAppeals();
     }
   }, [user?.studentId, activeTab]);
+
+  if (isCheckingAuth) {
+    return <div className="text-center text-kmuGreen">Loading...</div>;
+  }
+
+  if (!user || user.role !== 'student') {
+    return <div className="text-red-600">Access denied. This page is for students only.</div>;
+  }
 
   const fetchReports = async () => {
     setLoadingReports(true);
@@ -189,7 +205,7 @@ export default function StudentDashboardPage() {
     setSubmitting(true);
     try {
       let res;
-      
+
       if (reportType === 'maintenance') {
         // Submit as maintenance report
         res = await fetch(`${API_BASE_URL}/api/maintenance`, {
@@ -237,11 +253,11 @@ export default function StudentDashboardPage() {
 
       if (!res.ok) throw new Error(await res.text());
 
-      const message = reportType === 'maintenance' 
+      const message = reportType === 'maintenance'
         ? 'Maintenance report submitted successfully! Hall warden will review your report shortly.'
         : 'Report submitted successfully! Admin will review your report shortly.';
       showNotification('success', message);
-      
+
       // Reset form
       setReportType('security');
       setIncidentDate('');
@@ -340,31 +356,28 @@ export default function StudentDashboardPage() {
         <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700">
           <button
             onClick={() => setActiveTab('myReports')}
-            className={`px-4 py-2 font-medium transition-colors ${
-              activeTab === 'myReports'
+            className={`px-4 py-2 font-medium transition-colors ${activeTab === 'myReports'
                 ? 'border-b-2 border-kmuGreen text-kmuGreen'
                 : 'text-gray-600 dark:text-gray-400 hover:text-kmuGreen'
-            }`}
+              }`}
           >
             My Reports ({total})
           </button>
           <button
             onClick={() => setActiveTab('submit')}
-            className={`px-4 py-2 font-medium transition-colors ${
-              activeTab === 'submit'
+            className={`px-4 py-2 font-medium transition-colors ${activeTab === 'submit'
                 ? 'border-b-2 border-kmuGreen text-kmuGreen'
                 : 'text-gray-600 dark:text-gray-400 hover:text-kmuGreen'
-            }`}
+              }`}
           >
             Submit Report
           </button>
           <button
             onClick={() => setActiveTab('appeals')}
-            className={`px-4 py-2 font-medium transition-colors ${
-              activeTab === 'appeals'
+            className={`px-4 py-2 font-medium transition-colors ${activeTab === 'appeals'
                 ? 'border-b-2 border-kmuGreen text-kmuGreen'
                 : 'text-gray-600 dark:text-gray-400 hover:text-kmuGreen'
-            }`}
+              }`}
           >
             Appeals ({appeals.length})
           </button>
@@ -426,9 +439,8 @@ export default function StudentDashboardPage() {
                   type="date"
                   value={incidentDate}
                   onChange={(e) => setIncidentDate(e.target.value)}
-                  className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
-                    errors.incidentDate ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                  }`}
+                  className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${errors.incidentDate ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                    }`}
                 />
                 {errors.incidentDate && (
                   <p className="text-red-500 text-sm mt-1">{errors.incidentDate}</p>
@@ -447,9 +459,8 @@ export default function StudentDashboardPage() {
                     <select
                       value={offenseType}
                       onChange={(e) => setOffenseType(e.target.value)}
-                      className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
-                        errors.offenseType ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                      }`}
+                      className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${errors.offenseType ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                        }`}
                     >
                       <option value="">Select offense type...</option>
                       {OFFENSE_TYPES.map((ot) => (
@@ -471,9 +482,8 @@ export default function StudentDashboardPage() {
                     <select
                       value={severity}
                       onChange={(e) => setSeverity(e.target.value)}
-                      className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
-                        errors.severity ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                      }`}
+                      className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${errors.severity ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                        }`}
                     >
                       <option value="">Select severity level...</option>
                       {SEVERITY_LEVELS.map((sv) => (
@@ -501,9 +511,8 @@ export default function StudentDashboardPage() {
                     <select
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
-                      className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
-                        errors.category ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                      }`}
+                      className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${errors.category ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                        }`}
                     >
                       <option value="">Select category...</option>
                       <option value="fridge">Refrigerator</option>
@@ -530,9 +539,8 @@ export default function StudentDashboardPage() {
                     <select
                       value={priority}
                       onChange={(e) => setPriority(e.target.value)}
-                      className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
-                        errors.priority ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                      }`}
+                      className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${errors.priority ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                        }`}
                     >
                       <option value="Low">Low</option>
                       <option value="Medium">Medium</option>
@@ -555,9 +563,8 @@ export default function StudentDashboardPage() {
                         value={hall}
                         onChange={(e) => setHall(e.target.value)}
                         placeholder="e.g., Hall A, Hall B"
-                        className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
-                          errors.hall ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                        }`}
+                        className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${errors.hall ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                          }`}
                       />
                       {errors.hall && (
                         <p className="text-red-500 text-sm mt-1">{errors.hall}</p>
@@ -611,13 +618,12 @@ export default function StudentDashboardPage() {
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder={reportType === 'maintenance' 
+                  placeholder={reportType === 'maintenance'
                     ? "Describe the maintenance issue in detail (e.g., what's broken, when did you notice it, etc.)..."
                     : "Describe the incident in detail..."}
                   rows={5}
-                  className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
-                    errors.description ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                  }`}
+                  className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${errors.description ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                    }`}
                 />
                 {errors.description && (
                   <p className="text-red-500 text-sm mt-1">{errors.description}</p>
@@ -746,13 +752,12 @@ export default function StudentDashboardPage() {
                             </span>
                           </td>
                           <td className="px-4 py-2">
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                              report.severity === 'High'
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${report.severity === 'High'
                                 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                                 : report.severity === 'Medium'
-                                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                                : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                            }`}>
+                                  ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                                  : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                              }`}>
                               {report.severity}
                             </span>
                           </td>
@@ -776,11 +781,10 @@ export default function StudentDashboardPage() {
                       <button
                         key={p}
                         onClick={() => setPage(p)}
-                        className={`px-4 py-2 rounded-lg ${
-                          page === p
+                        className={`px-4 py-2 rounded-lg ${page === p
                             ? 'bg-kmuGreen text-white'
                             : 'border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
-                        }`}
+                          }`}
                       >
                         {p}
                       </button>

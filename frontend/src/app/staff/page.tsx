@@ -26,20 +26,24 @@ const POSITIONS = ['Professor', 'Assistant Professor', 'Lecturer', 'Administrato
 export default function StaffPage() {
   const { user, token, loading: authLoading } = useAuth();
   const router = useRouter();
-  
-  // Handle authentication like profile page - only on client side
-  if (typeof window !== 'undefined') {
-    if (!authLoading && !token) {
-      router.replace('/login');
-      return <div className="text-center text-kmuGreen">Redirecting to login...</div>;
-    }
-    
-    if (authLoading) {
-      return <div className="text-center text-kmuGreen">Loading...</div>;
-    }
-  }
 
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [staff, setStaff] = useState<Staff[]>([]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (!authLoading && !token) {
+        router.replace('/login');
+        setIsCheckingAuth(false);
+        return;
+      }
+      if (authLoading) {
+        setIsCheckingAuth(true);
+        return;
+      }
+      setIsCheckingAuth(false);
+    }
+  }, [authLoading, token, router]);
   const [staffId, setStaffId] = useState('');
   const [fullName, setFullName] = useState('');
   const [department, setDepartment] = useState('');
@@ -67,7 +71,7 @@ export default function StaffPage() {
       const params = new URLSearchParams();
       params.append('page', pageNum.toString());
       params.append('limit', limit.toString());
-      
+
       if (search) {
         params.append('search', search);
       }
@@ -77,8 +81,8 @@ export default function StaffPage() {
       if (positionFilter) {
         params.append('position', positionFilter);
       }
-      
-      const response = await apiCall<{staff: Staff[], total: number}>('get', `/staff?${params.toString()}`);
+
+      const response = await apiCall<{ staff: Staff[], total: number }>('get', `/staff?${params.toString()}`);
       const data = response.data;
       setStaff(data.staff);
       setTotal(data.total);
@@ -124,23 +128,23 @@ export default function StaffPage() {
   async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    
+
     // Clear previous messages
     setError(null);
     setSuccess(null);
     setLoading(true);
-    
+
     try {
       // Validate file type
       const validExtensions = ['.csv', '.xls', '.xlsx'];
       const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
-      
+
       if (!validExtensions.includes(fileExtension)) {
         setError(`Unsupported file type: ${fileExtension}. Please upload a CSV (.csv) or Excel (.xls, .xlsx) file.`);
         setLoading(false);
         return;
       }
-      
+
       // Validate file size (max 5MB)
       const maxSize = 5 * 1024 * 1024; // 5MB
       if (file.size > maxSize) {
@@ -148,37 +152,37 @@ export default function StaffPage() {
         setLoading(false);
         return;
       }
-      
+
       let staffToImport: Staff[] = [];
       let validationErrors: string[] = [];
       let rowNumber = 1; // Start from 1 for user-friendly row numbers
-      
+
       if (file.name.endsWith('.csv')) {
         const text = await file.text();
-        const parsed = Papa.parse(text, { 
-          header: true, 
+        const parsed = Papa.parse(text, {
+          header: true,
           skipEmptyLines: true,
           transformHeader: (header) => header.trim()
         });
-        
+
         // Validate headers
         const headers = Object.keys(parsed.data[0] || {});
         const requiredHeaders = ['staffId', 'fullName', 'department'];
-        const missingHeaders = requiredHeaders.filter(h => 
-          !headers.some(header => 
+        const missingHeaders = requiredHeaders.filter(h =>
+          !headers.some(header =>
             header.toLowerCase().includes(h.toLowerCase())
           )
         );
-        
+
         if (missingHeaders.length > 0) {
           setError(`Missing required columns: ${missingHeaders.join(', ')}. Please include: staffId, fullName, department`);
           setLoading(false);
           return;
         }
-        
+
         staffToImport = parsed.data.map((row: any, index: number) => {
           rowNumber = index + 2; // +2 because index starts at 0 and we have header row
-          
+
           const staffMember = {
             staffId: (row.staffId || row.StaffId || row.ID || row.id || '').toString().trim(),
             fullName: (row.fullName || row.FullName || row.Name || row.name || '').toString().trim(),
@@ -188,24 +192,24 @@ export default function StaffPage() {
             phone: (row.phone || row.Phone || '').toString().trim(),
             hireDate: (row.hireDate || row.HireDate || row.hire_date || '').toString().trim(),
           };
-          
+
           // Validate required fields
           if (!staffMember.staffId) {
             validationErrors.push(`Row ${rowNumber}: Missing Staff ID`);
           } else if (staffMember.staffId.length < 3) {
             validationErrors.push(`Row ${rowNumber}: Staff ID too short (minimum 3 characters)`);
           }
-          
+
           if (!staffMember.fullName) {
             validationErrors.push(`Row ${rowNumber}: Missing Full Name`);
           } else if (staffMember.fullName.length < 2) {
             validationErrors.push(`Row ${rowNumber}: Full Name too short (minimum 2 characters)`);
           }
-          
+
           if (!staffMember.department) {
             validationErrors.push(`Row ${rowNumber}: Missing Department`);
           }
-          
+
           return staffMember;
         });
       } else {
@@ -215,25 +219,25 @@ export default function StaffPage() {
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(sheet);
-        
+
         // Validate headers
         const headers = Object.keys(jsonData[0] || {});
         const requiredHeaders = ['staffId', 'fullName', 'department'];
-        const missingHeaders = requiredHeaders.filter(h => 
-          !headers.some(header => 
+        const missingHeaders = requiredHeaders.filter(h =>
+          !headers.some(header =>
             header.toLowerCase().includes(h.toLowerCase())
           )
         );
-        
+
         if (missingHeaders.length > 0) {
           setError(`Missing required columns: ${missingHeaders.join(', ')}. Please include: staffId, fullName, department`);
           setLoading(false);
           return;
         }
-        
+
         staffToImport = jsonData.map((row: any, index: number) => {
           rowNumber = index + 2; // +2 because index starts at 0 and we have header row
-          
+
           const staffMember = {
             staffId: (row.staffId || row.StaffId || row.ID || row.id || '').toString().trim(),
             fullName: (row.fullName || row.FullName || row.Name || row.name || '').toString().trim(),
@@ -243,35 +247,35 @@ export default function StaffPage() {
             phone: (row.phone || row.Phone || '').toString().trim(),
             hireDate: (row.hireDate || row.HireDate || row.hire_date || '').toString().trim(),
           };
-          
+
           // Validate required fields
           if (!staffMember.staffId) {
             validationErrors.push(`Row ${rowNumber}: Missing Staff ID`);
           } else if (staffMember.staffId.length < 3) {
             validationErrors.push(`Row ${rowNumber}: Staff ID too short (minimum 3 characters)`);
           }
-          
+
           if (!staffMember.fullName) {
             validationErrors.push(`Row ${rowNumber}: Missing Full Name`);
           } else if (staffMember.fullName.length < 2) {
             validationErrors.push(`Row ${rowNumber}: Full Name too short (minimum 2 characters)`);
           }
-          
+
           if (!staffMember.department) {
             validationErrors.push(`Row ${rowNumber}: Missing Department`);
           }
-          
+
           return staffMember;
         });
       }
-      
+
       // Check for validation errors
       if (validationErrors.length > 0) {
         setError(`Validation errors found:\n${validationErrors.slice(0, 5).join('\n')}${validationErrors.length > 5 ? `\n...and ${validationErrors.length - 5} more errors` : ''}`);
         setLoading(false);
         return;
       }
-      
+
       // Check for duplicate staff IDs
       const staffIds = staffToImport.map(s => s.staffId);
       const duplicateIds = staffIds.filter((id, index) => staffIds.indexOf(id) !== index);
@@ -280,21 +284,21 @@ export default function StaffPage() {
         setLoading(false);
         return;
       }
-      
+
       // Import staff members
       const results = await Promise.allSettled(
         staffToImport.map(staffMember => create('staff', staffMember))
       );
-      
+
       const successfulImports = results.filter(result => result.status === 'fulfilled').length;
       const failedImports = results.filter(result => result.status === 'rejected').length;
-      
+
       if (failedImports > 0) {
         setError(`${failedImports} staff members failed to import. ${successfulImports} imported successfully.`);
       } else {
         setSuccess(`${successfulImports} staff members imported successfully!`);
       }
-      
+
       loadStaff();
     } catch (err: any) {
       setError(err?.message || 'Failed to import staff members');
@@ -322,9 +326,9 @@ export default function StaffPage() {
   }
 
   function toggleSelect(staffId: string) {
-    setSelected(prev => 
-      prev.includes(staffId) 
-        ? prev.filter(id => id !== staffId) 
+    setSelected(prev =>
+      prev.includes(staffId)
+        ? prev.filter(id => id !== staffId)
         : [...prev, staffId]
     );
   }
@@ -351,8 +355,12 @@ export default function StaffPage() {
     }
   }
 
+  if (isCheckingAuth) {
+    return <div className="text-center text-kmuGreen">Loading...</div>;
+  }
+
   // Filter staff for search
-  const filteredStaff = staff.filter(s => 
+  const filteredStaff = staff.filter(s =>
     s.fullName?.toLowerCase().includes(search.toLowerCase()) ||
     s.staffId?.toLowerCase().includes(search.toLowerCase()) ||
     s.department?.toLowerCase().includes(search.toLowerCase()) ||
@@ -375,7 +383,7 @@ export default function StaffPage() {
           {error}
         </div>
       )}
-      
+
       {success && (
         <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md mb-6">
           {success}
@@ -399,7 +407,7 @@ export default function StaffPage() {
                   required
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="fullName" className="block text-sm font-medium mb-1">Full Name *</label>
                 <input
@@ -411,7 +419,7 @@ export default function StaffPage() {
                   required
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="department" className="block text-sm font-medium mb-1">Department *</label>
                 <select
@@ -427,7 +435,7 @@ export default function StaffPage() {
                   ))}
                 </select>
               </div>
-              
+
               <div>
                 <label htmlFor="position" className="block text-sm font-medium mb-1">Position</label>
                 <select
@@ -442,7 +450,7 @@ export default function StaffPage() {
                   ))}
                 </select>
               </div>
-              
+
               <div>
                 <label htmlFor="email" className="block text-sm font-medium mb-1">Email</label>
                 <input
@@ -454,7 +462,7 @@ export default function StaffPage() {
                   placeholder="staff@kmu.ac.zm"
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="phone" className="block text-sm font-medium mb-1">Phone</label>
                 <input
@@ -466,7 +474,7 @@ export default function StaffPage() {
                   placeholder="+260..."
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="hireDate" className="block text-sm font-medium mb-1">Hire Date</label>
                 <input
@@ -477,7 +485,7 @@ export default function StaffPage() {
                   className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
-              
+
               <button
                 type="submit"
                 disabled={loading}
@@ -486,7 +494,7 @@ export default function StaffPage() {
                 {loading ? 'Adding...' : 'Add Staff Member'}
               </button>
             </form>
-            
+
             {/* Import Section */}
             <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
               <h3 className="text-md font-medium mb-3">Bulk Import</h3>
@@ -508,7 +516,7 @@ export default function StaffPage() {
             </div>
           </div>
         </div>
-        
+
         {/* Staff List */}
         <div className="lg:col-span-2">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
@@ -550,7 +558,7 @@ export default function StaffPage() {
                 </div>
               </div>
             </div>
-            
+
             {/* Bulk Actions */}
             {selected.length > 0 && (
               <div className="p-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700">
@@ -576,15 +584,15 @@ export default function StaffPage() {
                 </div>
               </div>
             )}
-            
+
             {/* Staff Table */}
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
                     <th className="py-2 px-2 md:px-4">
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         checked={selected.length === staff.length && staff.length > 0}
                         onChange={toggleSelectAll}
                       />
@@ -607,8 +615,8 @@ export default function StaffPage() {
                     filteredStaff.map((s) => (
                       <tr key={s.staffId} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                         <td className="py-2 px-2 md:px-4">
-                          <input 
-                            type="checkbox" 
+                          <input
+                            type="checkbox"
                             checked={selected.includes(s.staffId)}
                             onChange={() => toggleSelect(s.staffId)}
                           />
@@ -628,8 +636,8 @@ export default function StaffPage() {
                         <td className="py-2 px-2 md:px-4 hidden md:table-cell">{s.position || 'N/A'}</td>
                         <td className="py-2 px-2 md:px-4">
                           <div className="flex gap-2">
-                            <Link 
-                              href={`/staff/${s.staffId}`} 
+                            <Link
+                              href={`/staff/${s.staffId}`}
                               className="text-kmuGreen hover:underline text-sm"
                             >
                               View
@@ -649,7 +657,7 @@ export default function StaffPage() {
                 </tbody>
               </table>
             </div>
-            
+
             {/* Pagination */}
             {total > limit && (
               <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">

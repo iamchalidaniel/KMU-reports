@@ -27,24 +27,24 @@ interface Case {
 export default function EvidencePage() {
   const { user, token, loading: authLoading } = useAuth();
   const router = useRouter();
-  
-  // Handle authentication like profile page - only on client side
-  if (typeof window !== 'undefined') {
-    if (!authLoading && !token) {
-      router.replace('/login');
-      return <div className="text-center text-kmuGreen">Redirecting to login...</div>;
-    }
-    
-    if (authLoading) {
-      return <div className="text-center text-kmuGreen">Loading...</div>;
-    }
-    
-    if (!user || (user.role !== 'admin' && user.role !== 'security_officer')) {
-      return <div className="text-red-600">Access denied.</div>;
-    }
-  }
 
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [evidence, setEvidence] = useState<Evidence[]>([]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (!authLoading && !token) {
+        router.replace('/login');
+        setIsCheckingAuth(false);
+        return;
+      }
+      if (authLoading) {
+        setIsCheckingAuth(true);
+        return;
+      }
+      setIsCheckingAuth(false);
+    }
+  }, [authLoading, token, router]);
   const [cases, setCases] = useState<Case[]>([]);
   const [caseId, setCaseId] = useState('');
   const [file, setFile] = useState<File | null>(null);
@@ -223,149 +223,157 @@ export default function EvidencePage() {
     return String(item.uploadedBy);
   }
 
+  if (isCheckingAuth) {
+    return <div className="text-center text-kmuGreen">Loading...</div>;
+  }
+
+  if (!user || (user.role !== 'admin' && user.role !== 'security_officer')) {
+    return <div className="text-red-600">Access denied.</div>;
+  }
+
   const safeEvidence = Array.isArray(evidence) ? evidence : [];
 
   return (
-      <div className="max-w-6xl mx-auto p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold text-kmuGreen">Evidence Management</h1>
-            {offlineMode && (
-              <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded">
-                Offline Mode
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Upload Form */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-          <h2 className="text-lg font-semibold text-kmuOrange mb-4">Upload Evidence</h2>
-          <form className="space-y-4" onSubmit={handleUpload} aria-label="Upload evidence form">
-            <div>
-              <label htmlFor="caseId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Case
-              </label>
-              <select
-                id="caseId"
-                className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                value={caseId}
-                onChange={e => setCaseId(e.target.value)}
-                required
-                aria-label="Case"
-              >
-                <option value="">Select case...</option>
-                {cases.map(c => (
-                  <option key={c._id} value={c._id}>
-                    {c.description || 'No description'}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label htmlFor="evidenceFile" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                File
-              </label>
-              <input
-                id="evidenceFile"
-                type="file"
-                className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                onChange={e => setFile(e.target.files?.[0] || null)}
-                required
-                aria-label="Evidence file"
-              />
-            </div>
-            {error && <div className="text-red-600 text-sm" aria-live="polite">{error}</div>}
-            {success && <div className="text-kmuGreen text-sm" aria-live="polite">{success}</div>}
-            <button
-              type="submit"
-              className="bg-kmuGreen text-white px-4 py-2 rounded hover:bg-kmuOrange transition disabled:opacity-50"
-              disabled={uploading}
-              aria-label="Upload evidence"
-            >
-              {uploading ? "Uploading..." : "Upload"}
-            </button>
-          </form>
-        </div>
-
-        {/* Evidence List */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-4 text-kmuOrange">Uploaded Evidence</h2>
-          {loading ? (
-            <div className="text-gray-500 dark:text-gray-400">Loading...</div>
-          ) : safeEvidence.length === 0 ? (
-            <div className="text-gray-400 dark:text-gray-500">No evidence available.</div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {safeEvidence.map((item) => {
-                const filename = getEvidenceFilename(item);
-                const id = getEvidenceId(item);
-                const fileType = getFileType(filename);
-                const fileUrl = `${API_BASE_URL}/evidence/${id}/download`;
-
-                return (
-                  <div key={id} className="border border-gray-200 dark:border-gray-600 rounded-lg p-4">
-                    <div className="mb-3">
-                      <h3 className="font-medium text-gray-900 dark:text-white truncate" title={filename}>
-                        {filename}
-                      </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Case: {getCaseDescription(item)}
-                      </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Uploaded by: {getUploadedBy(item)}
-                      </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Date: {getEvidenceDate(item)}
-                      </p>
-                    </div>
-
-                    {/* File preview */}
-                    <div className="mb-3">
-                      {fileType === 'image' ? (
-                        <img 
-                          src={fileUrl} 
-                          alt={filename} 
-                          className="max-w-full h-32 object-cover rounded border border-gray-200 dark:border-gray-600"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                          }}
-                        />
-                      ) : fileType === 'pdf' ? (
-                        <iframe 
-                          src={fileUrl} 
-                          title={filename} 
-                          className="w-full h-32 border border-gray-200 dark:border-gray-600 rounded"
-                        />
-                      ) : (
-                        <div className="w-full h-32 bg-gray-100 dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 flex items-center justify-center">
-                          <span className="text-gray-500 dark:text-gray-400 text-sm">No preview available</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex gap-2">
-                      <button
-                        className="flex-1 bg-kmuGreen text-white px-3 py-1 rounded text-sm hover:bg-kmuOrange transition"
-                        onClick={() => handleDownload(id, filename)}
-                      >
-                        Download
-                      </button>
-                      <button
-                        className="flex-1 bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition"
-                        onClick={() => handleDelete(id)}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+    <div className="max-w-6xl mx-auto p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-4">
+          <h1 className="text-2xl font-bold text-kmuGreen">Evidence Management</h1>
+          {offlineMode && (
+            <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded">
+              Offline Mode
+            </span>
           )}
         </div>
       </div>
+
+      {/* Upload Form */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
+        <h2 className="text-lg font-semibold text-kmuOrange mb-4">Upload Evidence</h2>
+        <form className="space-y-4" onSubmit={handleUpload} aria-label="Upload evidence form">
+          <div>
+            <label htmlFor="caseId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Case
+            </label>
+            <select
+              id="caseId"
+              className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              value={caseId}
+              onChange={e => setCaseId(e.target.value)}
+              required
+              aria-label="Case"
+            >
+              <option value="">Select case...</option>
+              {cases.map(c => (
+                <option key={c._id} value={c._id}>
+                  {c.description || 'No description'}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="evidenceFile" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              File
+            </label>
+            <input
+              id="evidenceFile"
+              type="file"
+              className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              onChange={e => setFile(e.target.files?.[0] || null)}
+              required
+              aria-label="Evidence file"
+            />
+          </div>
+          {error && <div className="text-red-600 text-sm" aria-live="polite">{error}</div>}
+          {success && <div className="text-kmuGreen text-sm" aria-live="polite">{success}</div>}
+          <button
+            type="submit"
+            className="bg-kmuGreen text-white px-4 py-2 rounded hover:bg-kmuOrange transition disabled:opacity-50"
+            disabled={uploading}
+            aria-label="Upload evidence"
+          >
+            {uploading ? "Uploading..." : "Upload"}
+          </button>
+        </form>
+      </div>
+
+      {/* Evidence List */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <h2 className="text-lg font-semibold mb-4 text-kmuOrange">Uploaded Evidence</h2>
+        {loading ? (
+          <div className="text-gray-500 dark:text-gray-400">Loading...</div>
+        ) : safeEvidence.length === 0 ? (
+          <div className="text-gray-400 dark:text-gray-500">No evidence available.</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {safeEvidence.map((item) => {
+              const filename = getEvidenceFilename(item);
+              const id = getEvidenceId(item);
+              const fileType = getFileType(filename);
+              const fileUrl = `${API_BASE_URL}/evidence/${id}/download`;
+
+              return (
+                <div key={id} className="border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                  <div className="mb-3">
+                    <h3 className="font-medium text-gray-900 dark:text-white truncate" title={filename}>
+                      {filename}
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Case: {getCaseDescription(item)}
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Uploaded by: {getUploadedBy(item)}
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Date: {getEvidenceDate(item)}
+                    </p>
+                  </div>
+
+                  {/* File preview */}
+                  <div className="mb-3">
+                    {fileType === 'image' ? (
+                      <img
+                        src={fileUrl}
+                        alt={filename}
+                        className="max-w-full h-32 object-cover rounded border border-gray-200 dark:border-gray-600"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    ) : fileType === 'pdf' ? (
+                      <iframe
+                        src={fileUrl}
+                        title={filename}
+                        className="w-full h-32 border border-gray-200 dark:border-gray-600 rounded"
+                      />
+                    ) : (
+                      <div className="w-full h-32 bg-gray-100 dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 flex items-center justify-center">
+                        <span className="text-gray-500 dark:text-gray-400 text-sm">No preview available</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-2">
+                    <button
+                      className="flex-1 bg-kmuGreen text-white px-3 py-1 rounded text-sm hover:bg-kmuOrange transition"
+                      onClick={() => handleDownload(id, filename)}
+                    >
+                      Download
+                    </button>
+                    <button
+                      className="flex-1 bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition"
+                      onClick={() => handleDelete(id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
   );
 } 

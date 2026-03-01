@@ -48,7 +48,7 @@ const SEVERITY_OPTIONS = ['Low', 'Medium', 'High'];
 export default function CasesPage() {
   const { token, user, loading: authLoading } = useAuth();
   const router = useRouter();
-  
+
   // Handle authentication - moved useState hooks before any conditional logic
   // authentication / general state hooks up front
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
@@ -84,10 +84,7 @@ export default function CasesPage() {
     }
   }, [authLoading, token, router]);
 
-  // Show loading state while checking auth
-  if (isCheckingAuth) {
-    return <div className="text-center text-kmuGreen">Loading...</div>;
-  }
+
 
   const searchParams = useSearchParams();
   const studentIdFilter = searchParams?.get('studentId') || '';
@@ -140,15 +137,15 @@ export default function CasesPage() {
         if (limit !== 20) {
           params.append('limit', limit.toString());
         }
-        
+
         if (params.toString()) {
           endpoint += `?${params.toString()}`;
         }
-        
+
         const response = await apiCall<Case[]>('get', endpoint);
         const responseData = response.data as any;
         const casesArray = Array.isArray(responseData) ? responseData : (Array.isArray(responseData.cases) ? responseData.cases : []);
-        
+
         // Debug: Log cases with missing person data
         casesArray.forEach((caseItem: any, index: number) => {
           if (!caseItem.student && !caseItem.staff) {
@@ -160,10 +157,10 @@ export default function CasesPage() {
             });
           }
         });
-        
+
         setCases(casesArray);
         setOfflineMode(response.offline);
-        
+
         if (responseData.total !== undefined) {
           setTotal(responseData.total);
         }
@@ -176,6 +173,10 @@ export default function CasesPage() {
     }
     fetchCases();
   }, [apiCall, studentIdFilter, staffIdFilter, search, statusFilter, severityFilter, page, limit]);
+
+  if (isCheckingAuth) {
+    return <div className="text-center text-kmuGreen">Loading...</div>;
+  }
 
   const safeCases = Array.isArray(cases) ? cases : [];
   const filteredCases = safeCases; // Backend handles all filtering now
@@ -213,7 +214,7 @@ export default function CasesPage() {
       alert('Please select items to export');
       return;
     }
-    
+
     setExporting(true);
     try {
       const endpoint = format === 'docx' ? '/reports/docx' : '/reports/export-excel';
@@ -229,13 +230,13 @@ export default function CasesPage() {
           entity: 'cases'
         }),
       });
-      
+
       if (!res.ok) throw new Error(await res.text());
-      
+
       const blob = await res.blob();
       const filename = `cases_${new Date().toISOString().split('T')[0]}.${format}`;
       saveAs(blob, filename);
-      
+
       showNotification('success', 'Export successful!');
     } catch (err) {
       console.error('Export failed:', err);
@@ -324,15 +325,15 @@ export default function CasesPage() {
               </span>
             )}
           </div>
-          
+
           <div className="flex gap-3">
-            <Link 
-              href="/cases/new" 
+            <Link
+              href="/cases/new"
               className="bg-kmuGreen text-white px-4 py-2 rounded hover:bg-kmuOrange transition flex items-center"
             >
               + New Case
             </Link>
-            
+
             <div className="relative export-dropdown">
               <button
                 onClick={() => setShowExportDropdown(!showExportDropdown)}
@@ -341,7 +342,7 @@ export default function CasesPage() {
               >
                 {exporting ? 'Exporting...' : 'Export'}
               </button>
-              
+
               {showExportDropdown && (
                 <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg z-10 border border-gray-200 dark:border-gray-700">
                   <button
@@ -373,7 +374,7 @@ export default function CasesPage() {
             {error}
           </div>
         )}
-        
+
         {notification?.isVisible && (
           <Notification
             type={notification.type}
@@ -397,7 +398,7 @@ export default function CasesPage() {
                 className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
-            
+
             <div>
               <label htmlFor="status" className="block text-sm font-medium mb-1">Status</label>
               <select
@@ -412,7 +413,7 @@ export default function CasesPage() {
                 ))}
               </select>
             </div>
-            
+
             <div>
               <label htmlFor="severity" className="block text-sm font-medium mb-1">Severity</label>
               <select
@@ -427,7 +428,7 @@ export default function CasesPage() {
                 ))}
               </select>
             </div>
-            
+
             <div>
               <label htmlFor="studentId" className="block text-sm font-medium mb-1">Student ID</label>
               <input
@@ -443,7 +444,7 @@ export default function CasesPage() {
                 className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
-            
+
             <div>
               <label htmlFor="staffId" className="block text-sm font-medium mb-1">Staff ID</label>
               <input
@@ -492,8 +493,8 @@ export default function CasesPage() {
               <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
                   <th className="py-2 px-2 md:px-4">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       checked={selected.length === filteredCases.length && filteredCases.length > 0}
                       onChange={selected.length === filteredCases.length && filteredCases.length > 0 ? clearSelected : selectAll}
                     />
@@ -554,27 +555,25 @@ export default function CasesPage() {
                           {s.offenseType || '-'}
                         </td>
                         <td className="py-2 px-2 md:px-4 hidden md:table-cell">
-                          <span className={`px-2 py-1 rounded text-xs ${
-                            s.status === 'Open' ? 'bg-red-100 text-red-800' :
-                            s.status === 'Closed' ? 'bg-green-100 text-green-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
+                          <span className={`px-2 py-1 rounded text-xs ${s.status === 'Open' ? 'bg-red-100 text-red-800' :
+                              s.status === 'Closed' ? 'bg-green-100 text-green-800' :
+                                'bg-gray-100 text-gray-800'
+                            }`}>
                             {s.status || '-'}
                           </span>
                         </td>
                         <td className="py-2 px-2 md:px-4 hidden md:table-cell">
-                          <span className={`px-2 py-1 rounded text-xs ${
-                            s.severity === 'High' ? 'bg-red-100 text-red-800' :
-                            s.severity === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                            s.severity === 'Low' ? 'bg-green-100 text-green-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
+                          <span className={`px-2 py-1 rounded text-xs ${s.severity === 'High' ? 'bg-red-100 text-red-800' :
+                              s.severity === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                                s.severity === 'Low' ? 'bg-green-100 text-green-800' :
+                                  'bg-gray-100 text-gray-800'
+                            }`}>
                             {s.severity || '-'}
                           </span>
                         </td>
                         <td className="py-2 px-2 md:px-4">
-                          <Link 
-                            href={`/cases/${s._id}`} 
+                          <Link
+                            href={`/cases/${s._id}`}
                             className="text-kmuGreen hover:underline text-sm"
                           >
                             View Details
@@ -587,7 +586,7 @@ export default function CasesPage() {
               </tbody>
             </table>
           </div>
-          
+
           {/* Pagination */}
           {total > limit && (
             <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
