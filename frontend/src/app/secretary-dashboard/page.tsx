@@ -58,18 +58,14 @@ export default function SecretaryDashboard() {
     }
   }, [authLoading, token, user, router]);
 
-  if (isCheckingAuth) {
-    return <div className="text-center text-kmuGreen">Loading...</div>;
-  }
 
-  if (!user || user.role !== 'secretary') return <div className="text-red-600">Access denied.</div>;
 
   useEffect(() => {
     async function fetchData() {
       try {
         const casesRes = await fetch(`${API_BASE_URL}/cases`, { headers: { ...authHeaders() } });
         const studentsRes = await fetch(`${API_BASE_URL}/students`, { headers: { ...authHeaders() } });
-        
+
         if (casesRes.ok) {
           const casesData = await casesRes.json();
           setCases(casesData.cases || casesData || []);
@@ -77,7 +73,7 @@ export default function SecretaryDashboard() {
           console.error('Failed to fetch cases:', casesRes.status);
           setCases([]);
         }
-        
+
         if (studentsRes.ok) {
           const studentsData = await studentsRes.json();
           setStudents(studentsData.students || studentsData || []);
@@ -114,16 +110,22 @@ export default function SecretaryDashboard() {
     );
   }, [search, cases, students]);
 
+  if (isCheckingAuth) {
+    return <div className="text-center text-kmuGreen">Loading...</div>;
+  }
+
+  if (!user || user.role !== 'secretary') return <div className="text-red-600">Access denied.</div>;
+
   async function exportCasesToWord() {
     try {
       // Prepare chart data
       const chartExportData = await prepareChartExport();
-      
+
       const res = await fetch(`${API_BASE_URL}/reports/dashboard-cases`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          ...authHeaders() 
+          ...authHeaders()
         },
         body: JSON.stringify({
           charts: chartExportData.charts,
@@ -133,7 +135,7 @@ export default function SecretaryDashboard() {
           }
         }),
       });
-      
+
       if (!res.ok) throw new Error(await res.text());
       const blob = await res.blob();
       saveAs(blob, 'secretary_all_cases_report.docx');
@@ -157,7 +159,7 @@ export default function SecretaryDashboard() {
     weekAgo.setDate(weekAgo.getDate() - 7);
     return caseDate >= weekAgo;
   }).length;
-  
+
   // Get cases per day for the last 7 days
   const last7Days = [];
   const casesPerDay = [];
@@ -165,7 +167,7 @@ export default function SecretaryDashboard() {
     const date = new Date();
     date.setDate(date.getDate() - i);
     last7Days.push(date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }));
-    
+
     const casesOnDay = filteredCases.filter(c => {
       const caseDate = new Date(c.createdAt || c.incidentDate || 0);
       return caseDate.toDateString() === date.toDateString();
@@ -209,7 +211,7 @@ export default function SecretaryDashboard() {
           <h1 className="text-4xl font-bold mb-2 text-kmuGreen">Secretary Dashboard</h1>
           <p className="text-gray-700 dark:text-gray-300">Welcome to your administrative dashboard. Manage records, documentation, and administrative tasks efficiently.</p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 flex flex-col items-center justify-center">
             <div className="text-4xl font-bold text-kmuGreen">{totalStudents}</div>
@@ -230,7 +232,7 @@ export default function SecretaryDashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div 
+          <div
             id="secretary-weekly-trend-chart"
             data-chart-export="true"
             data-chart-title="Weekly Case Trend"
@@ -240,7 +242,7 @@ export default function SecretaryDashboard() {
             <h2 className="text-lg font-semibold mb-2 text-kmuOrange">Weekly Case Trend</h2>
             <Line data={weeklyTrendData} options={{ responsive: true, plugins: { legend: { display: false } } }} />
           </div>
-          <div 
+          <div
             id="secretary-department-chart"
             data-chart-export="true"
             data-chart-title="Cases by Department"
@@ -251,14 +253,14 @@ export default function SecretaryDashboard() {
             <Bar data={departmentChartData} options={{ responsive: true, plugins: { legend: { display: false } } }} />
           </div>
         </div>
-        
+
         {/* Recent Cases Section */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
               <h2 className="text-lg font-semibold text-kmuOrange">Recent Cases</h2>
-              <Link 
-                href="/cases" 
+              <Link
+                href="/cases"
                 className="text-sm text-kmuGreen hover:text-kmuOrange transition underline"
               >
                 View All Cases →
@@ -289,39 +291,37 @@ export default function SecretaryDashboard() {
                   .sort((a: Case, b: Case) => new Date(b.createdAt || b.incidentDate || 0).getTime() - new Date(a.createdAt || a.incidentDate || 0).getTime())
                   .slice(0, 15)
                   .map((c: Case, i: number) => (
-                  <tr 
-                    key={i} 
-                    className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
-                    onClick={() => router.push(`/cases/${c._id}`)}
-                  >
-                    <td className="py-2 px-2">
-                      <div className="font-medium text-kmuGreen hover:text-kmuOrange transition">{c.student?.fullName || 'Unknown'}</div>
-                      <div className="text-xs text-gray-500">{c.student?.studentId || ''}</div>
-                    </td>
-                    <td className="py-2 px-2">{c.student?.department || 'N/A'}</td>
-                    <td className="py-2 px-2">{c.offenseType || 'N/A'}</td>
-                    <td className="py-2 px-2">{c.incidentDate || 'N/A'}</td>
-                    <td className="py-2 px-2">
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        c.severity === 'Critical' ? 'bg-red-100 text-red-800' :
-                        c.severity === 'High' ? 'bg-orange-100 text-orange-800' :
-                        c.severity === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-green-100 text-green-800'
-                      }`}>
-                        {c.severity || 'N/A'}
-                      </span>
-                    </td>
-                    <td className="py-2 px-2">
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        c.status === 'Open' ? 'bg-blue-100 text-blue-800' :
-                        c.status === 'Closed' ? 'bg-gray-100 text-gray-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {c.status || 'N/A'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                    <tr
+                      key={i}
+                      className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                      onClick={() => router.push(`/cases/${c._id}`)}
+                    >
+                      <td className="py-2 px-2">
+                        <div className="font-medium text-kmuGreen hover:text-kmuOrange transition">{c.student?.fullName || 'Unknown'}</div>
+                        <div className="text-xs text-gray-500">{c.student?.studentId || ''}</div>
+                      </td>
+                      <td className="py-2 px-2">{c.student?.department || 'N/A'}</td>
+                      <td className="py-2 px-2">{c.offenseType || 'N/A'}</td>
+                      <td className="py-2 px-2">{c.incidentDate || 'N/A'}</td>
+                      <td className="py-2 px-2">
+                        <span className={`px-2 py-1 rounded text-xs ${c.severity === 'Critical' ? 'bg-red-100 text-red-800' :
+                            c.severity === 'High' ? 'bg-orange-100 text-orange-800' :
+                              c.severity === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-green-100 text-green-800'
+                          }`}>
+                          {c.severity || 'N/A'}
+                        </span>
+                      </td>
+                      <td className="py-2 px-2">
+                        <span className={`px-2 py-1 rounded text-xs ${c.status === 'Open' ? 'bg-blue-100 text-blue-800' :
+                            c.status === 'Closed' ? 'bg-gray-100 text-gray-800' :
+                              'bg-yellow-100 text-yellow-800'
+                          }`}>
+                          {c.status || 'N/A'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
             {filteredCases.length === 0 && (
@@ -378,7 +378,7 @@ export default function SecretaryDashboard() {
           </div>
         </div>
       </section>
-      
+
       {/* Notification */}
       {notification?.isVisible && (
         <Notification

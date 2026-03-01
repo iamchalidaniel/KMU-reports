@@ -30,20 +30,28 @@ export default function DeanOfStudentsDashboard() {
   const { user, token, loading: authLoading } = useAuth();
   const router = useRouter();
   const { notification, showNotification, hideNotification } = useNotification();
-  
+
   // Handle authentication like profile page - only on client side
-  if (typeof window !== 'undefined') {
-    if (!authLoading && !token) {
-      router.replace('/login');
-      return <div className="text-center text-kmuGreen">Redirecting to login...</div>;
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (!authLoading && !token) {
+        router.replace('/login');
+        setIsCheckingAuth(false);
+        return;
+      }
+      if (authLoading) {
+        setIsCheckingAuth(true);
+        return;
+      }
+      if (!user || user.role !== 'dean_of_students') {
+        setIsCheckingAuth(false);
+        return;
+      }
+      setIsCheckingAuth(false);
     }
-    
-    if (authLoading) {
-      return <div className="text-center text-kmuGreen">Loading...</div>;
-    }
-    
-    if (!user || user.role !== 'dean_of_students') return <div className="text-red-600">Access denied.</div>;
-  }
+  }, [authLoading, token, user, router]);
 
   const [search, setSearch] = useState('');
   const [cases, setCases] = useState<Case[]>([]);
@@ -56,7 +64,7 @@ export default function DeanOfStudentsDashboard() {
       try {
         const casesRes = await fetch(`${API_BASE_URL}/cases`, { headers: { ...authHeaders() } });
         const studentsRes = await fetch(`${API_BASE_URL}/students`, { headers: { ...authHeaders() } });
-        
+
         if (casesRes.ok) {
           const casesData = await casesRes.json();
           setCases(casesData.cases || casesData || []);
@@ -64,7 +72,7 @@ export default function DeanOfStudentsDashboard() {
           console.error('Failed to fetch cases:', casesRes.status);
           setCases([]);
         }
-        
+
         if (studentsRes.ok) {
           const studentsData = await studentsRes.json();
           setStudents(studentsData.students || studentsData || []);
@@ -101,16 +109,24 @@ export default function DeanOfStudentsDashboard() {
     );
   }, [search, cases, students]);
 
+  if (isCheckingAuth) {
+    return <div className="text-center text-kmuGreen">Loading...</div>;
+  }
+
+  if (!user || user.role !== 'dean_of_students') {
+    return <div className="text-red-600">Access denied.</div>;
+  }
+
   async function exportCasesToWord() {
     try {
       // Prepare chart data
       const chartExportData = await prepareChartExport();
-      
+
       const res = await fetch(`${API_BASE_URL}/reports/dashboard-cases`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          ...authHeaders() 
+          ...authHeaders()
         },
         body: JSON.stringify({
           charts: chartExportData.charts,
@@ -120,7 +136,7 @@ export default function DeanOfStudentsDashboard() {
           }
         }),
       });
-      
+
       if (!res.ok) throw new Error(await res.text());
       const blob = await res.blob();
       saveAs(blob, 'dean_of_students_all_cases_report.docx');
@@ -135,7 +151,7 @@ export default function DeanOfStudentsDashboard() {
   const totalStudents = safeStudents.length;
   const openCases = filteredCases.filter(c => c.status === 'Open').length;
   const highSeverityCases = filteredCases.filter(c => c.severity === 'High' || c.severity === 'Critical').length;
-  
+
   const departmentCounts: Record<string, number> = {};
   const severityCounts: Record<string, number> = {};
   filteredCases.forEach((c: Case) => {
@@ -177,7 +193,7 @@ export default function DeanOfStudentsDashboard() {
           <h1 className="text-4xl font-bold mb-2 text-kmuGreen">Dean of Students Dashboard</h1>
           <p className="text-gray-700 dark:text-gray-300">Welcome to your administrative dashboard. Oversee student affairs, academic policies, and institutional disciplinary matters.</p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 flex flex-col items-center justify-center">
             <div className="text-4xl font-bold text-kmuGreen">{totalStudents}</div>
@@ -198,7 +214,7 @@ export default function DeanOfStudentsDashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div 
+          <div
             id="dean-department-chart"
             data-chart-export="true"
             data-chart-title="Cases by Department"
@@ -208,7 +224,7 @@ export default function DeanOfStudentsDashboard() {
             <h2 className="text-lg font-semibold mb-2 text-kmuOrange">Cases by Department</h2>
             <Bar data={departmentChartData} options={{ responsive: true, plugins: { legend: { display: false } } }} />
           </div>
-          <div 
+          <div
             id="dean-severity-chart"
             data-chart-export="true"
             data-chart-title="Cases by Severity"
@@ -219,14 +235,14 @@ export default function DeanOfStudentsDashboard() {
             <Bar data={severityChartData} options={{ responsive: true, plugins: { legend: { display: false } } }} />
           </div>
         </div>
-        
+
         {/* Recent Cases Section */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
               <h2 className="text-lg font-semibold text-kmuOrange">Recent High-Priority Cases</h2>
-              <Link 
-                href="/cases" 
+              <Link
+                href="/cases"
                 className="text-sm text-kmuGreen hover:text-kmuOrange transition underline"
               >
                 View All Cases →
@@ -258,39 +274,37 @@ export default function DeanOfStudentsDashboard() {
                   .sort((a: Case, b: Case) => new Date(b.createdAt || b.incidentDate || 0).getTime() - new Date(a.createdAt || a.incidentDate || 0).getTime())
                   .slice(0, 10)
                   .map((c: Case, i: number) => (
-                  <tr 
-                    key={i} 
-                    className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
-                    onClick={() => router.push(`/cases/${c._id}`)}
-                  >
-                    <td className="py-2 px-2">
-                      <div className="font-medium text-kmuGreen hover:text-kmuOrange transition">{c.student?.fullName || 'Unknown'}</div>
-                      <div className="text-xs text-gray-500">{c.student?.studentId || ''}</div>
-                    </td>
-                    <td className="py-2 px-2">{c.student?.department || 'N/A'}</td>
-                    <td className="py-2 px-2">{c.offenseType || 'N/A'}</td>
-                    <td className="py-2 px-2">{c.incidentDate || 'N/A'}</td>
-                    <td className="py-2 px-2">
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        c.severity === 'Critical' ? 'bg-red-100 text-red-800' :
-                        c.severity === 'High' ? 'bg-orange-100 text-orange-800' :
-                        c.severity === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-green-100 text-green-800'
-                      }`}>
-                        {c.severity || 'N/A'}
-                      </span>
-                    </td>
-                    <td className="py-2 px-2">
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        c.status === 'Open' ? 'bg-blue-100 text-blue-800' :
-                        c.status === 'Closed' ? 'bg-gray-100 text-gray-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {c.status || 'N/A'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                    <tr
+                      key={i}
+                      className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                      onClick={() => router.push(`/cases/${c._id}`)}
+                    >
+                      <td className="py-2 px-2">
+                        <div className="font-medium text-kmuGreen hover:text-kmuOrange transition">{c.student?.fullName || 'Unknown'}</div>
+                        <div className="text-xs text-gray-500">{c.student?.studentId || ''}</div>
+                      </td>
+                      <td className="py-2 px-2">{c.student?.department || 'N/A'}</td>
+                      <td className="py-2 px-2">{c.offenseType || 'N/A'}</td>
+                      <td className="py-2 px-2">{c.incidentDate || 'N/A'}</td>
+                      <td className="py-2 px-2">
+                        <span className={`px-2 py-1 rounded text-xs ${c.severity === 'Critical' ? 'bg-red-100 text-red-800' :
+                            c.severity === 'High' ? 'bg-orange-100 text-orange-800' :
+                              c.severity === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-green-100 text-green-800'
+                          }`}>
+                          {c.severity || 'N/A'}
+                        </span>
+                      </td>
+                      <td className="py-2 px-2">
+                        <span className={`px-2 py-1 rounded text-xs ${c.status === 'Open' ? 'bg-blue-100 text-blue-800' :
+                            c.status === 'Closed' ? 'bg-gray-100 text-gray-800' :
+                              'bg-yellow-100 text-yellow-800'
+                          }`}>
+                          {c.status || 'N/A'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
             {filteredCases.filter(c => c.severity === 'High' || c.severity === 'Critical').length === 0 && (
@@ -327,7 +341,7 @@ export default function DeanOfStudentsDashboard() {
           </div>
         </div>
       </section>
-      
+
       {/* Notification */}
       {notification?.isVisible && (
         <Notification

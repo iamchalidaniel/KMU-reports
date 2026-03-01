@@ -91,21 +91,29 @@ const STATUSES = [
 export default function HallWardenDashboard() {
   const { user, token, loading: authLoading } = useAuth();
   const router = useRouter();
-  
-  if (typeof window !== 'undefined') {
-    if (!authLoading && !token) {
-      router.replace('/login');
-      return <div className="text-center text-kmuGreen">Redirecting to login...</div>;
+
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (!authLoading && !token) {
+        router.replace('/login');
+        setIsCheckingAuth(false);
+        return;
+      }
+
+      if (authLoading) {
+        setIsCheckingAuth(true);
+        return;
+      }
+
+      if (!user || user.role !== 'hall_warden') {
+        setIsCheckingAuth(false);
+        return;
+      }
+      setIsCheckingAuth(false);
     }
-    
-    if (authLoading) {
-      return <div className="text-center text-kmuGreen">Loading...</div>;
-    }
-    
-    if (!user || user.role !== 'hall_warden') {
-      return <div className="text-red-600">Access denied. Hall warden access only.</div>;
-    }
-  }
+  }, [authLoading, token, user, router]);
 
   const [reports, setReports] = useState<MaintenanceReport[]>([]);
   const [filteredReports, setFilteredReports] = useState<MaintenanceReport[]>([]);
@@ -121,7 +129,7 @@ export default function HallWardenDashboard() {
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'priority'>('newest');
   const [electricians, setElectricians] = useState<any[]>([]);
   const [assigningReportId, setAssigningReportId] = useState<string | null>(null);
-  
+
   // Form state
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -192,7 +200,7 @@ export default function HallWardenDashboard() {
 
   function filterReports() {
     let filtered = [...reports];
-    
+
     if (search) {
       filtered = filtered.filter(r =>
         r.description.toLowerCase().includes(search.toLowerCase()) ||
@@ -201,15 +209,15 @@ export default function HallWardenDashboard() {
         r.location.hall?.toLowerCase().includes(search.toLowerCase())
       );
     }
-    
+
     if (statusFilter) {
       filtered = filtered.filter(r => r.status === statusFilter);
     }
-    
+
     if (priorityFilter) {
       filtered = filtered.filter(r => r.priority === priorityFilter);
     }
-    
+
     if (categoryFilter) {
       filtered = filtered.filter(r => r.category === categoryFilter);
     }
@@ -222,7 +230,7 @@ export default function HallWardenDashboard() {
     if (dateFilter) {
       const now = new Date();
       const reportDate = (r: MaintenanceReport) => new Date(r.created_at);
-      
+
       switch (dateFilter) {
         case 'new':
           // Show only reports from last 24 hours
@@ -254,7 +262,7 @@ export default function HallWardenDashboard() {
     filtered.sort((a, b) => {
       const dateA = new Date(a.created_at).getTime();
       const dateB = new Date(b.created_at).getTime();
-      
+
       if (sortBy === 'newest') {
         return dateB - dateA; // Newest first
       } else if (sortBy === 'oldest') {
@@ -266,7 +274,7 @@ export default function HallWardenDashboard() {
       }
       return 0;
     });
-    
+
     setFilteredReports(filtered);
   }
 
@@ -320,9 +328,9 @@ export default function HallWardenDashboard() {
           status: 'Reported',
         }),
       });
-      
+
       if (!res.ok) throw new Error('Failed to create report');
-      
+
       setShowForm(false);
       setFormData({
         category: '',
@@ -354,7 +362,7 @@ export default function HallWardenDashboard() {
         },
         body: JSON.stringify({ status: newStatus }),
       });
-      
+
       if (!res.ok) throw new Error('Failed to update status');
       fetchReports();
       fetchAnalytics();
@@ -381,7 +389,7 @@ export default function HallWardenDashboard() {
           }
         }),
       });
-      
+
       if (!res.ok) throw new Error('Failed to assign report');
       fetchReports();
       fetchAnalytics();
@@ -395,6 +403,14 @@ export default function HallWardenDashboard() {
   // Check if report is electrical
   function isElectricalReport(category: string): boolean {
     return ['light', 'socket', 'ac', 'fan', 'fridge'].includes(category);
+  }
+
+  if (isCheckingAuth) {
+    return <div className="text-center text-kmuGreen">Loading...</div>;
+  }
+
+  if (!user || user.role !== 'hall_warden') {
+    return <div className="text-red-600">Access denied. Hall warden access only.</div>;
   }
 
   const categoryChartData = analytics ? {
@@ -665,7 +681,7 @@ export default function HallWardenDashboard() {
             )}
             {dateFilter === '' && (
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                <span className="font-semibold text-blue-600">{reports.filter(r => isNewReport(r.created_at)).length}</span> new report{reports.filter(r => isNewReport(r.created_at)).length !== 1 ? 's' : ''} in last 24h • 
+                <span className="font-semibold text-blue-600">{reports.filter(r => isNewReport(r.created_at)).length}</span> new report{reports.filter(r => isNewReport(r.created_at)).length !== 1 ? 's' : ''} in last 24h •
                 <span className="ml-1">{filteredReports.length}</span> total report{filteredReports.length !== 1 ? 's' : ''}
               </p>
             )}
@@ -681,11 +697,10 @@ export default function HallWardenDashboard() {
                 setHallFilter('');
                 setSearch('');
               }}
-              className={`px-4 py-2 rounded text-sm font-medium transition ${
-                dateFilter === 'new'
+              className={`px-4 py-2 rounded text-sm font-medium transition ${dateFilter === 'new'
                   ? 'bg-blue-600 text-white shadow-md'
                   : 'bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50'
-              }`}
+                }`}
             >
               {dateFilter === 'new' ? '✓ ' : ''}New Reports ({reports.filter(r => isNewReport(r.created_at)).length})
             </button>
@@ -778,11 +793,10 @@ export default function HallWardenDashboard() {
                 const isNew = isNewReport(report.created_at);
                 const relativeTime = getRelativeTime(report.created_at);
                 return (
-                  <tr 
-                    key={reportId} 
-                    className={`hover:bg-gray-50 dark:hover:bg-gray-700 ${
-                      isNew ? 'bg-blue-50 dark:bg-blue-900/10 border-l-4 border-blue-500' : ''
-                    }`}
+                  <tr
+                    key={reportId}
+                    className={`hover:bg-gray-50 dark:hover:bg-gray-700 ${isNew ? 'bg-blue-50 dark:bg-blue-900/10 border-l-4 border-blue-500' : ''
+                      }`}
                   >
                     <td className="px-4 py-2 whitespace-nowrap text-sm">
                       <div className="flex items-center gap-2">
@@ -803,12 +817,11 @@ export default function HallWardenDashboard() {
                       {report.description}
                     </td>
                     <td className="px-4 py-2 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs rounded ${
-                        report.priority === 'Urgent' ? 'bg-red-100 text-red-800' :
-                        report.priority === 'High' ? 'bg-orange-100 text-orange-800' :
-                        report.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-green-100 text-green-800'
-                      }`}>
+                      <span className={`px-2 py-1 text-xs rounded ${report.priority === 'Urgent' ? 'bg-red-100 text-red-800' :
+                          report.priority === 'High' ? 'bg-orange-100 text-orange-800' :
+                            report.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-green-100 text-green-800'
+                        }`}>
                         {report.priority}
                       </span>
                     </td>

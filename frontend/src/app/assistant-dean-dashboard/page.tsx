@@ -29,20 +29,28 @@ export default function AssistantDeanDashboard() {
   const { user, token, loading: authLoading } = useAuth();
   const router = useRouter();
   const { notification, showNotification, hideNotification } = useNotification();
-  
+
   // Handle authentication like profile page - only on client side
-  if (typeof window !== 'undefined') {
-    if (!authLoading && !token) {
-      router.replace('/login');
-      return <div className="text-center text-kmuGreen">Redirecting to login...</div>;
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (!authLoading && !token) {
+        router.replace('/login');
+        setIsCheckingAuth(false);
+        return;
+      }
+      if (authLoading) {
+        setIsCheckingAuth(true);
+        return;
+      }
+      if (!user || user.role !== 'assistant_dean') {
+        setIsCheckingAuth(false);
+        return;
+      }
+      setIsCheckingAuth(false);
     }
-    
-    if (authLoading) {
-      return <div className="text-center text-kmuGreen">Loading...</div>;
-    }
-    
-    if (!user || user.role !== 'assistant_dean') return <div className="text-red-600">Access denied.</div>;
-  }
+  }, [authLoading, token, user, router]);
 
   const [search, setSearch] = useState('');
   const [cases, setCases] = useState<Case[]>([]);
@@ -60,7 +68,7 @@ export default function AssistantDeanDashboard() {
         // Fetch cases with improved error handling
         const casesData = await fetchWithAuth(`${API_BASE_URL}/cases`);
         setCases(Array.isArray(casesData) ? casesData : (casesData.cases || casesData || []));
-        
+
         // Fetch students with improved error handling
         const studentsData = await fetchWithAuth(`${API_BASE_URL}/students`);
         setStudents(Array.isArray(studentsData) ? studentsData : (studentsData.students || studentsData || []));
@@ -96,14 +104,22 @@ export default function AssistantDeanDashboard() {
     );
   }, [search, cases, students]);
 
+  if (isCheckingAuth) {
+    return <div className="text-center text-kmuGreen">Loading...</div>;
+  }
+
+  if (!user || user.role !== 'assistant_dean') {
+    return <div className="text-red-600">Access denied.</div>;
+  }
+
   async function exportCasesToWord() {
     try {
       // Prepare chart data
       const chartExportData = await prepareChartExport();
-      
+
       const res = await fetch(`${API_BASE_URL}/reports/dashboard-cases`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           ...authHeaders() // Use the authHeaders function instead of fetchWithAuth.headers
         },
@@ -115,7 +131,7 @@ export default function AssistantDeanDashboard() {
           }
         }),
       });
-      
+
       if (!res.ok) throw new Error(await res.text());
       const blob = await res.blob();
       saveAs(blob, 'assistant_dean_all_cases_report.docx');
@@ -131,7 +147,7 @@ export default function AssistantDeanDashboard() {
   const totalStudents = safeStudents.length;
   const pendingCases = filteredCases.filter(c => c.status === 'Open' || c.status === 'Under Investigation').length;
   const resolvedCases = filteredCases.filter(c => c.status === 'Closed').length;
-  
+
   const statusCounts: Record<string, number> = {};
   const offenseCounts: Record<string, number> = {};
   filteredCases.forEach((c: Case) => {
@@ -184,7 +200,7 @@ export default function AssistantDeanDashboard() {
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-6">
           <h3 className="font-medium mb-2">Error Loading Dashboard</h3>
           <p>{error}</p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="mt-3 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
           >
@@ -202,7 +218,7 @@ export default function AssistantDeanDashboard() {
           <h1 className="text-4xl font-bold mb-2 text-kmuGreen">Assistant Dean Dashboard</h1>
           <p className="text-gray-700 dark:text-gray-300">Welcome to your administrative dashboard. Support the Dean in managing student affairs and academic policies.</p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 flex flex-col items-center justify-center">
             <div className="text-4xl font-bold text-kmuGreen">{totalStudents}</div>
@@ -223,7 +239,7 @@ export default function AssistantDeanDashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div 
+          <div
             id="assistant-dean-status-chart"
             data-chart-export="true"
             data-chart-title="Cases by Status"
@@ -233,7 +249,7 @@ export default function AssistantDeanDashboard() {
             <h2 className="text-lg font-semibold mb-2 text-kmuOrange">Cases by Status</h2>
             <Doughnut data={statusChartData} options={{ responsive: true, maintainAspectRatio: false }} />
           </div>
-          <div 
+          <div
             id="assistant-dean-offence-chart"
             data-chart-export="true"
             data-chart-title="Most Common Offences"
@@ -244,14 +260,14 @@ export default function AssistantDeanDashboard() {
             <Bar data={offenceChartData} options={{ responsive: true, plugins: { legend: { display: false } } }} />
           </div>
         </div>
-        
+
         {/* Recent Cases Section */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
               <h2 className="text-lg font-semibold text-kmuOrange">Pending Cases Requiring Review</h2>
-              <Link 
-                href="/cases" 
+              <Link
+                href="/cases"
                 className="text-sm text-kmuGreen hover:text-kmuOrange transition underline"
               >
                 View All Cases →
@@ -283,40 +299,38 @@ export default function AssistantDeanDashboard() {
                   .sort((a: Case, b: Case) => new Date(b.createdAt || b.incidentDate || 0).getTime() - new Date(a.createdAt || a.incidentDate || 0).getTime())
                   .slice(0, 10)
                   .map((c: Case, i: number) => (
-                  <tr 
-                    key={i} 
-                    className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
-                    onClick={() => router.push(`/cases/${c._id}`)}
-                  >
-                    <td className="py-2 px-2">
-                      <div className="font-medium text-kmuGreen hover:text-kmuOrange transition">{c.student?.fullName || 'Unknown'}</div>
-                      <div className="text-xs text-gray-500">{c.student?.studentId || ''}</div>
-                    </td>
-                    <td className="py-2 px-2">{c.student?.department || 'N/A'}</td>
-                    <td className="py-2 px-2">{c.offenseType || 'N/A'}</td>
-                    <td className="py-2 px-2">{c.incidentDate || 'N/A'}</td>
-                    <td className="py-2 px-2">
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        c.severity === 'Critical' ? 'bg-red-100 text-red-800' :
-                        c.severity === 'High' ? 'bg-orange-100 text-orange-800' :
-                        c.severity === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-green-100 text-green-800'
-                      }`}>
-                        {c.severity || 'N/A'}
-                      </span>
-                    </td>
-                    <td className="py-2 px-2">
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        c.status === 'Open' ? 'bg-blue-100 text-blue-800' :
-                        c.status === 'Under Investigation' ? 'bg-yellow-100 text-yellow-800' :
-                        c.status === 'Closed' ? 'bg-gray-100 text-gray-800' :
-                        'bg-purple-100 text-purple-800'
-                      }`}>
-                        {c.status || 'N/A'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                    <tr
+                      key={i}
+                      className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                      onClick={() => router.push(`/cases/${c._id}`)}
+                    >
+                      <td className="py-2 px-2">
+                        <div className="font-medium text-kmuGreen hover:text-kmuOrange transition">{c.student?.fullName || 'Unknown'}</div>
+                        <div className="text-xs text-gray-500">{c.student?.studentId || ''}</div>
+                      </td>
+                      <td className="py-2 px-2">{c.student?.department || 'N/A'}</td>
+                      <td className="py-2 px-2">{c.offenseType || 'N/A'}</td>
+                      <td className="py-2 px-2">{c.incidentDate || 'N/A'}</td>
+                      <td className="py-2 px-2">
+                        <span className={`px-2 py-1 rounded text-xs ${c.severity === 'Critical' ? 'bg-red-100 text-red-800' :
+                            c.severity === 'High' ? 'bg-orange-100 text-orange-800' :
+                              c.severity === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-green-100 text-green-800'
+                          }`}>
+                          {c.severity || 'N/A'}
+                        </span>
+                      </td>
+                      <td className="py-2 px-2">
+                        <span className={`px-2 py-1 rounded text-xs ${c.status === 'Open' ? 'bg-blue-100 text-blue-800' :
+                            c.status === 'Under Investigation' ? 'bg-yellow-100 text-yellow-800' :
+                              c.status === 'Closed' ? 'bg-gray-100 text-gray-800' :
+                                'bg-purple-100 text-purple-800'
+                          }`}>
+                          {c.status || 'N/A'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
             {filteredCases.filter(c => c.status === 'Open' || c.status === 'Under Investigation').length === 0 && (
@@ -353,7 +367,7 @@ export default function AssistantDeanDashboard() {
           </div>
         </div>
       </section>
-      
+
       {/* Notification */}
       {notification?.isVisible && (
         <Notification

@@ -58,16 +58,6 @@ export default function AdminPage() {
     }
   }, [authLoading, token, user, router]);
 
-  // Show loading state while checking auth
-  if (isCheckingAuth) {
-    return <div className="text-center text-kmuGreen">Loading...</div>;
-  }
-
-  // Show access denied if not admin
-  if (!user || user.role !== 'admin') {
-    return <div className="text-red-600">Access denied.</div>;
-  }
-
   useEffect(() => {
     async function fetchData() {
       if (!API_BASE_URL) {
@@ -100,7 +90,7 @@ export default function AdminPage() {
       }
     }
     fetchData();
-  }, [token, API_BASE_URL]);
+  }, [token]);
 
   const safeCases = Array.isArray(cases) ? cases : [];
   const safeStudents = Array.isArray(students) ? students : [];
@@ -121,6 +111,16 @@ export default function AdminPage() {
       ) : safeStudents
     );
   }, [search, cases, students]);
+
+  // Show loading state while checking auth
+  if (isCheckingAuth) {
+    return <div className="text-center text-kmuGreen">Loading...</div>;
+  }
+
+  // Show access denied if not admin
+  if (!user || user.role !== 'admin') {
+    return <div className="text-red-600">Access denied.</div>;
+  }
 
   async function exportCasesToWord() {
     try {
