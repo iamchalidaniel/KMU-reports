@@ -55,7 +55,7 @@ export default function AIAssistant({ formType, onSuggestionReceived }: AIAssist
       const aiResponse = data.response;
 
       setMessages(prev => [...prev, { role: 'model', content: aiResponse }]);
-      
+
       if (onSuggestionReceived) {
         onSuggestionReceived(aiResponse);
       }
@@ -86,7 +86,7 @@ export default function AIAssistant({ formType, onSuggestionReceived }: AIAssist
           {/* Header */}
           <div className="bg-kmuGreen dark:bg-kmuGreen/90 text-white p-4 rounded-t-xl flex justify-between items-center">
             <h3 className="font-semibold">AI Assistant</h3>
-            <button 
+            <button
               onClick={toggleAssistant}
               className="text-white hover:text-gray-200 focus:outline-none"
             >
@@ -99,7 +99,7 @@ export default function AIAssistant({ formType, onSuggestionReceived }: AIAssist
             <div className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 p-3 text-xs border-b border-yellow-200 dark:border-yellow-800">
               <p className="font-semibold mb-1">Privacy Notice:</p>
               <p>Do not share sensitive personal information. This assistant helps with form completion only.</p>
-              <button 
+              <button
                 onClick={() => setShowDisclaimer(false)}
                 className="mt-1 text-xs underline hover:no-underline"
               >
@@ -109,7 +109,7 @@ export default function AIAssistant({ formType, onSuggestionReceived }: AIAssist
           )}
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 max-h-[350px]">
+          <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {messages.length === 0 && (
               <div className="text-center text-gray-500 dark:text-gray-400 py-8">
                 <p className="mb-2">Ask me anything about filling out this form!</p>
@@ -117,13 +117,12 @@ export default function AIAssistant({ formType, onSuggestionReceived }: AIAssist
               </div>
             )}
             {messages.map((msg, index) => (
-              <div 
-                key={index} 
-                className={`p-3 rounded-lg max-w-[85%] ${
-                  msg.role === 'user' 
-                    ? 'bg-blue-100 dark:bg-blue-900/50 ml-auto' 
+              <div
+                key={index}
+                className={`p-3 rounded-lg max-w-[85%] ${msg.role === 'user'
+                    ? 'bg-blue-100 dark:bg-blue-900/50 ml-auto'
                     : 'bg-gray-100 dark:bg-gray-700 mr-auto'
-                }`}
+                  }`}
               >
                 <p className="text-sm">{msg.content}</p>
               </div>

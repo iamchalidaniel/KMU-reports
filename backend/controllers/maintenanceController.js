@@ -9,9 +9,9 @@ export async function listMaintenanceReports(req, res) {
         const priority = req.query.priority;
         const category = req.query.category;
         const hall = req.query.hall;
-        
+
         const query = { report_type: 'maintenance' }; // Only maintenance reports
-        
+
         if (status) query.status = status;
         if (priority) query.priority = priority;
         if (category) query.category = category;
@@ -28,10 +28,10 @@ export async function listMaintenanceReports(req, res) {
         if (req.user.role === 'student') {
             query['reported_by.student_id'] = req.user.studentId || req.user.id;
         }
-        
+
         // Filter by assigned staff if user is electrician (only see assigned reports)
         if (req.user.role === 'electrician') {
-            query['assigned_to.staff_id'] = req.user.id || req.user._id;
+            query['assigned_to.staff_id'] = req.user.id;
         }
 
         const total = await MaintenanceReportModel.countDocuments(query);
@@ -59,11 +59,11 @@ export async function getMaintenanceReport(req, res) {
     try {
         const { id } = req.params;
         let report;
-        
+
         if (dbType === 'mongo') {
-            report = await MaintenanceReportModel.findOne({ 
-                _id: id, 
-                report_type: 'maintenance' 
+            report = await MaintenanceReportModel.findOne({
+                _id: id,
+                report_type: 'maintenance'
             });
             if (!report) {
                 return res.status(404).json({ error: 'Maintenance report not found' });
@@ -142,7 +142,7 @@ export async function updateMaintenanceReport(req, res) {
                 estimated_cost = ?, actual_cost = ?, completion_date = ?, notes = ?,
                 updated_at = NOW()
                 WHERE id = ? AND report_type = "maintenance"`;
-            
+
             const params = [
                 updateData.category,
                 JSON.stringify(updateData.location),
@@ -159,12 +159,12 @@ export async function updateMaintenanceReport(req, res) {
                 updateData.notes,
                 id
             ];
-            
+
             const [result] = await db.execute(sql, params);
             if (result.affectedRows === 0) {
                 return res.status(404).json({ error: 'Maintenance report not found' });
             }
-            
+
             const [rows] = await db.execute('SELECT * FROM maintenance_reports WHERE id = ?', [id]);
             report = rows[0];
         }
@@ -179,12 +179,12 @@ export async function updateMaintenanceReport(req, res) {
 export async function deleteMaintenanceReport(req, res) {
     try {
         const { id } = req.params;
-        
-        const result = await MaintenanceReportModel.deleteOne({ 
-            _id: id, 
-            report_type: 'maintenance' 
+
+        const result = await MaintenanceReportModel.deleteOne({
+            _id: id,
+            report_type: 'maintenance'
         });
-        
+
         if (result.deletedCount === 0) {
             return res.status(404).json({ error: 'Maintenance report not found' });
         }
@@ -199,35 +199,35 @@ export async function deleteMaintenanceReport(req, res) {
 export async function getMaintenanceAnalytics(req, res) {
     try {
         const reports = await MaintenanceReportModel.find({ report_type: 'maintenance' });
-        
+
         // Category distribution
         const categoryStats = {};
         reports.forEach(r => {
             const cat = r.category || 'other';
             categoryStats[cat] = (categoryStats[cat] || 0) + 1;
         });
-        
+
         // Status distribution
         const statusStats = {};
         reports.forEach(r => {
             const status = r.status || 'Reported';
             statusStats[status] = (statusStats[status] || 0) + 1;
         });
-        
+
         // Priority distribution
         const priorityStats = {};
         reports.forEach(r => {
             const priority = r.priority || 'Medium';
             priorityStats[priority] = (priorityStats[priority] || 0) + 1;
         });
-        
+
         // Hall distribution
         const hallStats = {};
         reports.forEach(r => {
             const hall = r.location?.hall || 'Unknown';
             hallStats[hall] = (hallStats[hall] || 0) + 1;
         });
-        
+
         const analytics = {
             total: reports.length,
             categoryStats: Object.entries(categoryStats).map(([k, v]) => ({ category: k, count: v })),
@@ -235,7 +235,7 @@ export async function getMaintenanceAnalytics(req, res) {
             priorityStats: Object.entries(priorityStats).map(([k, v]) => ({ priority: k, count: v })),
             hallStats: Object.entries(hallStats).map(([k, v]) => ({ hall: k, count: v }))
         };
-        
+
         res.json(analytics);
     } catch (err) {
         console.error('Error getting maintenance analytics:', err);

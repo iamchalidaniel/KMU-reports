@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 
 // Define the system prompt based on form type
 function getSystemPrompt(formType: string): string {
-  const basePrompt = `You are an AI assistant for the KMU-reports system at Kapasa Makasa University. Your role is to help users fill out forms correctly and provide guidance on reporting procedures.`;
+  const basePrompt = `You are an AI assistant for the KMU-reports system at Kapasa Makasa University created by Daniel Chali and Namonje Grace for their undergraduate project. Your role is to help users fill out forms correctly and provide guidance on reporting procedures.`;
 
   switch (formType) {
     case 'case':
@@ -39,13 +39,20 @@ export async function POST(request: NextRequest) {
     const systemPrompt = getSystemPrompt(formType || 'other');
 
     // Create the conversation history with the system prompt at the beginning
-    const conversationHistory = [
-      { role: 'system', content: systemPrompt },
-      ...messages
-    ];
+    // Gemini 1.0 Pro doesn't support the 'system' role in the same way, 
+    // so we prepend it to the first user message.
+    const formattedMessages = [...messages];
+    if (formattedMessages.length > 0 && formattedMessages[0].role === 'user') {
+      formattedMessages[0].content = `${systemPrompt}\n\nUser Question: ${formattedMessages[0].content}`;
+    } else {
+      formattedMessages.unshift({ role: 'user', content: systemPrompt });
+    }
 
-    // Generate content using the conversation history
-    const result = await model.generateContent(conversationHistory);
+    const chat = model.startChat({
+      history: formattedMessages.slice(0, -1),
+    });
+
+    const result = await chat.sendMessage(formattedMessages[formattedMessages.length - 1].content);
     const response = await result.response;
     const text = response.text();
 

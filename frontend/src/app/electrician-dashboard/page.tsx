@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { API_BASE_URL } from '../../config/constants';
-import { authHeaders } from '../../utils/api';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Bar, Doughnut } from 'react-chartjs-2';
@@ -17,6 +16,8 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import Notification, { useNotification } from '../../components/Notification';
+import { authHeaders, getProfile } from '../../utils/api';
 
 ChartJS.register(
   CategoryScale,
@@ -83,9 +84,12 @@ const STATUSES = [
 export default function ElectricianDashboard() {
   const { user, token, loading: authLoading } = useAuth();
   const router = useRouter();
+  const { notification, showNotification, hideNotification } = useNotification();
 
-  // all state hooks must be declared unconditionally at the top
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [profile, setProfile] = useState<any>(null);
+  const [profileLoading, setProfileLoading] = useState(true);
   const [reports, setReports] = useState<MaintenanceReport[]>([]);
   const [filteredReports, setFilteredReports] = useState<MaintenanceReport[]>([]);
   const [analytics, setAnalytics] = useState<any>(null);
@@ -114,85 +118,77 @@ export default function ElectricianDashboard() {
     }
   }, [authLoading, token, user, router]);
 
-
-
   useEffect(() => {
-    fetchReports();
-    fetchAnalytics();
-  }, []);
-
-  useEffect(() => {
-    filterReports();
-  }, [search, statusFilter, priorityFilter, reports]);
-
-  async function fetchReports() {
-    try {
-      setLoading(true);
-      const res = await fetch(`${API_BASE_URL}/api/maintenance`, {
-        headers: { ...authHeaders() }
-      });
-      if (!res.ok) throw new Error('Failed to fetch reports');
-      const data = await res.json();
-      // Backend already filters by assigned_to for electricians, but we also filter by electrical categories
-      const electricalReports = (data.reports || data || []).filter((r: MaintenanceReport) =>
-        ELECTRICAL_CATEGORIES.some(cat => cat.value === r.category)
-      );
-      setReports(electricalReports);
-    } catch (err: any) {
-      setError(err?.message || 'Failed to load reports');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function fetchAnalytics() {
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/maintenance/analytics`, {
-        headers: { ...authHeaders() }
-      });
-      if (!res.ok) throw new Error('Failed to fetch analytics');
-      const data = await res.json();
-      // Filter analytics to only electrical categories
-      if (data.categoryStats) {
-        data.categoryStats = data.categoryStats.filter((s: any) =>
-          ELECTRICAL_CATEGORIES.some(cat => cat.value === s.category)
-        );
+    async function fetchStaffProfile() {
+      try {
+        setProfileLoading(true);
+        const data = await getProfile();
+        setProfile(data);
+      } catch (err) {
+        console.error('Failed to fetch profile:', err);
+      } finally {
+        setProfileLoading(false);
       }
-      setAnalytics(data);
-    } catch (err: any) {
-      console.error('Failed to fetch analytics:', err);
     }
-  }
 
-  function filterReports() {
+    async function fetchReports() {
+      try {
+        setLoading(true);
+        const res = await fetch(`${API_BASE_URL}/api/maintenance`, {
+          headers: { ...authHeaders() }
+        });
+        if (!res.ok) throw new Error('Failed to fetch reports');
+        const data = await res.json();
+        const electricalReports = (data.reports || data || []).filter((r: MaintenanceReport) =>
+          ELECTRICAL_CATEGORIES.some(cat => cat.value === r.category)
+        );
+        setReports(electricalReports);
+      } catch (err: any) {
+        setError(err?.message || 'Failed to load reports');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    async function fetchAnalytics() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/maintenance/analytics`, {
+          headers: { ...authHeaders() }
+        });
+        if (!res.ok) throw new Error('Failed to fetch analytics');
+        const data = await res.json();
+        if (data.categoryStats) {
+          data.categoryStats = data.categoryStats.filter((s: any) =>
+            ELECTRICAL_CATEGORIES.some(cat => cat.value === s.category)
+          );
+        }
+        setAnalytics(data);
+      } catch (err: any) {
+        console.error('Failed to fetch analytics:', err);
+      }
+    }
+
+    if (token) {
+      fetchStaffProfile();
+      fetchReports();
+      fetchAnalytics();
+    }
+  }, [token]);
+
+  useEffect(() => {
     let filtered = [...reports];
-
     if (search) {
       filtered = filtered.filter(r =>
         r.description.toLowerCase().includes(search.toLowerCase()) ||
         r.location.room?.toLowerCase().includes(search.toLowerCase()) ||
+        r.location.hall?.toLowerCase().includes(search.toLowerCase()) ||
         r.reported_by.name?.toLowerCase().includes(search.toLowerCase())
       );
     }
-
-    if (statusFilter) {
-      filtered = filtered.filter(r => r.status === statusFilter);
-    }
-
-    if (priorityFilter) {
-      filtered = filtered.filter(r => r.priority === priorityFilter);
-    }
-
+    if (statusFilter) filtered = filtered.filter(r => r.status === statusFilter);
+    if (priorityFilter) filtered = filtered.filter(r => r.priority === priorityFilter);
     setFilteredReports(filtered);
-  }
-
-  if (isCheckingAuth) {
-    return <div className="text-center text-kmuGreen">Loading...</div>;
-  }
-
-  if (!user || user.role !== 'electrician') {
-    return <div className="text-red-600">Access denied. Electrician access only.</div>;
-  }
+  }, [search, statusFilter, priorityFilter, reports]);
 
   async function updateStatus(reportId: string, newStatus: string) {
     try {
@@ -206,12 +202,29 @@ export default function ElectricianDashboard() {
       });
 
       if (!res.ok) throw new Error('Failed to update status');
-      fetchReports();
-      fetchAnalytics();
+      const resReports = await fetch(`${API_BASE_URL}/api/maintenance`, { headers: { ...authHeaders() } });
+      if (resReports.ok) {
+        const data = await resReports.json();
+        const electricalReports = (data.reports || data || []).filter((r: MaintenanceReport) =>
+          ELECTRICAL_CATEGORIES.some(cat => cat.value === r.category)
+        );
+        setReports(electricalReports);
+      }
+      showNotification('success', 'Status updated successfully');
     } catch (err: any) {
-      setError(err?.message || 'Failed to update status');
+      showNotification('error', err?.message || 'Failed to update status');
     }
   }
+
+  if (isCheckingAuth) {
+    return <div className="text-center text-kmuGreen p-12">Loading...</div>;
+  }
+
+  if (!user || user.role !== 'electrician') {
+    return <div className="text-red-600 p-12">Access denied. Electrician access only.</div>;
+  }
+
+  const staffData = profile || user;
 
   const categoryChartData = analytics ? {
     labels: analytics.categoryStats?.map((s: any) =>
@@ -220,9 +233,7 @@ export default function ElectricianDashboard() {
     datasets: [{
       label: 'Electrical Reports by Category',
       data: analytics.categoryStats?.map((s: any) => s.count) || [],
-      backgroundColor: [
-        '#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
-      ],
+      backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'],
     }],
   } : null;
 
@@ -231,189 +242,236 @@ export default function ElectricianDashboard() {
     datasets: [{
       label: 'Reports by Status',
       data: analytics.statusStats?.map((s: any) => s.count) || [],
-      backgroundColor: [
-        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'
-      ],
+      backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
     }],
   } : null;
 
-  if (loading && reports.length === 0) {
-    return <div className="text-center text-kmuGreen p-8">Loading dashboard...</div>;
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-kmuGreen mb-2">Electrician Dashboard</h1>
-          <p className="text-gray-600 dark:text-gray-400">Manage electrical maintenance reports</p>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
+      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+
+        {/* Banner Area */}
+        <div className="relative mb-6 rounded-xl overflow-hidden bg-white dark:bg-gray-900 shadow-sm border border-gray-200 dark:border-gray-800">
+          <div className="h-32 bg-gradient-to-r from-blue-600 to-teal-500 relative">
+            <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/diamond-upholstery.png')]"></div>
+          </div>
+          <div className="px-6 pb-6 flex flex-col md:flex-row items-center md:items-end -mt-12 gap-6 relative z-10">
+            <div className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-900 bg-white dark:bg-gray-800 shadow-lg flex items-center justify-center overflow-hidden">
+              <div className="w-24 h-24 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-4xl shadow-inner">
+                {staffData.name ? staffData.name.charAt(0).toUpperCase() : staffData.username.charAt(0).toUpperCase()}
+              </div>
+            </div>
+            <div className="flex-1 text-center md:text-left mb-2">
+              <h1 className="text-2xl font-bold uppercase">{staffData.name || 'Electrician Name'}</h1>
+              <p className="text-gray-600 dark:text-gray-400 font-semibold tracking-tight">Staff ID : <span className="text-blue-600 dark:text-blue-400 font-mono">{staffData.staffId || staffData.username}</span></p>
+            </div>
+          </div>
         </div>
 
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
-          </div>
-        )}
-
-        {/* Analytics Cards */}
-        {analytics && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-              <div className="text-sm text-gray-600 dark:text-gray-400">Total Electrical Reports</div>
-              <div className="text-2xl font-bold text-kmuGreen">{reports.length}</div>
-            </div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-l-4 border-blue-500">
-              <div className="text-sm text-gray-600 dark:text-gray-400">Assigned to Me</div>
-              <div className="text-2xl font-bold text-blue-600">
-                {reports.filter(r => r.assigned_to && (r.status === 'Assigned' || r.status === 'In Progress')).length}
-              </div>
-            </div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-              <div className="text-sm text-gray-600 dark:text-gray-400">In Progress</div>
-              <div className="text-2xl font-bold text-yellow-600">
-                {reports.filter(r => r.status === 'In Progress').length}
-              </div>
-            </div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-              <div className="text-sm text-gray-600 dark:text-gray-400">Completed</div>
-              <div className="text-2xl font-bold text-green-600">
-                {reports.filter(r => r.status === 'Completed').length}
-              </div>
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Side Navigation */}
+          <div className="lg:w-1/4">
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden sticky top-24">
+              <nav className="flex flex-col">
+                <NavButton label="Dashboard" icon="📊" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
+                <NavButton label="Tasks" icon="⚡" active={activeTab === 'tasks'} onClick={() => setActiveTab('tasks')} />
+                <NavButton label="Staff Info" icon="👤" active={activeTab === 'info'} onClick={() => setActiveTab('info')} />
+                <NavButton label="Settings" icon="⚙️" active={activeTab === 'password'} onClick={() => setActiveTab('password')} />
+              </nav>
             </div>
           </div>
-        )}
 
-        {/* Charts */}
-        {analytics && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            {categoryChartData && (
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-                <h3 className="text-lg font-semibold mb-4">Electrical Reports by Category</h3>
-                <Bar data={categoryChartData} />
+          {/* Right Column Content */}
+          <div className="lg:w-3/4 space-y-6">
+
+            {activeTab === 'dashboard' && (
+              <div className="animate-in fade-in duration-300 space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <StatCard title="All Electrical" value={reports.length} color="blue" />
+                  <StatCard title="Assigned" value={reports.filter(r => r.status === 'Assigned').length} color="teal" />
+                  <StatCard title="In Progress" value={reports.filter(r => r.status === 'In Progress').length} color="orange" />
+                  <StatCard title="Completed" value={reports.filter(r => r.status === 'Completed').length} color="green" />
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+                    <h3 className="text-lg font-bold mb-6 text-gray-800 dark:text-gray-200 uppercase text-xs tracking-widest">Reports by Category</h3>
+                    {categoryChartData && <Bar data={categoryChartData} />}
+                  </div>
+                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+                    <h3 className="text-lg font-bold mb-6 text-gray-800 dark:text-gray-200 uppercase text-xs tracking-widest">Reports by Status</h3>
+                    {statusChartData && <Doughnut data={statusChartData} />}
+                  </div>
+                </div>
               </div>
             )}
-            {statusChartData && (
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-                <h3 className="text-lg font-semibold mb-4">Reports by Status</h3>
-                <Doughnut data={statusChartData} />
+
+            {activeTab === 'tasks' && (
+              <div className="animate-in fade-in duration-300 space-y-6">
+                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                    <h2 className="text-xl font-bold">Electrical Tasks</h2>
+                    <div className="flex flex-wrap gap-2 w-full md:w-auto">
+                      <input
+                        placeholder="Search..."
+                        className="bg-gray-100 dark:bg-gray-800 border-none rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 flex-1"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                      />
+                      <select
+                        className="bg-gray-100 dark:bg-gray-800 border-none rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                      >
+                        <option value="">All Status</option>
+                        {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4">
+                    {filteredReports.map(report => {
+                      const reportId = report._id || report.id;
+                      return (
+                        <div key={reportId} className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl p-5 hover:border-blue-300 transition-colors shadow-sm">
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold uppercase rounded mb-2 inline-block">
+                                {ELECTRICAL_CATEGORIES.find(c => c.value === report.category)?.label || report.category}
+                              </span>
+                              <h3 className="font-bold text-lg">{report.location.hall} {report.location.room ? `- Room ${report.location.room}` : ''}</h3>
+                            </div>
+                            <select
+                              value={report.status}
+                              onChange={(e) => updateStatus(reportId!, e.target.value)}
+                              className={`text-[11px] font-bold border-none rounded px-3 py-1.5 focus:ring-0 ${report.status === 'Completed' ? 'bg-green-100 text-green-700' :
+                                  report.status === 'In Progress' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'
+                                }`}
+                            >
+                              {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                            </select>
+                          </div>
+                          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">{report.description}</p>
+                          <div className="flex items-center justify-between pt-4 border-t border-gray-50 dark:border-gray-700">
+                            <div className="text-[10px] text-gray-400 uppercase font-bold tracking-widest">Reported by: {report.reported_by.name}</div>
+                            <Link href={`/maintenance/${reportId}`} className="text-blue-600 font-bold text-xs hover:underline uppercase tracking-wider">Details →</Link>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {filteredReports.length === 0 && (
+                      <div className="text-center py-12 text-gray-500 italic">No tasks found.</div>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
-          </div>
-        )}
 
-        {/* Reports List */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-          <div className="flex flex-wrap items-center justify-between mb-4 gap-4">
-            <h2 className="text-lg font-semibold text-kmuOrange">Electrical Maintenance Reports</h2>
-            <div className="flex flex-wrap gap-2">
-              <input
-                type="text"
-                placeholder="Search reports..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="border border-gray-300 dark:border-gray-600 rounded px-3 py-1 bg-white dark:bg-gray-700 text-sm"
-              />
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="border border-gray-300 dark:border-gray-600 rounded px-3 py-1 bg-white dark:bg-gray-700 text-sm"
-              >
-                <option value="">All Status</option>
-                {STATUSES.map(s => (
-                  <option key={s.value} value={s.value}>{s.label}</option>
-                ))}
-              </select>
-              <select
-                value={priorityFilter}
-                onChange={(e) => setPriorityFilter(e.target.value)}
-                className="border border-gray-300 dark:border-gray-600 rounded px-3 py-1 bg-white dark:bg-gray-700 text-sm"
-              >
-                <option value="">All Priorities</option>
-                {PRIORITIES.map(p => (
-                  <option key={p.value} value={p.value}>{p.label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
+            {activeTab === 'info' && (
+              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 md:p-8 animate-in fade-in duration-300">
+                <div className="space-y-10">
+                  <section>
+                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide border-b border-gray-100 dark:border-gray-800 pb-2 mb-4">Account Details</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                      <InfoField label="Staff ID" value={staffData.staffId || staffData.username} />
+                      <InfoField label="Role" value={staffData.role?.toUpperCase().replace('_', ' ')} />
+                      <InfoField label="Status" value="ACTIVE" />
+                    </div>
+                  </section>
+                  <section>
+                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide border-b border-gray-100 dark:border-gray-800 pb-2 mb-4">Personal Info</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                      <InfoField label="First Name" value={staffData.firstName || staffData.name?.split(' ')[1] || ''} />
+                      <InfoField label="Sur Name" value={staffData.surName || staffData.name?.split(' ')[0] || ''} />
+                      <InfoField label="NRC" value={staffData.nrc || ''} />
+                      <InfoField label="Gender" value={staffData.gender || ''} />
+                      <InfoField label="Nationality" value={staffData.nationality || ''} />
+                    </div>
+                  </section>
+                  <section>
+                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide border-b border-gray-100 dark:border-gray-800 pb-2 mb-4">Address</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                      <InfoField label="Province" value={staffData.province || ''} />
+                      <InfoField label="Town" value={staffData.town || ''} />
+                      <InfoField label="Phone" value={staffData.phone || ''} />
+                      <InfoField label="Email" value={staffData.email || ''} />
+                    </div>
+                  </section>
+                </div>
+              </div>
+            )}
 
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-50 dark:bg-gray-700">
-                <tr>
-                  <th className="px-4 py-2 text-left text-xs font-medium uppercase">Category</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium uppercase">Location</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium uppercase">Description</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium uppercase">Priority</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium uppercase">Status</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium uppercase">Reported By</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium uppercase">Date</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium uppercase">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {filteredReports.map((report) => {
-                  const reportId = report._id || report.id;
-                  return (
-                    <tr key={reportId} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                      <td className="px-4 py-2 whitespace-nowrap text-sm">
-                        {ELECTRICAL_CATEGORIES.find(c => c.value === report.category)?.label || report.category}
-                      </td>
-                      <td className="px-4 py-2 text-sm">
-                        <div>{report.location.hall}</div>
-                        {report.location.room && <div className="text-xs text-gray-500">Room: {report.location.room}</div>}
-                      </td>
-                      <td className="px-4 py-2 text-sm max-w-xs truncate">{report.description}</td>
-                      <td className="px-4 py-2 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs rounded ${report.priority === 'Urgent' ? 'bg-red-100 text-red-800' :
-                            report.priority === 'High' ? 'bg-orange-100 text-orange-800' :
-                              report.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                                'bg-green-100 text-green-800'
-                          }`}>
-                          {report.priority}
-                        </span>
-                      </td>
-                      <td className="px-4 py-2 whitespace-nowrap">
-                        <select
-                          value={report.status}
-                          onChange={(e) => updateStatus(reportId!, e.target.value)}
-                          className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700"
-                        >
-                          {STATUSES.map(s => (
-                            <option key={s.value} value={s.value}>{s.label}</option>
-                          ))}
-                        </select>
-                      </td>
-                      <td className="px-4 py-2 text-sm">
-                        <div>{report.reported_by.name}</div>
-                        {report.reported_by.contact && (
-                          <div className="text-xs text-gray-500">{report.reported_by.contact}</div>
-                        )}
-                      </td>
-                      <td className="px-4 py-2 whitespace-nowrap text-sm">
-                        {new Date(report.created_at).toLocaleDateString()}
-                      </td>
-                      <td className="px-4 py-2 whitespace-nowrap">
-                        <Link
-                          href={`/maintenance/${reportId}`}
-                          className="text-kmuGreen hover:text-kmuOrange text-sm"
-                        >
-                          View
-                        </Link>
-                      </td>
-                    </tr>
-                  );
-                })}
-                {filteredReports.length === 0 && (
-                  <tr>
-                    <td colSpan={8} className="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
-                      No electrical maintenance reports found
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+            {activeTab === 'password' && (
+              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 md:p-8 animate-in fade-in duration-300 max-w-md mx-auto text-center">
+                <h2 className="text-2xl font-bold text-blue-600 mb-8">Security Settings</h2>
+                <div className="space-y-6 text-left">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-extrabold text-blue-700 dark:text-blue-400 uppercase tracking-tighter">New Password</label>
+                    <input type="password" placeholder="••••••••" className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none" />
+                  </div>
+                  <button
+                    onClick={() => showNotification('info', 'Feature coming soon')}
+                    className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow hover:bg-blue-700 transition uppercase tracking-widest text-xs"
+                  >
+                    Update Security
+                  </button>
+                </div>
+              </div>
+            )}
+
           </div>
         </div>
+      </div>
+
+      {notification?.isVisible && (
+        <Notification
+          type={notification.type}
+          message={notification.message}
+          isVisible={notification.isVisible}
+          onClose={hideNotification}
+        />
+      )}
+    </div>
+  );
+}
+
+// UI Components
+function NavButton({ label, icon, active, onClick }: any) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-4 px-6 py-4 transition-all border-l-4 text-left ${active
+        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/10 text-blue-600'
+        : 'border-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+        }`}
+    >
+      <span className="text-xl">{icon}</span>
+      <span className="font-semibold">{label}</span>
+    </button>
+  );
+}
+
+function StatCard({ title, value, color }: any) {
+  const colors: any = {
+    teal: 'text-teal-600 border-teal-100',
+    orange: 'text-orange-600 border-orange-100',
+    blue: 'text-blue-600 border-blue-100',
+    green: 'text-green-600 border-green-100'
+  };
+  return (
+    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border ${colors[color]} p-5`}>
+      <div className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mb-1">{title}</div>
+      <div className={`text-3xl font-bold ${colors[color].split(' ')[0]}`}>{value}</div>
+    </div>
+  );
+}
+
+function InfoField({ label, value }: any) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-[10px] font-extrabold text-blue-700 dark:text-blue-400 uppercase tracking-tighter ml-1">{label}</label>
+      <div className="bg-gray-100 dark:bg-gray-800/80 rounded border border-gray-200 dark:border-gray-700 px-3 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 min-h-[38px]">
+        {value || '-'}
       </div>
     </div>
   );

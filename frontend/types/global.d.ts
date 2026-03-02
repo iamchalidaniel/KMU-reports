@@ -25,6 +25,12 @@ export interface Student {
   fullName: string;
   department?: string;
   year?: string;
+  yearOfStudy?: number;
+  status?: string;
+  deliveryMode?: string;
+  passport?: string;
+  roomNo?: string;
+  program?: string;
   gender?: string;
   disciplinaryHistory?: Case[];
 }

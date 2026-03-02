@@ -45,7 +45,7 @@ export default function Sidebar() {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
@@ -53,7 +53,7 @@ export default function Sidebar() {
 
   // Sidebar style classes
   const sidebarBase =
-    'fixed z-40 left-0 top-0 h-full bg-gray-900 text-white shadow-lg border-r border-gray-800 transform transition-transform duration-200 ease-in-out';
+    'fixed z-40 left-0 top-0 h-screen bg-gray-900 text-white shadow-lg border-r border-gray-800 transform transition-transform duration-200 ease-in-out';
   const linkBase =
     'flex items-center gap-3 py-2 px-4 rounded-lg transition-all font-medium hover:bg-gray-200 dark:hover:bg-gray-800 text-sm sm:text-base';
   const linkActive =
@@ -168,7 +168,7 @@ export default function Sidebar() {
 
   const handleMouseMove = (e: MouseEvent) => {
     if (!isResizing) return;
-    
+
     const newWidth = e.clientX;
     // Limit width between 200px and 400px
     if (newWidth >= 200 && newWidth <= 400) {
@@ -204,13 +204,13 @@ export default function Sidebar() {
   return (
     <>
       <div className={`fixed inset-0 bg-black bg-opacity-30 z-30 transition-opacity md:hidden ${open ? 'block' : 'hidden'}`} onClick={() => setOpen(false)} />
-      <aside 
-        className={`${sidebarBase} ${open ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 dark:bg-gray-900 dark:text-white bg-white text-gray-900`}
+      <aside
+        className={`${sidebarBase} ${open ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 dark:bg-gray-900 dark:text-white bg-white text-gray-900 flex flex-col`}
         style={{ width: `${sidebarWidth}px` }}
       >
         <div className="flex flex-col items-center gap-2 pt-8 pb-4 border-b border-gray-800 dark:border-gray-800 border-gray-200 px-4 relative">
           {/* Close button for mobile */}
-          <button 
+          <button
             className="absolute top-2 right-2 p-2 rounded-lg bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors md:hidden"
             onClick={() => setOpen(false)}
             aria-label="Close sidebar"
@@ -220,12 +220,12 @@ export default function Sidebar() {
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
           </button>
-          <img 
-            src="/kmu_logo.svg" 
-            alt="KMU Logo" 
-            width={64} 
-            height={64} 
-            className="mb-2 h-16 w-16 object-contain" 
+          <img
+            src="/kmu_logo.svg"
+            alt="KMU Logo"
+            width={64}
+            height={64}
+            className="mb-2 h-16 w-16 object-contain"
             onError={(e) => {
               console.error('Logo failed to load in sidebar');
               e.currentTarget.style.display = 'none';
@@ -244,43 +244,43 @@ export default function Sidebar() {
           >
             {theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode'}
           </button>
-      </div>
+        </div>
         <nav className="flex flex-col gap-0.5 mt-6 px-4 pb-6 flex-1 justify-start overflow-y-auto">
           {navLinks
             .filter(link => !link.mobileOnly || isMobile) // Only show mobileOnly items on mobile
             .map(link =>
-            link.label === 'Logout' ? (
-              <button
-                key={link.path}
-                onClick={() => logout()}
-                className={
-                  `${linkBase} ${link.danger ? 'hover:bg-red-900 hover:text-red-400 dark:hover:text-red-400' : ''} text-gray-900 dark:text-white`}
-              >
-                <span className="text-xl">{link.icon}</span>
-                <span>{link.label}</span>
-              </button>
-            ) : (
-              <Link
-                key={link.path}
-                href={link.path}
-                className={
-                  `${linkBase} ${pathname === link.path ? linkActive : ''} ${link.danger ? 'hover:bg-red-900 hover:text-red-400 dark:hover:text-red-400' : ''} text-gray-900 dark:text-white`}
-                onClick={() => setOpen(false)} // Close sidebar on mobile when clicking a link
-              >
-                <span className="text-xl">{link.icon}</span>
-                <span>{link.label}</span>
-              </Link>
-            )
-          )}
+              link.label === 'Logout' ? (
+                <button
+                  key={link.path}
+                  onClick={() => logout()}
+                  className={
+                    `${linkBase} ${link.danger ? 'hover:bg-red-900 hover:text-red-400 dark:hover:text-red-400' : ''} text-gray-900 dark:text-white`}
+                >
+                  <span className="text-xl">{link.icon}</span>
+                  <span>{link.label}</span>
+                </button>
+              ) : (
+                <Link
+                  key={link.path}
+                  href={link.path}
+                  className={
+                    `${linkBase} ${pathname === link.path ? linkActive : ''} ${link.danger ? 'hover:bg-red-900 hover:text-red-400 dark:hover:text-red-400' : ''} text-gray-900 dark:text-white`}
+                  onClick={() => setOpen(false)} // Close sidebar on mobile when clicking a link
+                >
+                  <span className="text-xl">{link.icon}</span>
+                  <span>{link.label}</span>
+                </Link>
+              )
+            )}
         </nav>
-        
+
         {/* Resize handle - only visible on desktop */}
-        <div 
+        <div
           className="absolute right-0 top-0 bottom-0 w-1 bg-gray-600 hover:bg-gray-500 cursor-col-resize hidden md:block"
           onMouseDown={handleMouseDown}
           title="Drag to resize sidebar"
         />
-    </aside>
+      </aside>
       <button className="absolute top-4 left-4 z-50 p-3 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-lg border border-gray-200 dark:border-gray-700 md:hidden hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" onClick={() => setOpen(!open)} aria-label="Toggle sidebar">
         <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
       </button>

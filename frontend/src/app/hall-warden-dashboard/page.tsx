@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { API_BASE_URL } from '../../config/constants';
-import { authHeaders } from '../../utils/api';
+import { authHeaders, getProfile } from '../../utils/api';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Notification, { useNotification } from '../../components/Notification';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -129,6 +130,9 @@ export default function HallWardenDashboard() {
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'priority'>('newest');
   const [electricians, setElectricians] = useState<any[]>([]);
   const [assigningReportId, setAssigningReportId] = useState<string | null>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'reports' | 'info' | 'password'>('dashboard');
+  const { notification, showNotification, hideNotification } = useNotification();
 
   // Form state
   const [showForm, setShowForm] = useState(false);
@@ -148,7 +152,17 @@ export default function HallWardenDashboard() {
     fetchReports();
     fetchAnalytics();
     fetchElectricians();
+    fetchStaffProfile();
   }, []);
+
+  async function fetchStaffProfile() {
+    try {
+      const data = await getProfile();
+      setProfile(data);
+    } catch (err) {
+      console.error('Failed to fetch profile:', err);
+    }
+  }
 
   async function fetchElectricians() {
     try {
@@ -426,6 +440,12 @@ export default function HallWardenDashboard() {
     }],
   } : null;
 
+  if (loading && reports.length === 0) {
+    return <div className="text-center text-kmuGreen p-8">Loading dashboard...</div>;
+  }
+
+  const staffData = profile || user;
+
   const statusChartData = analytics ? {
     labels: analytics.statusStats?.map((s: any) => s.status) || [],
     datasets: [{
@@ -437,475 +457,356 @@ export default function HallWardenDashboard() {
     }],
   } : null;
 
-  if (loading && reports.length === 0) {
-    return <div className="text-center text-kmuGreen p-8">Loading dashboard...</div>;
-  }
-
   return (
-    <section className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-kmuGreen mb-2">Hall Warden Dashboard</h1>
-        <p className="text-gray-600 dark:text-gray-400">Manage maintenance reports for hostel facilities</p>
-      </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
+      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
-
-      {/* New Reports Alert Banner */}
-      {reports.filter(r => isNewReport(r.created_at)).length > 0 && dateFilter !== 'new' && (
-        <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-6 rounded-lg">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex-shrink-0">
-                <span className="text-2xl">🔔</span>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-200">
-                  {reports.filter(r => isNewReport(r.created_at)).length} New Report{reports.filter(r => isNewReport(r.created_at)).length !== 1 ? 's' : ''} in Last 24 Hours
-                </h3>
-                <p className="text-sm text-blue-600 dark:text-blue-300 mt-1">
-                  Click the "New Reports" button below to view only recent reports
-                </p>
+        {/* Dashboard Header / Banner area */}
+        <div className="relative mb-6 rounded-xl overflow-hidden bg-white dark:bg-gray-900 shadow-sm border border-gray-200 dark:border-gray-800">
+          <div className="h-32 bg-gradient-to-r from-teal-600 to-kmuGreen relative">
+            <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/diamond-upholstery.png')]"></div>
+          </div>
+          <div className="px-6 pb-6 flex flex-col md:flex-row items-center md:items-end -mt-12 gap-6 relative z-10">
+            <div className="relative group">
+              <div className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-900 bg-white dark:bg-gray-800 shadow-lg flex items-center justify-center overflow-hidden">
+                <div className="w-24 h-24 rounded-full bg-teal-500 flex items-center justify-center text-white font-bold text-4xl shadow-inner">
+                  {staffData.name ? staffData.name.charAt(0).toUpperCase() : staffData.username.charAt(0).toUpperCase()}
+                </div>
               </div>
             </div>
-            <button
-              onClick={() => {
-                setDateFilter('new');
-                setStatusFilter('');
-                setPriorityFilter('');
-                setCategoryFilter('');
-                setHallFilter('');
-                setSearch('');
-              }}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition font-medium"
-            >
-              View New Reports
-            </button>
-          </div>
-        </div>
-      )}
 
-      {/* Analytics Cards */}
-      {analytics && (
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-            <div className="text-sm text-gray-600 dark:text-gray-400">Total Reports</div>
-            <div className="text-2xl font-bold text-kmuGreen">{analytics.total || 0}</div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-l-4 border-blue-500">
-            <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
-              <span>New (24h)</span>
-              {reports.filter(r => isNewReport(r.created_at)).length > 0 && (
-                <span className="px-2 py-0.5 bg-blue-500 text-white text-xs rounded-full">
-                  {reports.filter(r => isNewReport(r.created_at)).length}
-                </span>
-              )}
-            </div>
-            <div className="text-2xl font-bold text-blue-600">
-              {reports.filter(r => isNewReport(r.created_at)).length}
-            </div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-            <div className="text-sm text-gray-600 dark:text-gray-400">Pending</div>
-            <div className="text-2xl font-bold text-yellow-600">
-              {analytics.statusStats?.find((s: any) => s.status === 'Reported')?.count || 0}
-            </div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-            <div className="text-sm text-gray-600 dark:text-gray-400">In Progress</div>
-            <div className="text-2xl font-bold text-blue-600">
-              {analytics.statusStats?.find((s: any) => s.status === 'In Progress')?.count || 0}
-            </div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-            <div className="text-sm text-gray-600 dark:text-gray-400">Completed</div>
-            <div className="text-2xl font-bold text-green-600">
-              {analytics.statusStats?.find((s: any) => s.status === 'Completed')?.count || 0}
+            <div className="flex-1 text-center md:text-left mb-2">
+              <h1 className="text-2xl font-bold uppercase">{staffData.name || 'Staff Name'}</h1>
+              <p className="text-gray-600 dark:text-gray-400 font-semibold tracking-tight">Staff ID : <span className="text-teal-600 dark:text-teal-400 font-mono">{staffData.staffId || staffData.username}</span></p>
             </div>
           </div>
         </div>
-      )}
 
-      {/* Charts */}
-      {analytics && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          {categoryChartData && (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-              <h3 className="text-lg font-semibold mb-4">Reports by Category</h3>
-              <Doughnut data={categoryChartData} />
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Left Column: Side Navigation */}
+          <div className="lg:w-1/4">
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden sticky top-24">
+              <nav className="flex flex-col">
+                <NavButton label="Dashboard" icon="📊" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
+                <NavButton label="All Reports" icon="📋" active={activeTab === 'reports'} onClick={() => setActiveTab('reports')} />
+                <NavButton label="Staff Info" icon="👤" active={activeTab === 'info'} onClick={() => setActiveTab('info')} />
+                <NavButton label="Settings" icon="⚙️" active={activeTab === 'password'} onClick={() => setActiveTab('password')} />
+              </nav>
             </div>
-          )}
-          {statusChartData && (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-              <h3 className="text-lg font-semibold mb-4">Reports by Status</h3>
-              <Doughnut data={statusChartData} />
-            </div>
-          )}
-        </div>
-      )}
+          </div>
 
-      {/* Create Report Form */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-kmuOrange">Create Maintenance Report</h2>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="bg-kmuGreen text-white px-4 py-2 rounded hover:bg-kmuOrange transition"
-          >
-            {showForm ? 'Cancel' : 'New Report'}
-          </button>
-        </div>
+          {/* Right Column: Content */}
+          <div className="lg:w-3/4 space-y-6">
 
-        {showForm && (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Category *</label>
-                <select
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700"
-                  required
-                >
-                  <option value="">Select category...</option>
-                  {CATEGORIES.map(cat => (
-                    <option key={cat.value} value={cat.value}>{cat.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Priority *</label>
-                <select
-                  value={formData.priority}
-                  onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700"
-                  required
-                >
-                  {PRIORITIES.map(p => (
-                    <option key={p.value} value={p.value}>{p.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Hall *</label>
-                <input
-                  type="text"
-                  value={formData.hall}
-                  onChange={(e) => setFormData({ ...formData, hall: e.target.value })}
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Room</label>
-                <input
-                  type="text"
-                  value={formData.room}
-                  onChange={(e) => setFormData({ ...formData, room: e.target.value })}
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Floor</label>
-                <input
-                  type="text"
-                  value={formData.floor}
-                  onChange={(e) => setFormData({ ...formData, floor: e.target.value })}
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Building</label>
-                <input
-                  type="text"
-                  value={formData.building}
-                  onChange={(e) => setFormData({ ...formData, building: e.target.value })}
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Description *</label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700"
-                rows={3}
-                required
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Reported By *</label>
-                <input
-                  type="text"
-                  value={formData.reported_by_name}
-                  onChange={(e) => setFormData({ ...formData, reported_by_name: e.target.value })}
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Contact</label>
-                <input
-                  type="text"
-                  value={formData.reported_by_contact}
-                  onChange={(e) => setFormData({ ...formData, reported_by_contact: e.target.value })}
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700"
-                />
-              </div>
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-kmuGreen text-white px-6 py-2 rounded hover:bg-kmuOrange transition disabled:opacity-50"
-            >
-              {loading ? 'Submitting...' : 'Submit Report'}
-            </button>
-          </form>
-        )}
-      </div>
+            {activeTab === 'dashboard' && (
+              <div className="animate-in fade-in duration-300 space-y-6">
+                {/* Stats Cards and Charts */}
+                {analytics && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <StatCard title="Total" value={analytics.total || 0} color="teal" />
+                    <StatCard title="New (24h)" value={reports.filter(r => isNewReport(r.created_at)).length} color="blue" />
+                    <StatCard title="Pending" value={analytics.statusStats?.find((s: any) => s.status === 'Reported')?.count || 0} color="yellow" />
+                    <StatCard title="Completed" value={analytics.statusStats?.find((s: any) => s.status === 'Completed')?.count || 0} color="green" />
+                  </div>
+                )}
 
-      {/* Reports List */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <div className="flex flex-wrap items-center justify-between mb-4 gap-4">
-          <div>
-            <h2 className="text-lg font-semibold text-kmuOrange">Maintenance Reports</h2>
-            {dateFilter === 'new' && (
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                Showing <span className="font-semibold text-blue-600">{filteredReports.length}</span> new report{filteredReports.length !== 1 ? 's' : ''} from the last 24 hours
-              </p>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+                    <h3 className="text-lg font-bold mb-6 text-gray-800 dark:text-gray-200">Reports by Category</h3>
+                    {categoryChartData && <Doughnut data={categoryChartData} />}
+                  </div>
+                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+                    <h3 className="text-lg font-bold mb-6 text-gray-800 dark:text-gray-200">Reports by Status</h3>
+                    {statusChartData && <Doughnut data={statusChartData} />}
+                  </div>
+                </div>
+              </div>
             )}
-            {dateFilter === '' && (
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                <span className="font-semibold text-blue-600">{reports.filter(r => isNewReport(r.created_at)).length}</span> new report{reports.filter(r => isNewReport(r.created_at)).length !== 1 ? 's' : ''} in last 24h •
-                <span className="ml-1">{filteredReports.length}</span> total report{filteredReports.length !== 1 ? 's' : ''}
-              </p>
-            )}
-          </div>
-          <div className="flex flex-wrap gap-2 items-center">
-            {/* Quick Filter Button for New Reports */}
-            <button
-              onClick={() => {
-                setDateFilter(dateFilter === 'new' ? '' : 'new');
-                setStatusFilter('');
-                setPriorityFilter('');
-                setCategoryFilter('');
-                setHallFilter('');
-                setSearch('');
-              }}
-              className={`px-4 py-2 rounded text-sm font-medium transition ${dateFilter === 'new'
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50'
-                }`}
-            >
-              {dateFilter === 'new' ? '✓ ' : ''}New Reports ({reports.filter(r => isNewReport(r.created_at)).length})
-            </button>
-            <div className="border-l border-gray-300 dark:border-gray-600 h-6 mx-1"></div>
-            <input
-              type="text"
-              placeholder="Search reports..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="border border-gray-300 dark:border-gray-600 rounded px-3 py-1 bg-white dark:bg-gray-700 text-sm"
-            />
-            <input
-              type="text"
-              placeholder="Filter by hall..."
-              value={hallFilter}
-              onChange={(e) => setHallFilter(e.target.value)}
-              className="border border-gray-300 dark:border-gray-600 rounded px-3 py-1 bg-white dark:bg-gray-700 text-sm"
-            />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="border border-gray-300 dark:border-gray-600 rounded px-3 py-1 bg-white dark:bg-gray-700 text-sm"
-            >
-              <option value="">All Status</option>
-              {STATUSES.map(s => (
-                <option key={s.value} value={s.value}>{s.label}</option>
-              ))}
-            </select>
-            <select
-              value={priorityFilter}
-              onChange={(e) => setPriorityFilter(e.target.value)}
-              className="border border-gray-300 dark:border-gray-600 rounded px-3 py-1 bg-white dark:bg-gray-700 text-sm"
-            >
-              <option value="">All Priorities</option>
-              {PRIORITIES.map(p => (
-                <option key={p.value} value={p.value}>{p.label}</option>
-              ))}
-            </select>
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="border border-gray-300 dark:border-gray-600 rounded px-3 py-1 bg-white dark:bg-gray-700 text-sm"
-            >
-              <option value="">All Categories</option>
-              {CATEGORIES.map(c => (
-                <option key={c.value} value={c.value}>{c.label}</option>
-              ))}
-            </select>
-            <select
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              className="border border-gray-300 dark:border-gray-600 rounded px-3 py-1 bg-white dark:bg-gray-700 text-sm"
-            >
-              <option value="">All Dates</option>
-              <option value="new">New (Last 24h) ({reports.filter(r => isNewReport(r.created_at)).length})</option>
-              <option value="today">Today</option>
-              <option value="this_week">This Week</option>
-              <option value="this_month">This Month</option>
-              <option value="older">Older than 30 days</option>
-            </select>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest' | 'priority')}
-              className="border border-gray-300 dark:border-gray-600 rounded px-3 py-1 bg-white dark:bg-gray-700 text-sm"
-            >
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
-              <option value="priority">Priority</option>
-            </select>
-          </div>
-        </div>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-700">
-              <tr>
-                <th className="px-4 py-2 text-left text-xs font-medium uppercase">Category</th>
-                <th className="px-4 py-2 text-left text-xs font-medium uppercase">Location</th>
-                <th className="px-4 py-2 text-left text-xs font-medium uppercase">Description</th>
-                <th className="px-4 py-2 text-left text-xs font-medium uppercase">Priority</th>
-                <th className="px-4 py-2 text-left text-xs font-medium uppercase">Status</th>
-                <th className="px-4 py-2 text-left text-xs font-medium uppercase">Reported By</th>
-                <th className="px-4 py-2 text-left text-xs font-medium uppercase">Date / Time</th>
-                <th className="px-4 py-2 text-left text-xs font-medium uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {filteredReports.map((report) => {
-                const reportId = report._id || report.id;
-                const isNew = isNewReport(report.created_at);
-                const relativeTime = getRelativeTime(report.created_at);
-                return (
-                  <tr
-                    key={reportId}
-                    className={`hover:bg-gray-50 dark:hover:bg-gray-700 ${isNew ? 'bg-blue-50 dark:bg-blue-900/10 border-l-4 border-blue-500' : ''
-                      }`}
+            {activeTab === 'reports' && (
+              <div className="animate-in fade-in duration-300 space-y-6">
+                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-bold">Maintenance Reports</h2>
+                    <button
+                      onClick={() => setShowForm(!showForm)}
+                      className="bg-kmuGreen text-white px-4 py-2 rounded-lg font-bold hover:opacity-90 transition"
+                    >
+                      {showForm ? 'Close Form' : '+ New Report'}
+                    </button>
+                  </div>
+
+                  {showForm && (
+                    <div className="mb-10 p-6 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
+                      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField label="Category" value={formData.category} onChange={(v: string) => setFormData({ ...formData, category: v })} type="select" options={CATEGORIES} />
+                        <FormField label="Priority" value={formData.priority} onChange={(v: string) => setFormData({ ...formData, priority: v })} type="select" options={PRIORITIES} />
+                        <FormField label="Hall" value={formData.hall} onChange={(v: string) => setFormData({ ...formData, hall: v })} />
+                        <FormField label="Room" value={formData.room} onChange={(v: string) => setFormData({ ...formData, room: v })} />
+                        <div className="md:col-span-2">
+                          <FormField label="Description" value={formData.description} onChange={(v: string) => setFormData({ ...formData, description: v })} type="textarea" />
+                        </div>
+                        <FormField label="Reported By" value={formData.reported_by_name} onChange={(v: string) => setFormData({ ...formData, reported_by_name: v })} />
+                        <FormField label="Contact" value={formData.reported_by_contact} onChange={(v: string) => setFormData({ ...formData, reported_by_contact: v })} />
+                        <div className="md:col-span-2">
+                          <button type="submit" disabled={loading} className="w-full bg-teal-600 text-white font-bold py-3 rounded-xl hover:bg-teal-700 transition disabled:opacity-50">
+                            {loading ? 'Submitting...' : 'Create Report'}
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  )}
+
+                  {/* Filters */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <input
+                      placeholder="Search Description..."
+                      className="bg-gray-100 dark:bg-gray-800 border-none rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-teal-500"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                    />
+                    <select
+                      className="bg-gray-100 dark:bg-gray-800 border-none rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-teal-500"
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                    >
+                      <option value="">All Statuses</option>
+                      {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                    </select>
+                    <select
+                      className="bg-gray-100 dark:bg-gray-800 border-none rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-teal-500"
+                      value={priorityFilter}
+                      onChange={(e) => setPriorityFilter(e.target.value)}
+                    >
+                      <option value="">All Priorities</option>
+                      {PRIORITIES.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
+                    </select>
+                    <button
+                      onClick={() => setDateFilter(dateFilter === 'new' ? '' : 'new')}
+                      className={`px-4 py-2 rounded-lg text-sm font-bold transition ${dateFilter === 'new' ? 'bg-teal-600 text-white' : 'bg-teal-50 text-teal-700 dark:bg-teal-900/20'}`}
+                    >
+                      {dateFilter === 'new' ? '✓ New Reports' : 'New Last 24h'}
+                    </button>
+                  </div>
+
+                  {/* Table */}
+                  <div className="overflow-x-auto border rounded-xl border-gray-100 dark:border-gray-800">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-800">
+                        <tr>
+                          <th className="px-4 py-4 text-left font-bold uppercase text-[10px] tracking-wider">Info</th>
+                          <th className="px-4 py-4 text-left font-bold uppercase text-[10px] tracking-wider text-center">Priority</th>
+                          <th className="px-4 py-4 text-left font-bold uppercase text-[10px] tracking-wider text-center">Status</th>
+                          <th className="px-4 py-4 text-right font-bold uppercase text-[10px] tracking-wider">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                        {filteredReports.map(report => {
+                          const reportId = report._id || report.id;
+                          return (
+                            <tr key={reportId} className="hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors">
+                              <td className="px-4 py-4">
+                                <div className="font-bold text-gray-900 dark:text-gray-100 mb-0.5">{report.category.toUpperCase()}</div>
+                                <div className="text-[11px] text-gray-500 flex gap-2">
+                                  <span>📍 {report.location.hall} {report.location.room ? `- ${report.location.room}` : ''}</span>
+                                  <span>🕒 {getRelativeTime(report.created_at)}</span>
+                                </div>
+                                <div className="text-xs text-gray-600 dark:text-gray-400 mt-2 line-clamp-1">{report.description}</div>
+                              </td>
+                              <td className="px-4 py-4 text-center">
+                                <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${report.priority === 'Urgent' ? 'bg-red-100 text-red-700' :
+                                    report.priority === 'High' ? 'bg-orange-100 text-orange-700' :
+                                      report.priority === 'Medium' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
+                                  }`}>
+                                  {report.priority}
+                                </span>
+                              </td>
+                              <td className="px-4 py-4 text-center">
+                                <select
+                                  value={report.status}
+                                  onChange={(e) => updateStatus(reportId!, e.target.value)}
+                                  className={`text-[10px] font-bold border-none rounded px-2 py-1 bg-transparent dark:bg-transparent ${report.status === 'Completed' ? 'text-green-600' : 'text-blue-600'
+                                    }`}
+                                >
+                                  {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                                </select>
+                              </td>
+                              <td className="px-4 py-4 text-right">
+                                {isElectricalReport(report.category) && report.status === 'Reported' && (
+                                  <div className="flex flex-col gap-1 items-end">
+                                    <span className="text-[9px] font-bold text-gray-400 uppercase">Assign to:</span>
+                                    <select
+                                      className="text-[10px] bg-gray-100 dark:bg-gray-700 border-none rounded px-2 py-1 max-w-[120px]"
+                                      onChange={(e) => {
+                                        const elec = electricians.find(el => el._id === e.target.value);
+                                        if (elec) assignToElectrician(reportId!, elec._id, elec.name);
+                                      }}
+                                      defaultValue=""
+                                    >
+                                      <option value="" disabled>Select...</option>
+                                      {electricians.map(el => <option key={el._id} value={el._id}>{el.name}</option>)}
+                                    </select>
+                                  </div>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                        {filteredReports.length === 0 && (
+                          <tr>
+                            <td colSpan={4} className="px-4 py-10 text-center text-gray-500 italic">No reports matching filters.</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'info' && (
+              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 md:p-8 animate-in fade-in duration-300">
+                <div className="space-y-10">
+                  {/* Section: ACCOUNT DETAILS */}
+                  <section>
+                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide border-b border-gray-100 dark:border-gray-800 pb-2 mb-4">Account Details</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                      <InfoField label="Staff ID" value={staffData.staffId || staffData.username} />
+                      <InfoField label="Role" value={staffData.role?.toUpperCase().replace('_', ' ')} />
+                      <InfoField label="Status" value="ACTIVE" />
+                    </div>
+                  </section>
+
+                  {/* Section: PERSONAL INFO */}
+                  <section>
+                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide border-b border-gray-100 dark:border-gray-800 pb-2 mb-4">Personal Info</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                      <InfoField label="First Name" value={staffData.firstName || staffData.name?.split(' ')[1] || ''} />
+                      <InfoField label="Sur Name" value={staffData.surName || staffData.name?.split(' ')[0] || ''} />
+                      <InfoField label="NRC" value={staffData.nrc || ''} />
+                      <InfoField label="Gender" value={staffData.gender || ''} />
+                      <InfoField label="Marital Status" value={staffData.maritalStatus || ''} />
+                      <InfoField label="Nationality" value={staffData.nationality || ''} />
+                      <InfoField label="Date of birth" value={staffData.dateOfBirth || ''} />
+                    </div>
+                  </section>
+
+                  {/* Section: ADDRESS */}
+                  <section>
+                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide border-b border-gray-100 dark:border-gray-800 pb-2 mb-4">Address</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                      <InfoField label="Province" value={staffData.province || ''} />
+                      <InfoField label="Town" value={staffData.town || ''} />
+                      <InfoField label="Address" value={staffData.address || ''} />
+                      <InfoField label="Phone" value={staffData.phone || ''} />
+                      <InfoField label="Email" value={staffData.email || ''} />
+                    </div>
+                  </section>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'password' && (
+              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 md:p-8 animate-in fade-in duration-300 max-w-md mx-auto">
+                <h2 className="text-2xl font-bold text-teal-600 mb-8 text-center">Security Settings</h2>
+                <div className="space-y-6">
+                  <FormField label="Current Password" type="password" />
+                  <FormField label="New Password" type="password" />
+                  <button
+                    onClick={() => showNotification('info', 'Feature coming soon')}
+                    className="w-full bg-teal-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-teal-700 transition uppercase tracking-wider"
                   >
-                    <td className="px-4 py-2 whitespace-nowrap text-sm">
-                      <div className="flex items-center gap-2">
-                        {CATEGORIES.find(c => c.value === report.category)?.label || report.category}
-                        {isNew && (
-                          <span className="px-1.5 py-0.5 text-xs font-semibold bg-blue-500 text-white rounded">
-                            NEW
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-2 text-sm">
-                      <div className="font-medium">{report.location.hall}</div>
-                      {report.location.room && <div className="text-xs text-gray-500">Room: {report.location.room}</div>}
-                      {report.location.floor && <div className="text-xs text-gray-500">Floor: {report.location.floor}</div>}
-                    </td>
-                    <td className="px-4 py-2 text-sm max-w-xs truncate" title={report.description}>
-                      {report.description}
-                    </td>
-                    <td className="px-4 py-2 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs rounded ${report.priority === 'Urgent' ? 'bg-red-100 text-red-800' :
-                          report.priority === 'High' ? 'bg-orange-100 text-orange-800' :
-                            report.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-green-100 text-green-800'
-                        }`}>
-                        {report.priority}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2 whitespace-nowrap">
-                      <select
-                        value={report.status}
-                        onChange={(e) => updateStatus(reportId!, e.target.value)}
-                        className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700"
-                      >
-                        {STATUSES.map(s => (
-                          <option key={s.value} value={s.value}>{s.label}</option>
-                        ))}
-                      </select>
-                    </td>
-                    <td className="px-4 py-2 text-sm">
-                      <div>{report.reported_by.name}</div>
-                      {report.reported_by.contact && (
-                        <div className="text-xs text-gray-500">{report.reported_by.contact}</div>
-                      )}
-                      {report.reported_by.student_id && (
-                        <div className="text-xs text-gray-500">Student ID: {report.reported_by.student_id}</div>
-                      )}
-                    </td>
-                    <td className="px-4 py-2 whitespace-nowrap text-sm">
-                      <div className="flex flex-col">
-                        <span className={isNew ? 'font-semibold text-blue-600 dark:text-blue-400' : ''}>
-                          {relativeTime}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {new Date(report.created_at).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-2 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        {isElectricalReport(report.category) && !report.assigned_to && (
-                          <select
-                            value=""
-                            onChange={(e) => {
-                              if (e.target.value) {
-                                const electrician = electricians.find((e: any) => e.id === e.target.value || e._id === e.target.value);
-                                if (electrician) {
-                                  assignToElectrician(reportId!, e.target.value, electrician.name || electrician.username);
-                                }
-                              }
-                            }}
-                            disabled={assigningReportId === reportId}
-                            className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-kmuGreen"
-                          >
-                            <option value="">Assign...</option>
-                            {electricians.map((electrician: any) => (
-                              <option key={electrician.id || electrician._id} value={electrician.id || electrician._id}>
-                                {electrician.name || electrician.username}
-                              </option>
-                            ))}
-                          </select>
-                        )}
-                        {report.assigned_to && (
-                          <span className="text-xs px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 rounded">
-                            ✓ {report.assigned_to.role === 'electrician' ? '⚡' : ''} {report.assigned_to.name}
-                          </span>
-                        )}
-                        <Link
-                          href={`/maintenance/${reportId}`}
-                          className="text-kmuGreen hover:text-kmuOrange text-sm"
-                        >
-                          View
-                        </Link>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-              {filteredReports.length === 0 && (
-                <tr>
-                  <td colSpan={8} className="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
-                    No maintenance reports found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                    Update Security
+                  </button>
+                </div>
+              </div>
+            )}
+
+          </div>
         </div>
       </div>
-    </section>
+
+      {notification?.isVisible && (
+        <Notification
+          type={notification.type}
+          message={notification.message}
+          isVisible={notification.isVisible}
+          onClose={hideNotification}
+        />
+      )}
+    </div>
+  );
+}
+
+// UI Components
+function NavButton({ label, icon, active, onClick }: any) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-4 px-6 py-4 transition-all border-l-4 text-left ${active
+        ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/10 text-teal-600'
+        : 'border-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+        }`}
+    >
+      <span className="text-xl">{icon}</span>
+      <span className="font-semibold">{label}</span>
+    </button>
+  );
+}
+
+function StatCard({ title, value, color }: any) {
+  const colors: any = {
+    teal: 'text-teal-600 border-teal-100',
+    blue: 'text-blue-600 border-blue-100',
+    yellow: 'text-yellow-600 border-yellow-100',
+    green: 'text-green-600 border-green-100'
+  };
+  return (
+    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border ${colors[color]} p-5`}>
+      <div className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mb-1">{title}</div>
+      <div className={`text-3xl font-bold ${colors[color].split(' ')[0]}`}>{value}</div>
+    </div>
+  );
+}
+
+function FormField({ label, value, onChange, type = 'text', options = [] }: any) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-[10px] font-extrabold text-teal-700 dark:text-teal-400 uppercase tracking-tighter ml-1">{label}</label>
+      {type === 'select' ? (
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-teal-500 outline-none"
+        >
+          <option value="">Select {label}...</option>
+          {options.map((o: any) => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </select>
+      ) : type === 'textarea' ? (
+        <textarea
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-teal-500 outline-none min-h-[100px]"
+        />
+      ) : (
+        <input
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-teal-500 outline-none"
+        />
+      )}
+    </div>
+  );
+}
+
+function InfoField({ label, value, fullWidth = false }: any) {
+  return (
+    <div className={`flex flex-col gap-1 ${fullWidth ? 'md:col-span-2' : ''}`}>
+      <label className="text-[10px] font-extrabold text-teal-700 dark:text-teal-400 uppercase tracking-tighter">{label}</label>
+      <div className="bg-gray-100 dark:bg-gray-800/80 rounded border border-gray-200 dark:border-gray-700 px-3 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 min-h-[38px]">
+        {value || '-'}
+      </div>
+    </div>
   );
 }

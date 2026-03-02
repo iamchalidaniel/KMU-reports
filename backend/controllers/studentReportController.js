@@ -10,7 +10,7 @@ export const listStudentReports = async (req, res) => {
 
         // If student, only show their own reports
         if (req.user && req.user.role === 'student') {
-            query.student_id = req.user._id;
+            query.student_id = req.user.id;
         }
 
         // Apply filters
@@ -52,7 +52,7 @@ export const getStudentReport = async (req, res) => {
         }
 
         // Check authorization
-        if (req.user.role === 'student' && report.student_id._id.toString() !== req.user._id.toString()) {
+        if (req.user.role === 'student' && report.student_id._id.toString() !== req.user.id.toString()) {
             return res.status(403).json({ error: 'Unauthorized' });
         }
 
@@ -89,8 +89,8 @@ export const createStudentReport = async (req, res) => {
         }
 
         const report = new StudentReport({
-            student_id: is_anonymous ? null : req.user._id,
-            student_name: is_anonymous ? 'Anonymous' : req.user.fullName,
+            student_id: is_anonymous ? null : req.user.id,
+            student_name: is_anonymous ? 'Anonymous' : req.user.name,
             student_email: is_anonymous ? null : req.user.email,
             incident_date: incident_date || new Date(),
             description: description.trim(),

@@ -46,7 +46,13 @@ export async function login(req, res) {
             });
             return res.status(401).json({ error: 'Invalid credentials' });
         }
-        const payload = { id: user._id || user.id, role: user.role, username: user.username };
+        const payload = {
+            id: user._id || user.id,
+            role: user.role,
+            username: user.username,
+            name: user.name,
+            studentId: user.studentId
+        };
         const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
 
         // Audit log for successful login
@@ -101,7 +107,7 @@ export async function register(req, res) {
 
 export async function registerStudent(req, res) {
     const { sin, name, contact, email, program, roomNo, password } = req.body;
-    
+
     try {
         // Validate required fields
         if (!sin || !name || !email || !program || !roomNo || !password) {
@@ -138,10 +144,7 @@ export async function registerStudent(req, res) {
             return res.status(409).json({ error: 'Student ID already registered as user' });
         }
 
-        // Generate a temporary password (students will need to reset it on first login)
-        // In production, you might want to send this via email or require password during registration
-        const tempPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
-        const hashedPassword = await bcrypt.hash(tempPassword, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         // Create User account with role 'student'
         const user = await UserModel.create({
@@ -194,15 +197,15 @@ export async function registerStudent(req, res) {
         });
     } catch (err) {
         console.error('Student registration error:', err);
-        
+
         // Handle duplicate key errors
         if (err.code === 11000) {
             const field = Object.keys(err.keyPattern)[0];
-            return res.status(409).json({ 
-                error: `${field === 'studentId' ? 'Student ID' : field} already exists` 
+            return res.status(409).json({
+                error: `${field === 'studentId' ? 'Student ID' : field} already exists`
             });
         }
-        
+
         res.status(500).json({ error: 'Server error during registration' });
     }
 }

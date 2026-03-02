@@ -10,7 +10,7 @@ export const listAppeals = async (req, res) => {
 
         // If student, only show their own appeals
         if (req.user && req.user.role === 'student') {
-            query.student_id = req.user._id;
+            query.student_id = req.user.id;
         } else if (studentId) {
             query.student_id = studentId;
         }
@@ -54,7 +54,7 @@ export const getAppeal = async (req, res) => {
         }
 
         // Check authorization
-        if (req.user.role === 'student' && appeal.student_id !== req.user._id.toString()) {
+        if (req.user.role === 'student' && appeal.student_id !== req.user.id.toString()) {
             return res.status(403).json({ error: 'Unauthorized' });
         }
 
@@ -99,7 +99,7 @@ export const submitAppeal = async (req, res) => {
         }
 
         // Check authorization
-        if (appeal.student_id !== req.user._id.toString()) {
+        if (appeal.student_id !== req.user.id.toString()) {
             return res.status(403).json({ error: 'Unauthorized' });
         }
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-
 import { saveAs } from 'file-saver';
 import { Bar, Line } from 'react-chartjs-2';
 import {
@@ -17,7 +16,7 @@ import {
 } from 'chart.js';
 import { useAuth } from '../../context/AuthContext';
 import { API_BASE_URL } from '../../config/constants';
-import { authHeaders } from '../../utils/api';
+import { authHeaders, getProfile } from '../../utils/api';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type { Case, Student } from '../../../types/global.d';
@@ -31,8 +30,10 @@ export default function SecretaryDashboard() {
   const router = useRouter();
   const { notification, showNotification, hideNotification } = useNotification();
 
-  // declare all state variables before any conditional returns
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [profile, setProfile] = useState<any>(null);
+  const [profileLoading, setProfileLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [cases, setCases] = useState<Case[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
@@ -58,36 +59,40 @@ export default function SecretaryDashboard() {
     }
   }, [authLoading, token, user, router]);
 
-
-
   useEffect(() => {
+    async function fetchStaffProfile() {
+      try {
+        setProfileLoading(true);
+        const data = await getProfile();
+        setProfile(data);
+      } catch (err) {
+        console.error('Failed to fetch profile:', err);
+      } finally {
+        setProfileLoading(false);
+      }
+    }
+
     async function fetchData() {
       try {
         const casesRes = await fetch(`${API_BASE_URL}/cases`, { headers: { ...authHeaders() } });
         const studentsRes = await fetch(`${API_BASE_URL}/students`, { headers: { ...authHeaders() } });
-
         if (casesRes.ok) {
-          const casesData = await casesRes.json();
-          setCases(casesData.cases || casesData || []);
-        } else {
-          console.error('Failed to fetch cases:', casesRes.status);
-          setCases([]);
+          const data = await casesRes.json();
+          setCases(data.cases || data || []);
         }
-
         if (studentsRes.ok) {
-          const studentsData = await studentsRes.json();
-          setStudents(studentsData.students || studentsData || []);
-        } else {
-          console.error('Failed to fetch students:', studentsRes.status);
-          setStudents([]);
+          const data = await studentsRes.json();
+          setStudents(data.students || data || []);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
-        setCases([]);
-        setStudents([]);
       }
     }
-    fetchData();
+
+    if (token) {
+      fetchStaffProfile();
+      fetchData();
+    }
   }, [token]);
 
   const safeStudents = Array.isArray(students) ? students : [];
@@ -110,17 +115,9 @@ export default function SecretaryDashboard() {
     );
   }, [search, cases, students]);
 
-  if (isCheckingAuth) {
-    return <div className="text-center text-kmuGreen">Loading...</div>;
-  }
-
-  if (!user || user.role !== 'secretary') return <div className="text-red-600">Access denied.</div>;
-
   async function exportCasesToWord() {
     try {
-      // Prepare chart data
       const chartExportData = await prepareChartExport();
-
       const res = await fetch(`${API_BASE_URL}/reports/dashboard-cases`, {
         method: 'POST',
         headers: {
@@ -130,264 +127,264 @@ export default function SecretaryDashboard() {
         body: JSON.stringify({
           charts: chartExportData.charts,
           pageInfo: {
-            title: 'Secretary Dashboard - All Cases Report',
-            url: window.location.href
+            title: 'Secretary Dashboard Administrative Report',
+            url: typeof window !== 'undefined' ? window.location.href : ''
           }
         }),
       });
 
       if (!res.ok) throw new Error(await res.text());
       const blob = await res.blob();
-      saveAs(blob, 'secretary_all_cases_report.docx');
+      saveAs(blob, 'secretary_report.docx');
+      showNotification('success', 'Report exported successfully!');
     } catch (err) {
-      console.error('Export cases error:', err);
-      showNotification('error', 'Failed to export cases');
+      console.error('Export error:', err);
+      showNotification('error', 'Failed to export report');
     }
   }
 
-  // Visualization data
-  const totalCases = filteredCases.length;
-  const totalStudents = safeStudents.length;
-  const todayCases = filteredCases.filter(c => {
-    const caseDate = new Date(c.createdAt || c.incidentDate || 0);
-    const today = new Date();
-    return caseDate.toDateString() === today.toDateString();
-  }).length;
-  const recentCases = filteredCases.filter(c => {
-    const caseDate = new Date(c.createdAt || c.incidentDate || 0);
+  if (isCheckingAuth) {
+    return <div className="text-center text-kmuGreen p-12">Loading...</div>;
+  }
+
+  if (!user || user.role !== 'secretary') return <div className="text-red-600 p-12">Access denied.</div>;
+
+  const staffData = profile || user;
+
+  // Stats
+  const todayCount = filteredCases.filter(c => new Date(c.createdAt || 0).toDateString() === new Date().toDateString()).length;
+  const recentCount = filteredCases.filter(c => {
+    const d = new Date(c.createdAt || 0);
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
-    return caseDate >= weekAgo;
+    return d >= weekAgo;
   }).length;
 
-  // Get cases per day for the last 7 days
+  // Charts
   const last7Days = [];
   const casesPerDay = [];
   for (let i = 6; i >= 0; i--) {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
-    last7Days.push(date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }));
-
-    const casesOnDay = filteredCases.filter(c => {
-      const caseDate = new Date(c.createdAt || c.incidentDate || 0);
-      return caseDate.toDateString() === date.toDateString();
-    }).length;
-    casesPerDay.push(casesOnDay);
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    last7Days.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
+    casesPerDay.push(filteredCases.filter(c => new Date(c.createdAt || 0).toDateString() === d.toDateString()).length);
   }
 
-  const weeklyTrendData = {
+  const trendData = {
     labels: last7Days,
-    datasets: [
-      {
-        label: 'Cases per Day',
-        data: casesPerDay,
-        borderColor: 'rgba(16, 185, 129, 1)',
-        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-        tension: 0.4,
-      },
-    ],
+    datasets: [{
+      label: 'Cases',
+      data: casesPerDay,
+      borderColor: '#10B981',
+      backgroundColor: 'rgba(16, 185, 129, 0.1)',
+      fill: true,
+      tension: 0.4
+    }]
   };
 
-  const departmentCounts: Record<string, number> = {};
-  filteredCases.forEach((c: Case) => {
-    if (c.student?.department) departmentCounts[c.student.department] = (departmentCounts[c.student.department] || 0) + 1;
+  const deptCounts: Record<string, number> = {};
+  filteredCases.forEach(c => {
+    const d = c.student?.department || 'N/A';
+    deptCounts[d] = (deptCounts[d] || 0) + 1;
   });
 
-  const departmentChartData = {
-    labels: Object.keys(departmentCounts),
-    datasets: [
-      {
-        label: 'Cases by Department',
-        data: Object.values(departmentCounts),
-        backgroundColor: 'rgba(251, 191, 36, 0.7)',
-      },
-    ],
+  const deptData = {
+    labels: Object.keys(deptCounts),
+    datasets: [{
+      label: 'By Department',
+      data: Object.values(deptCounts),
+      backgroundColor: '#F59E0B'
+    }]
   };
 
   return (
-    <>
-      <section>
-        <div className="mb-6">
-          <h1 className="text-4xl font-bold mb-2 text-kmuGreen">Secretary Dashboard</h1>
-          <p className="text-gray-700 dark:text-gray-300">Welcome to your administrative dashboard. Manage records, documentation, and administrative tasks efficiently.</p>
-        </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
+      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 flex flex-col items-center justify-center">
-            <div className="text-4xl font-bold text-kmuGreen">{totalStudents}</div>
-            <div className="text-gray-700 dark:text-gray-300">Total Students</div>
+        {/* Banner */}
+        <div className="relative mb-6 rounded-xl overflow-hidden bg-white dark:bg-gray-900 shadow-sm border border-gray-200 dark:border-gray-800">
+          <div className="h-32 bg-gradient-to-r from-emerald-600 to-teal-500 relative">
+            <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/diamond-upholstery.png')]"></div>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 flex flex-col items-center justify-center">
-            <div className="text-4xl font-bold text-kmuOrange">{totalCases}</div>
-            <div className="text-gray-700 dark:text-gray-300">Total Cases</div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 flex flex-col items-center justify-center">
-            <div className="text-4xl font-bold text-blue-600">{todayCases}</div>
-            <div className="text-gray-700 dark:text-gray-300">Cases Today</div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 flex flex-col items-center justify-center">
-            <div className="text-4xl font-bold text-purple-600">{recentCases}</div>
-            <div className="text-gray-700 dark:text-gray-300">This Week</div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div
-            id="secretary-weekly-trend-chart"
-            data-chart-export="true"
-            data-chart-title="Weekly Case Trend"
-            data-chart-description="Number of cases created per day over the last 7 days"
-            className="bg-white dark:bg-gray-800 rounded-lg shadow p-6"
-          >
-            <h2 className="text-lg font-semibold mb-2 text-kmuOrange">Weekly Case Trend</h2>
-            <Line data={weeklyTrendData} options={{ responsive: true, plugins: { legend: { display: false } } }} />
-          </div>
-          <div
-            id="secretary-department-chart"
-            data-chart-export="true"
-            data-chart-title="Cases by Department"
-            data-chart-description="Distribution of disciplinary cases across academic departments"
-            className="bg-white dark:bg-gray-800 rounded-lg shadow p-6"
-          >
-            <h2 className="text-lg font-semibold mb-2 text-kmuOrange">Cases by Department</h2>
-            <Bar data={departmentChartData} options={{ responsive: true, plugins: { legend: { display: false } } }} />
-          </div>
-        </div>
-
-        {/* Recent Cases Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <h2 className="text-lg font-semibold text-kmuOrange">Recent Cases</h2>
-              <Link
-                href="/cases"
-                className="text-sm text-kmuGreen hover:text-kmuOrange transition underline"
-              >
-                View All Cases →
-              </Link>
+          <div className="px-6 pb-6 flex flex-col md:flex-row items-center md:items-end -mt-12 gap-6 relative z-10">
+            <div className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-900 bg-white dark:bg-gray-800 shadow-lg flex items-center justify-center overflow-hidden">
+              <div className="w-24 h-24 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-4xl shadow-inner">
+                {staffData.name ? staffData.name.charAt(0).toUpperCase() : staffData.username.charAt(0).toUpperCase()}
+              </div>
             </div>
-            <input
-              type="text"
-              className="border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-              placeholder="Search cases..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
+            <div className="flex-1 text-center md:text-left mb-2">
+              <h1 className="text-2xl font-bold uppercase">{staffData.name || 'Secretary Name'}</h1>
+              <p className="text-gray-600 dark:text-gray-400 font-semibold tracking-tight">Staff ID : <span className="text-emerald-600 dark:text-emerald-400 font-mono">{staffData.staffId || staffData.username}</span></p>
+            </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-200 dark:border-gray-600">
-                  <th className="text-left py-2 px-2">Student</th>
-                  <th className="text-left py-2 px-2">Department</th>
-                  <th className="text-left py-2 px-2">Offense</th>
-                  <th className="text-left py-2 px-2">Date</th>
-                  <th className="text-left py-2 px-2">Severity</th>
-                  <th className="text-left py-2 px-2">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredCases
-                  .sort((a: Case, b: Case) => new Date(b.createdAt || b.incidentDate || 0).getTime() - new Date(a.createdAt || a.incidentDate || 0).getTime())
-                  .slice(0, 15)
-                  .map((c: Case, i: number) => (
-                    <tr
-                      key={i}
-                      className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
-                      onClick={() => router.push(`/cases/${c._id}`)}
-                    >
-                      <td className="py-2 px-2">
-                        <div className="font-medium text-kmuGreen hover:text-kmuOrange transition">{c.student?.fullName || 'Unknown'}</div>
-                        <div className="text-xs text-gray-500">{c.student?.studentId || ''}</div>
-                      </td>
-                      <td className="py-2 px-2">{c.student?.department || 'N/A'}</td>
-                      <td className="py-2 px-2">{c.offenseType || 'N/A'}</td>
-                      <td className="py-2 px-2">{c.incidentDate || 'N/A'}</td>
-                      <td className="py-2 px-2">
-                        <span className={`px-2 py-1 rounded text-xs ${c.severity === 'Critical' ? 'bg-red-100 text-red-800' :
-                            c.severity === 'High' ? 'bg-orange-100 text-orange-800' :
-                              c.severity === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                                'bg-green-100 text-green-800'
-                          }`}>
-                          {c.severity || 'N/A'}
-                        </span>
-                      </td>
-                      <td className="py-2 px-2">
-                        <span className={`px-2 py-1 rounded text-xs ${c.status === 'Open' ? 'bg-blue-100 text-blue-800' :
-                            c.status === 'Closed' ? 'bg-gray-100 text-gray-800' :
-                              'bg-yellow-100 text-yellow-800'
-                          }`}>
-                          {c.status || 'N/A'}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-            {filteredCases.length === 0 && (
-              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                No cases found.
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Nav */}
+          <div className="lg:w-1/4">
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden sticky top-24">
+              <nav className="flex flex-col">
+                <NavButton label="Dashboard" icon="🏢" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
+                <NavButton label="Registry" icon="📋" active={activeTab === 'registry'} onClick={() => setActiveTab('registry')} />
+                <NavButton label="Staff Info" icon="👤" active={activeTab === 'info'} onClick={() => setActiveTab('info')} />
+                <NavButton label="Settings" icon="⚙️" active={activeTab === 'password'} onClick={() => setActiveTab('password')} />
+              </nav>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="lg:w-3/4 space-y-6">
+
+            {activeTab === 'dashboard' && (
+              <div className="animate-in fade-in duration-300 space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <StatCard title="Total Students" value={safeStudents.length} color="teal" />
+                  <StatCard title="Total Cases" value={filteredCases.length} color="emerald" />
+                  <StatCard title="Added Today" value={todayCount} color="blue" />
+                  <StatCard title="This Week" value={recentCount} color="orange" />
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+                    <h3 className="text-sm font-bold opacity-50 mb-4 uppercase tracking-widest">Weekly Activity</h3>
+                    <Line data={trendData} />
+                  </div>
+                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+                    <h3 className="text-sm font-bold opacity-50 mb-4 uppercase tracking-widest">Dept. Distribution</h3>
+                    <Bar data={deptData} />
+                  </div>
+                </div>
+
+                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+                  <h3 className="font-bold mb-4">Documentation Actions</h3>
+                  <div className="flex gap-4">
+                    <button onClick={exportCasesToWord} className="px-6 py-2 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700 transition">EXPORT CASES (DOCX)</button>
+                    <Link href="/reports" className="px-6 py-2 border border-emerald-600 text-emerald-600 font-bold rounded-lg hover:bg-emerald-50 transition">VIEW FULL REPORTS</Link>
+                  </div>
+                </div>
               </div>
             )}
+
+            {activeTab === 'registry' && (
+              <div className="animate-in fade-in duration-300 space-y-6">
+                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-bold">Administrative Registry</h2>
+                    <input
+                      placeholder="Search student or case..."
+                      className="bg-gray-100 dark:bg-gray-800 border-none rounded-lg px-4 py-2 text-sm w-64"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                    />
+                  </div>
+                  <div className="overflow-x-auto border border-gray-100 dark:border-gray-800 rounded-xl">
+                    <table className="w-full text-xs">
+                      <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 font-bold text-gray-400 uppercase">
+                        <tr>
+                          <th className="px-4 py-4 text-left">Entity</th>
+                          <th className="px-4 py-4 text-left">Details</th>
+                          <th className="px-4 py-4 text-center">Date</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                        {filteredCases.slice(0, 15).map((c, i) => (
+                          <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-900 cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
+                            <td className="px-4 py-4">
+                              <div className="font-bold text-emerald-600">{c.student?.fullName}</div>
+                              <div className="text-[10px] text-gray-400">{c.student?.studentId}</div>
+                            </td>
+                            <td className="px-4 py-4">{c.offenseType}</td>
+                            <td className="px-4 py-4 text-center text-gray-500 font-mono">{new Date(c.createdAt || 0).toLocaleDateString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'info' && (
+              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 md:p-8 animate-in fade-in duration-300">
+                <div className="space-y-10">
+                  <section>
+                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide border-b border-gray-100 dark:border-gray-800 pb-2 mb-4">Account Details</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                      <InfoField label="Staff ID" value={staffData.staffId || staffData.username} />
+                      <InfoField label="Role" value={staffData.role?.toUpperCase().replace('_', ' ')} />
+                      <InfoField label="Status" value="ACTIVE" />
+                    </div>
+                  </section>
+                  <section>
+                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide border-b border-gray-100 dark:border-gray-800 pb-2 mb-4">Personal Info</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                      <InfoField label="First Name" value={staffData.firstName} />
+                      <InfoField label="Sur Name" value={staffData.surName} />
+                      <InfoField label="NRC" value={staffData.nrc} />
+                      <InfoField label="Gender" value={staffData.gender} />
+                      <InfoField label="Nationality" value={staffData.nationality} />
+                    </div>
+                  </section>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'password' && (
+              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-12 animate-in fade-in duration-300 max-w-md mx-auto text-center">
+                <h2 className="text-2xl font-bold text-emerald-600 mb-8 uppercase tracking-widest">Administrative Password</h2>
+                <p className="text-gray-500 text-sm mb-8">Update your system access credentials here.</p>
+                <button onClick={() => showNotification('info', 'Feature coming soon')} className="w-full bg-emerald-600 text-white font-bold py-4 rounded-xl shadow-lg uppercase text-xs tracking-widest">Initialize Reset</button>
+              </div>
+            )}
+
           </div>
         </div>
+      </div>
 
-        {/* Quick Actions */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
-          <h2 className="text-lg font-semibold mb-4 text-kmuOrange">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Link
-              href="/students"
-              className="bg-kmuGreen text-white px-4 py-3 rounded hover:bg-kmuOrange transition text-center font-medium"
-            >
-              📚 Manage Students
-            </Link>
-            <Link
-              href="/cases"
-              className="bg-blue-600 text-white px-4 py-3 rounded hover:bg-blue-700 transition text-center font-medium"
-            >
-              📋 View All Cases
-            </Link>
-            <button
-              className="bg-gray-600 text-white px-4 py-3 rounded hover:bg-gray-700 transition font-medium"
-              onClick={exportCasesToWord}
-              type="button"
-            >
-              📄 Export Reports
-            </button>
-          </div>
-        </div>
-
-        {/* Export Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
-          <h2 className="text-lg font-semibold mb-4 text-kmuOrange">Export & Reports</h2>
-          <div className="flex gap-4 flex-wrap">
-            <button
-              className="bg-kmuGreen text-white px-4 py-2 rounded hover:bg-kmuOrange transition"
-              onClick={exportCasesToWord}
-              type="button"
-            >
-              Export All Cases (DOCX)
-            </button>
-            <Link
-              href="/reports"
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition inline-block"
-            >
-              View Detailed Reports
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Notification */}
       {notification?.isVisible && (
-        <Notification
-          type={notification.type}
-          message={notification.message}
-          isVisible={notification.isVisible}
-          onClose={hideNotification}
-        />
+        <Notification type={notification.type} message={notification.message} isVisible={notification.isVisible} onClose={hideNotification} />
       )}
-    </>
+    </div>
   );
-} 
+}
+
+function NavButton({ label, icon, active, onClick }: any) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-4 px-6 py-4 transition-all border-l-4 text-left ${active
+        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/10 text-emerald-600'
+        : 'border-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+        }`}
+    >
+      <span className="text-xl">{icon}</span>
+      <span className="font-semibold">{label}</span>
+    </button>
+  );
+}
+
+function StatCard({ title, value, color }: any) {
+  const colors: any = {
+    teal: 'text-teal-600 border-teal-100',
+    emerald: 'text-emerald-600 border-emerald-100',
+    blue: 'text-blue-600 border-blue-100',
+    orange: 'text-orange-600 border-orange-100'
+  };
+  return (
+    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border ${colors[color]} p-5`}>
+      <div className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mb-1">{title}</div>
+      <div className={`text-3xl font-bold ${colors[color].split(' ')[0]}`}>{value}</div>
+    </div>
+  );
+}
+
+function InfoField({ label, value }: any) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-[10px] font-extrabold text-emerald-700 dark:text-emerald-400 uppercase tracking-tighter ml-1">{label}</label>
+      <div className="bg-gray-100 dark:bg-gray-800/80 rounded border border-gray-200 dark:border-gray-700 px-3 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 min-h-[38px]">
+        {value || '-'}
+      </div>
+    </div>
+  );
+}

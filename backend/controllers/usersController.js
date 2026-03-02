@@ -1,4 +1,5 @@
 import UserModel from '../models/user.js';
+import StudentModel from '../models/student.js';
 import db from '../models/db.js';
 import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
@@ -97,8 +98,27 @@ export async function getOwnProfile(req, res) {
             console.log('User not found for id:', req.user.id);
             return res.status(404).json({ error: 'User not found' });
         }
-        console.log('User found:', user);
-        res.json(user);
+
+        // Convert to plain object if it's a Mongoose document
+        let userObj = user.toObject ? user.toObject() : user;
+
+        // If student, merge with student record
+        if (userObj.role === 'student' && userObj.studentId) {
+            try {
+                const student = await StudentModel.findOne({ studentId: userObj.studentId });
+                if (student) {
+                    const studentObj = student.toObject ? student.toObject() : student;
+                    // Merge student data into user profile
+                    userObj = { ...userObj, ...studentObj };
+                }
+            } catch (err) {
+                console.error('Error fetching student data for profile:', err);
+                // Continue with user data if student fetch fails
+            }
+        }
+
+        console.log('User found:', userObj);
+        res.json(userObj);
     } catch (err) {
         console.error('getOwnProfile error:', err);
         res.status(500).json({ error: 'Server error' });
@@ -109,10 +129,17 @@ export async function updateOwnProfile(req, res) {
     try {
         let result;
         if (dbType === 'mongo') {
-            // Allow updating both name and username
+            // Allow updating personal and address fields
+            const allowedFields = [
+                'name', 'username', 'firstName', 'surName', 'nrc', 'gender',
+                'maritalStatus', 'nationality', 'dateOfBirth', 'phone', 'email',
+                'province', 'town', 'address'
+            ];
+
             const updateData = {};
-            if (req.body.name !== undefined) updateData.name = req.body.name;
-            if (req.body.username !== undefined) updateData.username = req.body.username;
+            allowedFields.forEach(field => {
+                if (req.body[field] !== undefined) updateData[field] = req.body[field];
+            });
 
             let id = req.user.id;
             // Only convert to ObjectId if it looks like a valid ObjectId
@@ -126,6 +153,31 @@ export async function updateOwnProfile(req, res) {
             }
 
             result = await UserModel.findByIdAndUpdate(id, updateData, { new: true, select: '-password' });
+
+            // If student, also update the student model
+            if (result && result.role === 'student' && result.studentId) {
+                try {
+                    // Map user profile fields to student model fields if they overlap
+                    const studentUpdateData = { ...updateData };
+                    if (updateData.name) studentUpdateData.fullName = updateData.name;
+
+                    // Added fields specific to student dashboard requirements
+                    const studentSpecificFields = [
+                        'yearOfStudy', 'status', 'deliveryMode', 'passport', 'roomNo', 'program'
+                    ];
+                    studentSpecificFields.forEach(field => {
+                        if (req.body[field] !== undefined) studentUpdateData[field] = req.body[field];
+                    });
+
+                    await StudentModel.findOneAndUpdate(
+                        { studentId: result.studentId },
+                        studentUpdateData,
+                        { new: true }
+                    );
+                } catch (err) {
+                    console.error('Error updating linked student record:', err);
+                }
+            }
         } else if (dbType === 'mysql') {
             const updates = [];
             const values = [];

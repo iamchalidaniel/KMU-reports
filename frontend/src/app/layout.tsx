@@ -17,6 +17,7 @@ const ServiceWorkerRegistration = lazy(() => import('../components/ServiceWorker
 const PreloadProgress = lazy(() => import('../components/PreloadProgress'));
 const CacheStatus = lazy(() => import('../components/CacheStatus'));
 const OfflineIndicator = lazy(() => import('../components/OfflineIndicator'));
+const Navbar = lazy(() => import('../components/Navbar'));
 
 import clsx from 'clsx';
 import { API_BASE_URL } from '../config/constants';
@@ -50,37 +51,7 @@ const LoadingFallback = () => (
 // Lazy load Sidebar component
 const Sidebar = lazy(() => import('../components/Sidebar'));
 
-function TopNavbar() {
-  const { user, logout } = useAuth();
-  const pathname = usePathname();
-  const router = useRouter();
-
-  if (!user) return null;
-
-  return (
-    <nav className="sticky top-0 z-30 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
-      <div className="px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-            KMU Reports
-          </h1>
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-600 dark:text-gray-300">
-            {user.name || user.username}
-          </span>
-          <button
-            onClick={logout}
-            className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-          >
-            Logout
-          </button>
-        </div>
-      </div>
-        </nav>
-  );
-}
+// Old TopNavbar removed in favor of lazy loaded Navbar component
 
 function AppContent({ isLogin, isPublic, children }: { isLogin: boolean; isPublic: boolean; children: React.ReactNode }) {
   const { user } = useAuth();
@@ -105,7 +76,7 @@ function AppContent({ isLogin, isPublic, children }: { isLogin: boolean; isPubli
           <Sidebar />
         </Suspense>
       )}
-      
+
       {/* Main content */}
       <div
         className="flex-1 flex flex-col relative"
@@ -113,10 +84,12 @@ function AppContent({ isLogin, isPublic, children }: { isLogin: boolean; isPubli
           marginLeft: shouldShowNav && !isMobile ? `${sidebarWidth}px` : '0px'
         }}
       >
-        {/* Hide top navbar on mobile */}
-        <div className="hidden md:block">
-          {shouldShowNav && <TopNavbar />}
-        </div>
+        {/* Main Navbar */}
+        {shouldShowNav && (
+          <Suspense fallback={<div className="h-16 border-b border-gray-200 dark:border-gray-700" />}>
+            <Navbar />
+          </Suspense>
+        )}
         <main className="flex-1 px-2 py-2 md:px-6 md:py-8 overflow-x-hidden">
           <Suspense fallback={<LoadingFallback />}>
             {children}
@@ -124,8 +97,8 @@ function AppContent({ isLogin, isPublic, children }: { isLogin: boolean; isPubli
         </main>
       </div>
     </div>
-    );
-  }
+  );
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -152,17 +125,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="description" content="KMU Reports - Comprehensive Reporting Management System" />
         <meta name="theme-color" content="#10B981" />
-        
+
         {/* Preload critical resources */}
         <link rel="preload" href="/kmu_logo.svg" as="image" type="image/svg+xml" />
         <link rel="preload" href="/api/health" as="fetch" crossOrigin="anonymous" />
-        
+
         {/* DNS prefetch for external domains */}
         <link rel="dns-prefetch" href="//kmu-reports.onrender.com" />
-        
+
         {/* Preconnect to API */}
         <link rel="preconnect" href="https://kmu-reports.onrender.com" />
-        
+
         <title>KMU Reports</title>
       </head>
       <body className="min-h-screen">
@@ -171,32 +144,32 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {syncError}
           </div>
         )}
-        
+
         <AuthProvider>
           <SyncProvider>
             <ThemeProvider>
               <SidebarProvider>
                 <AppContent isLogin={isLogin} isPublic={isPublic}>
-                    {children}
+                  {children}
                 </AppContent>
-              
+
                 {/* Lazy load PWA components */}
                 <Suspense fallback={null}>
-              <ServiceWorkerRegistration />
+                  <ServiceWorkerRegistration />
                 </Suspense>
-                
+
                 <Suspense fallback={null}>
                   <PreloadProgress />
                 </Suspense>
-                
+
                 <Suspense fallback={null}>
                   <CacheStatus />
                 </Suspense>
-                
+
                 <Suspense fallback={null}>
                   <OfflineIndicator />
                 </Suspense>
-                
+
                 <Suspense fallback={null}>
                   <SyncManagerClient />
                 </Suspense>
