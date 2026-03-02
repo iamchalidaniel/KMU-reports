@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -32,10 +32,9 @@ const navIcons = {
 };
 
 export default function Sidebar() {
-  const [open, setOpen] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const { sidebarWidth, setSidebarWidth } = useSidebar();
+  const { sidebarWidth, setSidebarWidth, isSidebarOpen: open, setIsSidebarOpen: setOpen } = useSidebar();
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
@@ -59,7 +58,7 @@ export default function Sidebar() {
   const linkActive =
     'bg-kmuGreen text-white shadow dark:bg-kmuGreen dark:text-white';
 
-  // Role-based navs
+  // Role-based navs - Removed duplicates (Profile, Settings, Logout)
   let navLinks = [];
   if (user?.role === 'admin') {
     navLinks = [
@@ -71,9 +70,7 @@ export default function Sidebar() {
       { icon: navIcons.evidence, label: 'Evidence', path: '/evidence' },
       { icon: navIcons.newcase, label: 'New Case', path: '/cases/new' },
       { icon: navIcons.audit, label: 'Audit/Logs', path: '/audit' },
-      { icon: navIcons.profile, label: 'Profile & Settings', path: '/profile' },
       { icon: navIcons.help, label: 'Help', path: '/help' },
-      { icon: navIcons.logout, label: 'Logout', path: '/logout', danger: true, mobileOnly: true },
     ];
   } else if (user?.role === 'security_officer') {
     navLinks = [
@@ -82,9 +79,7 @@ export default function Sidebar() {
       { icon: navIcons.evidence, label: 'Evidence', path: '/evidence' },
       { icon: navIcons.students, label: 'Students', path: '/students' },
       { icon: navIcons.newcase, label: 'New Case', path: '/cases/new' },
-      { icon: navIcons.profile, label: 'Profile & Settings', path: '/profile' },
       { icon: navIcons.help, label: 'Help', path: '/help' },
-      { icon: navIcons.logout, label: 'Logout', path: '/logout', danger: true, mobileOnly: true },
     ];
   } else if (user?.role === 'chief_security_officer') {
     navLinks = [
@@ -95,9 +90,7 @@ export default function Sidebar() {
       { icon: navIcons.evidence, label: 'Evidence', path: '/evidence' },
       { icon: navIcons.newcase, label: 'New Case', path: '/cases/new' },
       { icon: navIcons.audit, label: 'Audit/Logs', path: '/audit' },
-      { icon: navIcons.profile, label: 'Profile & Settings', path: '/profile' },
       { icon: navIcons.help, label: 'Help', path: '/help' },
-      { icon: navIcons.logout, label: 'Logout', path: '/logout', danger: true, mobileOnly: true },
     ];
   } else if (user?.role === 'dean_of_students') {
     navLinks = [
@@ -106,9 +99,7 @@ export default function Sidebar() {
       { icon: navIcons.cases, label: 'Cases', path: '/cases' },
       { icon: navIcons.reports, label: 'Reports', path: '/reports' },
       { icon: navIcons.audit, label: 'Audit/Logs', path: '/audit' },
-      { icon: navIcons.profile, label: 'Profile & Settings', path: '/profile' },
       { icon: navIcons.help, label: 'Help', path: '/help' },
-      { icon: navIcons.logout, label: 'Logout', path: '/logout', danger: true, mobileOnly: true },
     ];
   } else if (user?.role === 'assistant_dean') {
     navLinks = [
@@ -116,9 +107,7 @@ export default function Sidebar() {
       { icon: navIcons.students, label: 'Students', path: '/students' },
       { icon: navIcons.cases, label: 'Cases', path: '/cases' },
       { icon: navIcons.reports, label: 'Reports', path: '/reports' },
-      { icon: navIcons.profile, label: 'Profile & Settings', path: '/profile' },
       { icon: navIcons.help, label: 'Help', path: '/help' },
-      { icon: navIcons.logout, label: 'Logout', path: '/logout', danger: true, mobileOnly: true },
     ];
   } else if (user?.role === 'secretary') {
     navLinks = [
@@ -126,38 +115,25 @@ export default function Sidebar() {
       { icon: navIcons.students, label: 'Students', path: '/students' },
       { icon: navIcons.cases, label: 'Cases', path: '/cases' },
       { icon: navIcons.reports, label: 'Reports', path: '/reports' },
-      { icon: navIcons.profile, label: 'Profile & Settings', path: '/profile' },
       { icon: navIcons.help, label: 'Help', path: '/help' },
-      { icon: navIcons.logout, label: 'Logout', path: '/logout', danger: true, mobileOnly: true },
     ];
   } else if (user?.role === 'hall_warden') {
     navLinks = [
       { icon: navIcons.hall, label: 'Dashboard', path: '/hall-warden-dashboard' },
-      { icon: navIcons.maintenance, label: 'Maintenance Reports', path: '/hall-warden-dashboard' },
-      { icon: navIcons.profile, label: 'Profile & Settings', path: '/profile' },
       { icon: navIcons.help, label: 'Help', path: '/help' },
-      { icon: navIcons.logout, label: 'Logout', path: '/logout', danger: true, mobileOnly: true },
     ];
   } else if (user?.role === 'electrician') {
     navLinks = [
       { icon: navIcons.electrician, label: 'Dashboard', path: '/electrician-dashboard' },
-      { icon: navIcons.maintenance, label: 'Electrical Reports', path: '/electrician-dashboard' },
-      { icon: navIcons.profile, label: 'Profile & Settings', path: '/profile' },
       { icon: navIcons.help, label: 'Help', path: '/help' },
-      { icon: navIcons.logout, label: 'Logout', path: '/logout', danger: true, mobileOnly: true },
     ];
   } else if (user?.role === 'student') {
     navLinks = [
       { icon: navIcons.dashboard, label: 'My Dashboard', path: '/student-dashboard' },
-      { icon: navIcons.cases, label: 'My Reports', path: '/student-dashboard' },
-      { icon: navIcons.profile, label: 'Profile & Settings', path: '/profile' },
       { icon: navIcons.help, label: 'Help', path: '/help' },
-      { icon: navIcons.logout, label: 'Logout', path: '/logout', danger: true, mobileOnly: true },
     ];
   } else {
-    navLinks = [
-      { icon: navIcons.logout, label: 'Logout', path: '/logout', danger: true, mobileOnly: true },
-    ];
+    navLinks = [{ icon: navIcons.help, label: 'Help', path: '/help' }];
   }
 
   // Resize functionality
@@ -226,52 +202,21 @@ export default function Sidebar() {
             width={64}
             height={64}
             className="mb-2 h-16 w-16 object-contain"
-            onError={(e) => {
-              console.error('Logo failed to load in sidebar');
-              e.currentTarget.style.display = 'none';
-              // Show fallback text
-              const fallback = document.createElement('div');
-              fallback.className = 'text-2xl font-bold text-white mb-2';
-              fallback.textContent = 'KMU';
-              e.currentTarget.parentNode?.appendChild(fallback);
-            }}
-            onLoad={() => console.log('Sidebar logo loaded successfully')}
           />
-          <button
-            className="mt-2 px-3 py-2 rounded bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
-            onClick={toggleTheme}
-            aria-label="Toggle dark mode"
-          >
-            {theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode'}
-          </button>
         </div>
         <nav className="flex flex-col gap-0.5 mt-6 px-4 pb-6 flex-1 justify-start overflow-y-auto">
-          {navLinks
-            .filter(link => !link.mobileOnly || isMobile) // Only show mobileOnly items on mobile
-            .map(link =>
-              link.label === 'Logout' ? (
-                <button
-                  key={link.path}
-                  onClick={() => logout()}
-                  className={
-                    `${linkBase} ${link.danger ? 'hover:bg-red-900 hover:text-red-400 dark:hover:text-red-400' : ''} text-gray-900 dark:text-white`}
-                >
-                  <span className="text-xl">{link.icon}</span>
-                  <span>{link.label}</span>
-                </button>
-              ) : (
-                <Link
-                  key={link.path}
-                  href={link.path}
-                  className={
-                    `${linkBase} ${pathname === link.path ? linkActive : ''} ${link.danger ? 'hover:bg-red-900 hover:text-red-400 dark:hover:text-red-400' : ''} text-gray-900 dark:text-white`}
-                  onClick={() => setOpen(false)} // Close sidebar on mobile when clicking a link
-                >
-                  <span className="text-xl">{link.icon}</span>
-                  <span>{link.label}</span>
-                </Link>
-              )
-            )}
+          {navLinks.map(link => (
+            <Link
+              key={link.path + link.label}
+              href={link.path}
+              className={
+                `${linkBase} ${pathname === link.path ? linkActive : ''} text-gray-900 dark:text-white`}
+              onClick={() => setOpen(false)} // Close sidebar on mobile when clicking a link
+            >
+              <span className="text-xl">{link.icon}</span>
+              <span>{link.label}</span>
+            </Link>
+          ))}
         </nav>
 
         {/* Resize handle - only visible on desktop */}
@@ -281,9 +226,6 @@ export default function Sidebar() {
           title="Drag to resize sidebar"
         />
       </aside>
-      <button className="absolute top-4 left-4 z-50 p-3 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-lg border border-gray-200 dark:border-gray-700 md:hidden hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" onClick={() => setOpen(!open)} aria-label="Toggle sidebar">
-        <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
-      </button>
     </>
   );
 }

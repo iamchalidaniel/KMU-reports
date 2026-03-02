@@ -2,11 +2,14 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useSidebar } from '../context/SidebarContext';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import DarkModeToggle from './DarkModeToggle';
 
 export default function Navbar() {
     const { user, logout } = useAuth();
+    const { isSidebarOpen, setIsSidebarOpen } = useSidebar();
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const pathname = usePathname();
@@ -29,19 +32,31 @@ export default function Navbar() {
         <nav className="sticky top-0 z-30 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm transition-all duration-200">
             <div className="max-w-full px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-16 items-center">
-                    {/* Left Side: Mobile Menu Button (handled by Sidebar usually, but we could add desktop breadcrumbs here) */}
-                    <div className="flex items-center">
-                        <h1 className="text-xl font-bold bg-gradient-to-r from-kmuGreen to-kmuOrange bg-clip-text text-transparent hidden sm:block">
+                    {/* Left Side: Mobile Menu Button & Brand */}
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors md:hidden text-gray-600 dark:text-gray-400"
+                            aria-label="Toggle Menu"
+                        >
+                            <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+                        </button>
+                        <h1 className="text-xl font-bold bg-gradient-to-r from-kmuGreen to-kmuOrange bg-clip-text text-transparent hidden xs:block">
                             KMU DISCIPLINE DESK
                         </h1>
                     </div>
 
-                    {/* Right Side: Profile & Actions */}
-                    <div className="flex items-center gap-4">
-                        {/* Sponsor Info (as seen in screenshot) */}
-                        <div className="hidden lg:flex flex-col items-end text-[10px] leading-tight text-gray-500 dark:text-gray-400">
+                    {/* Right Side: Theme, Profile & Actions */}
+                    <div className="flex items-center gap-2 sm:gap-4">
+                        {/* Theme Toggle */}
+                        <div className="hidden xs:block">
+                            <DarkModeToggle />
+                        </div>
+
+                        {/* Sponsor Info */}
+                        <div className="hidden lg:flex flex-col items-end text-[10px] leading-tight text-gray-500 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700 pr-4 mr-2">
                             <span className="text-red-500 font-bold uppercase">Sponsor</span>
-                            <span className="font-semibold uppercase">{user.name || user.username}</span>
+                            <span className="font-semibold uppercase tracking-tight">{user.name || user.username}</span>
                             <span className="text-blue-500 uppercase font-mono">{user.studentId || 'STAFF'}</span>
                         </div>
 
@@ -51,7 +66,7 @@ export default function Navbar() {
                                 onClick={() => setDropdownOpen(!dropdownOpen)}
                                 className="flex items-center gap-2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none"
                             >
-                                <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-lg shadow-inner ring-2 ring-white dark:ring-gray-700">
+                                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-lg shadow-inner ring-2 ring-white dark:ring-gray-700">
                                     {user.name ? user.name.charAt(0).toUpperCase() : user.username.charAt(0).toUpperCase()}
                                 </div>
                                 <div className="hidden md:flex flex-col items-start leading-tight">
@@ -66,9 +81,9 @@ export default function Navbar() {
                             {/* Dropdown Menu */}
                             {dropdownOpen && (
                                 <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1 z-50 animate-in fade-in zoom-in duration-100 origin-top-right">
-                                    <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700 md:hidden">
-                                        <p className="text-sm font-semibold text-gray-900 dark:text-white">{user.name || user.username}</p>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user.role}</p>
+                                    <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 md:hidden">
+                                        <p className="text-sm font-semibold text-gray-900 dark:text-white leading-none mb-1">{user.name || user.username}</p>
+                                        <p className="text-[10px] text-gray-500 dark:text-gray-400 capitalize">{user.role.replace('_', ' ')}</p>
                                     </div>
 
                                     <Link
@@ -88,6 +103,12 @@ export default function Navbar() {
                                         <span className="text-lg">⚙️</span>
                                         <span>Settings</span>
                                     </Link>
+
+                                    <div className="md:hidden border-t border-gray-100 dark:border-gray-700 my-1"></div>
+                                    <div className="md:hidden flex items-center justify-between px-4 py-2 text-sm text-gray-700 dark:text-gray-200">
+                                        <span>Dark Mode</span>
+                                        <DarkModeToggle />
+                                    </div>
 
                                     <div className="border-t border-gray-100 dark:border-gray-700 my-1"></div>
 
