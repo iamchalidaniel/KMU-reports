@@ -35,7 +35,7 @@ export default function Sidebar() {
   const [isResizing, setIsResizing] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { sidebarWidth, setSidebarWidth, isSidebarOpen: open, setIsSidebarOpen: setOpen } = useSidebar();
-  const { user, logout } = useAuth();
+  const { user, token, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
   const [reportCount, setReportCount] = useState(0);
@@ -46,7 +46,7 @@ export default function Sidebar() {
       if (!user || user.role === 'student' || user.role === 'hall_warden' || user.role === 'electrician') return;
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/student-reports?status=Pending`, {
-          headers: { 'Authorization': `Bearer ${user.token || localStorage.getItem('token')}` }
+          headers: { 'Authorization': `Bearer ${token || localStorage.getItem('token')}` }
         });
         if (res.ok) {
           const data = await res.json();
@@ -60,7 +60,7 @@ export default function Sidebar() {
     // Poll every 30 seconds
     const interval = setInterval(fetchReportCount, 30000);
     return () => clearInterval(interval);
-  }, [user]);
+  }, [user, token]);
 
   // Check if mobile
   useEffect(() => {
