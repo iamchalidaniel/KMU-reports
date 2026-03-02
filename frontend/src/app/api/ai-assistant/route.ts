@@ -35,24 +35,31 @@ export async function POST(request: NextRequest) {
 
     const { messages, formType } = await request.json();
 
-    // Get the system prompt for the specific form type
+    // Map the messages to the format expected by the Gemini SDK
+    // Gemini 1.0+ expects { role: 'user' | 'model', parts: [{ text: string }] }
+    // We also ensure roles are mapped correctly if they come in as 'assistant'
+    const transformedMessages = messages.map((msg: any) => ({
+      role: msg.role === 'assistant' || msg.role === 'model' ? 'model' : 'user',
+      parts: [{ text: msg.content || msg.text || '' }]
+    }));
+
+    // Get the system prompt and prepend/apply it
     const systemPrompt = getSystemPrompt(formType || 'other');
 
-    // Create the conversation history with the system prompt at the beginning
-    // Gemini 1.0 Pro doesn't support the 'system' role in the same way, 
-    // so we prepend it to the first user message.
-    const formattedMessages = [...messages];
-    if (formattedMessages.length > 0 && formattedMessages[0].role === 'user') {
-      formattedMessages[0].content = `${systemPrompt}\n\nUser Question: ${formattedMessages[0].content}`;
+    if (transformedMessages.length > 0 && transformedMessages[0].role === 'user') {
+      transformedMessages[0].parts[0].text = `${systemPrompt}\n\nUser Question: ${transformedMessages[0].parts[0].text}`;
     } else {
-      formattedMessages.unshift({ role: 'user', content: systemPrompt });
+      transformedMessages.unshift({ role: 'user', parts: [{ text: systemPrompt }] });
     }
 
+    const history = transformedMessages.slice(0, -1);
+    const lastMessage = transformedMessages[transformedMessages.length - 1];
+
     const chat = model.startChat({
-      history: formattedMessages.slice(0, -1),
+      history: history,
     });
 
-    const result = await chat.sendMessage(formattedMessages[formattedMessages.length - 1].content);
+    const result = await chat.sendMessage(lastMessage.parts[0].text);
     const response = await result.response;
     const text = response.text();
 
