@@ -153,7 +153,7 @@ export default function ReportsPage() {
 
   const handleApproveReport = async (reportId: string) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/student-reports/${reportId}`, {
+      const res = await fetch(`${API_BASE_URL}/student-reports/${reportId}`, {
         method: 'PUT',
         headers: { ...authHeaders(), 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'Approved' }),
@@ -169,7 +169,7 @@ export default function ReportsPage() {
 
   const handleConvertToCase = async (reportId: string) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/student-reports/${reportId}/convert-to-case`, {
+      const res = await fetch(`${API_BASE_URL}/student-reports/${reportId}/convert-to-case`, {
         method: 'POST',
         headers: { ...authHeaders(), 'Content-Type': 'application/json' },
       });
@@ -359,196 +359,260 @@ export default function ReportsPage() {
       <section>
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-kmuGreen">Reports Management</h1>
-          <div className="flex gap-2">
-            <span className="bg-kmuOrange/10 text-kmuOrange px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+          <div className="flex gap-4">
+            <div className="flex bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+              <button
+                onClick={() => setActiveTab('analytics')}
+                className={`px-4 py-2 rounded-md font-bold text-xs transition-all ${activeTab === 'analytics' ? 'bg-white dark:bg-gray-800 text-kmuGreen shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              >
+                📊 ANALYTICS
+              </button>
+              <button
+                onClick={() => setActiveTab('studentReports')}
+                className={`px-4 py-2 rounded-md font-bold text-xs transition-all ${activeTab === 'studentReports' ? 'bg-white dark:bg-gray-800 text-kmuGreen shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              >
+                📜 ALL REPORTS
+              </button>
+            </div>
+            <span className="bg-kmuOrange/10 text-kmuOrange px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider h-fit">
               {total} Student Reports
             </span>
           </div>
         </div>
 
-        {/* Student Reports View */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-          <h2 className="text-2xl font-bold text-kmuGreen mb-6">Student-Submitted Reports</h2>
+        {/* Analytics View */}
+        {activeTab === 'analytics' && (
+          <div className="animate-in fade-in duration-300 space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <h3 className="text-lg font-bold text-kmuGreen mb-4">Offense Trends</h3>
+                <div className="h-64">
+                  <Bar data={offenseData} options={{ maintainAspectRatio: false }} />
+                </div>
+              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <h3 className="text-lg font-bold text-kmuGreen mb-4">Reports by Department</h3>
+                <div className="h-64">
+                  <Bar data={deptData} options={{ maintainAspectRatio: false }} />
+                </div>
+              </div>
+            </div>
 
-          {/* Filters */}
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <input
-              type="text"
-              placeholder="Search by student name or description..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            />
-            <select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setPage(1);
-              }}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            >
-              <option value="">All Statuses</option>
-              <option value="Pending">Pending</option>
-              <option value="Reviewed">Reviewed</option>
-              <option value="Approved">Approved</option>
-              <option value="Rejected">Rejected</option>
-              <option value="Converted">Converted to Case</option>
-            </select>
-            <select
-              value={severityFilter}
-              onChange={(e) => {
-                setSeverityFilter(e.target.value);
-                setPage(1);
-              }}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            >
-              <option value="">All Severity Levels</option>
-              <option value="Low">Low</option>
-              <option value="Medium">Medium</option>
-              <option value="High">High</option>
-            </select>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <h3 className="text-lg font-bold text-kmuGreen mb-4">Summary Statistics</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div className="text-xs text-gray-500 uppercase">Total Reports</div>
+                  <div className="text-2xl font-bold">{total}</div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div className="text-xs text-gray-500 uppercase">Pending</div>
+                  <div className="text-2xl font-bold text-yellow-600">
+                    {studentReports.filter(r => r.status === 'Pending').length}
+                  </div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div className="text-xs text-gray-500 uppercase">Approved</div>
+                  <div className="text-2xl font-bold text-green-600">
+                    {studentReports.filter(r => r.status === 'Approved').length}
+                  </div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div className="text-xs text-gray-500 uppercase">High Severity</div>
+                  <div className="text-2xl font-bold text-red-600">
+                    {studentReports.filter(r => r.severity === 'High').length}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
+        )}
 
-          {/* Reports Table */}
-          {loadingReports ? (
-            <div className="text-center py-8">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-kmuGreen"></div>
+        {/* Student Reports View */}
+        {activeTab === 'studentReports' && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 animate-in fade-in duration-300">
+            <h2 className="text-2xl font-bold text-kmuGreen mb-6">Student-Submitted Reports</h2>
+
+            {/* Filters */}
+            <div className="flex flex-col md:flex-row gap-4 mb-6">
+              <input
+                type="text"
+                placeholder="Search by student name or description..."
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+              <select
+                value={statusFilter}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value);
+                  setPage(1);
+                }}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="">All Statuses</option>
+                <option value="Pending">Pending</option>
+                <option value="Reviewed">Reviewed</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
+                <option value="Converted">Converted to Case</option>
+              </select>
+              <select
+                value={severityFilter}
+                onChange={(e) => {
+                  setSeverityFilter(e.target.value);
+                  setPage(1);
+                }}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="">All Severity Levels</option>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+              </select>
             </div>
-          ) : studentReports.length === 0 ? (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-              No student reports found.
-            </div>
-          ) : (
-            <>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
-                    <tr>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
-                        Student
-                      </th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
-                        Date
-                      </th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
-                        Description
-                      </th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
-                        Type
-                      </th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
-                        Status
-                      </th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
-                        Severity
-                      </th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {studentReports.map((report) => (
-                      <tr
-                        key={report._id}
-                        className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-                      >
-                        <td className="px-4 py-2 text-gray-900 dark:text-white">
-                          {report.student_name || 'N/A'}
-                        </td>
-                        <td className="px-4 py-2 text-gray-900 dark:text-white">
-                          {formatDate(report.incident_date)}
-                        </td>
-                        <td className="px-4 py-2 text-gray-900 dark:text-white truncate max-w-xs">
-                          {report.description}
-                        </td>
-                        <td className="px-4 py-2 text-gray-900 dark:text-white text-xs">
-                          {report.offense_type}
-                        </td>
-                        <td className="px-4 py-2">
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(report.status)}`}>
-                            {report.status}
-                          </span>
-                        </td>
-                        <td className="px-4 py-2">
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${report.severity === 'High'
-                            ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                            : report.severity === 'Medium'
-                              ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                              : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                            }`}>
-                            {report.severity}
-                          </span>
-                        </td>
-                        <td className="px-4 py-2 text-sm space-x-2">
-                          {report.status === 'Pending' && (
-                            <>
-                              <button
-                                onClick={() => handleApproveReport(report._id)}
-                                className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600"
-                              >
-                                Approve
-                              </button>
+
+            {/* Reports Table */}
+            {loadingReports ? (
+              <div className="text-center py-8">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-kmuGreen"></div>
+              </div>
+            ) : studentReports.length === 0 ? (
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                No student reports found.
+              </div>
+            ) : (
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                      <tr>
+                        <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
+                          Student
+                        </th>
+                        <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
+                          Date
+                        </th>
+                        <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
+                          Description
+                        </th>
+                        <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
+                          Type
+                        </th>
+                        <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
+                          Status
+                        </th>
+                        <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
+                          Severity
+                        </th>
+                        <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {studentReports.map((report) => (
+                        <tr
+                          key={report._id}
+                          className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                        >
+                          <td className="px-4 py-2 text-gray-900 dark:text-white">
+                            {report.student_name || 'N/A'}
+                          </td>
+                          <td className="px-4 py-2 text-gray-900 dark:text-white">
+                            {formatDate(report.incident_date)}
+                          </td>
+                          <td className="px-4 py-2 text-gray-900 dark:text-white truncate max-w-xs">
+                            {report.description}
+                          </td>
+                          <td className="px-4 py-2 text-gray-900 dark:text-white text-xs">
+                            {report.offense_type}
+                          </td>
+                          <td className="px-4 py-2">
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(report.status)}`}>
+                              {report.status}
+                            </span>
+                          </td>
+                          <td className="px-4 py-2">
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${report.severity === 'High'
+                              ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                              : report.severity === 'Medium'
+                                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                                : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                              }`}>
+                              {report.severity}
+                            </span>
+                          </td>
+                          <td className="px-4 py-2 text-sm space-x-2">
+                            {report.status === 'Pending' && (
+                              <>
+                                <button
+                                  onClick={() => handleApproveReport(report._id)}
+                                  className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600"
+                                >
+                                  Approve
+                                </button>
+                                <button
+                                  onClick={() => handleConvertToCase(report._id)}
+                                  className="px-2 py-1 bg-kmuGreen text-white rounded text-xs hover:bg-kmuGreen/90"
+                                >
+                                  Convert
+                                </button>
+                              </>
+                            )}
+                            {report.status === 'Approved' && (
                               <button
                                 onClick={() => handleConvertToCase(report._id)}
                                 className="px-2 py-1 bg-kmuGreen text-white rounded text-xs hover:bg-kmuGreen/90"
                               >
-                                Convert
+                                Create Case
                               </button>
-                            </>
-                          )}
-                          {report.status === 'Approved' && (
-                            <button
-                              onClick={() => handleConvertToCase(report._id)}
-                              className="px-2 py-1 bg-kmuGreen text-white rounded text-xs hover:bg-kmuGreen/90"
-                            >
-                              Create Case
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="flex justify-center gap-2 mt-6">
-                  <button
-                    onClick={() => setPage(Math.max(1, page - 1))}
-                    disabled={page === 1}
-                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700"
-                  >
-                    Previous
-                  </button>
-                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + Math.max(1, page - 2)).map((p) => (
-                    <button
-                      key={p}
-                      onClick={() => setPage(p)}
-                      className={`px-4 py-2 rounded-lg ${page === p
-                        ? 'bg-kmuGreen text-white'
-                        : 'border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
-                        }`}
-                    >
-                      {p}
-                    </button>
-                  ))}
-                  <button
-                    onClick={() => setPage(Math.min(totalPages, page + 1))}
-                    disabled={page === totalPages}
-                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700"
-                  >
-                    Next
-                  </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              )}
-            </>
-          )}
-        </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex justify-center gap-2 mt-6">
+                    <button
+                      onClick={() => setPage(Math.max(1, page - 1))}
+                      disabled={page === 1}
+                      className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    >
+                      Previous
+                    </button>
+                    {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + Math.max(1, page - 2)).map((p) => (
+                      <button
+                        key={p}
+                        onClick={() => setPage(p)}
+                        className={`px-4 py-2 rounded-lg ${page === p
+                          ? 'bg-kmuGreen text-white'
+                          : 'border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                          }`}
+                      >
+                        {p}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => setPage(Math.min(totalPages, page + 1))}
+                      disabled={page === totalPages}
+                      className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
       </section>
 
       {/* Notification */}

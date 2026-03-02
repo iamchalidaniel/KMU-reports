@@ -37,8 +37,8 @@ export default function AdminPage() {
   const [hostelFilter, setHostelFilter] = useState('');
   const [cases, setCases] = useState([]);
   const [students, setStudents] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [reports, setReports] = useState([]);
+  const [studentReports, setStudentReports] = useState([]);
+  const [maintenanceReports, setMaintenanceReports] = useState([]);
   const [filteredCases, setFilteredCases] = useState([]);
 
   useEffect(() => {
@@ -87,18 +87,18 @@ export default function AdminPage() {
           setStudents(data.students || data || []);
         }
 
-        const [usersRes, reportsRes] = await Promise.all([
-          fetch(`${API_BASE_URL}/users`, { headers: { ...authHeaders() } }),
-          fetch(`${API_BASE_URL}/student-reports`, { headers: { ...authHeaders() } })
+        const [reportsRes, maintenanceRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/student-reports`, { headers: { ...authHeaders() } }),
+          fetch(`${API_BASE_URL}/maintenance`, { headers: { ...authHeaders() } })
         ]);
 
-        if (usersRes.ok) {
-          const data = await usersRes.json();
-          setUsers(data.users || data || []);
-        }
         if (reportsRes.ok) {
           const data = await reportsRes.json();
-          setReports(data.reports || data || []);
+          setStudentReports(data.reports || data || []);
+        }
+        if (maintenanceRes.ok) {
+          const data = await maintenanceRes.json();
+          setMaintenanceReports(data.maintenance || data || []);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -184,10 +184,10 @@ export default function AdminPage() {
   const topOffenders = Object.entries(offenderCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
   // Maintenance Analytics
-  const maintenanceReports = Array.isArray(reports) ? reports : [];
+  const safeMaintenance = Array.isArray(maintenanceReports) ? maintenanceReports : [];
   const filteredMaintenance = hostelFilter
-    ? maintenanceReports.filter((r: any) => r.location?.hall === hostelFilter)
-    : maintenanceReports;
+    ? safeMaintenance.filter((r: any) => r.location?.hall === hostelFilter)
+    : safeMaintenance;
 
   const maintenanceCounts: Record<string, number> = {};
   filteredMaintenance.forEach((r: any) => {
@@ -214,7 +214,7 @@ export default function AdminPage() {
   };
 
   const programs = Array.from(new Set(safeStudents.map((s: any) => s.program).filter(Boolean)));
-  const hostels = Array.from(new Set(maintenanceReports.map((r: any) => r.location?.hall).filter(Boolean)));
+  const hostels = Array.from(new Set(safeMaintenance.map((r: any) => r.location?.hall).filter(Boolean)));
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
@@ -227,7 +227,8 @@ export default function AdminPage() {
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden sticky top-24">
               <nav className="flex flex-col">
                 <NavButton label="Analytics" icon="📊" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
-                <NavButton label="All Cases" icon="⚖️" active={activeTab === 'cases'} onClick={() => setActiveTab('cases')} />
+                <NavButton label="Disciplinary Cases" icon="⚖️" active={activeTab === 'cases'} onClick={() => setActiveTab('cases')} />
+                <NavButton label="Disciplinary Reports" icon="📜" active={activeTab === 'student-reports'} onClick={() => setActiveTab('student-reports')} />
                 <NavButton label="Maintenance" icon="🔧" active={activeTab === 'maintenance'} onClick={() => setActiveTab('maintenance')} />
               </nav>
             </div>
@@ -241,8 +242,7 @@ export default function AdminPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <StatCard title="Total Students" value={safeStudents.length} color="emerald" />
                   <StatCard title="Active Cases" value={safeCases.filter((c: any) => c.status !== 'Closed').length} color="teal" />
-                  <StatCard title="Maintenance" value={maintenanceReports.length} color="blue" />
-                  <StatCard title="Total Users" value={users.length} color="green" />
+                  <StatCard title="Maintenance" value={safeMaintenance.length} color="blue" />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -390,6 +390,44 @@ export default function AdminPage() {
                             <td className="px-4 py-4 uppercase font-medium">{r.category}</td>
                             <td className="px-4 py-4 text-center">
                               <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${r.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>{r.status}</span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+            {activeTab === 'student-reports' && (
+              <div className="animate-in fade-in duration-300 space-y-6">
+                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-bold">Student Disciplinary Reports</h2>
+                    <Link href="/reports" className="text-xs text-kmuGreen hover:underline font-bold uppercase tracking-widest">Manage All Reports →</Link>
+                  </div>
+                  <div className="overflow-x-auto border border-gray-100 dark:border-gray-800 rounded-xl">
+                    <table className="w-full text-xs">
+                      <thead className="bg-gray-50 dark:bg-gray-800 font-bold uppercase text-gray-400">
+                        <tr>
+                          <th className="px-4 py-4 text-left">Student</th>
+                          <th className="px-4 py-4 text-left">Incident</th>
+                          <th className="px-4 py-4 text-center">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                        {Array.isArray(studentReports) && studentReports.slice(0, 15).map((r: any, i) => (
+                          <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-900">
+                            <td className="px-4 py-4">
+                              <div className="font-bold">{r.student_name || 'Anonymous'}</div>
+                              <div className="text-[10px] text-gray-400">{new Date(r.incident_date).toLocaleDateString()}</div>
+                            </td>
+                            <td className="px-4 py-4">
+                              <div className="font-medium">{r.offense_type}</div>
+                              <div className="text-[10px] text-gray-400 line-clamp-1">{r.description}</div>
+                            </td>
+                            <td className="px-4 py-4 text-center">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${r.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'}`}>{r.status}</span>
                             </td>
                           </tr>
                         ))}
