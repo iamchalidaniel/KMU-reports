@@ -4,6 +4,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { API_BASE_URL } from '../../../config/constants';
 import { getAll, register, update, remove, exportDocx, exportExcel } from '../../../utils/api';
+import ConfirmDialog from '../../../components/ConfirmDialog';
 
 
 const ROLES = [
@@ -57,6 +58,7 @@ export default function UserManagementPage() {
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [selected, setSelected] = useState<string[]>([]);
+  const [confirmDelete, setConfirmDelete] = useState<{ isOpen: boolean; id: string | null; isBulk: boolean }>({ isOpen: false, id: null, isBulk: false });
 
   async function fetchUsers() {
     setLoading(true);
@@ -116,7 +118,6 @@ export default function UserManagementPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
     setError(null);
     setSuccess(null);
     try {
@@ -161,7 +162,6 @@ export default function UserManagementPage() {
   }
 
   async function handleBulkDelete() {
-    if (!window.confirm('Delete selected users?')) return;
     for (const id of selected) {
       await remove('users', id);
     }
@@ -283,7 +283,7 @@ export default function UserManagementPage() {
             </button>
             {selected.length > 0 && (
               <>
-                <button className="bg-red-600 text-white px-2 py-1 rounded text-sm hover:bg-red-700" onClick={handleBulkDelete}>
+                <button className="bg-red-600 text-white px-2 py-1 rounded text-sm hover:bg-red-700" onClick={() => setConfirmDelete({ isOpen: true, id: null, isBulk: true })}>
                   Delete Selected
                 </button>
                 <button className="bg-kmuGreen text-white px-2 py-1 rounded text-sm hover:bg-kmuOrange" onClick={handleBulkExport}>
@@ -414,6 +414,19 @@ export default function UserManagementPage() {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={confirmDelete.isOpen}
+        title={confirmDelete.isBulk ? "Delete Multiple Users" : "Delete User"}
+        message={confirmDelete.isBulk
+          ? `Are you sure you want to delete the ${selected.length} selected users? This action is permanent and cannot be undone.`
+          : "Are you sure you want to delete this user? All their associated data will be permanently removed from the system."
+        }
+        confirmLabel="Delete User"
+        onConfirm={() => confirmDelete.isBulk ? handleBulkDelete() : (confirmDelete.id && handleDelete(confirmDelete.id))}
+        onCancel={() => setConfirmDelete({ isOpen: false, id: null, isBulk: false })}
+        type="danger"
+      />
     </div>
   );
 }
