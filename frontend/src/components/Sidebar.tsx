@@ -90,6 +90,7 @@ export default function Sidebar() {
       { icon: navIcons.cases, label: 'Cases', path: '/cases' },
       { icon: navIcons.reports, label: 'Reports', path: '/reports' },
       { icon: navIcons.students, label: 'Students', path: '/students' },
+      { icon: navIcons.maintenance, label: 'Maintenance Reports', path: '/maintenance' },
       { icon: navIcons.evidence, label: 'Evidence', path: '/evidence' },
       { icon: navIcons.newcase, label: 'New Case', path: '/cases/new' },
       { icon: navIcons.help, label: 'Help', path: '/help' },

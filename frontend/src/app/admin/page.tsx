@@ -28,7 +28,6 @@ export default function AdminPage() {
   const { notification, showNotification, hideNotification } = useNotification();
 
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [activeTab, setActiveTab] = useState('dashboard');
   const [profile, setProfile] = useState<any>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -37,6 +36,7 @@ export default function AdminPage() {
   const [hostelFilter, setHostelFilter] = useState('');
   const [cases, setCases] = useState([]);
   const [students, setStudents] = useState([]);
+  const [usersCount, setUsersCount] = useState(0);
   const [studentReports, setStudentReports] = useState([]);
   const [maintenanceReports, setMaintenanceReports] = useState([]);
   const [filteredCases, setFilteredCases] = useState([]);
@@ -87,9 +87,10 @@ export default function AdminPage() {
           setStudents(data.students || data || []);
         }
 
-        const [reportsRes, maintenanceRes] = await Promise.all([
+        const [reportsRes, maintenanceRes, usersRes] = await Promise.all([
           fetch(`${API_BASE_URL}/student-reports`, { headers: { ...authHeaders() } }),
-          fetch(`${API_BASE_URL}/maintenance`, { headers: { ...authHeaders() } })
+          fetch(`${API_BASE_URL}/maintenance`, { headers: { ...authHeaders() } }),
+          fetch(`${API_BASE_URL}/users`, { headers: { ...authHeaders() } })
         ]);
 
         if (reportsRes.ok) {
@@ -99,6 +100,11 @@ export default function AdminPage() {
         if (maintenanceRes.ok) {
           const data = await maintenanceRes.json();
           setMaintenanceReports(data.maintenance || data || []);
+        }
+        if (usersRes.ok) {
+          const data = await usersRes.json();
+          const usersData = data.users || data || [];
+          setUsersCount(usersData.length);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -204,6 +210,15 @@ export default function AdminPage() {
     }]
   };
 
+  const offenderChartData = {
+    labels: topOffenders.map(([name]) => name),
+    datasets: [{
+      label: 'Cases',
+      data: topOffenders.map(([, count]) => count),
+      backgroundColor: '#10b981'
+    }]
+  };
+
   const maintenanceChartData = {
     labels: topMaintenance.map(([cat]) => cat),
     datasets: [{
@@ -221,224 +236,72 @@ export default function AdminPage() {
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
 
 
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Side Nav */}
-          <div className="lg:w-1/4">
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden sticky top-24">
-              <nav className="flex flex-col">
-                <NavButton label="Analytics" icon="📊" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
-                <NavButton label="Disciplinary Cases" icon="⚖️" active={activeTab === 'cases'} onClick={() => setActiveTab('cases')} />
-                <NavButton label="Disciplinary Reports" icon="📜" active={activeTab === 'student-reports'} onClick={() => setActiveTab('student-reports')} />
-                <NavButton label="Maintenance" icon="🔧" active={activeTab === 'maintenance'} onClick={() => setActiveTab('maintenance')} />
-              </nav>
-            </div>
-          </div>
-
+        <div className="space-y-6">
           {/* Main Area */}
-          <div className="lg:w-3/4 space-y-6">
+          <div className="animate-in fade-in duration-300 space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <StatCard title="Total Students" value={safeStudents.length} color="emerald" link="/students" />
+              <StatCard title="Total Disciplinary Cases" value={safeCases.length} color="teal" link="/cases" />
+              <StatCard title="Total Users" value={usersCount} color="blue" link="/admin/users" />
+              <StatCard title="Total Maintenance Reports" value={safeMaintenance.length} color="green" link="/maintenance" />
+            </div>
 
-            {activeTab === 'dashboard' && (
-              <div className="animate-in fade-in duration-300 space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <StatCard title="Total Students" value={safeStudents.length} color="emerald" />
-                  <StatCard title="Active Cases" value={safeCases.filter((c: any) => c.status !== 'Closed').length} color="teal" />
-                  <StatCard title="Maintenance" value={safeMaintenance.length} color="blue" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Disciplinary Analytics */}
+              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400">Disciplinary Offenses</h3>
+                  <select
+                    className="bg-gray-50 dark:bg-gray-800 border-none rounded-lg px-3 py-1 text-xs outline-none"
+                    value={programFilter}
+                    onChange={(e) => setProgramFilter(e.target.value)}
+                  >
+                    <option value="">All Programs</option>
+                    {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
+                  </select>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Disciplinary Analytics */}
-                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                    <div className="flex justify-between items-center mb-6">
-                      <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400">Disciplinary Offenses</h3>
-                      <select
-                        className="bg-gray-50 dark:bg-gray-800 border-none rounded-lg px-3 py-1 text-xs outline-none"
-                        value={programFilter}
-                        onChange={(e) => setProgramFilter(e.target.value)}
-                      >
-                        <option value="">All Programs</option>
-                        {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
-                      </select>
-                    </div>
-                    <div className="h-64">
-                      <Bar data={offenceChartData} options={{ maintainAspectRatio: false }} />
-                    </div>
-                  </div>
-
-                  {/* Maintenance Analytics */}
-                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                    <div className="flex justify-between items-center mb-6">
-                      <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400">Maintenance Issues</h3>
-                      <select
-                        className="bg-gray-50 dark:bg-gray-800 border-none rounded-lg px-3 py-1 text-xs outline-none"
-                        value={hostelFilter}
-                        onChange={(e) => setHostelFilter(e.target.value)}
-                      >
-                        <option value="">All Hostels</option>
-                        {hostels.map((h: any) => <option key={h} value={h}>{h}</option>)}
-                      </select>
-                    </div>
-                    <div className="h-64">
-                      <Bar data={maintenanceChartData} options={{ maintainAspectRatio: false }} />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Most Common Offenders */}
-                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                  <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6">Most Common Offenders</h3>
-                  <div className="space-y-4">
-                    {topOffenders.length > 0 ? topOffenders.map(([name, count], i) => (
-                      <div key={i} className="flex justify-between items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors">
-                        <span className="font-medium">{name}</span>
-                        <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">{count} Cases</span>
-                      </div>
-                    )) : <p className="text-center text-gray-500 py-8">No offender data found.</p>}
-                  </div>
-                </div>
-
-                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 flex justify-between items-center">
-                  <div>
-                    <h3 className="text-lg font-bold">System Audit</h3>
-                    <p className="text-sm text-gray-500">Generate comprehensive university-wide activity and disciplinary reports.</p>
-                  </div>
-                  <button onClick={exportCasesToWord} className="bg-emerald-700 text-white px-8 py-3 rounded-xl font-bold hover:shadow-lg transition">EXPORT FULL AUDIT (DOCX)</button>
+                <div className="h-64">
+                  <Bar data={offenceChartData} options={{ maintainAspectRatio: false }} />
                 </div>
               </div>
-            )}
 
-            {activeTab === 'cases' && (
-              <div className="animate-in fade-in duration-300 space-y-6">
-                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-bold">Active Cases Review</h2>
-                    <div className="flex gap-2">
-                      <input
-                        placeholder="Search cases..."
-                        className="bg-gray-100 dark:bg-gray-800 border-none rounded-lg px-4 py-2 text-sm"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                      />
-                      <select
-                        className="bg-gray-100 dark:bg-gray-800 border-none rounded-lg px-4 py-2 text-sm outline-none"
-                        value={programFilter}
-                        onChange={(e) => setProgramFilter(e.target.value)}
-                      >
-                        <option value="">All Programs</option>
-                        {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
-                      </select>
-                    </div>
-                  </div>
-                  <div className="overflow-x-auto border border-gray-100 dark:border-gray-800 rounded-xl">
-                    <table className="w-full text-xs">
-                      <thead className="bg-gray-50 dark:bg-gray-800 font-bold uppercase text-gray-400">
-                        <tr>
-                          <th className="px-4 py-4 text-left">Student</th>
-                          <th className="px-4 py-4 text-left">Offense</th>
-                          <th className="px-4 py-4 text-center">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                        {filteredCases.slice(0, 15).map((c: any, i) => (
-                          <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-900">
-                            <td className="px-4 py-4">
-                              <div className="font-bold">{c.student?.fullName}</div>
-                              <div className="text-[10px] text-gray-400">{c.student?.studentId} • {c.student?.program}</div>
-                            </td>
-                            <td className="px-4 py-4">{c.offenseType}</td>
-                            <td className="px-4 py-4 text-center">
-                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${c.status === 'Open' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}`}>{c.status}</span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+              {/* Maintenance Analytics */}
+              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400">Maintenance Issues</h3>
+                  <select
+                    className="bg-gray-50 dark:bg-gray-800 border-none rounded-lg px-3 py-1 text-xs outline-none"
+                    value={hostelFilter}
+                    onChange={(e) => setHostelFilter(e.target.value)}
+                  >
+                    <option value="">All Hostels</option>
+                    {hostels.map((h: any) => <option key={h} value={h}>{h}</option>)}
+                  </select>
+                </div>
+                <div className="h-64">
+                  <Bar data={maintenanceChartData} options={{ maintainAspectRatio: false }} />
                 </div>
               </div>
-            )}
+            </div>
 
-            {activeTab === 'maintenance' && (
-              <div className="animate-in fade-in duration-300 space-y-6">
-                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-bold">Maintenance Logs</h2>
-                    <select
-                      className="bg-gray-100 dark:bg-gray-800 border-none rounded-lg px-4 py-2 text-sm outline-none"
-                      value={hostelFilter}
-                      onChange={(e) => setHostelFilter(e.target.value)}
-                    >
-                      <option value="">All Hostels</option>
-                      {hostels.map((h: any) => <option key={h} value={h}>{h}</option>)}
-                    </select>
-                  </div>
-                  <div className="overflow-x-auto border border-gray-100 dark:border-gray-800 rounded-xl">
-                    <table className="w-full text-xs">
-                      <thead className="bg-gray-50 dark:bg-gray-800 font-bold uppercase text-gray-400">
-                        <tr>
-                          <th className="px-4 py-4 text-left">Location</th>
-                          <th className="px-4 py-4 text-left">Category</th>
-                          <th className="px-4 py-4 text-center">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                        {filteredMaintenance.slice(0, 15).map((r: any, i) => (
-                          <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-900">
-                            <td className="px-4 py-4">
-                              <div className="font-bold">{r.location?.hall}</div>
-                              <div className="text-[10px] text-gray-400">Room {r.location?.room || 'N/A'}</div>
-                            </td>
-                            <td className="px-4 py-4 uppercase font-medium">{r.category}</td>
-                            <td className="px-4 py-4 text-center">
-                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${r.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>{r.status}</span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+            {/* Most Common Offenders Chart */}
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+              <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6">Most Common Offenders</h3>
+              <div className="h-80">
+                <Bar data={offenderChartData} options={{
+                  maintainAspectRatio: false,
+                  indexAxis: 'y' as const,
+                }} />
               </div>
-            )}
-            {activeTab === 'student-reports' && (
-              <div className="animate-in fade-in duration-300 space-y-6">
-                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-bold">Student Disciplinary Reports</h2>
-                    <Link href="/reports" className="text-xs text-kmuGreen hover:underline font-bold uppercase tracking-widest">Manage All Reports →</Link>
-                  </div>
-                  <div className="overflow-x-auto border border-gray-100 dark:border-gray-800 rounded-xl">
-                    <table className="w-full text-xs">
-                      <thead className="bg-gray-50 dark:bg-gray-800 font-bold uppercase text-gray-400">
-                        <tr>
-                          <th className="px-4 py-4 text-left">Student</th>
-                          <th className="px-4 py-4 text-left">Incident</th>
-                          <th className="px-4 py-4 text-center">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                        {Array.isArray(studentReports) && studentReports.slice(0, 15).map((r: any, i) => (
-                          <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-900">
-                            <td className="px-4 py-4">
-                              <div className="font-bold">{r.student_name || 'Anonymous'}</div>
-                              <div className="text-[10px] text-gray-400">{new Date(r.incident_date).toLocaleDateString()}</div>
-                            </td>
-                            <td className="px-4 py-4">
-                              <div className="font-medium">{r.offense_type}</div>
-                              <div className="text-[10px] text-gray-400 line-clamp-1">{r.description}</div>
-                            </td>
-                            <td className="px-4 py-4 text-center">
-                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${r.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'}`}>{r.status}</span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+            </div>
+
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-bold">System Audit</h3>
+                <p className="text-sm text-gray-500">Generate comprehensive university-wide activity and disciplinary reports.</p>
               </div>
-            )}
-
-
+              <button onClick={exportCasesToWord} className="bg-emerald-700 text-white px-8 py-3 rounded-xl font-bold hover:shadow-lg transition">EXPORT FULL AUDIT (DOCX)</button>
+            </div>
           </div>
         </div>
       </div>
@@ -450,34 +313,31 @@ export default function AdminPage() {
   );
 }
 
-function NavButton({ label, icon, active, onClick }: any) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex items-center gap-4 px-6 py-4 transition-all border-l-4 text-left ${active
-        ? 'border-emerald-700 bg-emerald-50 dark:bg-emerald-900/10 text-emerald-800'
-        : 'border-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
-        }`}
-    >
-      <span className="text-xl">{icon}</span>
-      <span className="font-semibold">{label}</span>
-    </button>
-  );
-}
 
-function StatCard({ title, value, color }: any) {
+function StatCard({ title, value, color, link }: any) {
   const colors: any = {
-    emerald: 'text-emerald-700 border-emerald-100',
-    teal: 'text-teal-700 border-teal-100',
-    blue: 'text-blue-700 border-blue-100',
-    green: 'text-green-700 border-green-100'
+    emerald: 'text-emerald-700 border-emerald-100 hover:bg-emerald-50 dark:hover:bg-emerald-900/10',
+    teal: 'text-teal-700 border-teal-100 hover:bg-teal-50 dark:hover:bg-teal-900/10',
+    blue: 'text-blue-700 border-blue-100 hover:bg-blue-50 dark:hover:bg-blue-900/10',
+    green: 'text-green-700 border-green-100 hover:bg-green-50 dark:hover:bg-green-900/10'
   };
-  return (
-    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border ${colors[color]} p-5`}>
+
+  const CardContent = (
+    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border ${colors[color]} p-5 transition-all duration-200 cursor-pointer h-full`}>
       <div className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mb-1">{title}</div>
       <div className={`text-3xl font-bold ${colors[color].split(' ')[0]}`}>{value}</div>
     </div>
   );
+
+  if (link) {
+    return (
+      <Link href={link} className="block no-underline">
+        {CardContent}
+      </Link>
+    );
+  }
+
+  return CardContent;
 }
 
 function InfoField({ label, value }: any) {
