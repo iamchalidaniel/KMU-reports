@@ -210,22 +210,22 @@ export default function AdminPage() {
   const hostels = Array.from(new Set(safeMaintenance.map((r: any) => r.location?.hall).filter(Boolean)));
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-serif">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="animate-in fade-in duration-300 space-y-6">
 
-          {/* Executive Command Bar */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-8 rounded-3xl border-t-4 border-indigo-600 shadow-xl gap-4">
+          {/* Page Header */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 gap-4">
             <div>
-              <h1 className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white uppercase italic">Administrator Terminal</h1>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">KMU Unified Governance & System Hub</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Administrator Dashboard</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">System-wide governance and analytics hub</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={exportCasesToWord}
-                className="bg-indigo-600 text-white px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:shadow-lg hover:shadow-indigo-500/20 transition flex items-center gap-2 group border-none"
+                className="bg-kmuGreen text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-green-700 transition flex items-center gap-2 shadow-sm"
               >
-                <span className="group-hover:animate-pulse">📊</span> System Audit Report
+                📊 System Audit Report
               </button>
             </div>
           </div>
@@ -239,12 +239,12 @@ export default function AdminPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Disciplinary Intelligence */}
-            <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
-              <div className="flex justify-between items-center mb-8">
-                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 font-bold">Disciplinary Distribution</h3>
+            {/* Disciplinary Analytics */}
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Disciplinary Distribution</h3>
                 <select
-                  className="bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-sans"
+                  className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs font-semibold outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
                   value={programFilter}
                   onChange={(e) => setProgramFilter(e.target.value)}
                 >
@@ -252,24 +252,27 @@ export default function AdminPage() {
                   {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
-              <div className="h-64 flex items-center justify-center">
+              <div className="h-64">
                 <Bar
                   data={offenceChartData}
                   options={{
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
+                    scales: {
+                      y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+                      x: { grid: { display: false } }
+                    }
                   }}
                 />
               </div>
             </div>
 
-            {/* Maintenance Intelligence */}
-            <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
-              <div className="flex justify-between items-center mb-8">
-                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 font-bold">Facility Infrastructure Load</h3>
+            {/* Maintenance Analytics */}
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Facility Infrastructure</h3>
                 <select
-                  className="bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-blue-500 transition-all font-sans"
+                  className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs font-semibold outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
                   value={hostelFilter}
                   onChange={(e) => setHostelFilter(e.target.value)}
                 >
@@ -277,22 +280,25 @@ export default function AdminPage() {
                   {hostels.map((h: any) => <option key={h} value={h}>{h}</option>)}
                 </select>
               </div>
-              <div className="h-64 flex items-center justify-center">
+              <div className="h-64">
                 <Bar
                   data={maintenanceChartData}
                   options={{
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
+                    scales: {
+                      y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+                      x: { grid: { display: false } }
+                    }
                   }}
                 />
               </div>
             </div>
           </div>
 
-          {/* Operational Links Area */}
-          <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
-            <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-8 font-bold">Quick Administrative Dispatch</h3>
+          {/* Quick Links */}
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+            <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Quick Actions</h3>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <QuickLink href="/students" label="Registry" icon="👥" />
               <QuickLink href="/cases" label="Discipline" icon="⚖️" />
@@ -314,16 +320,16 @@ export default function AdminPage() {
 
 function StatCard({ title, value, color, link }: any) {
   const colors: any = {
-    indigo: 'text-indigo-700 bg-indigo-50/30 border-indigo-100 dark:bg-indigo-950/10 dark:border-indigo-900/50',
-    blue: 'text-blue-700 bg-blue-50/30 border-blue-100 dark:bg-blue-950/10 dark:border-blue-900/50',
-    emerald: 'text-emerald-700 bg-emerald-50/30 border-emerald-100 dark:bg-emerald-950/10 dark:border-emerald-900/50',
-    teal: 'text-teal-700 bg-teal-50/30 border-teal-100 dark:bg-teal-950/10 dark:border-teal-900/50'
+    indigo: 'border-indigo-500 dark:border-indigo-400',
+    blue: 'border-blue-500 dark:border-blue-400',
+    emerald: 'border-emerald-500 dark:border-emerald-400',
+    teal: 'border-teal-500 dark:border-teal-400'
   };
 
   const content = (
-    <div className={`bg-white dark:bg-gray-900 rounded-3xl shadow-sm border p-8 transition-all duration-300 ${colors[color]} cursor-pointer hover:shadow-lg`}>
-      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">{title}</div>
-      <div className="text-4xl font-black tracking-tight italic">{value}</div>
+    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-6 transition-all hover:shadow-md ${colors[color]}`}>
+      <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{title}</div>
+      <div className="text-3xl font-bold text-gray-900 dark:text-white">{value}</div>
     </div>
   );
 
@@ -332,9 +338,9 @@ function StatCard({ title, value, color, link }: any) {
 
 function QuickLink({ href, label, icon }: any) {
   return (
-    <Link href={href} className="flex flex-col items-center justify-center p-6 bg-gray-50/50 dark:bg-gray-800/50 rounded-2xl border border-transparent hover:border-indigo-500/30 hover:bg-indigo-50/10 transition-all group">
+    <Link href={href} className="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:border-kmuGreen hover:bg-green-50/10 transition-all group">
       <span className="text-2xl mb-2 group-hover:scale-110 transition-transform">{icon}</span>
-      <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 group-hover:text-indigo-600 transition-colors">{label}</span>
+      <span className="text-xs font-bold text-gray-600 dark:text-gray-300 group-hover:text-kmuGreen transition-colors">{label}</span>
     </Link>
   );
 }

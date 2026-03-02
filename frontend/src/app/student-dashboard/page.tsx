@@ -165,44 +165,44 @@ export default function StudentDashboardPage() {
   const studentData = profile || user;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-serif">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="animate-in fade-in duration-300 space-y-6">
 
-          {/* Student Executive Banner */}
-          <div className="bg-white dark:bg-gray-900 p-8 rounded-3xl border-t-4 border-indigo-600 shadow-xl overflow-hidden relative">
+          {/* Student Profile Header */}
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 relative overflow-hidden">
             <div className="absolute top-0 right-0 p-8 opacity-10">
               <span className="text-9xl font-black">KMU</span>
             </div>
-            <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
-              <div className="w-24 h-24 rounded-2xl bg-indigo-600 flex items-center justify-center text-white font-black text-4xl shadow-xl shadow-indigo-500/20 transform -rotate-3">
+            <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
+              <div className="w-20 h-20 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold text-3xl shadow-lg">
                 {studentData.name ? studentData.name.charAt(0).toUpperCase() : studentData.username.charAt(0).toUpperCase()}
               </div>
-              <div className="text-center md:text-left">
-                <h1 className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white uppercase italic">{studentData.fullName || studentData.name || 'Student Portal'}</h1>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">ID: {studentData.studentId} • {studentData.program}</p>
-                <div className="flex gap-4 mt-4 justify-center md:justify-start">
+              <div className="text-center md:text-left flex-1">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">{studentData.fullName || studentData.name || 'Student Portal'}</h1>
+                <p className="text-sm text-gray-500 font-semibold mt-1">ID: {studentData.studentId} • {studentData.program}</p>
+                <div className="flex flex-wrap gap-4 mt-4 justify-center md:justify-start border-t border-gray-100 dark:border-gray-800 pt-4">
                   <button
                     onClick={() => setActiveTab('overview')}
-                    className={`text-[10px] font-black uppercase tracking-widest pb-1 border-b-2 transition-all ${activeTab === 'overview' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+                    className={`text-xs font-bold uppercase tracking-wider pb-1.5 border-b-2 transition-all ${activeTab === 'overview' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
                   >
                     Registry Overview
                   </button>
                   <button
                     onClick={() => setActiveTab('reports')}
-                    className={`text-[10px] font-black uppercase tracking-widest pb-1 border-b-2 transition-all ${activeTab === 'reports' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+                    className={`text-xs font-bold uppercase tracking-wider pb-1.5 border-b-2 transition-all ${activeTab === 'reports' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
                   >
                     My Statements
                   </button>
                   <button
                     onClick={() => setActiveTab('cases')}
-                    className={`text-[10px] font-black uppercase tracking-widest pb-1 border-b-2 transition-all ${activeTab === 'cases' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+                    className={`text-xs font-bold uppercase tracking-wider pb-1.5 border-b-2 transition-all ${activeTab === 'cases' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
                   >
                     Disciplinary Ledger
                   </button>
                   <button
                     onClick={() => setActiveTab('appeals')}
-                    className={`text-[10px] font-black uppercase tracking-widest pb-1 border-b-2 transition-all ${activeTab === 'appeals' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+                    className={`text-xs font-bold uppercase tracking-wider pb-1.5 border-b-2 transition-all ${activeTab === 'appeals' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
                   >
                     Appeals Portal
                   </button>

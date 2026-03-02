@@ -217,28 +217,28 @@ export default function AssistantDeanDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-serif">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="animate-in fade-in duration-300 space-y-6">
 
-          {/* Executive Command Bar */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-8 rounded-3xl border-t-4 border-purple-600 shadow-xl gap-4 text-sm">
+          {/* Page Header */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 gap-4">
             <div>
-              <h1 className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white uppercase">Assistant Dean Oversight</h1>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">Student Affairs & Disciplinary Governance</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Assistant Dean Dashboard</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Student affairs and disciplinary oversight</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={exportCasesToWord}
-                className="bg-kmuGreen text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:shadow-lg hover:shadow-emerald-500/20 transition flex items-center gap-2 group"
+                className="bg-kmuGreen text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-green-700 transition flex items-center gap-2 shadow-sm"
               >
-                <span className="group-hover:animate-bounce">📄</span> Export Registry
+                📊 Export Registry
               </button>
               <Link
                 href="/reports"
-                className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:shadow-lg hover:shadow-blue-500/20 transition flex items-center gap-2 group"
+                className="bg-blue-600 text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-blue-700 transition flex items-center gap-2 shadow-sm"
               >
-                <span className="group-hover:animate-pulse">📂</span> Analytics Portal
+                📂 Analytics Portal
               </Link>
             </div>
           </div>
@@ -251,11 +251,11 @@ export default function AssistantDeanDashboard() {
             <StatCard title="Resolved" value={resolvedCases} color="green" />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 text-sm">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Case Status Distribution */}
-            <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
-              <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-8 font-bold">Case Status Distribution</h3>
-              <div className="h-64 flex items-center justify-center">
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Case Status Distribution</h3>
+              <div className="h-64">
                 <Doughnut
                   data={statusChartData}
                   options={{
@@ -267,11 +267,11 @@ export default function AssistantDeanDashboard() {
             </div>
 
             {/* Offense Frequency */}
-            <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
-              <div className="flex justify-between items-center mb-8">
-                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 font-bold">Primary Offense Index</h3>
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Primary Offense Index</h3>
                 <select
-                  className="bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-purple-500 transition-all font-sans"
+                  className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs font-semibold outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
                   value={programFilter}
                   onChange={(e) => setProgramFilter(e.target.value)}
                 >
@@ -279,53 +279,56 @@ export default function AssistantDeanDashboard() {
                   {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
-              <div className="h-64 flex items-center justify-center">
+              <div className="h-64">
                 <Bar
                   data={offenseChartData}
                   options={{
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
+                    scales: {
+                      y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+                      x: { grid: { display: false } }
+                    }
                   }}
                 />
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 text-sm">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Recurrent Offenders */}
-            <div className="lg:col-span-1 bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
-              <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-6 font-bold">Recurrent Subjects</h3>
-              <div className="space-y-4 font-sans">
+            <div className="lg:col-span-1 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Recurrent Subjects</h3>
+              <div className="space-y-3">
                 {topOffenders.length > 0 ? topOffenders.map(([name, count], i) => (
-                  <div key={i} className="flex justify-between items-center p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-2xl transition-colors border-b border-gray-50 dark:border-gray-800 last:border-0 group">
-                    <span className="font-bold text-xs tracking-tight text-gray-700 dark:text-gray-300 group-hover:text-purple-600 transition-colors uppercase">{name}</span>
-                    <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter">{count} Incidents</span>
+                  <div key={i} className="flex justify-between items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg transition-colors border border-gray-100 dark:border-gray-700 group">
+                    <span className="font-bold text-sm text-gray-700 dark:text-gray-300 group-hover:text-kmuGreen transition-colors">{name}</span>
+                    <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase">{count} Incidents</span>
                   </div>
                 )) : <p className="text-center text-gray-500 py-12 italic text-sm">No offender telemetry found.</p>}
               </div>
             </div>
 
             {/* Case Registry Ledger */}
-            <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
-              <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <h2 className="text-lg font-black uppercase tracking-tighter">Case Registry Ledger</h2>
-                <div className="relative w-full md:w-64 font-sans">
+            <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
+              <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">Active Case Ledger</h2>
+                <div className="relative w-full md:w-64">
                   <input
                     placeholder="Search ledger..."
-                    className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-5 py-3 text-xs w-full focus:ring-2 focus:ring-purple-500 transition-all shadow-inner"
+                    className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-sm w-full focus:ring-2 focus:ring-kmuGreen transition-all"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
                 </div>
               </div>
-              <div className="overflow-x-auto flex-1 font-sans">
-                <table className="w-full text-xs">
-                  <thead className="bg-gray-50/50 dark:bg-gray-800/50 text-[10px] font-black uppercase text-gray-400 tracking-widest">
+              <div className="overflow-x-auto flex-1">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-xs font-bold uppercase tracking-wider">
                     <tr>
-                      <th className="px-8 py-5 text-left">Subject / Identification</th>
-                      <th className="px-8 py-5 text-left">Classification</th>
-                      <th className="px-8 py-5 text-center">Status</th>
+                      <th className="px-6 py-4 text-left">Subject</th>
+                      <th className="px-6 py-4 text-left">Classification</th>
+                      <th className="px-6 py-4 text-center">Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -334,15 +337,15 @@ export default function AssistantDeanDashboard() {
                       .slice(0, 8)
                       .map((c, i) => (
                         <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 group transition-colors cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
-                          <td className="px-8 py-5">
-                            <div className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-purple-600 transition-colors uppercase">{c.student?.fullName}</div>
-                            <div className="text-[10px] text-gray-400 font-mono mt-0.5">{c.student?.studentId} • {c.student?.program}</div>
+                          <td className="px-6 py-4">
+                            <div className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-kmuGreen transition-colors">{c.student?.fullName}</div>
+                            <div className="text-xs text-gray-500 mt-0.5">{c.student?.studentId} • {c.student?.program}</div>
                           </td>
-                          <td className="px-8 py-5">
-                            <div className="text-gray-700 dark:text-gray-300 font-medium uppercase">{c.offenseType}</div>
+                          <td className="px-6 py-4">
+                            <div className="text-gray-600 dark:text-gray-400 font-medium">{c.offenseType}</div>
                           </td>
-                          <td className="px-8 py-5 text-center">
-                            <span className="px-3 py-1 rounded-lg bg-orange-100 dark:bg-orange-950/30 text-orange-700 dark:text-orange-400 font-black text-[9px] uppercase tracking-tighter border border-orange-200 dark:border-orange-900/50">{c.status}</span>
+                          <td className="px-6 py-4 text-center">
+                            <span className="px-2.5 py-1 rounded-full bg-orange-100 dark:bg-orange-950/30 text-orange-700 dark:text-orange-400 font-bold text-[10px] uppercase border border-orange-200 dark:border-orange-900/50">{c.status}</span>
                           </td>
                         </tr>
                       ))}
@@ -352,8 +355,8 @@ export default function AssistantDeanDashboard() {
                   <div className="text-center py-20 text-gray-400 italic text-sm">No active inquiries found.</div>
                 )}
               </div>
-              <div className="p-6 bg-gray-50/30 dark:bg-gray-800/20 text-center border-t border-gray-100 dark:border-gray-800">
-                <Link href="/students" className="text-[10px] font-black text-purple-600 hover:text-purple-700 uppercase tracking-[0.2em] transition-all">Expand Student Registry →</Link>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800/50 text-center border-t border-gray-100 dark:border-gray-800">
+                <Link href="/students" className="text-xs font-bold text-kmuGreen hover:text-green-700 uppercase tracking-wider transition-all">Expand Student Registry →</Link>
               </div>
             </div>
           </div>
@@ -370,15 +373,15 @@ export default function AssistantDeanDashboard() {
 
 function StatCard({ title, value, color }: any) {
   const colors: any = {
-    indigo: 'text-indigo-700 bg-indigo-50/30 border-indigo-100 hover:bg-indigo-50 dark:bg-indigo-950/10 dark:border-indigo-900/50',
-    purple: 'text-purple-700 bg-purple-50/30 border-purple-100 hover:bg-purple-50 dark:bg-purple-950/10 dark:border-purple-900/50',
-    orange: 'text-orange-700 bg-orange-50/30 border-orange-100 hover:bg-orange-50 dark:bg-orange-950/10 dark:border-orange-900/50',
-    green: 'text-green-700 bg-green-50/30 border-green-100 hover:bg-green-50 dark:bg-green-950/10 dark:border-green-900/50'
+    indigo: 'border-indigo-500 dark:border-indigo-400',
+    purple: 'border-purple-500 dark:border-purple-400',
+    orange: 'border-orange-500 dark:border-orange-400',
+    green: 'border-green-500 dark:border-green-400'
   };
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-3xl shadow-sm border p-8 transition-all duration-300 ${colors[color]}`}>
-      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">{title}</div>
-      <div className="text-4xl font-black tracking-tight">{value}</div>
+    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-6 transition-all hover:shadow-md ${colors[color]}`}>
+      <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{title}</div>
+      <div className="text-3xl font-bold text-gray-900 dark:text-white">{value}</div>
     </div>
   );
 }

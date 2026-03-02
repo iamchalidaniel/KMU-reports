@@ -245,27 +245,27 @@ export default function SecretaryDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-serif">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="animate-in fade-in duration-300 space-y-6">
 
-          {/* Executive Command Bar */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-8 rounded-3xl border-t-4 border-emerald-600 shadow-xl gap-4">
+          {/* Page Header */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 gap-4">
             <div>
-              <h1 className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white uppercase">Secretariat Command</h1>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">Administrative Intelligence & Registry Governance</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Secretariat Dashboard</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Administrative intelligence and registry hub</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={handleGenerateSummary}
                 disabled={isSummarizing || cases.length === 0}
-                className="bg-emerald-600 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:shadow-lg hover:shadow-emerald-500/20 transition flex items-center gap-2 group border-none"
+                className="bg-kmuGreen text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-green-700 transition flex items-center gap-2 shadow-sm disabled:opacity-50"
               >
-                <span className="group-hover:animate-spin">✨</span> {isSummarizing ? "Analyzing Patterns..." : "AI Behavioral Summary"}
+                {isSummarizing ? "Analyzing..." : "✨ AI Summary"}
               </button>
               <button
                 onClick={exportCasesToWord}
-                className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:shadow-lg border border-gray-200 dark:border-gray-700 transition flex items-center gap-2 group"
+                className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-6 py-2.5 rounded-lg font-bold text-sm shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
               >
                 📄 Export Ledger
               </button>
@@ -274,15 +274,15 @@ export default function SecretaryDashboard() {
 
           {/* AI Insight banner */}
           {aiSummary && (
-            <div className="p-8 bg-emerald-50/50 dark:bg-emerald-950/20 border-l-8 border-emerald-500 rounded-3xl animate-in slide-in-from-left duration-500 shadow-sm relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-4">
-                <button onClick={() => setAiSummary(null)} className="text-emerald-300 hover:text-emerald-500 transition">✕</button>
+            <div className="p-6 bg-emerald-50 dark:bg-emerald-900/10 border-l-4 border-emerald-500 rounded-xl animate-in slide-in-from-left duration-500 shadow-sm relative overflow-hidden">
+              <div className="absolute top-2 right-2">
+                <button onClick={() => setAiSummary(null)} className="text-emerald-400 hover:text-emerald-600 transition">✕</button>
               </div>
-              <div className="flex items-center gap-3 mb-4">
-                <span className="text-2xl animate-pulse">🧠</span>
-                <h3 className="text-xs font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400">Synthesized Administrative Intelligence</h3>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-xl">🧠</span>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Administrative AI Analysis</h3>
               </div>
-              <div className="text-sm font-medium text-emerald-900 dark:text-emerald-100 leading-relaxed font-sans bg-white/50 dark:bg-black/20 p-6 rounded-2xl border border-emerald-100/50 dark:border-emerald-800/50">
+              <div className="text-sm text-emerald-900 dark:text-emerald-100 leading-relaxed p-4 bg-white/60 dark:bg-black/20 rounded-lg border border-emerald-100/50 dark:border-emerald-800/50">
                 {aiSummary}
               </div>
             </div>
@@ -298,11 +298,11 @@ export default function SecretaryDashboard() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Activity Trend */}
-            <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
-              <div className="flex justify-between items-center mb-8">
-                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 font-bold">Activity Velocity Index</h3>
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Activity Index</h3>
                 <select
-                  className="bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-sans"
+                  className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs font-semibold outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
                   value={programFilter}
                   onChange={(e) => setProgramFilter(e.target.value)}
                 >
@@ -310,7 +310,7 @@ export default function SecretaryDashboard() {
                   {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
-              <div className="h-64 flex items-center justify-center font-sans">
+              <div className="h-64">
                 <Line
                   data={trendData}
                   options={{
@@ -326,13 +326,13 @@ export default function SecretaryDashboard() {
             </div>
 
             {/* Top Offenders List */}
-            <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
-              <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-8 font-bold">Registry Anomaly Frequency</h3>
-              <div className="space-y-4 font-sans">
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Registry Anomaly Frequency</h3>
+              <div className="space-y-3">
                 {topOffenders.slice(0, 5).length > 0 ? topOffenders.map(([name, count], i) => (
-                  <div key={i} className="flex justify-between items-center p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-2xl transition-colors border-b border-gray-50 dark:border-gray-800 last:border-0 group">
-                    <span className="font-bold text-xs tracking-tight text-gray-700 dark:text-gray-300 group-hover:text-emerald-600 transition-colors uppercase">{name}</span>
-                    <span className="bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter">{count} Entries</span>
+                  <div key={i} className="flex justify-between items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg transition-colors border border-gray-100 dark:border-gray-700 group">
+                    <span className="font-bold text-sm text-gray-700 dark:text-gray-300 group-hover:text-kmuGreen transition-colors">{name}</span>
+                    <span className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase">{count} Entries</span>
                   </div>
                 )) : <p className="text-center text-gray-500 py-12 italic text-sm">No significant anomalies detected.</p>}
               </div>
@@ -340,38 +340,38 @@ export default function SecretaryDashboard() {
           </div>
 
           {/* Central Registry Ledger */}
-          <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
-            <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <h2 className="text-lg font-black uppercase tracking-tighter">Central Registry Ledger</h2>
-              <div className="relative w-full md:w-80 font-sans">
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Central Registry Ledger</h2>
+              <div className="relative w-full md:w-80">
                 <input
                   placeholder="Query central registry..."
-                  className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-5 py-3.5 text-xs w-full focus:ring-2 focus:ring-emerald-500 transition-all shadow-inner"
+                  className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2.5 text-sm w-full focus:ring-2 focus:ring-kmuGreen transition-all shadow-inner"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
             </div>
-            <div className="overflow-x-auto flex-1 font-sans">
-              <table className="w-full text-xs">
-                <thead className="bg-gray-50/50 dark:bg-gray-800/50 text-[10px] font-black uppercase text-gray-400 tracking-widest">
+            <div className="overflow-x-auto flex-1">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-xs font-bold uppercase tracking-wider">
                   <tr>
-                    <th className="px-8 py-5 text-left">Subject / Entity</th>
-                    <th className="px-8 py-5 text-left">Classification</th>
-                    <th className="px-8 py-5 text-center">Timestamp</th>
+                    <th className="px-6 py-4 text-left">Subject</th>
+                    <th className="px-6 py-4 text-left">Classification</th>
+                    <th className="px-6 py-4 text-center">Timestamp</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {filteredCases.slice(0, 12).map((c, i) => (
                     <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 group transition-colors cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
-                      <td className="px-8 py-5">
-                        <div className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-emerald-600 transition-colors uppercase">{c.student?.fullName}</div>
-                        <div className="text-[10px] text-gray-400 font-mono mt-0.5">{c.student?.studentId}</div>
+                      <td className="px-6 py-4">
+                        <div className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-kmuGreen transition-colors">{c.student?.fullName}</div>
+                        <div className="text-xs text-gray-500 mt-0.5">{c.student?.studentId}</div>
                       </td>
-                      <td className="px-8 py-5">
-                        <div className="text-gray-700 dark:text-gray-300 font-medium uppercase tracking-tight">{c.offenseType}</div>
+                      <td className="px-6 py-4">
+                        <div className="text-gray-600 dark:text-gray-400 font-medium uppercase tracking-tight">{c.offenseType}</div>
                       </td>
-                      <td className="px-8 py-5 text-center text-gray-400 font-mono text-[10px]">
+                      <td className="px-6 py-4 text-center text-gray-400 text-xs font-mono">
                         {new Date(c.createdAt || 0).toLocaleDateString()}
                       </td>
                     </tr>
@@ -396,15 +396,15 @@ export default function SecretaryDashboard() {
 
 function StatCard({ title, value, color }: any) {
   const colors: any = {
-    teal: 'text-teal-700 bg-teal-50/30 border-teal-100 hover:bg-teal-50 dark:bg-teal-950/10 dark:border-teal-900/50',
-    emerald: 'text-emerald-700 bg-emerald-50/30 border-emerald-100 hover:bg-emerald-50 dark:bg-emerald-950/10 dark:border-emerald-900/50',
-    blue: 'text-blue-700 bg-blue-50/30 border-blue-100 hover:bg-blue-50 dark:bg-blue-950/10 dark:border-blue-900/50',
-    orange: 'text-orange-700 bg-orange-50/30 border-orange-100 hover:bg-orange-50 dark:bg-orange-950/10 dark:border-orange-900/50'
+    teal: 'border-teal-500 dark:border-teal-400',
+    emerald: 'border-emerald-500 dark:border-emerald-400',
+    blue: 'border-blue-500 dark:border-blue-400',
+    orange: 'border-orange-500 dark:border-orange-400'
   };
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-3xl shadow-sm border p-8 transition-all duration-300 ${colors[color]}`}>
-      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">{title}</div>
-      <div className="text-4xl font-black tracking-tight">{value}</div>
+    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-6 transition-all hover:shadow-md ${colors[color]}`}>
+      <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{title}</div>
+      <div className="text-3xl font-bold text-gray-900 dark:text-white">{value}</div>
     </div>
   );
 }

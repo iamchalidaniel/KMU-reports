@@ -168,22 +168,22 @@ export default function ChiefSecurityOfficerDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-serif">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="animate-in fade-in duration-300 space-y-6">
 
-          {/* Executive Command Bar */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-8 rounded-3xl border-t-4 border-red-600 shadow-xl gap-4">
+          {/* Page Header */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 gap-4">
             <div>
-              <h1 className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white uppercase italic">CSO High Command</h1>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">Strategic Oversight & Enforcement Protocols</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Chief Security Officer Dashboard</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Strategic oversight and enforcement protocols</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={exportCasesToWord}
-                className="bg-red-600 text-white px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:shadow-lg hover:shadow-red-500/20 transition flex items-center gap-2 group border-none"
+                className="bg-red-600 text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-red-700 transition flex items-center gap-2 shadow-sm"
               >
-                <span className="group-hover:animate-pulse">📂</span> Generate Intelligence Report
+                📊 Generate Intelligence Report
               </button>
             </div>
           </div>
@@ -193,16 +193,16 @@ export default function ChiefSecurityOfficerDashboard() {
             <StatCard title="Total Indictments" value={safeCases.length} color="red" />
             <StatCard title="Active Inquiries" value={safeCases.filter(c => c.status === 'Open').length} color="blue" />
             <StatCard title="Critical Index" value={safeCases.filter(c => c.severity === 'High' || c.severity === 'Critical').length} color="orange" />
-            <StatCard title="Force Deployment" value={safeStudents.length} color="indigo" />
+            <StatCard title="Total Students" value={safeStudents.length} color="indigo" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Analytics Ledger */}
-            <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
-              <div className="flex justify-between items-center mb-8">
-                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 font-bold">Criminological Variance</h3>
+            <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Criminological Variance</h3>
                 <select
-                  className="bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-red-500 transition-all font-sans"
+                  className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs font-semibold outline-none focus:ring-2 focus:ring-red-500 transition-all font-sans"
                   value={programFilter}
                   onChange={(e) => setProgramFilter(e.target.value)}
                 >
@@ -210,30 +210,33 @@ export default function ChiefSecurityOfficerDashboard() {
                   {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
-              <div className="h-64 flex items-center justify-center">
+              <div className="h-64">
                 <Bar
                   data={offenceChartData}
                   options={{
                     maintainAspectRatio: false,
                     indexAxis: 'y',
                     plugins: { legend: { display: false } },
-                    scales: { x: { beginAtZero: true, grid: { display: false } }, y: { grid: { display: false } } }
+                    scales: {
+                      x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+                      y: { grid: { display: false } }
+                    }
                   }}
                 />
               </div>
             </div>
 
             {/* Target Subjects Watchlist */}
-            <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
-              <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-8 font-bold">Priority Watch Indices</h3>
-              <div className="space-y-4 font-sans">
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Priority Watch Indices</h3>
+              <div className="space-y-3">
                 {topOffenders.map(([name, count], i) => (
-                  <div key={i} className="flex justify-between items-center p-4 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-2xl transition-all border border-transparent hover:border-red-500/10 group">
+                  <div key={i} className="flex justify-between items-center p-3 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-all border border-gray-100 dark:border-gray-700 group">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center text-red-600 font-bold text-xs">{name.charAt(0)}</div>
-                      <span className="font-bold text-xs text-gray-700 dark:text-gray-300">{name}</span>
+                      <span className="font-bold text-sm text-gray-700 dark:text-gray-300 group-hover:text-red-600 transition-colors uppercase">{name}</span>
                     </div>
-                    <span className="text-[9px] font-black text-red-600 bg-red-50 dark:bg-red-900/30 px-2 py-1 rounded-lg uppercase">{count} OFFENSES</span>
+                    <span className="text-[10px] font-bold text-red-600 bg-red-50 dark:bg-red-900/30 px-2 py-1 rounded-lg uppercase">{count} OFFENSES</span>
                   </div>
                 ))}
               </div>
@@ -241,41 +244,41 @@ export default function ChiefSecurityOfficerDashboard() {
           </div>
 
           {/* Operational Dispatch Ledger */}
-          <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
-            <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <h2 className="text-lg font-black uppercase tracking-tighter italic">Strategic Dispatch Ledger</h2>
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Strategic Dispatch Ledger</h2>
               <div className="relative w-full md:w-80">
                 <input
                   placeholder="Query command indices..."
-                  className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-5 py-3.5 text-xs w-full focus:ring-2 focus:ring-red-500 transition-all font-sans"
+                  className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-sm w-full focus:ring-2 focus:ring-red-500 transition-all font-sans"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
             </div>
-            <div className="overflow-x-auto font-sans">
-              <table className="w-full text-xs">
-                <thead className="bg-gray-50/50 dark:bg-gray-800/50 text-[10px] font-black uppercase text-gray-400 tracking-widest">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-xs font-bold uppercase tracking-wider">
                   <tr>
-                    <th className="px-8 py-5 text-left">Subject / CID</th>
-                    <th className="px-8 py-5 text-left">Protocol Class</th>
-                    <th className="px-8 py-5 text-center">Status</th>
-                    <th className="px-8 py-5 text-right">Escalation</th>
+                    <th className="px-6 py-4 text-left">Subject</th>
+                    <th className="px-6 py-4 text-left">Protocol Class</th>
+                    <th className="px-6 py-4 text-center">Status</th>
+                    <th className="px-6 py-4 text-right">Escalation</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {filteredCases.slice(0, 15).map((c, i) => (
                     <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 group transition-colors cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
-                      <td className="px-8 py-5">
+                      <td className="px-6 py-4">
                         <div className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-red-600 transition-colors uppercase">{c.student?.fullName || 'Anonymous'}</div>
-                        <div className="text-[10px] text-gray-400 font-mono italic">{c.student?.studentId || 'EXTERNAL'}</div>
+                        <div className="text-xs text-gray-500 mt-0.5">{c.student?.studentId || 'EXTERNAL'}</div>
                       </td>
-                      <td className="px-8 py-5 text-gray-700 dark:text-gray-300 font-bold uppercase tracking-tight">{c.offenseType}</td>
-                      <td className="px-8 py-5 text-center">
-                        <span className={`px-3 py-1 rounded-lg font-black text-[9px] uppercase tracking-widest border ${c.status === 'Open' ? 'bg-red-100 text-red-700 border-red-200' : 'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>{c.status}</span>
+                      <td className="px-6 py-4 text-gray-600 dark:text-gray-400 font-bold uppercase">{c.offenseType}</td>
+                      <td className="px-6 py-4 text-center">
+                        <span className={`px-2.5 py-1 rounded-full font-bold text-[10px] uppercase border ${c.status === 'Open' ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`}>{c.status}</span>
                       </td>
-                      <td className="px-8 py-5 text-right">
-                        <span className={`text-[10px] font-black uppercase ${c.severity === 'Critical' ? 'text-red-600 animate-pulse' :
+                      <td className="px-6 py-4 text-right">
+                        <span className={`text-[10px] font-bold uppercase ${c.severity === 'Critical' ? 'text-red-600 animate-pulse' :
                           c.severity === 'High' ? 'text-red-500' : 'text-gray-400'
                           }`}>
                           {c.severity}
@@ -286,11 +289,11 @@ export default function ChiefSecurityOfficerDashboard() {
                 </tbody>
               </table>
               {filteredCases.length === 0 && (
-                <div className="text-center py-24 text-gray-400 italic text-sm font-serif">Empty dispatch registry.</div>
+                <div className="text-center py-20 text-gray-400 italic text-sm">Empty dispatch registry.</div>
               )}
             </div>
-            <div className="p-8 bg-gray-50/30 dark:bg-gray-800/20 text-center">
-              <Link href="/cases" className="text-[10px] font-black text-red-600 hover:text-red-700 uppercase tracking-[0.3em]">Expand Fleet Dossier →</Link>
+            <div className="p-4 bg-gray-50 dark:bg-gray-800/50 text-center border-t border-gray-100 dark:border-gray-800">
+              <Link href="/cases" className="text-xs font-bold text-red-600 hover:text-red-700 uppercase tracking-wider transition-all">Expand Fleet Dossier →</Link>
             </div>
           </div>
         </div>
@@ -305,15 +308,15 @@ export default function ChiefSecurityOfficerDashboard() {
 
 function StatCard({ title, value, color }: any) {
   const colors: any = {
-    red: 'text-red-700 bg-red-50/30 border-red-100 dark:bg-red-950/10 dark:border-red-900/50',
-    blue: 'text-blue-700 bg-blue-50/30 border-blue-100 dark:bg-blue-950/10 dark:border-blue-900/50',
-    orange: 'text-orange-700 bg-orange-50/30 border-orange-100 dark:bg-orange-950/10 dark:border-orange-900/50',
-    indigo: 'text-indigo-700 bg-indigo-50/30 border-indigo-100 dark:bg-indigo-950/10 dark:border-indigo-900/50'
+    red: 'border-red-500 dark:border-red-400',
+    blue: 'border-blue-500 dark:border-blue-400',
+    orange: 'border-orange-500 dark:border-orange-400',
+    indigo: 'border-indigo-500 dark:border-indigo-400'
   };
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-3xl shadow-sm border p-8 transition-all duration-300 ${colors[color]}`}>
-      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">{title}</div>
-      <div className="text-4xl font-black tracking-tight italic">{value}</div>
+    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-6 transition-all hover:shadow-md ${colors[color]}`}>
+      <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{title}</div>
+      <div className="text-3xl font-bold text-gray-900 dark:text-white">{value}</div>
     </div>
   );
 }

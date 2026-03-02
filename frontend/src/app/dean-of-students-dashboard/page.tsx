@@ -217,27 +217,27 @@ export default function DeanOfStudentsDashboard() {
   const programs = Array.from(new Set(safeStudents.map((s: any) => s.program).filter(Boolean)));
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-serif">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="animate-in fade-in duration-300 space-y-6">
 
-          {/* Executive Command Bar */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-8 rounded-3xl border-t-4 border-emerald-600 shadow-xl gap-4">
+          {/* Page Header */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 gap-4">
             <div>
-              <h1 className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white uppercase italic">Dean's Executive Suite</h1>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">Student Affairs & Behavioral Management Oversight</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dean of Students Dashboard</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Student affairs and behavioral management oversight</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={handleGenerateSummary}
                 disabled={isSummarizing || cases.length === 0}
-                className="bg-emerald-600 text-white px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:shadow-lg hover:shadow-emerald-500/20 transition flex items-center gap-2 group border-none"
+                className="bg-kmuGreen text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-green-700 transition flex items-center gap-2 shadow-sm disabled:opacity-50"
               >
-                <span className="group-hover:animate-pulse">✨</span> {isSummarizing ? "Synthesizing..." : "Run AI Behavioral Audit"}
+                {isSummarizing ? "Synthesizing..." : "✨ AI Behavioral Audit"}
               </button>
               <button
                 onClick={exportCasesToWord}
-                className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:opacity-90 transition"
+                className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-6 py-2.5 rounded-lg font-bold text-sm shadow-sm hover:opacity-90 transition"
               >
                 Export Strategic Dossier
               </button>
@@ -254,16 +254,13 @@ export default function DeanOfStudentsDashboard() {
 
           {/* AI behavioral Insight Panel */}
           {aiSummary && (
-            <div className="p-8 bg-white dark:bg-gray-900 rounded-3xl shadow-xl border border-emerald-100 dark:border-emerald-900/50 relative overflow-hidden group animate-in slide-in-from-top-4 duration-500">
-              <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                <span className="text-9xl font-black">AI</span>
-              </div>
+            <div className="p-6 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-emerald-100 dark:border-emerald-900/50 relative overflow-hidden group animate-in slide-in-from-top-4 duration-500">
               <div className="relative z-10">
-                <div className="flex justify-between items-center mb-6">
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600">Administrative Intelligence Synthesis</span>
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">Administrative Intelligence Synthesis</span>
                   <button onClick={() => setAiSummary(null)} className="text-gray-400 hover:text-gray-600 transition">✕</button>
                 </div>
-                <div className="text-gray-800 dark:text-gray-200 leading-relaxed text-sm font-medium italic font-sans">
+                <div className="text-gray-800 dark:text-gray-200 leading-relaxed text-sm font-medium italic">
                   "{aiSummary}"
                 </div>
               </div>
@@ -272,11 +269,11 @@ export default function DeanOfStudentsDashboard() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Infraction Distribution */}
-            <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
-              <div className="flex justify-between items-center mb-8">
-                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 font-bold">Campus-Wide Behavioral Analytics</h3>
+            <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Campus behavioral Analytics</h3>
                 <select
-                  className="bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-sans"
+                  className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs font-semibold outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
                   value={programFilter}
                   onChange={(e) => setProgramFilter(e.target.value)}
                 >
@@ -284,29 +281,32 @@ export default function DeanOfStudentsDashboard() {
                   {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
-              <div className="h-64 flex items-center justify-center">
+              <div className="h-64">
                 <Bar
                   data={offenseChartData}
                   options={{
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
+                    scales: {
+                      y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+                      x: { grid: { display: false } }
+                    }
                   }}
                 />
               </div>
             </div>
 
             {/* Recidivism Watchlist */}
-            <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
-              <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-8 font-bold">Priority Observation Watch</h3>
-              <div className="space-y-4 font-sans">
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Observation Watchlist</h3>
+              <div className="space-y-3">
                 {topOffenders.length > 0 ? topOffenders.map(([name, count], i) => (
-                  <div key={i} className="flex justify-between items-center p-4 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 rounded-2xl transition-all border border-transparent hover:border-emerald-100 dark:hover:border-emerald-800 group">
+                  <div key={i} className="flex justify-between items-center p-3 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 rounded-lg transition-all border border-gray-100 dark:border-gray-700 group">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center text-emerald-600 font-bold text-xs uppercase">{name.charAt(0)}</div>
-                      <span className="font-bold text-xs text-gray-700 dark:text-gray-300">{name}</span>
+                      <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center text-emerald-600 font-bold text-xs uppercase">{name.charAt(0)}</div>
+                      <span className="font-bold text-sm text-gray-700 dark:text-gray-300 group-hover:text-kmuGreen transition-colors uppercase">{name}</span>
                     </div>
-                    <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1 rounded-lg uppercase tracking-tighter">{count} INCIDENTS</span>
+                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1 rounded-full uppercase">{count} INCIDENTS</span>
                   </div>
                 )) : <p className="text-center text-gray-400 py-12 italic text-xs">No watch data.</p>}
               </div>
@@ -314,41 +314,41 @@ export default function DeanOfStudentsDashboard() {
           </div>
 
           {/* Strategic Record Ledger */}
-          <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
-            <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <h2 className="text-lg font-black uppercase tracking-tighter italic text-emerald-600">Strategic Disciplinary Ledger</h2>
-              <div className="relative w-full md:w-80 font-sans">
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Disciplinary Ledger</h2>
+              <div className="relative w-full md:w-80">
                 <input
                   placeholder="Query behavioral indices..."
-                  className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-5 py-3.5 text-xs w-full focus:ring-2 focus:ring-emerald-500 transition-all font-sans"
+                  className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2.5 text-sm w-full focus:ring-2 focus:ring-kmuGreen transition-all shadow-inner"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
             </div>
-            <div className="overflow-x-auto font-sans">
-              <table className="w-full text-xs">
-                <thead className="bg-gray-50/50 dark:bg-gray-800/50 text-[10px] font-black uppercase text-gray-400 tracking-widest">
+            <div className="overflow-x-auto flex-1">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-xs font-bold uppercase tracking-wider">
                   <tr>
-                    <th className="px-8 py-5 text-left">Entity / Identification</th>
-                    <th className="px-8 py-5 text-left">Incident Classification</th>
-                    <th className="px-8 py-5 text-center">Status</th>
-                    <th className="px-8 py-5 text-right">Escalation</th>
+                    <th className="px-6 py-4 text-left">Subject</th>
+                    <th className="px-6 py-4 text-left">Classification</th>
+                    <th className="px-6 py-4 text-center">Status</th>
+                    <th className="px-6 py-4 text-right">Escalation</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {filteredCases.slice(0, 12).map((c, i) => (
                     <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 group transition-colors cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
-                      <td className="px-8 py-5">
+                      <td className="px-6 py-4">
                         <div className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-emerald-600 transition-colors uppercase">{c.student?.fullName || 'Anonymous'}</div>
-                        <div className="text-[10px] text-gray-400 font-mono italic">{c.student?.studentId || 'EXTERNAL'}</div>
+                        <div className="text-xs text-gray-500 mt-0.5 italic">{c.student?.studentId || 'EXTERNAL'}</div>
                       </td>
-                      <td className="px-8 py-5 text-gray-700 dark:text-gray-300 font-bold uppercase tracking-tight">{c.offenseType}</td>
-                      <td className="px-8 py-5 text-center">
-                        <span className={`px-3 py-1 rounded-lg font-black text-[9px] uppercase tracking-widest border ${c.status === 'Open' ? 'bg-red-100 text-red-700 border-red-200' : 'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>{c.status}</span>
+                      <td className="px-6 py-4 text-gray-600 dark:text-gray-400 font-bold uppercase">{c.offenseType}</td>
+                      <td className="px-6 py-4 text-center">
+                        <span className={`px-2.5 py-1 rounded-full font-bold text-[10px] uppercase border ${c.status === 'Open' ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`}>{c.status}</span>
                       </td>
-                      <td className="px-8 py-5 text-right">
-                        <span className={`text-[10px] font-black uppercase ${c.severity === 'Critical' ? 'text-red-600 animate-pulse' :
+                      <td className="px-6 py-4 text-right">
+                        <span className={`text-[10px] font-bold uppercase ${c.severity === 'Critical' ? 'text-red-600 animate-pulse' :
                           c.severity === 'High' ? 'text-red-500' : 'text-gray-400'
                           }`}>
                           {c.severity}
@@ -359,26 +359,26 @@ export default function DeanOfStudentsDashboard() {
                 </tbody>
               </table>
               {filteredCases.length === 0 && (
-                <div className="text-center py-24 text-gray-400 italic text-sm font-serif">Empty behavioral registry.</div>
+                <div className="text-center py-20 text-gray-400 italic text-sm">Empty behavioral registry.</div>
               )}
             </div>
-            <div className="p-8 bg-gray-50/30 dark:bg-gray-800/20 text-center border-t border-gray-100 dark:border-gray-800">
-              <Link href="/cases" className="text-[10px] font-black text-emerald-600 hover:text-emerald-700 uppercase tracking-[0.3em] transition-all">Expand Campus Dossier →</Link>
+            <div className="p-4 bg-gray-50 dark:bg-gray-800/50 text-center border-t border-gray-100 dark:border-gray-800">
+              <Link href="/cases" className="text-xs font-bold text-kmuGreen hover:text-green-700 uppercase tracking-wider transition-all">Expand Campus Dossier →</Link>
             </div>
           </div>
 
           {/* Registry Shortcut */}
-          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-sm border border-gray-200 dark:border-gray-800 p-10">
-            <div className="flex justify-between items-center mb-10">
-              <h2 className="text-xl font-black uppercase tracking-tighter italic">Dean's Registry Shortcut</h2>
-              <Link href="/students" className="text-[10px] font-black text-emerald-600 hover:underline uppercase tracking-widest">Global Registry →</Link>
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Registry Shortcut</h2>
+              <Link href="/students" className="text-xs font-bold text-kmuGreen hover:underline uppercase tracking-wider">Global Registry →</Link>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 font-sans">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {filteredStudents.slice(0, 12).map((s, i) => (
-                <div key={i} className="flex flex-col items-center bg-gray-50/50 dark:bg-gray-800/50 p-6 rounded-3xl hover:shadow-lg transition cursor-pointer text-center group border border-transparent hover:border-emerald-500/10" onClick={() => router.push(`/students/${s._id}`)}>
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-950/30 flex items-center justify-center text-emerald-600 font-bold mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform text-lg">{s.fullName?.charAt(0)}</div>
-                  <div className="font-extrabold text-[11px] line-clamp-1 dark:text-gray-100 uppercase tracking-tight">{s.fullName}</div>
-                  <div className="text-[9px] text-gray-400 font-bold tracking-tighter mt-1 uppercase">{s.studentId}</div>
+                <div key={i} className="flex flex-col items-center bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl hover:shadow-md transition cursor-pointer text-center group border border-gray-100 dark:border-gray-700 hover:border-emerald-500/30" onClick={() => router.push(`/students/${s._id}`)}>
+                  <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-950/30 flex items-center justify-center text-emerald-600 font-bold mb-3 group-hover:scale-110 transition-transform text-lg">{s.fullName?.charAt(0)}</div>
+                  <div className="font-bold text-[11px] line-clamp-1 dark:text-gray-100 uppercase tracking-tight">{s.fullName}</div>
+                  <div className="text-[9px] text-gray-400 font-bold mt-1 uppercase">{s.studentId}</div>
                 </div>
               ))}
             </div>
@@ -395,15 +395,15 @@ export default function DeanOfStudentsDashboard() {
 
 function StatCard({ title, value, color }: any) {
   const colors: any = {
-    teal: 'text-emerald-700 bg-emerald-50/30 border-emerald-100 dark:bg-emerald-950/10 dark:border-emerald-900/50',
-    orange: 'text-orange-700 bg-orange-50/30 border-orange-100 dark:bg-orange-950/10 dark:border-orange-900/50',
-    blue: 'text-blue-700 bg-blue-50/30 border-blue-100 dark:bg-blue-950/10 dark:border-blue-900/50',
-    red: 'text-red-700 bg-red-50/30 border-red-100 dark:bg-red-950/10 dark:border-red-900/50'
+    teal: 'border-emerald-500 dark:border-emerald-400',
+    orange: 'border-orange-500 dark:border-orange-400',
+    blue: 'border-blue-500 dark:border-blue-400',
+    red: 'border-red-500 dark:border-red-400'
   };
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-3xl shadow-sm border p-8 transition-all duration-300 ${colors[color]}`}>
-      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">{title}</div>
-      <div className="text-4xl font-black tracking-tight italic">{value}</div>
+    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-6 transition-all hover:shadow-md ${colors[color]}`}>
+      <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{title}</div>
+      <div className="text-3xl font-bold text-gray-900 dark:text-white">{value}</div>
     </div>
   );
 }
