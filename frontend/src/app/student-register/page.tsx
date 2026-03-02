@@ -59,8 +59,8 @@ export default function StudentRegisterPage() {
         return;
       }
     } else if (step === 2) {
-      if (!name || !program) {
-        setError("Full Name and Program are required.");
+      if (!program) {
+        setError("Program is required.");
         return;
       }
     } else if (step === 3) {
@@ -100,7 +100,9 @@ export default function StudentRegisterPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          sin, name, contact, email, program, roomNo, password,
+          sin,
+          name: `${firstName} ${surName}`.trim(),
+          contact, email, program, roomNo, password,
           year, gender, yearOfStudy, status: "REGISTERED", deliveryMode,
           firstName, surName, nrc, passport, maritalStatus, nationality,
           dateOfBirth, province, town, address, phone: contact
@@ -230,7 +232,7 @@ export default function StudentRegisterPage() {
 
               {step === 2 && (
                 <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
-                  <FormField label="Full Name" value={name} onChange={setName} placeholder="DANIEL CHALI" required />
+                  <FormField label="Program" value={program} onChange={setProgram} placeholder="BSc ICT Education" required />
                   <FormField label="Program" value={program} onChange={setProgram} placeholder="BSc ICT Education" required />
                   <div className="grid grid-cols-2 gap-4">
                     <FormField label="Year" value={year} onChange={setYear} placeholder="2026" />
