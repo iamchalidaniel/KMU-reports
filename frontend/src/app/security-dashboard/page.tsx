@@ -1,15 +1,26 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { Bar } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
 import { useAuth } from '../../context/AuthContext';
-import { API_BASE_URL, OFFENSE_TYPES, SEVERITY_LEVELS } from '../../config/constants';
+import { API_BASE_URL } from '../../config/constants';
 import { authHeaders, getProfile } from '../../utils/api';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import SmartStudentSearch from '../../components/SmartStudentSearch';
 import Notification, { useNotification } from '../../components/Notification';
 import CaseDossierForm from '../../components/CaseDossierForm';
 import CaseDossierPrintable from '../../components/CaseDossierPrintable';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 interface Student {
   studentId: string;
@@ -25,7 +36,7 @@ export default function SecurityDashboard() {
   const { notification, showNotification, hideNotification } = useNotification();
 
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [showAddCase, setShowAddCase] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [profileLoading, setProfileLoading] = useState(true);
 
@@ -141,8 +152,6 @@ export default function SecurityDashboard() {
     setFilteredCases(result);
   }, [search, cases, programFilter]);
 
-  // Case submission handled by CaseDossierForm
-
   if (isCheckingAuth) {
     return <div className="text-center text-kmuGreen p-12">Loading...</div>;
   }
@@ -151,176 +160,190 @@ export default function SecurityDashboard() {
     return <div className="text-red-600 p-12">Access denied.</div>;
   }
 
-  const staffData = profile || user;
+  const offenceCounts: Record<string, number> = {};
+  cases.forEach((c: any) => {
+    if (c.offenseType) offenceCounts[c.offenseType] = (offenceCounts[c.offenseType] || 0) + 1;
+  });
+  const topOffences = Object.entries(offenceCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+  const chartData = {
+    labels: topOffences.map(([offence]) => offence),
+    datasets: [{
+      label: 'Incident Frequency',
+      data: topOffences.map(([, count]) => count),
+      backgroundColor: 'rgba(5, 150, 105, 0.7)',
+      borderRadius: 12,
+    }]
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-serif">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div className="animate-in fade-in duration-300 space-y-6">
 
-
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Side Nav */}
-          <div className="lg:w-1/4">
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden sticky top-24">
-              <nav className="flex flex-col">
-                <NavButton label="Overview" icon="📊" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
-                <NavButton label="Record Case" icon="✍️" active={activeTab === 'add-case'} onClick={() => setActiveTab('add-case')} />
-                <NavButton label="Case History" icon="📜" active={activeTab === 'history'} onClick={() => setActiveTab('history')} />
-              </nav>
+          {/* Executive Command Bar */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-8 rounded-3xl border-t-4 border-emerald-600 shadow-xl gap-4">
+            <div>
+              <h1 className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white uppercase italic">Security Operations</h1>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">Direct Enforcement & Disciplinary Governance</p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={() => setShowAddCase(true)}
+                className="bg-emerald-600 text-white px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:shadow-lg hover:shadow-emerald-500/20 transition flex items-center gap-2 group border-none"
+              >
+                <span className="group-hover:animate-bounce">🛡️</span> Record Executive Dossier
+              </button>
             </div>
           </div>
 
-          {/* Main Area */}
-          <div className="lg:w-3/4 space-y-6">
+          {/* Strategic Metrics */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard title="Total Index" value={cases.length} color="emerald" />
+            <StatCard title="Officer Reports" value={cases.filter(c => c.createdBy === user?.id).length} color="blue" />
+            <StatCard title="Active Protocols" value={cases.filter(c => c.status === 'Open').length} color="orange" />
+            <StatCard title="Critical Anomalies" value={cases.filter(c => c.severity === 'High' || c.severity === 'Critical').length} color="red" />
+          </div>
 
-            {activeTab === 'add-case' && (
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="mb-6 flex justify-between items-center">
-                  <div>
-                    <h2 className="text-2xl font-bold">New Disciplinary Dossier</h2>
-                    <p className="text-gray-500 text-sm mt-1 uppercase tracking-tight">Security Department Official Protocol</p>
-                  </div>
-                  <button onClick={() => setActiveTab('dashboard')} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors text-gray-400">✕</button>
-                </div>
-
-                <CaseDossierForm
-                  onSuccess={async () => {
-                    showNotification('success', 'Case dossier registered successfully!');
-                    // Refresh list
-                    const casesRes = await fetch(`${API_BASE_URL}/cases`, { headers: { ...authHeaders() } });
-                    if (casesRes.ok) {
-                      const data = await casesRes.json();
-                      setCases(Array.isArray(data) ? data : (data.cases || data || []));
-                    }
-                    setActiveTab('dashboard');
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Incident Intelligence */}
+            <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
+              <div className="flex justify-between items-center mb-8">
+                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 font-bold">Campus Incident Velocity</h3>
+                <select
+                  className="bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-sans"
+                  value={programFilter}
+                  onChange={(e) => setProgramFilter(e.target.value)}
+                >
+                  <option value="">All Regions</option>
+                  {Array.from(new Set(students.map((s: any) => s.program).filter(Boolean))).map((p: any) => <option key={p} value={p}>{p}</option>)}
+                </select>
+              </div>
+              <div className="h-64 flex items-center justify-center">
+                <Bar
+                  data={chartData}
+                  options={{
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
                   }}
-                  onCancel={() => setActiveTab('dashboard')}
                 />
               </div>
-            )}
+            </div>
 
-            {activeTab === 'history' && (
-              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 animate-in fade-in duration-300">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-                  <div>
-                    <h2 className="text-xl font-bold">Recent Incident Registry</h2>
-                    <p className="text-xs text-gray-500 mt-1 uppercase tracking-tight font-bold">Total Records: {filteredCases.length}</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={handleGenerateSummary}
-                      disabled={isSummarizing || cases.length === 0}
-                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20 border border-emerald-100 dark:border-emerald-800 rounded-lg text-emerald-700 dark:text-emerald-400 font-bold text-xs hover:shadow-sm transition disabled:opacity-50"
-                    >
-                      <span>{isSummarizing ? "⏳ Analyzing..." : "✨ AI Trend Insights"}</span>
-                    </button>
-                    <input
-                      placeholder="Filter records..."
-                      className="bg-gray-100 dark:bg-gray-800 border-none rounded-lg px-4 py-2 text-sm"
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                    />
-                  </div>
-                </div>
-
+            {/* AI Insight Terminal */}
+            <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
+              <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-8 font-bold">Intelligence Synthesis</h3>
+              <div className="space-y-6">
+                <button
+                  onClick={handleGenerateSummary}
+                  disabled={isSummarizing || cases.length === 0}
+                  className="w-full flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-3xl hover:border-emerald-500/50 hover:bg-emerald-50/10 transition group"
+                >
+                  <span className="text-3xl mb-3 group-hover:scale-110 transition-transform">🧠</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">{isSummarizing ? "Processing Data..." : "Run AI Pattern Analysis"}</span>
+                </button>
                 {aiSummary && (
-                  <div className="mb-6 p-5 bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-800 rounded-2xl animate-in fade-in slide-in-from-top-4 duration-500">
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl">✨</span>
-                        <span className="text-[10px] font-extrabold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">AI Behavioral Analysis</span>
-                      </div>
-                      <button onClick={() => setAiSummary(null)} className="text-gray-400 hover:text-gray-600 transition">✕</button>
-                    </div>
-                    <div className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap">
-                      {aiSummary}
-                    </div>
-                    <div className="mt-4 pt-4 border-t border-emerald-100 dark:border-emerald-800 text-[10px] text-emerald-600/60 flex items-center gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      This summary is generated based on anonymized descriptions from current visible cases.
-                    </div>
+                  <div className="p-6 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900/50 text-xs font-medium text-gray-700 dark:text-emerald-100 leading-relaxed font-sans">
+                    {aiSummary}
                   </div>
                 )}
-                <div className="overflow-x-auto border border-gray-100 dark:border-gray-800 rounded-xl">
-                  <table className="w-full text-xs">
-                    <thead className="bg-gray-50 dark:bg-gray-800 font-bold uppercase text-gray-400">
-                      <tr>
-                        <th className="px-4 py-4 text-left">Subject</th>
-                        <th className="px-4 py-4 text-left">Incident</th>
-                        <th className="px-4 py-4 text-center">Date</th>
-                        <th className="px-4 py-4 text-center">Status</th>
-                        <th className="px-4 py-4 text-right">Print</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                      {filteredCases.slice(0, 15).map((c, i) => (
-                        <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-900 group">
-                          <td className="px-4 py-4" onClick={() => router.push(`/cases/${c._id}`)}>
-                            <div className="font-bold">{c.student?.fullName || 'Unknown Object'}</div>
-                            <div className="text-[10px] text-gray-400">{c.student?.studentId || 'N/A'}</div>
-                          </td>
-                          <td className="px-4 py-4">{c.offenseType}</td>
-                          <td className="px-4 py-4 text-center font-mono text-gray-500">{new Date(c.incidentDate).toLocaleDateString()}</td>
-                          <td className="px-4 py-4 text-center">
-                            <span className={`px-2 py-0.5 rounded font-bold ${c.status === 'Open' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{c.status}</span>
-                          </td>
-                          <td className="px-4 py-4 text-right">
-                            <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button
-                                onClick={(e) => { e.stopPropagation(); setPrintCase(c); setPrintType('docket'); setTimeout(() => window.print(), 500); }}
-                                className="p-1 hover:text-blue-600 font-bold" title="Print Docket"
-                              >🖨️</button>
-                              <button
-                                onClick={(e) => { e.stopPropagation(); setPrintCase(c); setPrintType('statement'); setTimeout(() => window.print(), 500); }}
-                                className="p-1 hover:text-blue-600 font-bold" title="Print Statements"
-                              >📜</button>
-                              <button
-                                onClick={(e) => { e.stopPropagation(); setPrintCase(c); setPrintType('callout'); setTimeout(() => window.print(), 500); }}
-                                className="p-1 hover:text-blue-600 font-bold" title="Print Call Out"
-                              >📢</button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
               </div>
-            )}
+            </div>
+          </div>
 
-            {activeTab === 'dashboard' && (
-              <div className="animate-in fade-in duration-300 space-y-6">
-                {/* Analytics restoration */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <StatCard title="Total Cases" value={cases.length} color="blue" />
-                  <StatCard title="My Reports" value={cases.filter(c => c.createdBy === user?.id).length} color="indigo" />
-                  <StatCard title="Pending" value={cases.filter(c => c.status === 'Open').length} color="orange" />
-                  <StatCard title="Priority" value={cases.filter(c => c.severity === 'High' || c.severity === 'Critical').length} color="red" />
-                </div>
-
-                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-lg font-bold">Campus Security Trends</h3>
-                    <select
-                      className="bg-gray-50 dark:bg-gray-800 border-none rounded-lg px-3 py-1 text-xs outline-none"
-                      value={programFilter}
-                      onChange={(e) => setProgramFilter(e.target.value)}
-                    >
-                      <option value="">All Programs</option>
-                      {Array.from(new Set(students.map((s: any) => s.program).filter(Boolean))).map((p: any) => <option key={p} value={p}>{p}</option>)}
-                    </select>
-                  </div>
-                  <p className="text-sm text-gray-500 mb-4">View real-time security analytics and incident distributions.</p>
-                  <Link href="/reports" className="text-blue-600 font-bold text-sm hover:underline">Open Detailed Security Analytics Portal →</Link>
-                </div>
+          {/* Operational Dispatch Ledger */}
+          <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
+            <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <h2 className="text-lg font-black uppercase tracking-tighter italic">Operational Dispatch Ledger</h2>
+              <div className="relative w-full md:w-80 font-sans">
+                <input
+                  placeholder="Query ledger indices..."
+                  className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-5 py-3.5 text-xs w-full focus:ring-2 focus:ring-emerald-500 transition-all shadow-inner"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
               </div>
-            )}
-
+            </div>
+            <div className="overflow-x-auto flex-1 font-sans">
+              <table className="w-full text-xs">
+                <thead className="bg-gray-50/50 dark:bg-gray-800/50 text-[10px] font-black uppercase text-gray-400 tracking-widest">
+                  <tr>
+                    <th className="px-8 py-5 text-left">Entity / Identification</th>
+                    <th className="px-8 py-5 text-left">Incident Class</th>
+                    <th className="px-8 py-5 text-center">Protocol Date</th>
+                    <th className="px-8 py-5 text-center">Status</th>
+                    <th className="px-8 py-5 text-right">Dispatch Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {filteredCases.slice(0, 12).map((c, i) => (
+                    <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 group transition-colors cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
+                      <td className="px-8 py-5">
+                        <div className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-emerald-600 transition-colors uppercase">{c.student?.fullName || 'Anonymous Entity'}</div>
+                        <div className="text-[10px] text-gray-400 font-mono mt-0.5">{c.student?.studentId || 'UNKNOWN_ID'}</div>
+                      </td>
+                      <td className="px-8 py-5 text-gray-700 dark:text-gray-300 font-bold uppercase tracking-tight">{c.offenseType}</td>
+                      <td className="px-8 py-5 text-center font-mono text-gray-400 text-[10px]">{new Date(c.incidentDate).toLocaleDateString()}</td>
+                      <td className="px-8 py-5 text-center">
+                        <span className={`px-3 py-1 rounded-lg font-black text-[9px] uppercase tracking-tighter border ${c.status === 'Open' ? 'bg-red-100 text-red-700 border-red-200' : 'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>{c.status}</span>
+                      </td>
+                      <td className="px-8 py-5 text-right">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setPrintCase(c); setPrintType('docket'); setTimeout(() => window.print(), 500); }}
+                            className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-2 rounded-xl hover:shadow-lg transition-all transform active:scale-95" title="Print Docket"
+                          >🖨️</button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setPrintCase(c); setPrintType('statement'); setTimeout(() => window.print(), 500); }}
+                            className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-2 rounded-xl hover:shadow-lg transition-all transform active:scale-95" title="Print Statements"
+                          >📜</button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setPrintCase(c); setPrintType('callout'); setTimeout(() => window.print(), 500); }}
+                            className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-2 rounded-xl hover:shadow-lg transition-all transform active:scale-95" title="Print Call Out"
+                          >📢</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {filteredCases.length === 0 && (
+                <div className="text-center py-24 text-gray-400 italic text-sm font-serif">Registry query returned zero indices.</div>
+              )}
+            </div>
+            <div className="p-6 bg-gray-50/30 dark:bg-gray-800/20 text-center border-t border-gray-100 dark:border-gray-800">
+              <Link href="/cases" className="text-[10px] font-black text-emerald-600 hover:text-emerald-700 uppercase tracking-[0.2em] transition-all">Expand Historical Dossier →</Link>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Add Case Modal */}
+      {showAddCase && (
+        <div className="fixed inset-0 z-[1001] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-gray-950/80 backdrop-blur-md" onClick={() => setShowAddCase(false)} />
+          <div className="relative bg-white dark:bg-gray-900 w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-[3rem] shadow-2xl border-t-8 border-emerald-600 p-12">
+            <div className="flex justify-between items-center mb-10">
+              <div>
+                <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase italic tracking-tighter">New Disciplinary Dossier</h2>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Official Protocol Registration</p>
+              </div>
+              <button onClick={() => setShowAddCase(false)} className="bg-gray-100 dark:bg-gray-800 p-4 rounded-full text-gray-400 hover:text-emerald-600 transition-all">✕</button>
+            </div>
+            <CaseDossierForm
+              onSuccess={() => {
+                showNotification('success', 'Protocol successfully indexed');
+                setShowAddCase(false);
+                fetch(`${API_BASE_URL}/cases`, { headers: { ...authHeaders() } })
+                  .then(res => res.json())
+                  .then(data => setCases(Array.isArray(data) ? data : (data.cases || data || [])));
+              }}
+              onCancel={() => setShowAddCase(false)}
+            />
+          </div>
+        </div>
+      )}
 
       {notification?.isVisible && (
         <Notification type={notification.type} message={notification.message} isVisible={notification.isVisible} onClose={hideNotification} />
@@ -338,41 +361,15 @@ export default function SecurityDashboard() {
 
 function StatCard({ title, value, color }: any) {
   const colors: any = {
-    blue: 'text-blue-600 border-blue-100',
-    indigo: 'text-indigo-600 border-indigo-100',
-    orange: 'text-orange-600 border-orange-100',
-    red: 'text-red-600 border-red-100'
+    emerald: 'text-emerald-700 bg-emerald-50/30 border-emerald-100 dark:bg-emerald-950/10 dark:border-emerald-900/50',
+    blue: 'text-blue-700 bg-blue-50/30 border-blue-100 dark:bg-blue-950/10 dark:border-blue-900/50',
+    orange: 'text-orange-700 bg-orange-50/30 border-orange-100 dark:bg-orange-950/10 dark:border-orange-900/50',
+    red: 'text-red-700 bg-red-50/30 border-red-100 dark:bg-red-950/10 dark:border-red-900/50'
   };
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border ${colors[color]} p-5`}>
-      <div className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mb-1">{title}</div>
-      <div className={`text-3xl font-bold ${colors[color].split(' ')[0]}`}>{value}</div>
-    </div>
-  );
-}
-
-function NavButton({ label, icon, active, onClick }: any) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex items-center gap-4 px-6 py-4 transition-all border-l-4 text-left ${active
-        ? 'border-gray-900 dark:border-white bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white'
-        : 'border-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
-        }`}
-    >
-      <span className="text-xl">{icon}</span>
-      <span className="font-semibold">{label}</span>
-    </button>
-  );
-}
-
-function InfoField({ label, value }: any) {
-  return (
-    <div className="flex flex-col gap-1">
-      <label className="text-[10px] font-extrabold text-blue-700 dark:text-blue-400 uppercase tracking-tighter ml-1">{label}</label>
-      <div className="bg-gray-100 dark:bg-gray-800/80 rounded border border-gray-200 dark:border-gray-700 px-3 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 min-h-[38px]">
-        {value || '-'}
-      </div>
+    <div className={`bg-white dark:bg-gray-900 rounded-3xl shadow-sm border p-8 transition-all duration-300 ${colors[color]}`}>
+      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">{title}</div>
+      <div className="text-4xl font-black tracking-tight italic">{value}</div>
     </div>
   );
 }

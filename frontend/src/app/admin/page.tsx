@@ -31,13 +31,11 @@ export default function AdminPage() {
   const [profile, setProfile] = useState<any>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
   const [programFilter, setProgramFilter] = useState('');
   const [hostelFilter, setHostelFilter] = useState('');
   const [cases, setCases] = useState([]);
   const [students, setStudents] = useState([]);
   const [usersCount, setUsersCount] = useState(0);
-  const [studentReports, setStudentReports] = useState([]);
   const [maintenanceReports, setMaintenanceReports] = useState([]);
   const [filteredCases, setFilteredCases] = useState([]);
 
@@ -87,16 +85,11 @@ export default function AdminPage() {
           setStudents(data.students || data || []);
         }
 
-        const [reportsRes, maintenanceRes, usersRes] = await Promise.all([
-          fetch(`${API_BASE_URL}/student-reports`, { headers: { ...authHeaders() } }),
+        const [maintenanceRes, usersRes] = await Promise.all([
           fetch(`${API_BASE_URL}/maintenance`, { headers: { ...authHeaders() } }),
           fetch(`${API_BASE_URL}/users`, { headers: { ...authHeaders() } })
         ]);
 
-        if (reportsRes.ok) {
-          const data = await reportsRes.json();
-          setStudentReports(data.reports || data || []);
-        }
         if (maintenanceRes.ok) {
           const data = await maintenanceRes.json();
           setMaintenanceReports(data.maintenance || data || []);
@@ -168,28 +161,20 @@ export default function AdminPage() {
   }
 
   if (!user || user.role !== 'admin') {
-    return <div className="text-red-600 p-12">Access denied. Administrator privileges required.</div>;
+    return <div className="text-red-600 p-12 text-center">Access denied.</div>;
   }
 
-  const staffData = profile || user;
-
-  // Analytics Calculations
+  // Analytics
   const analyticsCases = programFilter
     ? safeCases.filter((c: any) => c.student?.program === programFilter)
     : safeCases;
 
   const offenceCounts: Record<string, number> = {};
-  const offenderCounts: Record<string, number> = {};
-
   analyticsCases.forEach((c: any) => {
     if (c.offenseType) offenceCounts[c.offenseType] = (offenceCounts[c.offenseType] || 0) + 1;
-    if (c.student?.fullName) offenderCounts[c.student.fullName] = (offenderCounts[c.student.fullName] || 0) + 1;
   });
-
   const topOffences = Object.entries(offenceCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
-  const topOffenders = Object.entries(offenderCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
-  // Maintenance Analytics
   const safeMaintenance = Array.isArray(maintenanceReports) ? maintenanceReports : [];
   const filteredMaintenance = hostelFilter
     ? safeMaintenance.filter((r: any) => r.location?.hall === hostelFilter)
@@ -206,16 +191,8 @@ export default function AdminPage() {
     datasets: [{
       label: 'Offenses',
       data: topOffences.map(([, count]) => count),
-      backgroundColor: '#059669'
-    }]
-  };
-
-  const offenderChartData = {
-    labels: topOffenders.map(([name]) => name),
-    datasets: [{
-      label: 'Cases',
-      data: topOffenders.map(([, count]) => count),
-      backgroundColor: '#10b981'
+      backgroundColor: 'rgba(16, 185, 129, 0.7)',
+      borderRadius: 12,
     }]
   };
 
@@ -224,7 +201,8 @@ export default function AdminPage() {
     datasets: [{
       label: 'Issues',
       data: topMaintenance.map(([, count]) => count),
-      backgroundColor: '#3b82f6'
+      backgroundColor: 'rgba(59, 130, 246, 0.7)',
+      borderRadius: 12,
     }]
   };
 
@@ -232,77 +210,98 @@ export default function AdminPage() {
   const hostels = Array.from(new Set(safeMaintenance.map((r: any) => r.location?.hall).filter(Boolean)));
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-serif">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div className="animate-in fade-in duration-300 space-y-6">
 
-
-        <div className="space-y-6">
-          {/* Main Area */}
-          <div className="animate-in fade-in duration-300 space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <StatCard title="Total Students" value={safeStudents.length} color="emerald" link="/students" />
-              <StatCard title="Total Disciplinary Cases" value={safeCases.length} color="teal" link="/cases" />
-              <StatCard title="Total Users" value={usersCount} color="blue" link="/admin/users" />
-              <StatCard title="Total Maintenance Reports" value={safeMaintenance.length} color="green" link="/maintenance" />
+          {/* Executive Command Bar */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-8 rounded-3xl border-t-4 border-indigo-600 shadow-xl gap-4">
+            <div>
+              <h1 className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white uppercase italic">Administrator Terminal</h1>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">KMU Unified Governance & System Hub</p>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Disciplinary Analytics */}
-              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400">Disciplinary Offenses</h3>
-                  <select
-                    className="bg-gray-50 dark:bg-gray-800 border-none rounded-lg px-3 py-1 text-xs outline-none"
-                    value={programFilter}
-                    onChange={(e) => setProgramFilter(e.target.value)}
-                  >
-                    <option value="">All Programs</option>
-                    {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
-                  </select>
-                </div>
-                <div className="h-64">
-                  <Bar data={offenceChartData} options={{ maintainAspectRatio: false }} />
-                </div>
-              </div>
-
-              {/* Maintenance Analytics */}
-              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400">Maintenance Issues</h3>
-                  <select
-                    className="bg-gray-50 dark:bg-gray-800 border-none rounded-lg px-3 py-1 text-xs outline-none"
-                    value={hostelFilter}
-                    onChange={(e) => setHostelFilter(e.target.value)}
-                  >
-                    <option value="">All Hostels</option>
-                    {hostels.map((h: any) => <option key={h} value={h}>{h}</option>)}
-                  </select>
-                </div>
-                <div className="h-64">
-                  <Bar data={maintenanceChartData} options={{ maintainAspectRatio: false }} />
-                </div>
-              </div>
-            </div>
-
-            {/* Most Common Offenders Chart */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-              <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6">Most Common Offenders</h3>
-              <div className="h-80">
-                <Bar data={offenderChartData} options={{
-                  maintainAspectRatio: false,
-                  indexAxis: 'y' as const,
-                }} />
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 flex justify-between items-center">
-              <div>
-                <h3 className="text-lg font-bold">System Audit</h3>
-                <p className="text-sm text-gray-500">Generate comprehensive university-wide activity and disciplinary reports.</p>
-              </div>
-              <button onClick={exportCasesToWord} className="bg-emerald-700 text-white px-8 py-3 rounded-xl font-bold hover:shadow-lg transition">EXPORT FULL AUDIT (DOCX)</button>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={exportCasesToWord}
+                className="bg-indigo-600 text-white px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:shadow-lg hover:shadow-indigo-500/20 transition flex items-center gap-2 group border-none"
+              >
+                <span className="group-hover:animate-pulse">📊</span> System Audit Report
+              </button>
             </div>
           </div>
+
+          {/* Strategic Metrics */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard title="Total Students" value={safeStudents.length} color="indigo" link="/students" />
+            <StatCard title="Index of Cases" value={safeCases.length} color="blue" link="/cases" />
+            <StatCard title="Active Users" value={usersCount} color="emerald" link="/admin/users" />
+            <StatCard title="Maintenance Load" value={safeMaintenance.length} color="teal" link="/maintenance" />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Disciplinary Intelligence */}
+            <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
+              <div className="flex justify-between items-center mb-8">
+                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 font-bold">Disciplinary Distribution</h3>
+                <select
+                  className="bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-sans"
+                  value={programFilter}
+                  onChange={(e) => setProgramFilter(e.target.value)}
+                >
+                  <option value="">Full University</option>
+                  {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
+                </select>
+              </div>
+              <div className="h-64 flex items-center justify-center">
+                <Bar
+                  data={offenceChartData}
+                  options={{
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Maintenance Intelligence */}
+            <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
+              <div className="flex justify-between items-center mb-8">
+                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 font-bold">Facility Infrastructure Load</h3>
+                <select
+                  className="bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-blue-500 transition-all font-sans"
+                  value={hostelFilter}
+                  onChange={(e) => setHostelFilter(e.target.value)}
+                >
+                  <option value="">All Regions</option>
+                  {hostels.map((h: any) => <option key={h} value={h}>{h}</option>)}
+                </select>
+              </div>
+              <div className="h-64 flex items-center justify-center">
+                <Bar
+                  data={maintenanceChartData}
+                  options={{
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Operational Links Area */}
+          <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
+            <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-8 font-bold">Quick Administrative Dispatch</h3>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <QuickLink href="/students" label="Registry" icon="👥" />
+              <QuickLink href="/cases" label="Discipline" icon="⚖️" />
+              <QuickLink href="/maintenance" label="Facility" icon="🏢" />
+              <QuickLink href="/admin/users" label="Users" icon="🔐" />
+              <QuickLink href="/reports" label="Reports" icon="📜" />
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -313,40 +312,29 @@ export default function AdminPage() {
   );
 }
 
-
 function StatCard({ title, value, color, link }: any) {
   const colors: any = {
-    emerald: 'text-emerald-700 border-emerald-100 hover:bg-emerald-50 dark:hover:bg-emerald-900/10',
-    teal: 'text-teal-700 border-teal-100 hover:bg-teal-50 dark:hover:bg-teal-900/10',
-    blue: 'text-blue-700 border-blue-100 hover:bg-blue-50 dark:hover:bg-blue-900/10',
-    green: 'text-green-700 border-green-100 hover:bg-green-50 dark:hover:bg-green-900/10'
+    indigo: 'text-indigo-700 bg-indigo-50/30 border-indigo-100 dark:bg-indigo-950/10 dark:border-indigo-900/50',
+    blue: 'text-blue-700 bg-blue-50/30 border-blue-100 dark:bg-blue-950/10 dark:border-blue-900/50',
+    emerald: 'text-emerald-700 bg-emerald-50/30 border-emerald-100 dark:bg-emerald-950/10 dark:border-emerald-900/50',
+    teal: 'text-teal-700 bg-teal-50/30 border-teal-100 dark:bg-teal-950/10 dark:border-teal-900/50'
   };
 
-  const CardContent = (
-    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border ${colors[color]} p-5 transition-all duration-200 cursor-pointer h-full`}>
-      <div className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mb-1">{title}</div>
-      <div className={`text-3xl font-bold ${colors[color].split(' ')[0]}`}>{value}</div>
+  const content = (
+    <div className={`bg-white dark:bg-gray-900 rounded-3xl shadow-sm border p-8 transition-all duration-300 ${colors[color]} cursor-pointer hover:shadow-lg`}>
+      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">{title}</div>
+      <div className="text-4xl font-black tracking-tight italic">{value}</div>
     </div>
   );
 
-  if (link) {
-    return (
-      <Link href={link} className="block no-underline">
-        {CardContent}
-      </Link>
-    );
-  }
-
-  return CardContent;
+  return link ? <Link href={link}>{content}</Link> : content;
 }
 
-function InfoField({ label, value }: any) {
+function QuickLink({ href, label, icon }: any) {
   return (
-    <div className="flex flex-col gap-1">
-      <label className="text-[10px] font-extrabold text-emerald-800 dark:text-emerald-400 uppercase tracking-tighter ml-1">{label}</label>
-      <div className="bg-gray-100 dark:bg-gray-800/80 rounded border border-gray-200 dark:border-gray-700 px-3 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 min-h-[38px]">
-        {value || '-'}
-      </div>
-    </div>
+    <Link href={href} className="flex flex-col items-center justify-center p-6 bg-gray-50/50 dark:bg-gray-800/50 rounded-2xl border border-transparent hover:border-indigo-500/30 hover:bg-indigo-50/10 transition-all group">
+      <span className="text-2xl mb-2 group-hover:scale-110 transition-transform">{icon}</span>
+      <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 group-hover:text-indigo-600 transition-colors">{label}</span>
+    </Link>
   );
 }

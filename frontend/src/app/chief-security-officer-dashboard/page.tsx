@@ -29,14 +29,12 @@ export default function ChiefSecurityOfficerDashboard() {
   const { notification, showNotification, hideNotification } = useNotification();
 
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [activeTab, setActiveTab] = useState('dashboard');
   const [profile, setProfile] = useState<any>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [cases, setCases] = useState<Case[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [filteredCases, setFilteredCases] = useState<Case[]>([]);
-  const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
   const [programFilter, setProgramFilter] = useState('');
 
   useEffect(() => {
@@ -73,26 +71,21 @@ export default function ChiefSecurityOfficerDashboard() {
 
     async function fetchData() {
       try {
-        const casesRes = await fetch(`${API_BASE_URL}/cases`, { headers: { ...authHeaders() } });
-        const studentsRes = await fetch(`${API_BASE_URL}/students`, { headers: { ...authHeaders() } });
+        const [casesRes, studentsRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/cases`, { headers: { ...authHeaders() } }),
+          fetch(`${API_BASE_URL}/students`, { headers: { ...authHeaders() } })
+        ]);
 
         if (casesRes.ok) {
           const casesData = await casesRes.json();
           setCases(casesData.cases || casesData || []);
-        } else {
-          setCases([]);
         }
-
         if (studentsRes.ok) {
           const studentsData = await studentsRes.json();
           setStudents(studentsData.students || studentsData || []);
-        } else {
-          setStudents([]);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
-        setCases([]);
-        setStudents([]);
       }
     }
 
@@ -119,16 +112,7 @@ export default function ChiefSecurityOfficerDashboard() {
       casesResult = casesResult.filter((c: any) => c.student?.program === programFilter);
     }
     setFilteredCases(casesResult);
-
-    let studentsResult = safeStudents;
-    if (search) {
-      studentsResult = studentsResult.filter((s: any) =>
-        s.fullName?.toLowerCase().includes(search.toLowerCase()) ||
-        s.studentId?.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-    setFilteredStudents(studentsResult);
-  }, [search, cases, students, programFilter]);
+  }, [search, cases, programFilter]);
 
   async function exportCasesToWord() {
     try {
@@ -141,16 +125,12 @@ export default function ChiefSecurityOfficerDashboard() {
         },
         body: JSON.stringify({
           charts: chartExportData.charts,
-          pageInfo: {
-            title: 'Chief Security Officer Dashboard Report',
-            url: typeof window !== 'undefined' ? window.location.href : ''
-          }
+          pageInfo: { title: 'CSO High-Level Report', url: typeof window !== 'undefined' ? window.location.href : '' }
         }),
       });
-
       if (!res.ok) throw new Error(await res.text());
       const blob = await res.blob();
-      saveAs(blob, 'chief_security_officer_report.docx');
+      saveAs(blob, 'cso_strategic_report.docx');
       showNotification('success', 'Report exported successfully!');
     } catch (err) {
       console.error('Export error:', err);
@@ -163,19 +143,13 @@ export default function ChiefSecurityOfficerDashboard() {
   }
 
   if (!user || user.role !== 'chief_security_officer') {
-    return <div className="text-red-600 p-12">Access denied.</div>;
+    return <div className="text-red-600 p-12 text-center">Access denied.</div>;
   }
 
-  const staffData = profile || user;
-
   // Visualization data
-  const analyticsCases = programFilter
-    ? safeCases.filter((c: any) => c.student?.program === programFilter)
-    : safeCases;
-
   const offenceCounts: Record<string, number> = {};
   const offenderCounts: Record<string, number> = {};
-  analyticsCases.forEach((c: Case) => {
+  (programFilter ? safeCases.filter((c: any) => c.student?.program === programFilter) : safeCases).forEach((c: Case) => {
     if (c.offenseType) offenceCounts[c.offenseType] = (offenceCounts[c.offenseType] || 0) + 1;
     if (c.student?.fullName) offenderCounts[c.student.fullName] = (offenderCounts[c.student.fullName] || 0) + 1;
   });
@@ -186,145 +160,138 @@ export default function ChiefSecurityOfficerDashboard() {
   const offenceChartData = {
     labels: topOffences.map(([offence]) => offence),
     datasets: [{
-      label: 'Cases',
+      label: 'Frequency',
       data: topOffences.map(([, count]) => count),
-      backgroundColor: 'rgba(239, 68, 68, 0.7)',
-    }],
-  };
-  const offenderChartData = {
-    labels: topOffenders.map(([name]) => name),
-    datasets: [{
-      label: 'Cases',
-      data: topOffenders.map(([, count]) => count),
-      backgroundColor: 'rgba(59, 130, 246, 0.7)',
+      backgroundColor: 'rgba(220, 38, 38, 0.7)',
+      borderRadius: 12,
     }],
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-serif">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div className="animate-in fade-in duration-300 space-y-6">
 
-
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Side Navigation */}
-          <div className="lg:w-1/4">
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden sticky top-24">
-              <nav className="flex flex-col">
-                <NavButton label="Dashboard" icon="🚔" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
-                <NavButton label="Disciplinary Cases" icon="⚖️" active={activeTab === 'cases'} onClick={() => setActiveTab('cases')} />
-              </nav>
+          {/* Executive Command Bar */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-8 rounded-3xl border-t-4 border-red-600 shadow-xl gap-4">
+            <div>
+              <h1 className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white uppercase italic">CSO High Command</h1>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">Strategic Oversight & Enforcement Protocols</p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={exportCasesToWord}
+                className="bg-red-600 text-white px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:shadow-lg hover:shadow-red-500/20 transition flex items-center gap-2 group border-none"
+              >
+                <span className="group-hover:animate-pulse">📂</span> Generate Intelligence Report
+              </button>
             </div>
           </div>
 
-          {/* Content Area */}
-          <div className="lg:w-3/4 space-y-6">
+          {/* Strategic Metrics */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard title="Total Indictments" value={safeCases.length} color="red" />
+            <StatCard title="Active Inquiries" value={safeCases.filter(c => c.status === 'Open').length} color="blue" />
+            <StatCard title="Critical Index" value={safeCases.filter(c => c.severity === 'High' || c.severity === 'Critical').length} color="orange" />
+            <StatCard title="Force Deployment" value={safeStudents.length} color="indigo" />
+          </div>
 
-            {activeTab === 'dashboard' && (
-              <div className="animate-in fade-in duration-300 space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <StatCard title="Total Cases" value={filteredCases.length} color="red" />
-                  <StatCard title="Open" value={filteredCases.filter(c => c.status === 'Open').length} color="blue" />
-                  <StatCard title="High Priority" value={filteredCases.filter(c => c.severity === 'High').length} color="orange" />
-                  <StatCard title="Total Students" value={safeStudents.length} color="teal" />
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                    <div className="flex justify-between items-center mb-6">
-                      <h3 className="text-sm font-bold uppercase tracking-widest text-red-600">Offence Frequency</h3>
-                      <select
-                        className="bg-gray-50 dark:bg-gray-800 border-none rounded-lg px-3 py-1 text-xs outline-none"
-                        value={programFilter}
-                        onChange={(e) => setProgramFilter(e.target.value)}
-                      >
-                        <option value="">All Programs</option>
-                        {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
-                      </select>
-                    </div>
-                    <div className="h-64">
-                      <Bar data={offenceChartData} options={{ maintainAspectRatio: false, indexAxis: 'y' }} />
-                    </div>
-                  </div>
-                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                    <h3 className="text-sm font-bold uppercase tracking-widest text-blue-600 mb-6">Top Offenders</h3>
-                    <div className="space-y-4">
-                      {topOffenders.length > 0 ? topOffenders.map(([name, count], i) => (
-                        <div key={i} className="flex justify-between items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors border-b border-gray-50 dark:border-gray-800 last:border-0">
-                          <span className="font-medium text-sm">{name}</span>
-                          <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase">{count} Cases</span>
-                        </div>
-                      )) : <p className="text-center text-gray-500 py-8 italic text-sm">No offender data found.</p>}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 flex justify-between items-center">
-                  <div>
-                    <h3 className="text-lg font-bold">Security Reporting</h3>
-                    <p className="text-sm text-gray-500">Generate and export disciplinary case reports.</p>
-                  </div>
-                  <button onClick={exportCasesToWord} className="bg-red-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-red-700 transition shadow-lg">EXPORT DOCX</button>
-                </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Analytics Ledger */}
+            <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
+              <div className="flex justify-between items-center mb-8">
+                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 font-bold">Criminological Variance</h3>
+                <select
+                  className="bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-red-500 transition-all font-sans"
+                  value={programFilter}
+                  onChange={(e) => setProgramFilter(e.target.value)}
+                >
+                  <option value="">Full University</option>
+                  {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
+                </select>
               </div>
-            )}
-
-            {activeTab === 'cases' && (
-              <div className="animate-in fade-in duration-300 space-y-6">
-                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                  <div className="flex justify-between items-center mb-6 text-sm">
-                    <h2 className="text-xl font-bold font-serif">Security Incident Logs</h2>
-                    <div className="flex gap-2">
-                      <input
-                        placeholder="Search cases..."
-                        className="bg-gray-50 dark:bg-gray-800 border-none rounded-lg px-4 py-2 text-sm outline-none"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                      />
-                      <select
-                        className="bg-gray-50 dark:bg-gray-800 border-none rounded-lg px-4 py-2 text-sm outline-none"
-                        value={programFilter}
-                        onChange={(e) => setProgramFilter(e.target.value)}
-                      >
-                        <option value="">All Programs</option>
-                        {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
-                      </select>
-                    </div>
-                  </div>
-                  <div className="overflow-x-auto border border-gray-100 dark:border-gray-800 rounded-xl">
-                    <table className="w-full text-xs">
-                      <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 font-bold uppercase text-gray-400">
-                        <tr>
-                          <th className="px-4 py-4 text-left">Student</th>
-                          <th className="px-4 py-4 text-left">Offense</th>
-                          <th className="px-4 py-4 text-center">Severity</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                        {filteredCases.slice(0, 15).map((c, i) => (
-                          <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
-                            <td className="px-4 py-4 flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-red-100 text-red-700 flex items-center justify-center font-bold text-[10px]">{c.student?.fullName?.charAt(0)}</div>
-                              <div>
-                                <div className="font-bold">{c.student?.fullName}</div>
-                                <div className="text-[10px] text-gray-400">{c.student?.studentId}</div>
-                              </div>
-                            </td>
-                            <td className="px-4 py-4 font-medium">{c.offenseType}</td>
-                            <td className="px-4 py-4 text-center">
-                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${c.severity === 'Critical' ? 'bg-red-100 text-red-700' :
-                                c.severity === 'High' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'
-                                }`}>{c.severity}</span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+              <div className="h-64 flex items-center justify-center">
+                <Bar
+                  data={offenceChartData}
+                  options={{
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: { legend: { display: false } },
+                    scales: { x: { beginAtZero: true, grid: { display: false } }, y: { grid: { display: false } } }
+                  }}
+                />
               </div>
-            )}
+            </div>
 
+            {/* Target Subjects Watchlist */}
+            <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
+              <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-8 font-bold">Priority Watch Indices</h3>
+              <div className="space-y-4 font-sans">
+                {topOffenders.map(([name, count], i) => (
+                  <div key={i} className="flex justify-between items-center p-4 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-2xl transition-all border border-transparent hover:border-red-500/10 group">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center text-red-600 font-bold text-xs">{name.charAt(0)}</div>
+                      <span className="font-bold text-xs text-gray-700 dark:text-gray-300">{name}</span>
+                    </div>
+                    <span className="text-[9px] font-black text-red-600 bg-red-50 dark:bg-red-900/30 px-2 py-1 rounded-lg uppercase">{count} OFFENSES</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
 
+          {/* Operational Dispatch Ledger */}
+          <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+            <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <h2 className="text-lg font-black uppercase tracking-tighter italic">Strategic Dispatch Ledger</h2>
+              <div className="relative w-full md:w-80">
+                <input
+                  placeholder="Query command indices..."
+                  className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-5 py-3.5 text-xs w-full focus:ring-2 focus:ring-red-500 transition-all font-sans"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="overflow-x-auto font-sans">
+              <table className="w-full text-xs">
+                <thead className="bg-gray-50/50 dark:bg-gray-800/50 text-[10px] font-black uppercase text-gray-400 tracking-widest">
+                  <tr>
+                    <th className="px-8 py-5 text-left">Subject / CID</th>
+                    <th className="px-8 py-5 text-left">Protocol Class</th>
+                    <th className="px-8 py-5 text-center">Status</th>
+                    <th className="px-8 py-5 text-right">Escalation</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {filteredCases.slice(0, 15).map((c, i) => (
+                    <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 group transition-colors cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
+                      <td className="px-8 py-5">
+                        <div className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-red-600 transition-colors uppercase">{c.student?.fullName || 'Anonymous'}</div>
+                        <div className="text-[10px] text-gray-400 font-mono italic">{c.student?.studentId || 'EXTERNAL'}</div>
+                      </td>
+                      <td className="px-8 py-5 text-gray-700 dark:text-gray-300 font-bold uppercase tracking-tight">{c.offenseType}</td>
+                      <td className="px-8 py-5 text-center">
+                        <span className={`px-3 py-1 rounded-lg font-black text-[9px] uppercase tracking-widest border ${c.status === 'Open' ? 'bg-red-100 text-red-700 border-red-200' : 'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>{c.status}</span>
+                      </td>
+                      <td className="px-8 py-5 text-right">
+                        <span className={`text-[10px] font-black uppercase ${c.severity === 'Critical' ? 'text-red-600 animate-pulse' :
+                          c.severity === 'High' ? 'text-red-500' : 'text-gray-400'
+                          }`}>
+                          {c.severity}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {filteredCases.length === 0 && (
+                <div className="text-center py-24 text-gray-400 italic text-sm font-serif">Empty dispatch registry.</div>
+              )}
+            </div>
+            <div className="p-8 bg-gray-50/30 dark:bg-gray-800/20 text-center">
+              <Link href="/cases" className="text-[10px] font-black text-red-600 hover:text-red-700 uppercase tracking-[0.3em]">Expand Fleet Dossier →</Link>
+            </div>
           </div>
         </div>
       </div>
@@ -336,43 +303,17 @@ export default function ChiefSecurityOfficerDashboard() {
   );
 }
 
-function NavButton({ label, icon, active, onClick }: any) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex items-center gap-4 px-6 py-4 transition-all border-l-4 text-left ${active
-        ? 'border-red-600 bg-red-50 dark:bg-red-900/10 text-red-600'
-        : 'border-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
-        }`}
-    >
-      <span className="text-xl">{icon}</span>
-      <span className="font-semibold">{label}</span>
-    </button>
-  );
-}
-
 function StatCard({ title, value, color }: any) {
   const colors: any = {
-    red: 'text-red-600 border-red-100',
-    blue: 'text-blue-600 border-blue-100',
-    orange: 'text-orange-600 border-orange-100',
-    teal: 'text-teal-600 border-teal-100'
+    red: 'text-red-700 bg-red-50/30 border-red-100 dark:bg-red-950/10 dark:border-red-900/50',
+    blue: 'text-blue-700 bg-blue-50/30 border-blue-100 dark:bg-blue-950/10 dark:border-blue-900/50',
+    orange: 'text-orange-700 bg-orange-50/30 border-orange-100 dark:bg-orange-950/10 dark:border-orange-900/50',
+    indigo: 'text-indigo-700 bg-indigo-50/30 border-indigo-100 dark:bg-indigo-950/10 dark:border-indigo-900/50'
   };
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border ${colors[color]} p-5`}>
-      <div className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mb-1">{title}</div>
-      <div className={`text-3xl font-bold ${colors[color].split(' ')[0]}`}>{value}</div>
-    </div>
-  );
-}
-
-function InfoField({ label, value }: any) {
-  return (
-    <div className="flex flex-col gap-1">
-      <label className="text-[10px] font-extrabold text-red-700 dark:text-red-400 uppercase tracking-tighter ml-1">{label}</label>
-      <div className="bg-gray-100 dark:bg-gray-800/80 rounded border border-gray-200 dark:border-gray-700 px-3 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 min-h-[38px]">
-        {value || '-'}
-      </div>
+    <div className={`bg-white dark:bg-gray-900 rounded-3xl shadow-sm border p-8 transition-all duration-300 ${colors[color]}`}>
+      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">{title}</div>
+      <div className="text-4xl font-black tracking-tight italic">{value}</div>
     </div>
   );
 }

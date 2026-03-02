@@ -5,9 +5,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { API_BASE_URL } from '../../config/constants';
 import { authHeaders, getProfile } from '../../utils/api';
-import { OFFENSE_TYPES, SEVERITY_LEVELS } from '../../config/constants';
 import Notification, { useNotification } from '../../components/Notification';
 import AIAssistant from '../../components/AIAssistant';
+import Link from 'next/link';
 
 interface Report {
   _id: string;
@@ -18,8 +18,6 @@ interface Report {
   status: string;
   createdAt: string;
   updatedAt: string;
-  appealStatus?: string;
-  appealReason?: string;
 }
 
 interface Case {
@@ -48,7 +46,6 @@ export default function StudentDashboardPage() {
   const router = useRouter();
   const { notification, showNotification, hideNotification } = useNotification();
 
-  // Authentication checks
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [profile, setProfile] = useState<any>(null);
   const [reports, setReports] = useState<Report[]>([]);
@@ -56,12 +53,7 @@ export default function StudentDashboardPage() {
   const [appeals, setAppeals] = useState<Appeal[]>([]);
   const [loadingReports, setLoadingReports] = useState(true);
   const [loadingCases, setLoadingCases] = useState(true);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'reports' | 'cases' | 'appeals'>('dashboard');
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
-  const [total, setTotal] = useState(0);
-  const [statusFilter, setStatusFilter] = useState('');
-  const [search, setSearch] = useState('');
+  const [activeTab, setActiveTab] = useState<'overview' | 'reports' | 'cases' | 'appeals'>('overview');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -70,12 +62,10 @@ export default function StudentDashboardPage() {
         setIsCheckingAuth(false);
         return;
       }
-
       if (authLoading) {
         setIsCheckingAuth(true);
         return;
       }
-
       if (!user || user.role !== 'student') {
         setIsCheckingAuth(false);
         return;
@@ -84,7 +74,6 @@ export default function StudentDashboardPage() {
     }
   }, [authLoading, token, user, router]);
 
-  // Fetch Full Profile including student data
   useEffect(() => {
     async function fetchFullProfile() {
       try {
@@ -99,43 +88,25 @@ export default function StudentDashboardPage() {
     }
   }, [token, user]);
 
-  // Fetch student's reports and cases
   useEffect(() => {
     if (user?.studentId) {
       fetchReports();
       fetchCases();
-    }
-  }, [user?.studentId, page, statusFilter, search]);
-
-  // Fetch appeals
-  useEffect(() => {
-    if (user?.studentId && activeTab === 'appeals') {
       fetchAppeals();
     }
-  }, [user?.studentId, activeTab]);
+  }, [user?.studentId]);
 
   const fetchReports = async () => {
     setLoadingReports(true);
     try {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString(),
-      });
-
-      if (statusFilter) params.append('status', statusFilter);
-      if (search) params.append('search', search);
-
-      const res = await fetch(`${API_BASE_URL}/student-reports?${params}`, {
+      const res = await fetch(`${API_BASE_URL}/student-reports`, {
         headers: { ...authHeaders() },
       });
-
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
       setReports(data.reports || []);
-      setTotal(data.total || 0);
     } catch (err: any) {
       console.error('Failed to fetch reports:', err);
-      showNotification('error', 'Failed to load reports');
     } finally {
       setLoadingReports(false);
     }
@@ -162,41 +133,21 @@ export default function StudentDashboardPage() {
       const res = await fetch(`${API_BASE_URL}/api/appeals?studentId=${user?.studentId}`, {
         headers: { ...authHeaders() },
       });
-
-      if (!res.ok) throw new Error(await res.text());
-      const data = await res.json();
-      setAppeals(data.appeals || []);
+      if (res.ok) {
+        const data = await res.json();
+        setAppeals(data.appeals || []);
+      }
     } catch (err: any) {
       console.error('Failed to fetch appeals:', err);
-      showNotification('error', 'Failed to load appeals');
     }
   };
 
-  // Helper functions
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
     });
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case 'open':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-      case 'closed':
-      case 'resolved':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      case 'in appeal':
-        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
-      case 'appeal rejected':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
-    }
   };
 
   if (isCheckingAuth) {
@@ -208,417 +159,233 @@ export default function StudentDashboardPage() {
   }
 
   if (!user || user.role !== 'student') {
-    return <div className="p-8 text-center text-red-600 bg-red-50 rounded-lg m-4">Access denied. This page is for students only.</div>;
+    return <div className="p-12 text-center text-red-600">Access denied.</div>;
   }
 
   const studentData = profile || user;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-serif">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div className="animate-in fade-in duration-300 space-y-6">
 
-        {/* Dashboard Header / Banner area */}
-        <div className="relative mb-6 rounded-xl overflow-hidden bg-white dark:bg-gray-900 shadow-sm border border-gray-200 dark:border-gray-800">
-          <div className="h-32 bg-gradient-to-r from-blue-600 to-indigo-700 relative">
-            <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/diamond-upholstery.png')]"></div>
-          </div>
-          <div className="px-6 pb-6 flex flex-col md:flex-row items-center md:items-end -mt-12 gap-6 relative z-10">
-            <div className="relative group">
-              <div className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-900 bg-white dark:bg-gray-800 shadow-lg flex items-center justify-center overflow-hidden">
-                <div className="w-24 h-24 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-4xl shadow-inner">
-                  {studentData.name ? studentData.name.charAt(0).toUpperCase() : studentData.username.charAt(0).toUpperCase()}
+          {/* Student Executive Banner */}
+          <div className="bg-white dark:bg-gray-900 p-8 rounded-3xl border-t-4 border-indigo-600 shadow-xl overflow-hidden relative">
+            <div className="absolute top-0 right-0 p-8 opacity-10">
+              <span className="text-9xl font-black">KMU</span>
+            </div>
+            <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
+              <div className="w-24 h-24 rounded-2xl bg-indigo-600 flex items-center justify-center text-white font-black text-4xl shadow-xl shadow-indigo-500/20 transform -rotate-3">
+                {studentData.name ? studentData.name.charAt(0).toUpperCase() : studentData.username.charAt(0).toUpperCase()}
+              </div>
+              <div className="text-center md:text-left">
+                <h1 className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white uppercase italic">{studentData.fullName || studentData.name || 'Student Portal'}</h1>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">ID: {studentData.studentId} • {studentData.program}</p>
+                <div className="flex gap-4 mt-4 justify-center md:justify-start">
+                  <button
+                    onClick={() => setActiveTab('overview')}
+                    className={`text-[10px] font-black uppercase tracking-widest pb-1 border-b-2 transition-all ${activeTab === 'overview' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+                  >
+                    Registry Overview
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('reports')}
+                    className={`text-[10px] font-black uppercase tracking-widest pb-1 border-b-2 transition-all ${activeTab === 'reports' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+                  >
+                    My Statements
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('cases')}
+                    className={`text-[10px] font-black uppercase tracking-widest pb-1 border-b-2 transition-all ${activeTab === 'cases' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+                  >
+                    Disciplinary Ledger
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('appeals')}
+                    className={`text-[10px] font-black uppercase tracking-widest pb-1 border-b-2 transition-all ${activeTab === 'appeals' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+                  >
+                    Appeals Portal
+                  </button>
                 </div>
               </div>
             </div>
-
-            <div className="flex-1 text-center md:text-left mb-2">
-              <h1 className="text-2xl font-bold uppercase">{studentData.name || 'Student Name'}</h1>
-              <p className="text-gray-600 dark:text-gray-400 font-semibold tracking-tight">Student ID : <span className="text-blue-600 dark:text-blue-400 font-mono">{studentData.studentId}</span></p>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Left Column: Side Navigation */}
-          <div className="lg:w-1/4">
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden sticky top-24">
-              <nav className="flex flex-col">
-                <NavButton label="Overview" icon="📊" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
-                <NavButton label="My Reports" icon="📜" active={activeTab === 'reports'} onClick={() => setActiveTab('reports')} />
-                <NavButton label="Disciplinary" icon="⚖️" active={activeTab === 'cases'} onClick={() => setActiveTab('cases')} />
-                <NavButton label="Appeals" icon="🏛️" active={activeTab === 'appeals'} onClick={() => setActiveTab('appeals')} />
-              </nav>
-            </div>
           </div>
 
-          {/* Right Column: Content */}
-          <div className="lg:w-3/4">
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 md:p-8 min-h-[500px]">
+          {activeTab === 'overview' && (
+            <div className="animate-in fade-in duration-500 space-y-6">
+              {/* Strategic Metrics */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <StatCard title="Disciplinary Cases" value={cases.length} color="indigo" />
+                <StatCard title="Statement Filings" value={reports.length} color="blue" />
+                <StatCard title="Active Appeals" value={appeals.filter(a => a.status === 'Pending').length} color="orange" />
+                <StatCard title="Current Sanctions" value={cases.filter(c => !!c.sanctions).length} color="emerald" />
+              </div>
 
-              {activeTab === 'dashboard' && (
-                <div className="animate-in fade-in duration-300 space-y-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <StatCard title="Total Cases" value={cases.length} color="red" />
-                    <StatCard title="Pending Reports" value={reports.filter(r => r.status === 'Pending').length} color="blue" />
-                    <StatCard title="Active Appeals" value={appeals.filter(a => a.status === 'Pending').length} color="orange" />
-                    <StatCard title="Sanctions" value={cases.filter(c => !!c.sanctions).length} color="indigo" />
-                  </div>
+              {/* Personal Information Ledger */}
+              <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
+                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-8 font-bold">Official Student Registry Record</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-sans">
+                  <InfoField label="Academic Program" value={studentData.program} />
+                  <InfoField label="Year of Study" value={studentData.yearOfStudy} />
+                  <InfoField label="Delivery Mode" value={studentData.deliveryMode} />
+                  <InfoField label="Gender" value={studentData.gender} />
+                  <InfoField label="NRC Number" value={studentData.nrc} />
+                  <InfoField label="Contact Mobile" value={studentData.phone} />
+                  <InfoField label="University Email" value={studentData.email} />
+                  <InfoField label="Residential Unit" value={studentData.roomNo || 'Non-Resident'} />
+                  <InfoField label="Registry Status" value={studentData.status || 'ACTIVE'} />
+                </div>
+              </div>
+            </div>
+          )}
 
-                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
-                    <h3 className="text-xl font-bold mb-4">Welcome back, {studentData.fullName}</h3>
-                    <p className="text-gray-500 text-sm">Review your case status, submit appeals, or file new incident reports using the sidebar navigation.</p>
-                    <div className="mt-8 flex gap-4">
-                      <button onClick={() => setActiveTab('reports')} className="px-6 py-2 bg-kmuGreen text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 transform hover:-translate-y-0.5 transition">Report Incident</button>
-                      <button onClick={() => setActiveTab('appeals')} className="px-6 py-2 border border-kmuGreen text-kmuGreen font-bold rounded-xl hover:bg-emerald-50 transition">My Appeals</button>
+          {activeTab === 'reports' && (
+            <div className="animate-in slide-in-from-bottom-4 duration-500 bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+              <div className="p-8 border-b border-gray-100 dark:border-gray-800">
+                <h2 className="text-lg font-black uppercase tracking-tighter italic text-indigo-600">Statement History Ledger</h2>
+              </div>
+              <div className="overflow-x-auto font-sans">
+                <table className="w-full text-xs">
+                  <thead className="bg-gray-50/50 dark:bg-gray-800/50 text-[10px] font-black uppercase text-gray-400 tracking-widest">
+                    <tr>
+                      <th className="px-8 py-5 text-left">Incident Date</th>
+                      <th className="px-8 py-5 text-left">Classification</th>
+                      <th className="px-8 py-5 text-center">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                    {reports.map((r) => (
+                      <tr key={r._id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                        <td className="px-8 py-5 font-mono text-gray-500">{formatDate(r.incidentDate)}</td>
+                        <td className="px-8 py-5 font-bold uppercase text-gray-900 dark:text-gray-100">{r.offenseType}</td>
+                        <td className="px-8 py-5 text-center">
+                          <span className={`px-3 py-1 rounded-lg font-black text-[9px] uppercase tracking-tighter border ${r.status === 'Resolved' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-blue-100 text-blue-700 border-blue-200'}`}>
+                            {r.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                    {reports.length === 0 && (
+                      <tr>
+                        <td colSpan={3} className="px-8 py-10 text-center text-gray-400 italic font-serif">Empty statement registry.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'cases' && (
+            <div className="animate-in slide-in-from-bottom-4 duration-500 bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+              <div className="p-8 border-b border-gray-100 dark:border-gray-800">
+                <h2 className="text-lg font-black uppercase tracking-tighter italic text-red-600">Official Disciplinary Ledger</h2>
+              </div>
+              <div className="overflow-x-auto font-sans">
+                <table className="w-full text-xs">
+                  <thead className="bg-gray-50/50 dark:bg-gray-800/50 text-[10px] font-black uppercase text-gray-400 tracking-widest">
+                    <tr>
+                      <th className="px-8 py-5 text-left">Indictment Date</th>
+                      <th className="px-8 py-5 text-left">Offense Index</th>
+                      <th className="px-8 py-5 text-center">Protocol Status</th>
+                      <th className="px-8 py-5 text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                    {cases.map((c) => (
+                      <tr key={c._id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                        <td className="px-8 py-5 font-mono text-gray-500">{formatDate(c.incidentDate)}</td>
+                        <td className="px-8 py-5">
+                          <div className="font-bold uppercase text-gray-900 dark:text-gray-100">{c.offenseType}</div>
+                          <div className="text-[10px] text-gray-400 mt-0.5 line-clamp-1 italic">{c.description}</div>
+                        </td>
+                        <td className="px-8 py-5 text-center">
+                          <span className="px-3 py-1 rounded-lg bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400 font-black text-[9px] uppercase tracking-tighter border border-red-200">
+                            {c.status}
+                          </span>
+                        </td>
+                        <td className="px-8 py-5 text-center">
+                          <button className="text-[10px] font-black text-indigo-600 hover:text-indigo-800 uppercase tracking-widest transition-all">Command View →</button>
+                        </td>
+                      </tr>
+                    ))}
+                    {cases.length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="px-8 py-10 text-center text-gray-400 italic font-serif">No disciplinary indictments found in registry.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'appeals' && (
+            <div className="animate-in slide-in-from-bottom-4 duration-500 space-y-6">
+              <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
+                <h2 className="text-lg font-black uppercase tracking-tighter italic text-orange-600 mb-8">Petition for Appeal Registry</h2>
+                <div className="space-y-4 font-sans">
+                  {appeals.map((appeal) => (
+                    <div key={appeal._id} className="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-2xl border border-transparent hover:border-orange-500/30 transition-all">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h3 className="text-xs font-black uppercase tracking-tighter text-gray-900 dark:text-white">Appeal Ref: {appeal._id.substring(0, 8).toUpperCase()}</h3>
+                          <p className="text-[10px] text-gray-500 font-bold uppercase mt-1">Submitted: {formatDate(appeal.createdAt)}</p>
+                        </div>
+                        <span className="px-3 py-1 rounded-lg bg-orange-100 text-orange-700 font-black text-[9px] uppercase tracking-tighter">
+                          {appeal.status}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 italic line-clamp-2 mb-4">"{appeal.reason}"</p>
+                      {appeal.adminResponse && (
+                        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700/50">
+                          <p className="text-[9px] font-black text-emerald-600 uppercase mb-2">Registry Response:</p>
+                          <p className="text-xs text-gray-800 dark:text-gray-200 font-medium">{appeal.adminResponse}</p>
+                        </div>
+                      )}
                     </div>
-                  </div>
+                  ))}
+                  {appeals.length === 0 && (
+                    <div className="text-center py-24 text-gray-400 italic text-sm font-serif border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-3xl">No active petitions in the registry.</div>
+                  )}
                 </div>
-              )}
-
-              {activeTab === 'reports' && (
-                <div className="animate-in fade-in duration-300">
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-kmuGreen">My Submitted Reports</h2>
-                    <span className="text-sm font-medium text-gray-500">Total: {total}</span>
-                  </div>
-                  <ReportsTable reports={reports} formatDate={formatDate} getStatusColor={getStatusColor} loading={loadingReports} />
-                </div>
-              )}
-
-              {activeTab === 'cases' && (
-                <div className="animate-in fade-in duration-300">
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-red-600">Disciplinary Cases</h2>
-                    <span className="text-sm font-medium text-gray-500">History: {cases.length}</span>
-                  </div>
-                  <CasesTable cases={cases} formatDate={formatDate} getStatusColor={getStatusColor} loading={loadingCases} />
-                  <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
-                    <p className="text-sm text-blue-700 dark:text-blue-300">
-                      <strong>Need to appeal?</strong> You can submit an appeal for any case that you believe was wrongly decided. Click the appeal button next to the case.
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'appeals' && (
-                <div className="animate-in fade-in duration-300">
-                  <h2 className="text-2xl font-bold text-kmuGreen mb-6">My Appeals</h2>
-                  <AppealsList appeals={appeals} formatDate={formatDate} getStatusColor={getStatusColor} />
-                </div>
-              )}
-
+              </div>
             </div>
-          </div>
+          )}
+
         </div>
       </div>
 
       {notification?.isVisible && (
-        <Notification
-          type={notification.type}
-          message={notification.message}
-          isVisible={notification.isVisible}
-          onClose={hideNotification}
-        />
+        <Notification type={notification.type} message={notification.message} isVisible={notification.isVisible} onClose={hideNotification} />
       )}
       <AIAssistant formType="appeal" />
     </div>
   );
 }
 
-// Sub-components for cleaner structure
-function NavButton({ label, icon, active, onClick }: any) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex items-center gap-4 px-6 py-4 transition-all border-l-4 text-left ${active
-        ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/10 text-blue-600'
-        : 'border-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
-        }`}
-    >
-      <span className="text-xl">{icon}</span>
-      <span className="font-semibold">{label}</span>
-    </button>
-  );
-}
-
 function StatCard({ title, value, color }: any) {
   const colors: any = {
-    red: 'text-red-600 border-red-100',
-    blue: 'text-blue-600 border-blue-100',
-    orange: 'text-orange-600 border-orange-100',
-    indigo: 'text-indigo-600 border-indigo-100'
+    indigo: 'text-indigo-700 bg-indigo-50/30 border-indigo-100 dark:bg-indigo-950/10 dark:border-indigo-900/50',
+    blue: 'text-blue-700 bg-blue-50/30 border-blue-100 dark:bg-blue-950/10 dark:border-blue-900/50',
+    orange: 'text-orange-700 bg-orange-50/30 border-orange-100 dark:bg-orange-950/10 dark:border-orange-900/50',
+    emerald: 'text-emerald-700 bg-emerald-50/30 border-emerald-100 dark:bg-emerald-950/10 dark:border-emerald-900/50'
   };
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border ${colors[color]} p-5`}>
-      <div className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mb-1">{title}</div>
-      <div className={`text-3xl font-bold ${colors[color].split(' ')[0]}`}>{value}</div>
+    <div className={`bg-white dark:bg-gray-900 rounded-3xl shadow-sm border p-8 transition-all duration-300 ${colors[color]}`}>
+      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">{title}</div>
+      <div className="text-4xl font-black tracking-tight italic">{value}</div>
     </div>
   );
 }
 
-function PersonalInfoView({ studentData }: any) {
+function InfoField({ label, value }: any) {
   return (
-    <div className="space-y-10 animate-in fade-in duration-300">
-      <section>
-        <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide border-b border-gray-100 dark:border-gray-800 pb-2 mb-4">Account Details</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-          <InfoField label="Student ID" value={studentData.studentId} />
-          <InfoField label="Program" value={studentData.program} fullWidth />
-          <InfoField label="Year" value={studentData.year || '2026'} />
-          <InfoField label="Year of Study" value={studentData.yearOfStudy || '4'} />
-          <InfoField label="Status" value={studentData.status || 'REGISTERED'} />
-          <InfoField label="Delivery Mode" value={studentData.deliveryMode || 'FULLTIME'} />
-        </div>
-      </section>
-
-      <section>
-        <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide border-b border-gray-100 dark:border-gray-800 pb-2 mb-4">Personal Info</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-          <InfoField label="First Name" value={studentData.firstName || studentData.name?.split(' ')[1] || ''} />
-          <InfoField label="Sur Name" value={studentData.surName || studentData.name?.split(' ')[0] || ''} />
-          <InfoField label="NRC" value={studentData.nrc || ''} />
-          <InfoField label="Passport" value={studentData.passport || ''} />
-          <InfoField label="Marital Status" value={studentData.maritalStatus || 'SINGLE'} />
-          <InfoField label="Nationality" value={studentData.nationality || 'zambian'} />
-          <InfoField label="Gender" value={studentData.gender || 'MALE'} />
-          <InfoField label="Date of birth" value={studentData.dateOfBirth || '2004-04-23'} />
-        </div>
-      </section>
-
-      <section>
-        <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide border-b border-gray-100 dark:border-gray-800 pb-2 mb-4">Accomodation</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-          <InfoField label="Room Number" value={studentData.roomNo || ''} />
-        </div>
-      </section>
-
-      <section>
-        <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide border-b border-gray-100 dark:border-gray-800 pb-2 mb-4">Address</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-          <InfoField label="Province" value={studentData.province || 'MUCHINGA'} />
-          <InfoField label="Town" value={studentData.town || 'CHINSALI'} />
-          <InfoField label="Address" value={studentData.address || 'CHOSHI'} />
-          <InfoField label="Phone" value={studentData.phone || '0772273500'} />
-          <InfoField label="Email" value={studentData.email} />
-        </div>
-      </section>
-
-      <div className="text-center pt-8 border-t border-gray-100 dark:border-gray-800">
-        <p className="text-xs text-gray-500 font-medium italic">Apanel Version 1.9.85</p>
+    <div className="flex flex-col gap-1.5 bg-gray-50/30 dark:bg-gray-800/30 p-4 rounded-2xl border border-transparent hover:border-indigo-500/10 transition-all">
+      <label className="text-[9px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-widest">{label}</label>
+      <div className="text-xs font-bold text-gray-800 dark:text-gray-200 uppercase tracking-tight">
+        {value || 'Not Registered'}
       </div>
-    </div>
-  );
-}
-
-function InfoField({ label, value, fullWidth = false }: any) {
-  return (
-    <div className={`flex flex-col gap-1 ${fullWidth ? 'md:col-span-2' : ''}`}>
-      <label className="text-[10px] font-extrabold text-blue-800 dark:text-blue-400 uppercase tracking-tighter">{label}</label>
-      <div className="bg-gray-100 dark:bg-gray-800/80 rounded border border-gray-200 dark:border-gray-700 px-3 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 min-h-[38px]">
-        {value || '-'}
-      </div>
-    </div>
-  );
-}
-
-function ReportsTable({ reports, formatDate, getStatusColor, loading }: any) {
-  if (loading) return <div className="text-center py-10 italic text-gray-500">Loading reports...</div>;
-  if (reports.length === 0) return <div className="text-center py-10 italic text-gray-500">No reports found.</div>;
-
-  return (
-    <div className="overflow-x-auto border rounded-xl border-gray-100 dark:border-gray-800">
-      <table className="w-full text-sm">
-        <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-800">
-          <tr>
-            <th className="px-5 py-4 text-left font-bold text-gray-700 dark:text-gray-300 uppercase text-[10px] tracking-wider">Date</th>
-            <th className="px-5 py-4 text-left font-bold text-gray-700 dark:text-gray-300 uppercase text-[10px] tracking-wider">Type</th>
-            <th className="px-5 py-4 text-left font-bold text-gray-700 dark:text-gray-300 uppercase text-[10px] tracking-wider">Status</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-          {reports.map((r: any) => (
-            <tr key={r._id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-              <td className="px-5 py-4">{formatDate(r.incidentDate)}</td>
-              <td className="px-5 py-4 font-semibold">{r.offenseType}</td>
-              <td className="px-5 py-4">
-                <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${getStatusColor(r.status)}`}>
-                  {r.status}
-                </span>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function AppealsList({ appeals, formatDate, getStatusColor }: any) {
-  if (appeals.length === 0) return <div className="text-center py-10 italic text-gray-500 border rounded-xl border-gray-100 dark:border-gray-800">No appeals submitted yet.</div>;
-
-  return (
-    <div className="space-y-4">
-      {appeals.map((appeal: any) => (
-        <div key={appeal._id} className="border border-gray-200 dark:border-gray-800 rounded-xl p-5 hover:border-kmuOrange/30 transition-colors bg-white/50 dark:bg-gray-800/30">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <h3 className="font-bold text-gray-900 dark:text-white">Appeal for Report #{appeal.reportId?.substring(0, 8)}</h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Submitted: {formatDate(appeal.createdAt)}</p>
-            </div>
-            <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${getStatusColor(appeal.status)}`}>
-              {appeal.status}
-            </span>
-          </div>
-          <div className="text-sm border-t border-gray-100 dark:border-gray-800 pt-4 mt-2">
-            <p className="font-bold text-blue-800 dark:text-blue-400 text-[10px] uppercase mb-1">Reason:</p>
-            <p className="text-gray-700 dark:text-gray-300">{appeal.reason}</p>
-          </div>
-          {appeal.adminResponse && (
-            <div className="text-sm bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 mt-4 border border-gray-100 dark:border-gray-700">
-              <p className="font-bold text-kmuGreen text-[10px] uppercase mb-1">Admin Response:</p>
-              <p className="text-gray-700 dark:text-gray-300">{appeal.adminResponse}</p>
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function CasesTable({ cases, formatDate, getStatusColor, loading }: any) {
-  if (loading) return <div className="text-center py-10 italic text-gray-500">Loading cases...</div>;
-  if (cases.length === 0) return <div className="text-center py-10 italic text-gray-500">No disciplinary cases found.</div>;
-
-  return (
-    <div className="overflow-x-auto border rounded-xl border-gray-100 dark:border-gray-800">
-      <table className="w-full text-sm">
-        <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-800">
-          <tr>
-            <th className="px-5 py-4 text-left font-bold text-gray-700 dark:text-gray-300 uppercase text-[10px] tracking-wider">Date</th>
-            <th className="px-5 py-4 text-left font-bold text-gray-700 dark:text-gray-300 uppercase text-[10px] tracking-wider">Offense</th>
-            <th className="px-5 py-4 text-left font-bold text-gray-700 dark:text-gray-300 uppercase text-[10px] tracking-wider">Status</th>
-            <th className="px-5 py-4 text-center font-bold text-gray-700 dark:text-gray-300 uppercase text-[10px] tracking-wider">Action</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-          {cases.map((c: any) => (
-            <tr key={c._id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-              <td className="px-5 py-4">{formatDate(c.incidentDate)}</td>
-              <td className="px-5 py-4">
-                <div className="font-semibold">{c.offenseType}</div>
-                <div className="text-[10px] text-gray-400 truncate max-w-[200px]">{c.description}</div>
-              </td>
-              <td className="px-5 py-4">
-                <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${getStatusColor(c.status)}`}>
-                  {c.status}
-                </span>
-              </td>
-              <td className="px-5 py-4 text-center">
-                <button className="text-blue-600 hover:text-blue-800 font-bold text-xs uppercase">Appeal</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function ChangePasswordView({ showNotification }: any) {
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const handleUpdatePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      showNotification('error', 'Please fill in all fields');
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      showNotification('error', 'New passwords do not match');
-      return;
-    }
-    if (newPassword.length < 6) {
-      showNotification('error', 'New password must be at least 6 characters');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/auth/change-password`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...authHeaders()
-        },
-        body: JSON.stringify({ currentPassword, newPassword }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Failed to update password");
-      }
-
-      showNotification('success', 'Password updated successfully');
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-    } catch (err: any) {
-      showNotification('error', err.message || "Failed to update password");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="max-w-md mx-auto animate-in fade-in duration-300 py-8">
-      <h2 className="text-2xl font-bold text-kmuGreen mb-8 text-center">Change Your Password</h2>
-      <form onSubmit={handleUpdatePassword} className="space-y-6">
-        <div className="space-y-1">
-          <label className="text-[10px] font-extrabold text-blue-800 dark:text-blue-400 uppercase tracking-tighter ml-1">Current Password</label>
-          <input
-            type="password"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-kmuOrange outline-none transition-all"
-            placeholder="••••••••"
-            required
-          />
-        </div>
-        <div className="space-y-1">
-          <label className="text-[10px] font-extrabold text-blue-800 dark:text-blue-400 uppercase tracking-tighter ml-1">New Password</label>
-          <input
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-kmuOrange outline-none transition-all"
-            placeholder="••••••••"
-            required
-            minLength={6}
-          />
-        </div>
-        <div className="space-y-1">
-          <label className="text-[10px] font-extrabold text-blue-800 dark:text-blue-400 uppercase tracking-tighter ml-1">Confirm New Password</label>
-          <input
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-kmuOrange outline-none transition-all"
-            placeholder="••••••••"
-            required
-          />
-        </div>
-        <button
-          type="submit"
-          disabled={loading}
-          className={`w-full text-white font-bold py-4 rounded-xl transition shadow-lg transform active:scale-[0.98] uppercase tracking-wider ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"
-            }`}
-        >
-          {loading ? "Updating..." : "Update Password"}
-        </button>
-      </form>
     </div>
   );
 }

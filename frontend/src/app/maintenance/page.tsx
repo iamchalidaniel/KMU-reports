@@ -184,106 +184,144 @@ export default function AdminMaintenancePage() {
     }
 
     return (
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">All Maintenance Reports</h1>
-                <div className="flex gap-2">
-                    <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold uppercase">{reports.length} Total Reports</span>
-                </div>
-            </div>
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-serif">
+            <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                <div className="animate-in fade-in duration-300 space-y-6">
 
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                {/* Filters */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                    <input
-                        placeholder="Search hall, room, or reporter..."
-                        className="bg-gray-100 dark:bg-gray-800 border-none rounded-lg px-4 py-2 text-sm"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-                    <select
-                        className="bg-gray-100 dark:bg-gray-800 border-none rounded-lg px-4 py-2 text-sm outline-none"
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                    >
-                        <option value="">All Statuses</option>
-                        {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-                    </select>
-                    <select
-                        className="bg-gray-100 dark:bg-gray-800 border-none rounded-lg px-4 py-2 text-sm outline-none"
-                        value={priorityFilter}
-                        onChange={(e) => setPriorityFilter(e.target.value)}
-                    >
-                        <option value="">All Priorities</option>
-                        {PRIORITIES.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
-                    </select>
-                </div>
+                    {/* Executive Command Bar */}
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-8 rounded-3xl border-t-4 border-kmuGreen shadow-xl gap-4">
+                        <div>
+                            <h1 className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white uppercase">Maintenance Authority</h1>
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">Centralized Facility & Infrastructure Oversight</p>
+                        </div>
+                        <div className="flex gap-2">
+                            <div className="bg-emerald-50 dark:bg-emerald-950/20 px-4 py-2 rounded-2xl border border-emerald-100 dark:border-emerald-900/50">
+                                <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest block mb-0.5">Active Ledger</span>
+                                <span className="text-xl font-black text-emerald-700 dark:text-emerald-400">{reports.length} Reports</span>
+                            </div>
+                        </div>
+                    </div>
 
-                {/* Table */}
-                <div className="overflow-x-auto border border-gray-100 dark:border-gray-800 rounded-xl">
-                    <table className="w-full text-xs">
-                        <thead className="bg-gray-50 dark:bg-gray-800 font-bold uppercase text-gray-400">
-                            <tr>
-                                <th className="px-4 py-4 text-left">Location / Info</th>
-                                <th className="px-4 py-4 text-left">Category / Priority</th>
-                                <th className="px-4 py-4 text-center">Status</th>
-                                <th className="px-4 py-4 text-right">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                            {filteredReports.map((r, i) => {
-                                const reportId = r._id || r.id;
-                                return (
-                                    <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-900">
-                                        <td className="px-4 py-4">
-                                            <div className="font-bold">{r.location?.hall}</div>
-                                            <div className="text-[10px] text-gray-400">Room {r.location?.room || 'N/A'} • {r.reported_by?.name}</div>
-                                            <div className="mt-1 text-gray-600 dark:text-gray-400 italic line-clamp-1">{r.description}</div>
-                                        </td>
-                                        <td className="px-4 py-4">
-                                            <div className="font-medium uppercase">{r.category}</div>
-                                            <div className={`mt-1 text-[9px] font-bold uppercase ${r.priority === 'Urgent' ? 'text-red-600' :
-                                                    r.priority === 'High' ? 'text-orange-600' : 'text-gray-400'
-                                                }`}>{r.priority} Priority</div>
-                                        </td>
-                                        <td className="px-4 py-4 text-center">
-                                            <select
-                                                value={r.status}
-                                                onChange={(e) => updateStatus(reportId!, e.target.value)}
-                                                className={`text-[10px] font-bold border rounded px-2 py-1 bg-transparent ${r.status === 'Completed' ? 'text-green-600' : 'text-blue-600'
-                                                    }`}
-                                            >
-                                                {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-                                            </select>
-                                        </td>
-                                        <td className="px-4 py-4 text-right">
-                                            {isElectricalReport(r.category) && r.status === 'Reported' && (
-                                                <select
-                                                    className="text-[9px] bg-gray-100 dark:bg-gray-700 border-none rounded px-2 py-1"
-                                                    onChange={(e) => {
-                                                        const elec = electricians.find(el => (el._id || el.id) === e.target.value);
-                                                        if (elec) assignToElectrician(reportId!, elec._id || elec.id, elec.name);
-                                                    }}
-                                                    defaultValue=""
-                                                >
-                                                    <option value="" disabled>Assign Electrician</option>
-                                                    {electricians.map(el => <option key={el._id || el.id} value={el._id || el.id}>{el.name}</option>)}
-                                                </select>
-                                            )}
-                                            {r.assigned_to?.name && (
-                                                <div className="text-[9px] text-gray-500">Assigned to: {r.assigned_to.name}</div>
-                                            )}
-                                        </td>
+                    <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+                        {/* Filters */}
+                        <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div className="flex flex-wrap gap-3">
+                                <select
+                                    className="bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-2.5 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
+                                    value={statusFilter}
+                                    onChange={(e) => setStatusFilter(e.target.value)}
+                                >
+                                    <option value="">All Status Matrix</option>
+                                    {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                                </select>
+                                <select
+                                    className="bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-2.5 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
+                                    value={priorityFilter}
+                                    onChange={(e) => setPriorityFilter(e.target.value)}
+                                >
+                                    <option value="">Priority Level</option>
+                                    {PRIORITIES.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
+                                </select>
+                            </div>
+                            <div className="relative w-full md:w-96">
+                                <input
+                                    placeholder="Query infrastructure ledger (hall, room, reporter)..."
+                                    className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-5 py-3.5 text-xs w-full focus:ring-2 focus:ring-kmuGreen transition-all shadow-inner"
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Table */}
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-xs">
+                                <thead className="bg-gray-50/50 dark:bg-gray-800/50 text-[10px] font-black uppercase text-gray-400 tracking-widest">
+                                    <tr>
+                                        <th className="px-8 py-5 text-left">Location / Deployment</th>
+                                        <th className="px-8 py-5 text-left">Incident Class</th>
+                                        <th className="px-8 py-5 text-center">Status Matrix</th>
+                                        <th className="px-8 py-5 text-right">Command Actions</th>
                                     </tr>
-                                );
-                            })}
+                                </thead>
+                                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                                    {filteredReports.map((r, i) => {
+                                        const reportId = r._id || r.id;
+                                        return (
+                                            <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 group transition-colors">
+                                                <td className="px-8 py-5">
+                                                    <div className="font-bold text-gray-900 dark:text-gray-100">{r.location?.hall}</div>
+                                                    <div className="text-[10px] text-gray-400 font-mono italic">
+                                                        Room {r.location?.room || 'N/A'} • {r.reported_by?.name}
+                                                    </div>
+                                                </td>
+                                                <td className="px-8 py-5">
+                                                    <div className="font-medium uppercase tracking-tight text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                                        {r.category}
+                                                        <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase ${r.priority === 'Urgent' ? 'bg-red-100 text-red-600' :
+                                                                r.priority === 'High' ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-400'
+                                                            }`}>
+                                                            {r.priority}
+                                                        </span>
+                                                    </div>
+                                                    <div className="mt-1.5 text-[11px] text-gray-500 dark:text-gray-400 italic line-clamp-1 leading-relaxed ring-1 ring-gray-100 dark:ring-gray-800 px-2 py-1 rounded inline-block bg-white dark:bg-gray-900 shadow-sm">
+                                                        "{r.description}"
+                                                    </div>
+                                                </td>
+                                                <td className="px-8 py-5 text-center">
+                                                    <select
+                                                        value={r.status}
+                                                        onChange={(e) => updateStatus(reportId!, e.target.value)}
+                                                        className={`text-[10px] font-black uppercase bg-transparent outline-none cursor-pointer border-b-2 border-dotted transition-all ${r.status === 'Completed' ? 'text-emerald-600 border-emerald-200' : 'text-blue-600 border-blue-200'
+                                                            }`}
+                                                    >
+                                                        {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                                                    </select>
+                                                </td>
+                                                <td className="px-8 py-5 text-right">
+                                                    <div className="flex flex-col items-end gap-2">
+                                                        {isElectricalReport(r.category) && r.status === 'Reported' && (
+                                                            <div className="flex flex-col items-end">
+                                                                <span className="text-[8px] font-black text-gray-400 uppercase tracking-tighter mb-1">Assign Technician</span>
+                                                                <select
+                                                                    className="text-[9px] font-bold bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1.5 outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
+                                                                    onChange={(e) => {
+                                                                        const elec = electricians.find(el => (el._id || el.id) === e.target.value);
+                                                                        if (elec) assignToElectrician(reportId!, elec._id || elec.id, elec.name);
+                                                                    }}
+                                                                    defaultValue=""
+                                                                >
+                                                                    <option value="" disabled>Select Electrician...</option>
+                                                                    {electricians.map(el => <option key={el._id || el.id} value={el._id || el.id}>{el.name}</option>)}
+                                                                </select>
+                                                            </div>
+                                                        )}
+                                                        {r.assigned_to?.name ? (
+                                                            <div className="flex flex-col items-end">
+                                                                <span className="text-[8px] font-black text-emerald-600 uppercase tracking-tighter">Technician Assigned</span>
+                                                                <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300">{r.assigned_to.name}</span>
+                                                            </div>
+                                                        ) : !isElectricalReport(r.category) ? (
+                                                            <span className="text-[9px] text-gray-300 italic uppercase tracking-widest">General Repair</span>
+                                                        ) : null}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
                             {filteredReports.length === 0 && (
-                                <tr>
-                                    <td colSpan={4} className="px-4 py-12 text-center text-gray-500 italic">No maintenance reports found matching your criteria.</td>
-                                </tr>
+                                <div className="text-center py-24 bg-gray-50/50 dark:bg-gray-800/20">
+                                    <div className="text-4xl mb-4">🔍</div>
+                                    <div className="text-gray-400 italic text-sm font-serif">No operational data matches your current criteria.</div>
+                                </div>
                             )}
-                        </tbody>
-                    </table>
+                        </div>
+                        <div className="p-8 bg-gray-50/30 dark:bg-gray-800/20 text-center border-t border-gray-100 dark:border-gray-800">
+                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em]">Facility Management Authority Framework</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 

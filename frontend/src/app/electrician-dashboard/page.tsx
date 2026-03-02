@@ -66,13 +66,6 @@ const ELECTRICAL_CATEGORIES = [
   { value: 'other', label: 'Other Electrical' },
 ];
 
-const PRIORITIES = [
-  { value: 'Low', label: 'Low' },
-  { value: 'Medium', label: 'Medium' },
-  { value: 'High', label: 'High' },
-  { value: 'Urgent', label: 'Urgent' },
-];
-
 const STATUSES = [
   { value: 'Reported', label: 'Reported' },
   { value: 'Assigned', label: 'Assigned' },
@@ -87,17 +80,13 @@ export default function ElectricianDashboard() {
   const { notification, showNotification, hideNotification } = useNotification();
 
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [activeTab, setActiveTab] = useState('dashboard');
   const [profile, setProfile] = useState<any>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [reports, setReports] = useState<MaintenanceReport[]>([]);
   const [filteredReports, setFilteredReports] = useState<MaintenanceReport[]>([]);
-  const [analytics, setAnalytics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [priorityFilter, setPriorityFilter] = useState('');
   const [hallFilter, setHallFilter] = useState('');
 
   useEffect(() => {
@@ -145,34 +134,15 @@ export default function ElectricianDashboard() {
         );
         setReports(electricalReports);
       } catch (err: any) {
-        setError(err?.message || 'Failed to load reports');
+        console.error(err);
       } finally {
         setLoading(false);
-      }
-    }
-
-    async function fetchAnalytics() {
-      try {
-        const res = await fetch(`${API_BASE_URL}/maintenance/analytics`, {
-          headers: { ...authHeaders() }
-        });
-        if (!res.ok) throw new Error('Failed to fetch analytics');
-        const data = await res.json();
-        if (data.categoryStats) {
-          data.categoryStats = data.categoryStats.filter((s: any) =>
-            ELECTRICAL_CATEGORIES.some(cat => cat.value === s.category)
-          );
-        }
-        setAnalytics(data);
-      } catch (err: any) {
-        console.error('Failed to fetch analytics:', err);
       }
     }
 
     if (token) {
       fetchStaffProfile();
       fetchReports();
-      fetchAnalytics();
     }
   }, [token]);
 
@@ -187,9 +157,8 @@ export default function ElectricianDashboard() {
       );
     }
     if (statusFilter) filtered = filtered.filter(r => r.status === statusFilter);
-    if (priorityFilter) filtered = filtered.filter(r => r.priority === priorityFilter);
     setFilteredReports(filtered);
-  }, [search, statusFilter, priorityFilter, reports]);
+  }, [search, statusFilter, reports]);
 
   async function updateStatus(reportId: string, newStatus: string) {
     try {
@@ -203,7 +172,9 @@ export default function ElectricianDashboard() {
       });
 
       if (!res.ok) throw new Error('Failed to update status');
-      const resReports = await fetch(`${API_BASE_URL}/api/maintenance`, { headers: { ...authHeaders() } });
+
+      // Refresh reports
+      const resReports = await fetch(`${API_BASE_URL}/maintenance`, { headers: { ...authHeaders() } });
       if (resReports.ok) {
         const data = await resReports.json();
         const electricalReports = (data.reports || data || []).filter((r: MaintenanceReport) =>
@@ -222,17 +193,15 @@ export default function ElectricianDashboard() {
   }
 
   if (!user || user.role !== 'electrician') {
-    return <div className="text-red-600 p-12">Access denied. Electrician access only.</div>;
+    return <div className="text-red-600 p-12">Access denied.</div>;
   }
 
-  const staffData = profile || user;
+  const categoryCounts: Record<string, number> = {};
+  const statusCounts: Record<string, number> = {};
 
   const analyticsReports = hallFilter
     ? reports.filter(r => r.location.hall === hallFilter)
     : reports;
-
-  const categoryCounts: Record<string, number> = {};
-  const statusCounts: Record<string, number> = {};
 
   analyticsReports.forEach(r => {
     if (r.category) categoryCounts[r.category] = (categoryCounts[r.category] || 0) + 1;
@@ -240,247 +209,176 @@ export default function ElectricianDashboard() {
   });
 
   const categoryChartData = {
-    labels: Object.keys(categoryCounts).map(c => c.toUpperCase()),
+    labels: Object.keys(categoryCounts).map(c => ELECTRICAL_CATEGORIES.find(cat => cat.value === c)?.label || c),
     datasets: [{
-      label: 'Reports by Category',
       data: Object.values(categoryCounts),
-      backgroundColor: ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'],
+      backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'],
+      borderWidth: 0,
     }],
   };
 
   const statusChartData = {
     labels: Object.keys(statusCounts),
     datasets: [{
-      label: 'By Status',
       data: Object.values(statusCounts),
       backgroundColor: ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6'],
+      borderWidth: 0,
     }],
   };
 
   const halls = Array.from(new Set(reports.map(r => r.location.hall).filter(Boolean)));
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-serif">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div className="animate-in fade-in duration-300 space-y-6">
 
-
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Side Navigation */}
-          <div className="lg:w-1/4">
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden sticky top-24">
-              <nav className="flex flex-col">
-                <NavButton label="Dashboard" icon="📊" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
-                <NavButton label="Tasks" icon="🛠️" active={activeTab === 'tasks'} onClick={() => setActiveTab('tasks')} />
-              </nav>
+          {/* Executive Command Bar */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-8 rounded-3xl border-t-4 border-blue-600 shadow-xl gap-4">
+            <div>
+              <h1 className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white uppercase italic">Electrical Command</h1>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">Infrastructure Maintenance & Technical Operations</p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/maintenance"
+                className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:shadow-lg hover:shadow-blue-500/20 transition flex items-center gap-2 group border-none"
+              >
+                <span className="group-hover:animate-pulse">⚡</span> Infrastructure Ledger
+              </Link>
             </div>
           </div>
 
-          {/* Right Column Content */}
-          <div className="lg:w-3/4 space-y-6">
+          {/* Strategic Metrics */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard title="Asset Reports" value={reports.length} color="blue" />
+            <StatCard title="Assigned Tasks" value={reports.filter(r => r.status === 'Assigned').length} color="indigo" />
+            <StatCard title="In Operation" value={reports.filter(r => r.status === 'In Progress').length} color="orange" />
+            <StatCard title="Restored" value={reports.filter(r => r.status === 'Completed').length} color="emerald" />
+          </div>
 
-            {activeTab === 'dashboard' && (
-              <div className="animate-in fade-in duration-300 space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <StatCard title="All Electrical" value={reports.length} color="blue" />
-                  <StatCard title="Assigned" value={reports.filter(r => r.status === 'Assigned').length} color="teal" />
-                  <StatCard title="In Progress" value={reports.filter(r => r.status === 'In Progress').length} color="orange" />
-                  <StatCard title="Completed" value={reports.filter(r => r.status === 'Completed').length} color="green" />
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 text-center">
-                    <div className="flex justify-between items-center mb-6">
-                      <h3 className="text-lg font-bold">Category Distribution</h3>
-                      <select
-                        className="bg-gray-50 dark:bg-gray-800 border-none rounded-lg px-3 py-1 text-xs outline-none"
-                        value={hallFilter}
-                        onChange={(e) => setHallFilter(e.target.value)}
-                      >
-                        <option value="">All Hostels</option>
-                        {halls.map((h: any) => <option key={h} value={h}>{h}</option>)}
-                      </select>
-                    </div>
-                    <div className="h-64 flex items-center justify-center">
-                      <Doughnut data={categoryChartData} options={{ maintainAspectRatio: false }} />
-                    </div>
-                  </div>
-                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 text-center">
-                    <h3 className="text-lg font-bold mb-6">Status Overview</h3>
-                    <div className="h-64 flex items-center justify-center">
-                      <Doughnut data={statusChartData} options={{ maintainAspectRatio: false }} />
-                    </div>
-                  </div>
-                </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Asset Distribution */}
+            <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
+              <div className="flex justify-between items-center mb-8">
+                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 font-bold">Asset Type Distribution</h3>
+                <select
+                  className="bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-blue-500 transition-all font-sans"
+                  value={hallFilter}
+                  onChange={(e) => setHallFilter(e.target.value)}
+                >
+                  <option value="">All Locations</option>
+                  {halls.map((h: any) => <option key={h} value={h}>{h}</option>)}
+                </select>
               </div>
-            )}
+              <div className="h-64 flex items-center justify-center">
+                <Doughnut
+                  data={categoryChartData}
+                  options={{
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10, weight: 'bold' } } } }
+                  }}
+                />
+              </div>
+            </div>
 
-            {activeTab === 'tasks' && (
-              <div className="animate-in fade-in duration-300 space-y-6">
-                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-                    <h2 className="text-xl font-bold">Electrical Tasks</h2>
-                    <div className="flex flex-wrap gap-2 w-full md:w-auto">
-                      <input
-                        placeholder="Search..."
-                        className="bg-gray-100 dark:bg-gray-800 border-none rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 flex-1"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                      />
+            {/* Operational Status */}
+            <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
+              <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-8 font-bold">Operational Status Index</h3>
+              <div className="h-64 flex items-center justify-center">
+                <Doughnut
+                  data={statusChartData}
+                  options={{
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10, weight: 'bold' } } } }
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Maintenance Task Ledger */}
+          <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
+            <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <h2 className="text-lg font-black uppercase tracking-tighter italic">Technical Dispatch Ledger</h2>
+              <div className="flex gap-2 w-full md:w-auto font-sans">
+                <input
+                  placeholder="Search assets..."
+                  className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-5 py-3 text-xs focus:ring-2 focus:ring-blue-500 transition-all shadow-inner w-full md:w-64"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+                <select
+                  className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-5 py-3 text-xs focus:ring-2 focus:ring-blue-500 transition-all shadow-inner"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="">Status</option>
+                  {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-sans">
+              {filteredReports.slice(0, 12).map(report => {
+                const reportId = report._id || report.id;
+                return (
+                  <div key={reportId} className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-6 border border-transparent hover:border-blue-500/30 transition-all group relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-4">
                       <select
-                        className="bg-gray-100 dark:bg-gray-800 border-none rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500"
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
+                        value={report.status}
+                        onChange={(e) => updateStatus(reportId!, e.target.value)}
+                        className={`text-[9px] font-black uppercase tracking-widest border-none rounded-lg px-3 py-1.5 focus:ring-0 cursor-pointer ${report.status === 'Completed' ? 'bg-emerald-100 text-emerald-700' :
+                          report.status === 'In Progress' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'
+                          }`}
                       >
-                        <option value="">All Status</option>
                         {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                       </select>
                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-4">
-                    {filteredReports.map(report => {
-                      const reportId = report._id || report.id;
-                      return (
-                        <div key={reportId} className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl p-5 hover:border-blue-300 transition-colors shadow-sm">
-                          <div className="flex justify-between items-start mb-3">
-                            <div>
-                              <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold uppercase rounded mb-2 inline-block">
-                                {ELECTRICAL_CATEGORIES.find(c => c.value === report.category)?.label || report.category}
-                              </span>
-                              <h3 className="font-bold text-lg">{report.location.hall} {report.location.room ? `- Room ${report.location.room}` : ''}</h3>
-                            </div>
-                            <select
-                              value={report.status}
-                              onChange={(e) => updateStatus(reportId!, e.target.value)}
-                              className={`text-[11px] font-bold border-none rounded px-3 py-1.5 focus:ring-0 ${report.status === 'Completed' ? 'bg-green-100 text-green-700' :
-                                report.status === 'In Progress' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'
-                                }`}
-                            >
-                              {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-                            </select>
-                          </div>
-                          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">{report.description}</p>
-                          <div className="flex items-center justify-between pt-4 border-t border-gray-50 dark:border-gray-700">
-                            <div className="text-[10px] text-gray-400 uppercase font-bold tracking-widest">Reported by: {report.reported_by.name}</div>
-                            <Link href={`/maintenance/${reportId}`} className="text-blue-600 font-bold text-xs hover:underline uppercase tracking-wider">Details →</Link>
-                          </div>
-                        </div>
-                      );
-                    })}
-                    {filteredReports.length === 0 && (
-                      <div className="text-center py-12 text-gray-500 italic">No tasks found.</div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'info' && (
-              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 md:p-8 animate-in fade-in duration-300">
-                <div className="space-y-10">
-                  <section>
-                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide border-b border-gray-100 dark:border-gray-800 pb-2 mb-4">Account Details</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                      <InfoField label="Staff ID" value={staffData.staffId || staffData.username} />
-                      <InfoField label="Role" value={staffData.role?.toUpperCase().replace('_', ' ')} />
-                      <InfoField label="Status" value="ACTIVE" />
+                    <div className="mb-4">
+                      <span className="text-[9px] font-black tracking-[0.2em] text-blue-500 uppercase mb-2 block">
+                        {ELECTRICAL_CATEGORIES.find(c => c.value === report.category)?.label || report.category}
+                      </span>
+                      <h3 className="font-bold text-sm text-gray-900 dark:text-gray-100 uppercase group-hover:text-blue-600 transition-colors">
+                        {report.location.hall} {report.location.room ? `• ${report.location.room}` : ''}
+                      </h3>
                     </div>
-                  </section>
-                  <section>
-                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide border-b border-gray-100 dark:border-gray-800 pb-2 mb-4">Personal Info</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                      <InfoField label="First Name" value={staffData.firstName || staffData.name?.split(' ')[1] || ''} />
-                      <InfoField label="Sur Name" value={staffData.surName || staffData.name?.split(' ')[0] || ''} />
-                      <InfoField label="NRC" value={staffData.nrc || ''} />
-                      <InfoField label="Gender" value={staffData.gender || ''} />
-                      <InfoField label="Nationality" value={staffData.nationality || ''} />
+                    <p className="text-gray-500 dark:text-gray-400 text-xs mb-6 line-clamp-3 leading-relaxed">
+                      {report.description}
+                    </p>
+                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100 dark:border-gray-700/50">
+                      <span className="text-[9px] text-gray-400 font-black uppercase tracking-tighter">REF: {reportId?.slice(-6).toUpperCase()}</span>
+                      <Link href={`/maintenance/${reportId}`} className="text-[9px] font-black text-blue-600 hover:text-blue-700 uppercase tracking-widest transition-all">Command View →</Link>
                     </div>
-                  </section>
-                  <section>
-                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide border-b border-gray-100 dark:border-gray-800 pb-2 mb-4">Address</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                      <InfoField label="Province" value={staffData.province || ''} />
-                      <InfoField label="Town" value={staffData.town || ''} />
-                      <InfoField label="Phone" value={staffData.phone || ''} />
-                      <InfoField label="Email" value={staffData.email || ''} />
-                    </div>
-                  </section>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'password' && (
-              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 md:p-8 animate-in fade-in duration-300 max-w-md mx-auto text-center">
-                <h2 className="text-2xl font-bold text-blue-600 mb-8">Security Settings</h2>
-                <div className="space-y-6 text-left">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-extrabold text-blue-700 dark:text-blue-400 uppercase tracking-tighter">New Password</label>
-                    <input type="password" placeholder="••••••••" className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none" />
                   </div>
-                  <button
-                    onClick={() => showNotification('info', 'Feature coming soon')}
-                    className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow hover:bg-blue-700 transition uppercase tracking-widest text-xs"
-                  >
-                    Update Security
-                  </button>
-                </div>
-              </div>
-            )}
-
+                );
+              })}
+              {filteredReports.length === 0 && (
+                <div className="col-span-full text-center py-24 text-gray-400 italic text-sm font-serif">No technical dispatches found in registry.</div>
+              )}
+            </div>
           </div>
+
         </div>
       </div>
 
       {notification?.isVisible && (
-        <Notification
-          type={notification.type}
-          message={notification.message}
-          isVisible={notification.isVisible}
-          onClose={hideNotification}
-        />
+        <Notification type={notification.type} message={notification.message} isVisible={notification.isVisible} onClose={hideNotification} />
       )}
     </div>
   );
 }
 
-// UI Components
-function NavButton({ label, icon, active, onClick }: any) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex items-center gap-4 px-6 py-4 transition-all border-l-4 text-left ${active
-        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/10 text-blue-600'
-        : 'border-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
-        }`}
-    >
-      <span className="text-xl">{icon}</span>
-      <span className="font-semibold">{label}</span>
-    </button>
-  );
-}
-
 function StatCard({ title, value, color }: any) {
   const colors: any = {
-    teal: 'text-teal-600 border-teal-100',
-    orange: 'text-orange-600 border-orange-100',
-    blue: 'text-blue-600 border-blue-100',
-    green: 'text-green-600 border-green-100'
+    blue: 'text-blue-700 bg-blue-50/30 border-blue-100 dark:bg-blue-950/10 dark:border-blue-900/50',
+    indigo: 'text-indigo-700 bg-indigo-50/30 border-indigo-100 dark:bg-indigo-950/10 dark:border-indigo-900/50',
+    orange: 'text-orange-700 bg-orange-50/30 border-orange-100 dark:bg-orange-950/10 dark:border-orange-900/50',
+    emerald: 'text-emerald-700 bg-emerald-50/30 border-emerald-100 dark:bg-emerald-950/10 dark:border-emerald-900/50'
   };
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border ${colors[color]} p-5`}>
-      <div className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mb-1">{title}</div>
-      <div className={`text-3xl font-bold ${colors[color].split(' ')[0]}`}>{value}</div>
-    </div>
-  );
-}
-
-function InfoField({ label, value }: any) {
-  return (
-    <div className="flex flex-col gap-1">
-      <label className="text-[10px] font-extrabold text-blue-700 dark:text-blue-400 uppercase tracking-tighter ml-1">{label}</label>
-      <div className="bg-gray-100 dark:bg-gray-800/80 rounded border border-gray-200 dark:border-gray-700 px-3 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 min-h-[38px]">
-        {value || '-'}
-      </div>
+    <div className={`bg-white dark:bg-gray-900 rounded-3xl shadow-sm border p-8 transition-all duration-300 ${colors[color]}`}>
+      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">{title}</div>
+      <div className="text-4xl font-black tracking-tight">{value}</div>
     </div>
   );
 }

@@ -1,12 +1,11 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { authHeaders, remove, exportDocx, exportExcel, exportDocxList } from '../../utils/api';
+import { authHeaders, remove } from '../../utils/api';
 import { useOfflineApi } from '../../hooks/useOfflineSync';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { API_BASE_URL } from '../../config/constants';
-import { useSearchParams } from 'next/navigation';
 import { saveAs } from 'file-saver';
 import Notification, { useNotification } from '../../components/Notification';
 
@@ -15,51 +14,46 @@ interface Student {
   studentId: string;
   fullName: string;
   department?: string;
+  program?: string;
 }
 
 interface Case {
   _id: string;
-  student_id?: string; // Raw student ID from database
   student?: Student;
   incidentDate: string;
   description: string;
   offenseType: string;
   severity: string;
   status: string;
-  sanctions?: string;
-  createdBy?: string;
   createdAt: string;
-  updatedAt: string;
 }
 
 const STATUS_OPTIONS = ['Open', 'Closed', 'Pending'];
-const SEVERITY_OPTIONS = ['Low', 'Medium', 'High'];
+const SEVERITY_OPTIONS = ['Low', 'Medium', 'High', 'Critical'];
 
 export default function CasesPage() {
   const { token, user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const studentIdFilter = searchParams?.get('studentId') || '';
+  const { notification, showNotification, hideNotification } = useNotification();
 
-  // Handle authentication - moved useState hooks before any conditional logic
-  // authentication / general state hooks up front
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [cases, setCases] = useState<Case[]>([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [severityFilter, setSeverityFilter] = useState('');
-  const [selected, setSelected] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(20);
+  const [limit] = useState(25);
   const [total, setTotal] = useState(0);
   const [exporting, setExporting] = useState(false);
   const [offlineMode, setOfflineMode] = useState(false);
   const [showExportDropdown, setShowExportDropdown] = useState(false);
-  const { apiCall, isLoading: apiLoading, error: apiError } = useOfflineApi();
-  const { notification, showNotification, hideNotification } = useNotification();
+  const { apiCall } = useOfflineApi();
+  const exportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Handle authentication on client side only
     if (typeof window !== 'undefined') {
       if (!authLoading && !token) {
         router.replace('/login');
@@ -74,505 +68,268 @@ export default function CasesPage() {
     }
   }, [authLoading, token, router]);
 
-
-
-  const searchParams = useSearchParams();
-  const studentIdFilter = searchParams?.get('studentId') || '';
-
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Element;
-      if (!target.closest('.export-dropdown')) {
+      if (exportRef.current && !exportRef.current.contains(event.target as Node)) {
         setShowExportDropdown(false);
       }
     };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
-    if (showExportDropdown) {
-      document.addEventListener('mousedown', handleClickOutside);
+  async function fetchCases() {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (studentIdFilter) params.append('studentId', studentIdFilter);
+      if (search) params.append('search', search);
+      if (statusFilter) params.append('status', statusFilter);
+      if (severityFilter) params.append('severity', severityFilter);
+      params.append('page', page.toString());
+      params.append('limit', limit.toString());
+
+      const response = await apiCall<any>('get', `/cases?${params.toString()}`);
+      const responseData = response.data;
+      const casesArray = Array.isArray(responseData) ? responseData : (responseData.cases || []);
+      setCases(casesArray);
+      setTotal(responseData.total || casesArray.length);
+      setOfflineMode(response.offline);
+    } catch (err: any) {
+      console.error('Fetch error:', err);
+    } finally {
+      setLoading(false);
     }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showExportDropdown]);
-
+  }
 
   useEffect(() => {
-    async function fetchCases() {
-      setLoading(true);
-      setError(null);
-      try {
-        let endpoint = '/cases';
-        const params = new URLSearchParams();
-        if (studentIdFilter) {
-          params.append('studentId', studentIdFilter);
-        }
-        if (search) {
-          params.append('search', search);
-        }
-        if (statusFilter) {
-          params.append('status', statusFilter);
-        }
-        if (severityFilter) {
-          params.append('severity', severityFilter);
-        }
-        if (page > 1) {
-          params.append('page', page.toString());
-        }
-        if (limit !== 20) {
-          params.append('limit', limit.toString());
-        }
-
-        if (params.toString()) {
-          endpoint += `?${params.toString()}`;
-        }
-
-        const response = await apiCall<Case[]>('get', endpoint);
-        const responseData = response.data as any;
-        const casesArray = Array.isArray(responseData) ? responseData : (Array.isArray(responseData.cases) ? responseData.cases : []);
-
-        // Debug: Log cases with missing person data
-        casesArray.forEach((caseItem: any, index: number) => {
-          if (!caseItem.student) {
-            console.warn(`Case ${index} has no student data:`, {
-              caseId: caseItem._id,
-              studentId: caseItem.student_id,
-              caseData: caseItem
-            });
-          }
-        });
-
-        setCases(casesArray);
-        setOfflineMode(response.offline);
-
-        if (responseData.total !== undefined) {
-          setTotal(responseData.total);
-        }
-      } catch (err: any) {
-        setError(err.message || 'Failed to load cases');
-        setCases([]);
-      } finally {
-        setLoading(false);
-      }
-    }
     fetchCases();
-  }, [apiCall, studentIdFilter, search, statusFilter, severityFilter, page, limit]);
+  }, [studentIdFilter, search, statusFilter, severityFilter, page]);
 
-  if (isCheckingAuth) {
-    return <div className="text-center text-kmuGreen">Loading...</div>;
-  }
-
-  const safeCases = Array.isArray(cases) ? cases : [];
-  const filteredCases = safeCases; // Backend handles all filtering now
-
-  function toggleSelect(id: string) {
-    setSelected(sel => sel.includes(id) ? sel.filter(x => x !== id) : [...sel, id]);
-  }
-  function selectAll() {
-    setSelected(filteredCases.map(c => c._id));
-  }
-  function clearSelected() {
-    setSelected([]);
-  }
-
-  async function handleBulkDelete() {
-    if (!window.confirm('Delete selected cases?')) return;
-    for (const id of selected) {
-      await remove('cases', id);
-    }
-    setCases(cases => cases.filter(c => !selected.includes(c._id)));
-    setSelected([]);
-  }
-
-  async function handleBulkExport() {
-    await exportDocx('cases');
-  }
-
-  async function handleBulkExportExcel() {
-    await exportExcel('cases');
-  }
-
-  // Enhanced export functions
-  const handleExportSelected = async (format: 'docx' | 'xlsx') => {
-    if (selected.length === 0) {
-      alert('Please select items to export');
-      return;
-    }
-
+  const handleExportList = async () => {
     setExporting(true);
     try {
-      const endpoint = format === 'docx' ? '/reports/docx' : '/reports/export-excel';
-      const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const res = await fetch(`${API_BASE_URL}/reports/cases-docx`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
-          type: 'selected',
-          ids: selected,
-          entity: 'cases'
-        }),
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({ filters: { search, status: statusFilter, severity: severityFilter, studentId: studentIdFilter } }),
       });
-
-      if (!res.ok) throw new Error(await res.text());
-
-      const blob = await res.blob();
-      const filename = `cases_${new Date().toISOString().split('T')[0]}.${format}`;
-      saveAs(blob, filename);
-
-      showNotification('success', 'Export successful!');
+      if (res.ok) {
+        const blob = await res.blob();
+        saveAs(blob, `cases_ledger_${new Date().toISOString().split('T')[0]}.docx`);
+        showNotification('success', 'Strategic document generated');
+      }
     } catch (err) {
-      console.error('Export failed:', err);
-      showNotification('error', 'Export failed');
+      showNotification('error', 'Export failure');
     } finally {
       setExporting(false);
       setShowExportDropdown(false);
     }
   };
 
-  const handleExportCasesList = async () => {
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Commit record purge? This operation is final.')) return;
     try {
-      const res = await fetch(`${API_BASE_URL}/reports/cases-docx`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
-          filters: {
-            search,
-            status: statusFilter,
-            severity: severityFilter,
-            studentId: studentIdFilter
-          }
-        }),
-      });
-      if (!res.ok) throw new Error(await res.text());
-      const blob = await res.blob();
-      saveAs(blob, 'cases_list.docx');
+      await remove('cases', id);
+      showNotification('success', 'Case purged from index');
+      fetchCases();
     } catch (err) {
-      alert('Failed to export cases list.');
+      showNotification('error', 'Purge operation failed');
     }
   };
 
-  // Get person information for a case (either student or staff)
-  const getCasePerson = (caseItem: Case) => {
-    if (caseItem.student) {
-      return {
-        type: 'student',
-        id: caseItem.student.studentId,
-        name: caseItem.student.fullName,
-        department: caseItem.student.department,
-        link: `/students/${caseItem.student._id}`
-      };
-    }
-    return null;
-  };
-
-  // Get person ID for a case
-  const getCasePersonId = (caseItem: Case) => {
-    return caseItem.student?.studentId || 'N/A';
-  };
-
-  // Get person name for a case
-  const getCasePersonName = (caseItem: Case) => {
-    return caseItem.student?.fullName || 'Unknown';
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-kmuGreen text-lg">Loading cases...</div>
-      </div>
-    );
+  if (isCheckingAuth) {
+    return <div className="text-center p-12 text-kmuGreen font-serif">Initializing Fleet Dossier...</div>;
   }
 
   return (
-    <>
-      <section className="max-w-6xl mx-auto p-4">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold text-kmuGreen">Disciplinary Cases</h1>
-            {offlineMode && (
-              <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded">
-                Offline Mode
-              </span>
-            )}
-          </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-serif">
+      <div className="max-w-7xl mx-auto py-6">
+        <div className="animate-in fade-in duration-300 space-y-6">
 
-          <div className="flex gap-3">
-            <Link
-              href="/cases/new"
-              className="bg-kmuGreen text-white px-4 py-2 rounded hover:bg-kmuOrange transition flex items-center"
-            >
-              + New Case
-            </Link>
-
-            <div className="relative export-dropdown">
-              <button
-                onClick={() => setShowExportDropdown(!showExportDropdown)}
-                disabled={exporting}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition flex items-center disabled:opacity-50"
-              >
-                {exporting ? 'Exporting...' : 'Export'}
-              </button>
-
-              {showExportDropdown && (
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg z-10 border border-gray-200 dark:border-gray-700">
-                  <button
-                    onClick={() => handleExportSelected('docx')}
-                    className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    Export Selected (DOCX)
-                  </button>
-                  <button
-                    onClick={() => handleExportSelected('xlsx')}
-                    className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    Export Selected (Excel)
-                  </button>
-                  <button
-                    onClick={handleExportCasesList}
-                    className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 border-t border-gray-200 dark:border-gray-700"
-                  >
-                    Export All (DOCX)
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-6">
-            {error}
-          </div>
-        )}
-
-        {notification?.isVisible && (
-          <Notification
-            type={notification.type}
-            message={notification.message}
-            isVisible={notification.isVisible}
-            onClose={hideNotification}
-          />
-        )}
-
-        {/* Filters */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          {/* Executive Command Bar */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-8 rounded-[2rem] border-t-4 border-red-600 shadow-xl gap-4">
             <div>
-              <label htmlFor="search" className="block text-sm font-medium mb-1">Search</label>
-              <input
-                id="search"
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search cases..."
-                className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              />
+              <h1 className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white uppercase italic">Case Command</h1>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">
+                KMU Disciplinary Enforcement & Litigation Registry {offlineMode && <span className="text-orange-500 font-black ml-2">• OFFLINE PROTOCOL</span>}
+              </p>
             </div>
-
-            <div>
-              <label htmlFor="status" className="block text-sm font-medium mb-1">Status</label>
-              <select
-                id="status"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/cases/new"
+                className="bg-red-600 text-white px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:shadow-lg hover:shadow-red-500/20 transition flex items-center gap-2 group border-none"
               >
-                <option value="">All Statuses</option>
-                {STATUS_OPTIONS.map(status => (
-                  <option key={status} value={status}>{status}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="severity" className="block text-sm font-medium mb-1">Severity</label>
-              <select
-                id="severity"
-                value={severityFilter}
-                onChange={(e) => setSeverityFilter(e.target.value)}
-                className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              >
-                <option value="">All Severities</option>
-                {SEVERITY_OPTIONS.map(severity => (
-                  <option key={severity} value={severity}>{severity}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="studentId" className="block text-sm font-medium mb-1">Student ID</label>
-              <input
-                id="studentId"
-                type="text"
-                value={studentIdFilter}
-                onChange={(e) => {
-                  const url = new URL(window.location.href);
-                  url.searchParams.set('studentId', e.target.value);
-                  window.history.replaceState({}, '', url);
-                }}
-                placeholder="Filter by student ID"
-                className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Bulk Actions */}
-        {selected.length > 0 && (
-          <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-6 flex items-center justify-between">
-            <div className="text-sm">
-              {selected.length} case{selected.length !== 1 ? 's' : ''} selected
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={handleBulkDelete}
-                className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
-              >
-                Delete Selected
-              </button>
-              <button
-                onClick={clearSelected}
-                className="px-3 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600"
-              >
-                Clear Selection
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Cases Table */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-50 dark:bg-gray-700">
-                <tr>
-                  <th className="py-2 px-2 md:px-4">
-                    <input
-                      type="checkbox"
-                      checked={selected.length === filteredCases.length && filteredCases.length > 0}
-                      onChange={selected.length === filteredCases.length && filteredCases.length > 0 ? clearSelected : selectAll}
-                    />
-                  </th>
-                  <th className="py-2 px-2 md:px-4 text-left">Person</th>
-                  <th className="py-2 px-2 md:px-4 text-left hidden md:table-cell">Department</th>
-                  <th className="py-2 px-2 md:px-4 text-left">Date</th>
-                  <th className="py-2 px-2 md:px-4 text-left">Offense</th>
-                  <th className="py-2 px-2 md:px-4 text-left hidden md:table-cell">Status</th>
-                  <th className="py-2 px-2 md:px-4 text-left hidden md:table-cell">Severity</th>
-                  <th className="py-2 px-2 md:px-4 text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {filteredCases.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="py-8 px-4 text-center text-gray-500 dark:text-gray-400">
-                      No cases found
-                    </td>
-                  </tr>
-                ) : (
-                  filteredCases.map(s => {
-                    const person = getCasePerson(s);
-                    return (
-                      <tr key={s._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <td className="py-2 px-2 md:px-4">
-                          <input type="checkbox" checked={selected.includes(s._id)} onChange={() => toggleSelect(s._id)} />
-                        </td>
-                        <td className="py-2 px-2 md:px-4">
-                          {person ? (
-                            <div>
-                              <Link href={person.link} className="text-kmuGreen hover:underline font-medium">
-                                {person.name}
-                              </Link>
-                              <div className="text-xs text-gray-500 dark:text-gray-400 md:hidden">
-                                {person.department || '-'} • {s.incidentDate ? new Date(s.incidentDate).toLocaleDateString() : '-'}
-                              </div>
-                              <div className="text-xs text-gray-500 dark:text-gray-400">
-                                Student • {person.id}
-                              </div>
-                            </div>
-                          ) : (
-                            <div>
-                              <div className="font-medium">Unknown</div>
-                              <div className="text-xs text-gray-500 dark:text-gray-400">
-                                No person data
-                              </div>
-                            </div>
-                          )}
-                        </td>
-                        <td className="py-2 px-2 md:px-4 hidden md:table-cell">
-                          {person?.department || '-'}
-                        </td>
-                        <td className="py-2 px-2 md:px-4">
-                          {s.incidentDate ? new Date(s.incidentDate).toLocaleDateString() : '-'}
-                        </td>
-                        <td className="py-2 px-2 md:px-4">
-                          {s.offenseType || '-'}
-                        </td>
-                        <td className="py-2 px-2 md:px-4 hidden md:table-cell">
-                          <span className={`px-2 py-1 rounded text-xs ${s.status === 'Open' ? 'bg-red-100 text-red-800' :
-                            s.status === 'Closed' ? 'bg-green-100 text-green-800' :
-                              'bg-gray-100 text-gray-800'
-                            }`}>
-                            {s.status || '-'}
-                          </span>
-                        </td>
-                        <td className="py-2 px-2 md:px-4 hidden md:table-cell">
-                          <span className={`px-2 py-1 rounded text-xs ${s.severity === 'High' ? 'bg-red-100 text-red-800' :
-                            s.severity === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                              s.severity === 'Low' ? 'bg-green-100 text-green-800' :
-                                'bg-gray-100 text-gray-800'
-                            }`}>
-                            {s.severity || '-'}
-                          </span>
-                        </td>
-                        <td className="py-2 px-2 md:px-4">
-                          <Link
-                            href={`/cases/${s._id}`}
-                            className="text-kmuGreen hover:underline text-sm"
-                          >
-                            View Details
-                          </Link>
-                        </td>
-                      </tr>
-                    );
-                  })
+                <span className="group-hover:animate-pulse">⚖️</span> Initiate New Inquiry
+              </Link>
+              <div className="relative" ref={exportRef}>
+                <button
+                  onClick={() => setShowExportDropdown(!showExportDropdown)}
+                  className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:opacity-90 transition flex items-center gap-2"
+                >
+                  🚀 {exporting ? 'Synthesizing...' : 'Strategic Export'}
+                </button>
+                {showExportDropdown && (
+                  <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 py-2 z-50 font-sans animate-in zoom-in-95 duration-100">
+                    <button onClick={handleExportList} className="w-full text-left px-6 py-3 text-[10px] font-black uppercase hover:bg-gray-50 dark:hover:bg-gray-700 transition">Full Ledger (DOCX)</button>
+                  </div>
                 )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          {total > limit && (
-            <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                Showing {(page - 1) * limit + 1} to {Math.min(page * limit, total)} of {total} cases
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50"
-                >
-                  Previous
-                </button>
-                <button
-                  onClick={() => setPage(p => p + 1)}
-                  disabled={page * limit >= total}
-                  className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50"
-                >
-                  Next
-                </button>
               </div>
             </div>
-          )}
+          </div>
+
+          {/* Strategic Metrics Shortcut */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard title="Global Inquiries" value={total} color="red" />
+            <StatCard title="Open Protocols" value={cases.filter(c => c.status === 'Open').length} color="orange" />
+            <StatCard title="Critical Index" value={cases.filter(c => c.severity === 'High' || c.severity === 'Critical').length} color="indigo" />
+            <StatCard title="Operational Sync" value={offlineMode ? "Cached" : "Live"} color="blue" />
+          </div>
+
+          {/* Central Disciplinary Ledger */}
+          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+            <div className="p-10 border-b border-gray-100 dark:border-gray-800">
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+                <h2 className="text-xl font-black uppercase tracking-tighter italic text-red-600">Strategic Compliance Ledger</h2>
+                <div className="flex flex-wrap gap-4 w-full lg:w-auto font-sans">
+                  <div className="relative flex-1 lg:w-64">
+                    <input
+                      placeholder="Query compliance metadata..."
+                      className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-6 py-3.5 text-xs w-full focus:ring-2 focus:ring-red-500 transition-all font-sans italic shadow-inner"
+                      value={search}
+                      onChange={e => { setSearch(e.target.value); setPage(1); }}
+                    />
+                  </div>
+                  <select
+                    value={statusFilter}
+                    onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
+                    className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-4 py-3 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-red-500 transition-all font-sans"
+                  >
+                    <option value="">All Statuses</option>
+                    {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                  <select
+                    value={severityFilter}
+                    onChange={e => { setSeverityFilter(e.target.value); setPage(1); }}
+                    className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-4 py-3 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-red-500 transition-all font-sans"
+                  >
+                    <option value="">All Severities</option>
+                    {SEVERITY_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto font-sans">
+              <table className="w-full text-xs">
+                <thead className="bg-gray-50/50 dark:bg-gray-800/50 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] italic">
+                  <tr>
+                    <th className="px-10 py-6 text-left">Entity Cluster</th>
+                    <th className="px-10 py-6 text-left">Incident Classification</th>
+                    <th className="px-10 py-6 text-center">Status Index</th>
+                    <th className="px-10 py-6 text-right">Operational Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {cases.map((c, i) => (
+                    <tr key={c._id || i} className="hover:bg-red-50/30 dark:hover:bg-red-950/10 group transition-all duration-300">
+                      <td className="px-10 py-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-2xl bg-red-100 dark:bg-red-900/50 flex items-center justify-center text-red-600 font-black text-xs group-hover:scale-110 transition-transform uppercase">
+                            {c.student?.fullName?.charAt(0) || '?'}
+                          </div>
+                          <div>
+                            <Link href={`/cases/${c._id}`} className="font-extrabold text-gray-900 dark:text-gray-100 group-hover:text-red-600 transition-colors uppercase text-sm tracking-tighter">
+                              {c.student?.fullName || 'Anonymous'}
+                            </Link>
+                            <div className="text-[10px] text-gray-400 font-mono tracking-tighter mt-0.5">{c.student?.studentId || 'EXTERNAL'} • {c.student?.program || 'N/A'}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-10 py-6">
+                        <div className="font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tight">{c.offenseType}</div>
+                        <div className="text-[10px] text-gray-400 mt-1.5 tracking-tighter uppercase font-black">
+                          <span className={`px-2 py-0.5 rounded ${c.severity === 'Critical' ? 'bg-red-600 text-white animate-pulse' : c.severity === 'High' ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500'}`}>
+                            {c.severity} Priority
+                          </span>
+                          <span className="ml-2 italic font-medium">{new Date(c.incidentDate).toLocaleDateString()}</span>
+                        </div>
+                      </td>
+                      <td className="px-10 py-6 text-center">
+                        <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${c.status === 'Open' ? 'bg-red-50 text-red-600 border-red-100 shadow-sm shadow-red-500/10' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
+                          {c.status}
+                        </span>
+                      </td>
+                      <td className="px-10 py-6 text-right">
+                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+                          <Link href={`/cases/${c._id}`} className="p-3 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-600 hover:bg-gray-200 transition-colors" title="View Dossier">📄</Link>
+                          {(user?.role === 'admin' || user?.role === 'security_officer') && (
+                            <button onClick={() => handleDelete(c._id)} className="p-3 rounded-2xl bg-red-100 dark:bg-red-900/30 text-red-600 hover:bg-red-200 transition-colors" title="Purge Incident">🗑️</button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {cases.length === 0 && !loading && (
+                    <tr>
+                      <td colSpan={4} className="py-24 text-center text-gray-400 italic text-sm font-serif">Compliance registry query returned zero entities.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Premium Pagination */}
+            <div className="p-10 bg-gray-50/50 dark:bg-gray-800/20 border-t border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-center gap-6">
+              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Showing {cases.length} of {total} Compliance Indices</span>
+              <div className="flex items-center gap-1">
+                <PaginationButton onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Prev Cluster</PaginationButton>
+                {Array.from({ length: Math.ceil(total / limit) }, (_, i) => i + 1).filter(p => p === 1 || p === Math.ceil(total / limit) || Math.abs(p - page) <= 1).map((p, idx, arr) => (
+                  <div key={p} className="flex items-center">
+                    {idx > 0 && arr[idx - 1] !== p - 1 && <span className="px-2 text-gray-400">...</span>}
+                    <button
+                      onClick={() => setPage(p)}
+                      className={`w-10 h-10 rounded-xl font-black text-[10px] transition-all ${p === page ? 'bg-red-600 text-white shadow-lg shadow-red-500/30' : 'bg-white dark:bg-gray-800 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+                    >
+                      {p}
+                    </button>
+                  </div>
+                ))}
+                <PaginationButton onClick={() => setPage(p => Math.min(Math.ceil(total / limit), p + 1))} disabled={page === Math.ceil(total / limit) || total === 0}>Next Cluster</PaginationButton>
+              </div>
+            </div>
+          </div>
         </div>
-      </section>
-    </>
+      </div>
+
+      {notification?.isVisible && <Notification type={notification.type} message={notification.message} isVisible={notification.isVisible} onClose={hideNotification} />}
+    </div>
+  );
+}
+
+function StatCard({ title, value, color }: any) {
+  const colors: any = {
+    red: 'text-red-700 bg-red-50/30 border-red-100 dark:bg-red-950/10 dark:border-red-900/50',
+    orange: 'text-orange-700 bg-orange-50/30 border-orange-100 dark:bg-orange-950/10 dark:border-orange-900/50',
+    blue: 'text-blue-700 bg-blue-50/30 border-blue-100 dark:bg-blue-950/10 dark:border-blue-900/50',
+    indigo: 'text-indigo-700 bg-indigo-50/30 border-indigo-100 dark:bg-indigo-950/10 dark:border-indigo-900/50'
+  };
+  return (
+    <div className={`bg-white dark:bg-gray-900 rounded-[2rem] shadow-sm border p-8 transition-all duration-300 ${colors[color]}`}>
+      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">{title}</div>
+      <div className="text-4xl font-black tracking-tighter italic">{value}</div>
+    </div>
+  );
+}
+
+function PaginationButton({ children, onClick, disabled }: any) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${disabled ? 'text-gray-300' : 'text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20'}`}
+    >
+      {children}
+    </button>
   );
 }

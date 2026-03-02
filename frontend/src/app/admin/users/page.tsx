@@ -3,9 +3,9 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from '../../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { API_BASE_URL } from '../../../config/constants';
-import { getAll, register, update, remove, exportDocx, exportExcel } from '../../../utils/api';
-import ConfirmDialog from '../../../components/ConfirmDialog';
-
+import { getAll, register, update, remove } from '../../../utils/api';
+import Notification, { useNotification } from '../../../components/Notification';
+import Link from 'next/link';
 
 const ROLES = [
   { value: 'admin', label: 'Admin' },
@@ -22,9 +22,17 @@ const ROLES = [
 export default function UserManagementPage() {
   const { token, user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const { notification, showNotification, hideNotification } = useNotification();
 
-  // Handle authentication like profile page - only on client side
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState('');
+  const [showCreate, setShowCreate] = useState(false);
+  const [newUser, setNewUser] = useState({ username: '', name: '', password: '', role: 'security_officer' });
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [editUser, setEditUser] = useState<any | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -33,12 +41,10 @@ export default function UserManagementPage() {
         setIsCheckingAuth(false);
         return;
       }
-
       if (authLoading) {
         setIsCheckingAuth(true);
         return;
       }
-
       if (!user || user.role !== 'admin') {
         setIsCheckingAuth(false);
         return;
@@ -47,386 +53,291 @@ export default function UserManagementPage() {
     }
   }, [authLoading, token, user, router]);
 
-  const [users, setUsers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [editingUserId, setEditingUserId] = useState<string | null>(null);
-  const [editUser, setEditUser] = useState<any | null>(null);
-  const [newUser, setNewUser] = useState({ username: '', name: '', password: '', role: 'security_officer' });
-  const [showCreate, setShowCreate] = useState(false);
-  const [search, setSearch] = useState('');
-  const [roleFilter, setRoleFilter] = useState('');
-  const [selected, setSelected] = useState<string[]>([]);
-  const [confirmDelete, setConfirmDelete] = useState<{ isOpen: boolean; id: string | null; isBulk: boolean }>({ isOpen: false, id: null, isBulk: false });
-
   async function fetchUsers() {
     setLoading(true);
-    setError(null);
     try {
       const data = await getAll('users');
-      setUsers(Array.isArray(data) ? data : (data.users || data || []));
+      setUsers(Array.isArray(data) ? data : (data.users || []));
     } catch (err: any) {
-      console.error('Error fetching users:', err);
-      setError(err.message || 'Failed to load users');
-      setUsers([]);
+      console.error('Fetch error:', err);
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    if (user && user.role === 'admin') {
-      fetchUsers();
-    }
-  }, [token, user]);
+    if (user && user.role === 'admin') fetchUsers();
+  }, [user]);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
-    setSuccess(null);
+    setLoading(true);
     try {
       await register(newUser.username, newUser.password, newUser.name, newUser.role);
-      setSuccess('User created successfully!');
+      showNotification('success', 'Operational identity synthesized');
       setShowCreate(false);
       setNewUser({ username: '', name: '', password: '', role: 'security_officer' });
       fetchUsers();
     } catch (err: any) {
-      console.error('Error creating user:', err);
-      setError(err.message || 'Failed to create user');
+      showNotification('error', err.message || 'Identity creation failed');
+    } finally {
+      setLoading(false);
     }
   }
 
   async function handleEdit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
-    setSuccess(null);
+    setLoading(true);
     try {
       await update('users', editUser.id || editUser._id, {
         username: editUser.username,
         name: editUser.name,
         role: editUser.role
       });
-      setSuccess('User updated successfully!');
+      showNotification('success', 'Identity metadata updated');
       setEditUser(null);
       setEditingUserId(null);
       fetchUsers();
     } catch (err: any) {
-      console.error('Error updating user:', err);
-      setError(err.message || 'Failed to update user');
+      showNotification('error', 'Update operation failed');
+    } finally {
+      setLoading(false);
     }
   }
 
   async function handleDelete(id: string) {
-    setError(null);
-    setSuccess(null);
+    if (!window.confirm('Commit identity purge? This operation is final.')) return;
     try {
       await remove('users', id);
-      setSuccess('User deleted successfully!');
+      showNotification('success', 'Identity purged from registry');
       fetchUsers();
     } catch (err: any) {
-      console.error('Error deleting user:', err);
-      setError(err.message || 'Failed to delete user');
+      showNotification('error', 'Purge operation failed');
     }
   }
 
-  function startEdit(user: any) {
-    setEditingUserId(user.id || user._id);
-    setEditUser({ ...user });
+  const filteredUsers = users.filter(
+    (u) =>
+      (!search || u.username?.toLowerCase().includes(search.toLowerCase()) || u.name?.toLowerCase().includes(search.toLowerCase())) &&
+      (!roleFilter || u.role === roleFilter)
+  );
+
+  if (isCheckingAuth) {
+    return <div className="text-center p-12 text-kmuGreen font-serif">Initializing User Registry...</div>;
   }
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-serif">
+      <div className="max-w-7xl mx-auto py-6">
+        <div className="animate-in fade-in duration-300 space-y-6">
+
+          {/* Executive Command Bar */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-8 rounded-[2rem] border-t-4 border-indigo-600 shadow-xl gap-4">
+            <div>
+              <h1 className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white uppercase italic">User Control</h1>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">
+                KMU Identity Management & Access Governance
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={() => setShowCreate(true)}
+                className="bg-indigo-600 text-white px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:shadow-lg hover:shadow-indigo-500/20 transition flex items-center gap-2 group"
+              >
+                <span className="group-hover:animate-bounce">🔑</span> Provision New Identity
+              </button>
+            </div>
+          </div>
+
+          {/* Strategic Metrics Shortcut */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard title="Total Identities" value={users.length} color="indigo" />
+            <StatCard title="Administrative Units" value={users.filter(u => u.role === 'admin').length} color="purple" />
+            <StatCard title="Security Assets" value={users.filter(u => u.role.includes('security')).length} color="blue" />
+            <StatCard title="Platform Integrity" value="Live" color="emerald" />
+          </div>
+
+          {/* Central Identity Ledger */}
+          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+            <div className="p-10 border-b border-gray-100 dark:border-gray-800">
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+                <h2 className="text-xl font-black uppercase tracking-tighter italic text-indigo-600">Identity Provisioning Ledger</h2>
+                <div className="flex flex-wrap gap-4 w-full lg:w-auto font-sans">
+                  <div className="relative flex-1 lg:w-80">
+                    <input
+                      placeholder="Query identity metadata..."
+                      className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-6 py-4 text-xs w-full focus:ring-2 focus:ring-indigo-500 transition-all shadow-inner"
+                      value={search}
+                      onChange={e => setSearch(e.target.value)}
+                    />
+                  </div>
+                  <select
+                    value={roleFilter}
+                    onChange={e => setRoleFilter(e.target.value)}
+                    className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-4 py-3 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-sans"
+                  >
+                    <option value="">All Privileges</option>
+                    {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto font-sans">
+              <table className="w-full text-xs">
+                <thead className="bg-gray-50/50 dark:bg-gray-800/50 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] italic">
+                  <tr>
+                    <th className="px-10 py-6 text-left">Identity Cluster</th>
+                    <th className="px-10 py-6 text-left">Privilege Class</th>
+                    <th className="px-10 py-6 text-center">Status Index</th>
+                    <th className="px-10 py-6 text-right">Operational Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {filteredUsers.map((u, i) => {
+                    const userId = u.id || u._id;
+                    const isEditing = editingUserId === userId;
+                    return (
+                      <tr key={userId} className="hover:bg-indigo-50/30 dark:hover:bg-indigo-950/10 group transition-all duration-300">
+                        <td className="px-10 py-6">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 font-black text-xs uppercase group-hover:scale-110 transition-transform">
+                              {u.username?.charAt(0)}
+                            </div>
+                            <div>
+                              <div className="font-extrabold text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 transition-colors uppercase text-sm tracking-tighter">
+                                {u.name}
+                              </div>
+                              <div className="text-[10px] text-gray-400 font-mono tracking-tighter mt-0.5">@{u.username}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-10 py-6">
+                          <span className="px-3 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 text-[10px] font-black uppercase tracking-widest rounded-lg border border-indigo-100 dark:border-indigo-900/50">
+                            {u.role.replace('_', ' ')}
+                          </span>
+                        </td>
+                        <td className="px-10 py-6 text-center">
+                          <span className="px-3 py-1 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 text-[9px] font-black uppercase tracking-widest rounded-lg">Active</span>
+                        </td>
+                        <td className="px-10 py-6 text-right">
+                          <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+                            <button
+                              onClick={() => { setEditingUserId(userId); setEditUser({ ...u }); }}
+                              className="p-3 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-600 hover:bg-gray-200 transition-colors"
+                              title="Modify Identity"
+                            >
+                              ⚙️
+                            </button>
+                            <button
+                              onClick={() => handleDelete(userId)}
+                              className="p-3 rounded-2xl bg-red-100 dark:bg-red-900/30 text-red-600 hover:bg-red-200 transition-colors"
+                              title="Terminate Session"
+                            >
+                              🗑️
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Provisioning Modal */}
+      {showCreate && (
+        <div className="fixed inset-0 z-[1001] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-gray-950/80 backdrop-blur-md" onClick={() => setShowCreate(false)} />
+          <div className="relative bg-white dark:bg-gray-900 w-full max-w-2xl rounded-[3rem] shadow-2xl border-t-8 border-indigo-600 p-12 overflow-y-auto max-h-[90vh]">
+            <div className="flex justify-between items-center mb-10">
+              <div>
+                <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase italic tracking-tighter">Identity Provisioning</h2>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Unified Access Governance Entry</p>
+              </div>
+              <button onClick={() => setShowCreate(false)} className="bg-gray-100 dark:bg-gray-800 p-4 rounded-full text-gray-400 hover:text-indigo-600 transition-all font-sans">✕</button>
+            </div>
+            <form onSubmit={handleCreate} className="space-y-8 font-sans">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField label="Identity Username" value={newUser.username} onChange={(v: string) => setNewUser({ ...newUser, username: v })} required />
+                <FormField label="Legal Designation" value={newUser.name} onChange={(v: string) => setNewUser({ ...newUser, name: v })} required />
+                <FormField label="Security Password" value={newUser.password} onChange={(v: string) => setNewUser({ ...newUser, password: v })} type="password" required />
+                <FormField label="Privilege Class" value={newUser.role} onChange={(v: string) => setNewUser({ ...newUser, role: v })} type="select" options={ROLES} />
+              </div>
+              <button type="submit" disabled={loading} className="w-full bg-indigo-600 text-white font-black py-5 rounded-[2rem] hover:shadow-xl hover:shadow-indigo-500/30 transition-all text-[10px] uppercase tracking-widest">
+                {loading ? 'Synthesizing...' : 'Commit Identity Provisioning'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Quick Edit Modal */}
+      {editingUserId && (
+        <div className="fixed inset-0 z-[1001] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-gray-950/80 backdrop-blur-md" onClick={() => cancelEdit()} />
+          <div className="relative bg-white dark:bg-gray-900 w-full max-w-2xl rounded-[3rem] shadow-2xl border-t-8 border-indigo-600 p-12 overflow-y-auto max-h-[90vh]">
+            <div className="flex justify-between items-center mb-10">
+              <div>
+                <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase italic tracking-tighter">Modify Identity</h2>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Metadata Adjustment Protocol</p>
+              </div>
+              <button onClick={() => cancelEdit()} className="bg-gray-100 dark:bg-gray-800 p-4 rounded-full text-gray-400 hover:text-indigo-600 transition-all font-sans">✕</button>
+            </div>
+            <form onSubmit={handleEdit} className="space-y-8 font-sans">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField label="Identity Username" value={editUser.username} onChange={(v: string) => setEditUser({ ...editUser, username: v })} required />
+                <FormField label="Legal Designation" value={editUser.name} onChange={(v: string) => setEditUser({ ...editUser, name: v })} required />
+                <FormField label="Privilege Class" value={editUser.role} onChange={(v: string) => setEditUser({ ...editUser, role: v })} type="select" options={ROLES} />
+              </div>
+              <button type="submit" disabled={loading} className="w-full bg-indigo-600 text-white font-black py-5 rounded-[2rem] hover:shadow-xl hover:shadow-indigo-500/30 transition-all text-[10px] uppercase tracking-widest">
+                Update Metadata
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {notification?.isVisible && <Notification type={notification.type} message={notification.message} isVisible={notification.isVisible} onClose={hideNotification} />}
+    </div>
+  );
 
   function cancelEdit() {
     setEditingUserId(null);
     setEditUser(null);
   }
+}
 
-  const filteredUsers = users.filter(
-    (u) =>
-      (!search ||
-        u.username?.toLowerCase().includes(search.toLowerCase()) ||
-        u.name?.toLowerCase().includes(search.toLowerCase())
-      ) &&
-      (!roleFilter || u.role === roleFilter)
-  );
-
-  function toggleSelect(id: string) {
-    setSelected(sel => sel.includes(id) ? sel.filter(x => x !== id) : [...sel, id]);
-  }
-
-  function selectAll() {
-    setSelected(filteredUsers.map(u => u.id || u._id));
-  }
-
-  function clearSelected() {
-    setSelected([]);
-  }
-
-  async function handleBulkDelete() {
-    for (const id of selected) {
-      await remove('users', id);
-    }
-    setUsers(users => users.filter(u => !selected.includes(u.id || u._id)));
-    setSelected([]);
-  }
-
-  async function handleBulkExport() {
-    await exportDocx('users');
-  }
-
-  async function handleBulkExportExcel() {
-    await exportExcel('users');
-  }
-
-  if (isCheckingAuth) {
-    return <div className="text-center text-kmuGreen">Loading...</div>;
-  }
-
-  if (!user || user.role !== 'admin') {
-    return <div className="text-red-600">Access denied. Admin privileges required.</div>;
-  }
-
+function StatCard({ title, value, color }: any) {
+  const colors: any = {
+    indigo: 'text-indigo-700 bg-indigo-50/30 border-indigo-100 dark:bg-indigo-950/10 dark:border-indigo-900/50',
+    purple: 'text-purple-700 bg-purple-50/30 border-purple-100 dark:bg-purple-950/10 dark:border-purple-900/50',
+    blue: 'text-blue-700 bg-blue-50/30 border-blue-100 dark:bg-blue-950/10 dark:border-blue-900/50',
+    emerald: 'text-emerald-700 bg-emerald-50/30 border-emerald-100 dark:bg-emerald-950/10 dark:border-emerald-900/50'
+  };
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-kmuGreen">User Management</h1>
-      </div>
+    <div className={`bg-white dark:bg-gray-900 rounded-[2rem] shadow-sm border p-8 transition-all duration-300 ${colors[color]}`}>
+      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">{title}</div>
+      <div className="text-4xl font-black tracking-tighter italic">{value}</div>
+    </div>
+  );
+}
 
-      {/* Create User Section */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-        <button
-          className="mb-4 bg-kmuGreen text-white px-4 py-2 rounded hover:bg-kmuOrange transition"
-          onClick={() => setShowCreate(!showCreate)}
-        >
-          {showCreate ? 'Cancel' : 'Add New User'}
-        </button>
-        {showCreate && (
-          <form className="mb-6 space-y-4" onSubmit={handleCreate}>
-            <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-1">Username</label>
-              <input
-                type="text"
-                className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                value={newUser.username}
-                onChange={e => setNewUser(u => ({ ...u, username: e.target.value }))}
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-1">Name</label>
-              <input
-                type="text"
-                className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                value={newUser.name}
-                onChange={e => setNewUser(u => ({ ...u, name: e.target.value }))}
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-1">Password</label>
-              <input
-                type="password"
-                className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                value={newUser.password}
-                onChange={e => setNewUser(u => ({ ...u, password: e.target.value }))}
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-1">Role</label>
-              <select
-                className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                value={newUser.role}
-                onChange={e => setNewUser(u => ({ ...u, role: e.target.value }))}
-                required
-              >
-                {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
-              </select>
-            </div>
-            <button type="submit" className="bg-kmuGreen text-white px-4 py-2 rounded hover:bg-kmuOrange transition">
-              Create User
-            </button>
-          </form>
-        )}
-      </div>
-
-      {/* Messages */}
-      {success && <div className="text-kmuGreen text-sm mb-2 bg-green-100 dark:bg-green-900/20 p-2 rounded">{success}</div>}
-      {error && <div className="text-red-600 text-sm mb-2 bg-red-100 dark:bg-red-900/20 p-2 rounded">{error}</div>}
-
-      {/* Filters and Actions */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 md:p-6 mb-6">
-        <div className="mb-4 flex flex-col sm:flex-row gap-2 items-start sm:items-center">
-          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-            <input
-              type="text"
-              placeholder="Search by username or name"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-            />
-            <select
-              value={roleFilter}
-              onChange={e => setRoleFilter(e.target.value)}
-              className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-            >
-              <option value="">All Roles</option>
-              {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
-            </select>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <button className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded text-sm hover:bg-gray-300 dark:hover:bg-gray-600" onClick={selectAll}>
-              Select All
-            </button>
-            <button className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded text-sm hover:bg-gray-300 dark:hover:bg-gray-600" onClick={clearSelected}>
-              Clear
-            </button>
-            {selected.length > 0 && (
-              <>
-                <button className="bg-red-600 text-white px-2 py-1 rounded text-sm hover:bg-red-700" onClick={() => setConfirmDelete({ isOpen: true, id: null, isBulk: true })}>
-                  Delete Selected
-                </button>
-                <button className="bg-kmuGreen text-white px-2 py-1 rounded text-sm hover:bg-kmuOrange" onClick={handleBulkExport}>
-                  Export Selected (Word)
-                </button>
-                <button className="bg-blue-600 text-white px-2 py-1 rounded text-sm hover:bg-blue-700" onClick={handleBulkExportExcel}>
-                  Export Selected (Excel)
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Users Table */}
-        {loading ? (
-          <div className="text-gray-500 dark:text-gray-400">Loading users...</div>
-        ) : (
-          <div className="overflow-x-auto -mx-3 md:mx-0">
-            <table className="min-w-full bg-white dark:bg-gray-800 rounded-lg shadow text-sm md:text-base">
-              <thead className="bg-kmuGreen text-white">
-                <tr>
-                  <th className="py-2 px-2 md:px-4 text-left">
-                    <input
-                      type="checkbox"
-                      checked={selected.length === filteredUsers.length && filteredUsers.length > 0}
-                      onChange={e => e.target.checked ? selectAll() : clearSelected()}
-                    />
-                  </th>
-                  <th className="py-2 px-2 md:px-4 text-left">Username</th>
-                  <th className="py-2 px-2 md:px-4 text-left hidden sm:table-cell">Name</th>
-                  <th className="py-2 px-2 md:px-4 text-left">Role</th>
-                  <th className="py-2 px-2 md:px-4 text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredUsers.map((u) => {
-                  const userId = u.id || u._id;
-                  const isEditing = editingUserId === userId;
-
-                  return (
-                    <tr key={userId} className="border-b border-gray-200 dark:border-gray-600">
-                      <td className="py-2 px-2 md:px-4">
-                        <input
-                          type="checkbox"
-                          checked={selected.includes(userId)}
-                          onChange={() => toggleSelect(userId)}
-                        />
-                      </td>
-                      {isEditing ? (
-                        <>
-                          <td className="py-2 px-2 md:px-4">
-                            <input
-                              type="text"
-                              className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                              value={editUser.username}
-                              onChange={e => setEditUser((eu: any) => ({ ...eu, username: e.target.value }))}
-                            />
-                          </td>
-                          <td className="py-2 px-2 md:px-4 hidden sm:table-cell">
-                            <input
-                              type="text"
-                              className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                              value={editUser.name}
-                              onChange={e => setEditUser((eu: any) => ({ ...eu, name: e.target.value }))}
-                            />
-                          </td>
-                          <td className="py-2 px-2 md:px-4">
-                            <select
-                              className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                              value={editUser.role}
-                              onChange={e => setEditUser((eu: any) => ({ ...eu, role: e.target.value }))}
-                            >
-                              {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
-                            </select>
-                          </td>
-                          <td className="py-2 px-2 md:px-4">
-                            <div className="flex flex-col sm:flex-row gap-1">
-                              <button
-                                className="bg-kmuGreen text-white px-2 py-1 rounded text-xs hover:bg-kmuOrange transition"
-                                onClick={handleEdit}
-                              >
-                                Save
-                              </button>
-                              <button
-                                className="bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-2 py-1 rounded text-xs hover:bg-gray-400 dark:hover:bg-gray-500 transition"
-                                onClick={cancelEdit}
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          </td>
-                        </>
-                      ) : (
-                        <>
-                          <td className="py-2 px-2 md:px-4 text-gray-900 dark:text-white">
-                            <div className="font-medium">{u.username}</div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400 sm:hidden">{u.name}</div>
-                          </td>
-                          <td className="py-2 px-2 md:px-4 text-gray-900 dark:text-white hidden sm:table-cell">{u.name}</td>
-                          <td className="py-2 px-2 md:px-4 text-gray-900 dark:text-white">
-                            <span className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-full">
-                              {u.role}
-                            </span>
-                          </td>
-                          <td className="py-2 px-2 md:px-4">
-                            <div className="flex flex-col sm:flex-row gap-1">
-                              <button
-                                className="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600 transition"
-                                onClick={() => startEdit(u)}
-                              >
-                                Edit
-                              </button>
-                              <button
-                                className="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700 transition"
-                                onClick={() => handleDelete(userId)}
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </td>
-                        </>
-                      )}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      <ConfirmDialog
-        isOpen={confirmDelete.isOpen}
-        title={confirmDelete.isBulk ? "Delete Multiple Users" : "Delete User"}
-        message={confirmDelete.isBulk
-          ? `Are you sure you want to delete the ${selected.length} selected users? This action is permanent and cannot be undone.`
-          : "Are you sure you want to delete this user? All their associated data will be permanently removed from the system."
-        }
-        confirmLabel="Delete User"
-        onConfirm={() => confirmDelete.isBulk ? handleBulkDelete() : (confirmDelete.id && handleDelete(confirmDelete.id))}
-        onCancel={() => setConfirmDelete({ isOpen: false, id: null, isBulk: false })}
-        type="danger"
-      />
+function FormField({ label, value, onChange, type = 'text', options = [], required = false }: any) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">{label}</label>
+      {type === 'select' ? (
+        <select value={value} onChange={(e) => onChange(e.target.value)} required={required} className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-xs font-bold uppercase shadow-inner">
+          <option value="">Select Privilege...</option>
+          {options.map((o: any) => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </select>
+      ) : (
+        <input type={type} value={value} onChange={(e) => onChange(e.target.value)} required={required} className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-xs font-bold shadow-inner" />
+      )}
     </div>
   );
 }

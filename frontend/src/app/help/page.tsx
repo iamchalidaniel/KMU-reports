@@ -17,15 +17,12 @@ export default function HelpPage() {
     setAiResponse(null);
 
     try {
-      // Get all text content from the help sections
       const sections = document.querySelectorAll('.help-section');
       const context = Array.from(sections).map(s => (s as HTMLElement).innerText).join("\n\n");
 
       const res = await fetch('/api/ai-assistant', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [{ role: 'user', content: `Context from Manual:\n${context}\n\nUser Question: ${searchQuery}` }],
           formType: 'help'
@@ -47,218 +44,152 @@ export default function HelpPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-12">
-      <div className="text-center mb-16">
-        <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-100 dark:border-emerald-800 text-kmuGreen text-xs font-bold mb-6">
-          📖 USER DOCUMENTATION & SUPPORT
-        </div>
-        <h1 className="text-4xl md:text-6xl font-extrabold mb-6 text-gray-900 dark:text-white tracking-tight">Help & <span className="text-kmuGreen">Support</span></h1>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-24 font-serif">
+      <div className="max-w-7xl mx-auto py-12 px-6">
+        <div className="animate-in fade-in duration-500 space-y-16">
 
-        {/* AI Semantic Search */}
-        <div className="max-w-3xl mx-auto mt-8 relative">
-          <form onSubmit={handleSearch} className="relative">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Ask anything about policies, cases, or reporting..."
-              className="w-full pl-12 pr-32 py-4 bg-white dark:bg-gray-800 border-2 border-emerald-100 dark:border-emerald-800 focus:border-kmuGreen dark:focus:border-kmuGreen outline-none rounded-2xl shadow-xl shadow-emerald-500/5 dark:shadow-none transition-all text-lg"
-            />
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+          {/* Executive Header */}
+          <div className="text-center max-w-4xl mx-auto space-y-8">
+            <div className="inline-flex items-center px-6 py-2 rounded-full bg-emerald-100 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-emerald-600 text-[10px] font-black uppercase tracking-[0.3em] mb-4">
+              Operational Intelligence & Support
             </div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="absolute right-2 top-2 bottom-2 px-6 bg-kmuGreen hover:bg-emerald-600 text-white rounded-xl font-bold transition-all disabled:opacity-50"
-            >
-              {isLoading ? "Thinking..." : "Search"}
-            </button>
-          </form>
+            <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-gray-900 dark:text-white uppercase italic">
+              Knowledge <span className="text-emerald-600">Base</span>
+            </h1>
 
-          {aiResponse && (
-            <div className="mt-4 p-5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-2xl text-left animate-in fade-in slide-in-from-top-2">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl">✨</span>
-                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">AI Suggestion</span>
+            <div className="max-w-3xl mx-auto relative group">
+              <form onSubmit={handleSearch} className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Query compliance protocols, case logic, or reporting..."
+                  className="w-full pl-10 pr-32 py-6 bg-white dark:bg-gray-900 border-none rounded-[2rem] shadow-2xl shadow-emerald-500/10 focus:ring-4 focus:ring-emerald-500/20 outline-none transition-all text-sm font-sans italic"
+                />
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="absolute right-3 top-3 bottom-3 px-8 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
+                >
+                  {isLoading ? "Querying..." : "Execute Search"}
+                </button>
+              </form>
+
+              {aiResponse && (
+                <div className="mt-6 p-8 bg-white dark:bg-gray-900 border border-emerald-100 dark:border-emerald-800 rounded-[2.5rem] text-left shadow-xl animate-in fade-in slide-in-from-top-4 duration-300">
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-2xl">✨</span>
+                    <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">AI Synthesis Result</span>
+                  </div>
+                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-sm font-sans">
+                    {aiResponse}
+                  </p>
+                  <button
+                    onClick={() => setAiResponse(null)}
+                    className="mt-6 text-[9px] font-black text-gray-400 uppercase tracking-widest hover:text-emerald-600 transition"
+                  >
+                    Clear Synthesis
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Help Matrix */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+            {/* Quick Start Matrix */}
+            <div className="bg-white dark:bg-gray-900 rounded-[3rem] shadow-sm border border-gray-100 dark:border-gray-800 p-12 help-section">
+              <h2 className="text-2xl font-black uppercase tracking-tighter italic text-emerald-600 mb-8">Operational Onboarding</h2>
+              <div className="space-y-8">
+                <div>
+                  <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">Core Workflow</h3>
+                  <ul className="space-y-4 text-gray-600 dark:text-gray-400 font-sans text-sm">
+                    <li className="flex gap-4">
+                      <span className="text-emerald-500 font-black italic">01.</span>
+                      <span>Navigate via the **Command Sidebar** to access specialized modules.</span>
+                    </li>
+                    <li className="flex gap-4">
+                      <span className="text-emerald-500 font-black italic">02.</span>
+                      <span>Initiate cases via the **"+ New Case"** directive in the Executive Command Bar.</span>
+                    </li>
+                    <li className="flex gap-4">
+                      <span className="text-emerald-500 font-black italic">03.</span>
+                      <span>Utilize **Smart Search** to retrieve student histories and active dossier metadata.</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
-              <p className="text-gray-800 dark:text-gray-200 leading-relaxed text-sm">
-                {aiResponse}
-              </p>
-              <button
-                onClick={() => setAiResponse(null)}
-                className="mt-3 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase hover:underline"
-              >
-                Clear Response
-              </button>
             </div>
-          )}
-        </div>
 
-        <p className="text-gray-600 dark:text-gray-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mt-10">
-          Need assistance? Our comprehensive guides and FAQs are here to help you navigate CampusCare with ease.
-        </p>
-      </div>
-
-      {/* Quick Start Guide */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8 help-section">
-        <h2 className="text-2xl font-semibold mb-4 text-kmuOrange">🚀 Quick Start Guide</h2>
-        <div className="grid md:grid-cols-2 gap-6">
-          <div>
-            <h3 className="text-lg font-medium mb-3 text-kmuGreen">For New Users</h3>
-            <ul className="space-y-2 text-gray-600 dark:text-gray-400">
-              <li>• Use the sidebar to navigate between different sections</li>
-              <li>• Click "+ New Case" to report a new disciplinary case</li>
-              <li>• Search for students or staff by name or ID to view their history</li>
-              <li>• Use the search and filter options to find specific cases</li>
-              <li>• Export data using the export buttons in dashboards</li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="text-lg font-medium mb-3 text-kmuGreen">Navigation Tips</h3>
-            <ul className="space-y-2 text-gray-600 dark:text-gray-400">
-              <li>• Toggle dark mode using the button in the sidebar</li>
-              <li>• Check audit logs for system activity</li>
-              <li>• Update your profile and settings as needed</li>
-              <li>• Use the audit logs for transparency tracking</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-
-
-
-      {/* Key Features */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8 help-section">
-        <h2 className="text-2xl font-semibold mb-4 text-kmuOrange">✨ Key Features</h2>
-        <div className="grid md:grid-cols-2 gap-6">
-          <div>
-            <h3 className="text-lg font-medium mb-3 text-kmuGreen">Case Management</h3>
-            <ul className="space-y-2 text-gray-600 dark:text-gray-400">
-              <li>• <strong>Predefined Offense Types:</strong> Academic Dishonesty, Fighting, Drug/Alcohol, Theft, Vandalism, Harassment, etc.</li>
-              <li>• <strong>Severity Levels:</strong> Low, Medium, High, Critical</li>
-              <li>• <strong>Case Status:</strong> Open, Under Investigation, Closed, Appealed</li>
-              <li>• <strong>Guided Descriptions:</strong> Dynamic placeholders based on offense type</li>
-              <li>• <strong>Sanctions Tracking:</strong> Optional disciplinary measures</li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="text-lg font-medium mb-3 text-kmuGreen">Advanced Features</h3>
-            <ul className="space-y-2 text-gray-600 dark:text-gray-400">
-              <li>• <strong>Evidence Management:</strong> Upload and manage case evidence files</li>
-              <li>• <strong>Audit Logging:</strong> Complete transparency and accountability</li>
-              <li>• <strong>Export Options:</strong> DOCX and Excel formats</li>
-              <li>• <strong>Search & Filter:</strong> Find cases and people quickly</li>
-              <li>• <strong>Offline Support:</strong> Work without internet connection</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      {/* How-To Guides */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8 help-section">
-        <h2 className="text-2xl font-semibold mb-4 text-kmuOrange">📋 How-To Guides</h2>
-        <div className="space-y-6">
-          <div>
-            <h3 className="text-lg font-medium mb-3 text-kmuGreen">Creating a New Case</h3>
-            <ol className="list-decimal list-inside space-y-2 text-gray-600 dark:text-gray-400">
-              <li>Navigate to "Cases" → "New Case" or click "+ New Case" in the top bar</li>
-              <li>Choose between Student Case or Staff Case</li>
-              <li>Search and select the person involved</li>
-              <li>Enter the incident date</li>
-              <li>Select the offense type from the dropdown</li>
-              <li>Choose the severity level</li>
-              <li>Write a detailed description (guided by offense type)</li>
-              <li>Add any sanctions applied (optional)</li>
-              <li>Click "Create Case" to submit</li>
-            </ol>
-          </div>
-          <div>
-            <h3 className="text-lg font-medium mb-3 text-kmuGreen">Managing Cases</h3>
-            <ol className="list-decimal list-inside space-y-2 text-gray-600 dark:text-gray-400">
-              <li>View all cases in the "Cases" section</li>
-              <li>Use search and filters to find specific cases</li>
-              <li>Click "View Details" to see full case information</li>
-              <li>Update case status (Open/Closed) as needed</li>
-              <li>Add evidence files if required</li>
-              <li>Export case data for reporting</li>
-            </ol>
-          </div>
-          <div>
-            <h3 className="text-lg font-medium mb-3 text-kmuGreen">Person Management</h3>
-            <ol className="list-decimal list-inside space-y-2 text-gray-600 dark:text-gray-400">
-              <li>View all students in the "Students" section</li>
-              <li>View all staff in the "Staff" section</li>
-              <li>Search by name or ID</li>
-              <li>Click on a person's name to view their profile</li>
-              <li>See their complete case history</li>
-              <li>Add new cases directly from their profile</li>
-              <li>Export records as needed</li>
-            </ol>
-          </div>
-        </div>
-      </div>
-
-      {/* Staff Cases Information */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8 help-section">
-        <h2 className="text-2xl font-semibold mb-4 text-kmuOrange">👥 Staff Cases</h2>
-        <div className="space-y-4">
-          <p className="text-gray-600 dark:text-gray-400">
-            CampusCare now supports incident reports for both students and staff members.
-            This feature allows you to manage security concerns, facility issues, conduct violations, and other
-            campus safety matters involving all university community members.
-          </p>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="text-lg font-medium mb-3 text-kmuGreen">Staff Case Features</h3>
-              <ul className="space-y-2 text-gray-600 dark:text-gray-400">
-                <li>• Create cases for individual staff members</li>
-                <li>• Track disciplinary actions for multiple staff</li>
-                <li>• View staff member profiles and case history</li>
-                <li>• Manage staff information and details</li>
-                <li>• Export staff case reports</li>
-              </ul>
+            {/* Key Features Matrix */}
+            <div className="bg-white dark:bg-gray-900 rounded-[3rem] shadow-sm border border-gray-100 dark:border-gray-800 p-12 help-section">
+              <h2 className="text-2xl font-black uppercase tracking-tighter italic text-orange-600 mb-8">System Capabilities</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 font-sans">
+                <div className="space-y-4">
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-orange-600">Case Logic</h3>
+                  <ul className="space-y-2 text-xs text-gray-500 leading-relaxed">
+                    <li>• Guided Offense Classification</li>
+                    <li>• Multi-level Severity Index</li>
+                    <li>• Real-time Status Tracking</li>
+                  </ul>
+                </div>
+                <div className="space-y-4">
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-orange-600">Forensics</h3>
+                  <ul className="space-y-2 text-xs text-gray-500 leading-relaxed">
+                    <li>• Secure Evidence Vault</li>
+                    <li>• Strategic Export (DOCX/Excel)</li>
+                    <li>• Full Audit Provenance</li>
+                  </ul>
+                </div>
+              </div>
             </div>
-            <div>
-              <h3 className="text-lg font-medium mb-3 text-kmuGreen">Staff Management</h3>
-              <ul className="space-y-2 text-gray-600 dark:text-gray-400">
-                <li>• Add new staff members to the system</li>
-                <li>• Bulk import staff via CSV/Excel files</li>
-                <li>• Search and filter staff by department/position</li>
-                <li>• Track recent staff interactions</li>
-                <li>• Maintain staff directory</li>
-              </ul>
+
+            {/* Comprehensive Documentation */}
+            <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-[3rem] shadow-sm border border-gray-100 dark:border-gray-800 p-12 help-section">
+              <h2 className="text-2xl font-black uppercase tracking-tighter italic text-red-600 mb-12">Disciplinary Protocol Management</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-12 font-sans">
+                <div className="space-y-6">
+                  <h3 className="text-sm font-black uppercase tracking-widest text-red-600 border-b-2 border-red-50 pb-2">Inquiry Genesis</h3>
+                  <ol className="space-y-4 text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                    <li>1. Deploy to **"Inquiry Genesis"** via top-level navigation.</li>
+                    <li>2. Query and select the **Accused Subject** from the registry.</li>
+                    <li>3. Define the **Offense Classification** and chronological sequence.</li>
+                    <li>4. Finalize via the **Seal Protocol** (Digital Authentication).</li>
+                  </ol>
+                </div>
+                <div className="space-y-6">
+                  <h3 className="text-sm font-black uppercase tracking-widest text-red-600 border-b-2 border-red-50 pb-2">Dossier Oversight</h3>
+                  <ol className="space-y-4 text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                    <li>1. Monitor active protocols via the **Cases Ledger**.</li>
+                    <li>2. Update **Dossier Status** (Under Review / Closed).</li>
+                    <li>3. Attach **Forensic Evidence** to established indices.</li>
+                    <li>4. Generate **Executive Reports** for committee review.</li>
+                  </ol>
+                </div>
+                <div className="space-y-6">
+                  <h3 className="text-sm font-black uppercase tracking-widest text-red-600 border-b-2 border-red-50 pb-2">Registry Science</h3>
+                  <ol className="space-y-4 text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                    <li>1. Navigate to **"Student Registry"** for global search.</li>
+                    <li>2. Aggregate **Compliance Trends** via AI-powered dashboards.</li>
+                    <li>3. Synchronize **Operational Data** via offline-first architecture.</li>
+                  </ol>
+                </div>
+              </div>
             </div>
+
           </div>
 
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded p-4">
-            <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">Getting Started with Staff Cases</h4>
-            <p className="text-blue-700 dark:text-blue-300 text-sm">
-              To create a staff case, navigate to "Cases" → "New Case" and select "Staff Case" from the case type options.
-              Then search for the staff member by name or ID, fill in the case details, and submit.
+          <footer className="text-center space-y-4 bg-gray-100/50 dark:bg-gray-900 p-12 rounded-[3rem] border border-gray-200 dark:border-gray-800">
+            <div className="text-[10px] font-black text-gray-400 uppercase tracking-[0.5em]">
+              Kapasa Makasa University • Security Authority
+            </div>
+            <p className="text-gray-500 font-bold text-xs uppercase tracking-widest">
+              CampusCare Ecosystem v3.0 • Developed by Chali Daniel & Grace Namonje
             </p>
-          </div>
+          </footer>
         </div>
       </div>
-
-      {/* Footer with Developer Info */}
-      <footer className="bg-gray-100 dark:bg-gray-900 rounded-lg shadow p-6 text-center">
-        <div className="text-gray-600 dark:text-gray-400">
-          <p className="mb-2">
-            <strong>CampusCare</strong> - AI-Powered Campus Safety Reporting System
-          </p>
-          <p className="text-sm">
-            Developed by: <strong>Chali Daniel & Grace Namonje</strong> | 2025
-          </p>
-          <p className="text-xs mt-2">
-            © 2025 Kapasa Makasa University. All rights reserved.
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }

@@ -2,43 +2,19 @@
 import { useAuth } from '../../context/AuthContext';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bar } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
 import { API_BASE_URL } from '../../config/constants';
 import { authHeaders } from '../../utils/api';
-import { prepareChartExport } from '../../utils/chartExport';
-import { saveAs } from 'file-saver';
 import Notification, { useNotification } from '../../components/Notification';
-
-interface Student {
-  _id: string;
-  studentId: string;
-  fullName: string;
-  department?: string;
-}
+import Link from 'next/link';
 
 interface StudentReport {
   _id: string;
-  student_id?: string | Student;
   student_name?: string;
-  student_email?: string;
   incident_date: string;
   description: string;
   offense_type?: string;
   severity: string;
   status: string;
-  admin_comments?: string;
-  assigned_case_id?: string;
-  created_at: string;
-  updated_at: string;
 }
 
 export default function ReportsPage() {
@@ -46,57 +22,39 @@ export default function ReportsPage() {
   const router = useRouter();
   const { notification, showNotification, hideNotification } = useNotification();
 
-  // authentication state should come first
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-
   const [studentReports, setStudentReports] = useState<StudentReport[]>([]);
-  const [loadingReports, setLoadingReports] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('');
   const [severityFilter, setSeverityFilter] = useState('');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(20);
+  const [limit] = useState(25);
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
-    // Handle authentication on client side only
     if (typeof window !== 'undefined') {
       if (!authLoading && !token) {
         router.replace('/login');
         setIsCheckingAuth(false);
         return;
       }
-
       if (authLoading) {
         setIsCheckingAuth(true);
         return;
       }
-
       if (!user || !['admin', 'chief_security_officer', 'dean_of_students', 'assistant_dean', 'secretary', 'security_officer'].includes(user.role)) {
         setIsCheckingAuth(false);
         return;
       }
-
       setIsCheckingAuth(false);
     }
   }, [authLoading, token, user, router]);
 
-  // Fetch student reports
-  useEffect(() => {
-    if (user) {
-      fetchStudentReports();
-    }
-  }, [user, page, statusFilter, severityFilter, search]);
-
-  const fetchStudentReports = async () => {
-    setLoadingReports(true);
+  async function fetchStudentReports() {
+    setLoading(true);
     try {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString(),
-      });
-
+      const params = new URLSearchParams({ page: page.toString(), limit: limit.toString() });
       if (statusFilter) params.append('status', statusFilter);
       if (severityFilter) params.append('severity', severityFilter);
       if (search) params.append('search', search);
@@ -104,18 +62,20 @@ export default function ReportsPage() {
       const res = await fetch(`${API_BASE_URL}/student-reports?${params}`, {
         headers: { ...authHeaders() },
       });
-
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
       setStudentReports(data.reports || []);
       setTotal(data.total || 0);
     } catch (err: any) {
-      console.error('Failed to fetch student reports:', err);
-      showNotification('error', 'Failed to load student reports');
+      console.error('Fetch error:', err);
     } finally {
-      setLoadingReports(false);
+      setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    if (user) fetchStudentReports();
+  }, [user, page, statusFilter, severityFilter, search]);
 
   const handleApproveReport = async (reportId: string) => {
     try {
@@ -124,12 +84,12 @@ export default function ReportsPage() {
         headers: { ...authHeaders(), 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'Approved' }),
       });
-
-      if (!res.ok) throw new Error(await res.text());
-      showNotification('success', 'Report approved');
-      await fetchStudentReports();
-    } catch (err: any) {
-      showNotification('error', 'Failed to approve report');
+      if (res.ok) {
+        showNotification('success', 'Report authorized');
+        fetchStudentReports();
+      }
+    } catch (err) {
+      showNotification('error', 'Authorization failed');
     }
   };
 
@@ -137,259 +97,192 @@ export default function ReportsPage() {
     try {
       const res = await fetch(`${API_BASE_URL}/student-reports/${reportId}/convert-to-case`, {
         method: 'POST',
-        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        headers: { ...authHeaders() },
       });
-
-      if (!res.ok) throw new Error(await res.text());
-      showNotification('success', 'Report converted to case');
-      await fetchStudentReports();
-    } catch (err: any) {
-      showNotification('error', 'Failed to convert report to case');
+      if (res.ok) {
+        showNotification('success', 'Converted to formal case dossier');
+        fetchStudentReports();
+      }
+    } catch (err) {
+      showNotification('error', 'Conversion failed');
     }
   };
 
   if (isCheckingAuth) {
-    return <div className="text-center text-kmuGreen">Loading...</div>;
+    return <div className="text-center p-12 text-kmuGreen font-serif">Initializing Intelligence Ledger...</div>;
   }
 
   if (!user || !['admin', 'chief_security_officer', 'dean_of_students', 'assistant_dean', 'secretary', 'security_officer'].includes(user.role)) {
-    return <div className="text-red-600">Access denied.</div>;
+    return <div className="text-red-600 p-12">Access denied.</div>;
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case 'open':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-      case 'closed':
-      case 'resolved':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      case 'in appeal':
-        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
-      case 'appeal rejected':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
-    }
-  };
-
-  const totalPages = Math.ceil(total / limit);
-
   return (
-    <>
-      <section>
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-kmuGreen">New Disciplinary Reports</h1>
-          <div className="flex gap-4">
-            <span className="bg-kmuOrange/10 text-kmuOrange px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider h-fit">
-              {total} Reports
-            </span>
-          </div>
-        </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-serif">
+      <div className="max-w-7xl mx-auto py-6">
+        <div className="animate-in fade-in duration-300 space-y-6">
 
-        {/* Reports View */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 animate-in fade-in duration-300">
-          <h2 className="text-xl font-bold text-kmuGreen mb-6">Student-Submitted Reports</h2>
-
-          {/* Filters */}
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <input
-              type="text"
-              placeholder="Search by student name or description..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            />
-            <select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setPage(1);
-              }}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            >
-              <option value="">All Statuses</option>
-              <option value="Pending">Pending</option>
-              <option value="Reviewed">Reviewed</option>
-              <option value="Approved">Approved</option>
-              <option value="Rejected">Rejected</option>
-              <option value="Converted">Converted to Case</option>
-            </select>
-            <select
-              value={severityFilter}
-              onChange={(e) => {
-                setSeverityFilter(e.target.value);
-                setPage(1);
-              }}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            >
-              <option value="">All Severity Levels</option>
-              <option value="Low">Low</option>
-              <option value="Medium">Medium</option>
-              <option value="High">High</option>
-            </select>
+          {/* Executive Command Bar */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-8 rounded-[2rem] border-t-4 border-orange-500 shadow-xl gap-4">
+            <div>
+              <h1 className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white uppercase italic">Intelligence Command</h1>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">
+                KMU Unified Student Incident Reporting & Analytics
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <span className="bg-orange-100 dark:bg-orange-900/30 text-orange-600 px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2">
+                📡 {total} Active Ingress
+              </span>
+            </div>
           </div>
 
-          {/* Reports Table */}
-          {loadingReports ? (
-            <div className="text-center py-8">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-kmuGreen"></div>
-            </div>
-          ) : studentReports.length === 0 ? (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-              No reports found.
-            </div>
-          ) : (
-            <>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
-                    <tr>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
-                        Student
-                      </th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
-                        Date
-                      </th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
-                        Description
-                      </th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
-                        Type
-                      </th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
-                        Status
-                      </th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
-                        Severity
-                      </th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {studentReports.map((report) => (
-                      <tr
-                        key={report._id}
-                        className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-                      >
-                        <td className="px-4 py-2 text-gray-900 dark:text-white">
-                          {report.student_name || 'Anonymous'}
-                        </td>
-                        <td className="px-4 py-2 text-gray-900 dark:text-white">
-                          {formatDate(report.incident_date)}
-                        </td>
-                        <td className="px-4 py-2 text-gray-900 dark:text-white truncate max-w-xs">
-                          {report.description}
-                        </td>
-                        <td className="px-4 py-2 text-gray-900 dark:text-white text-xs">
-                          {report.offense_type}
-                        </td>
-                        <td className="px-4 py-2">
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(report.status)}`}>
-                            {report.status}
-                          </span>
-                        </td>
-                        <td className="px-4 py-2">
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${report.severity === 'High'
-                            ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                            : report.severity === 'Medium'
-                              ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                              : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                            }`}>
-                            {report.severity}
-                          </span>
-                        </td>
-                        <td className="px-4 py-2 text-sm space-x-2">
-                          {report.status === 'Pending' && (
-                            <>
-                              <button
-                                onClick={() => handleApproveReport(report._id)}
-                                className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600"
-                              >
-                                Approve
-                              </button>
-                              <button
-                                onClick={() => handleConvertToCase(report._id)}
-                                className="px-2 py-1 bg-kmuGreen text-white rounded text-xs hover:bg-kmuGreen/90"
-                              >
-                                Convert
-                              </button>
-                            </>
-                          )}
-                          {report.status === 'Approved' && (
-                            <button
-                              onClick={() => handleConvertToCase(report._id)}
-                              className="px-2 py-1 bg-kmuGreen text-white rounded text-xs hover:bg-kmuGreen/90"
-                            >
-                              Create Case
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+          {/* Strategic Metrics Shortcut */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard title="Total Reports" value={total} color="orange" />
+            <StatCard title="Pending Review" value={studentReports.filter(r => r.status === 'Pending').length} color="amber" />
+            <StatCard title="High Alert" value={studentReports.filter(r => r.severity === 'High').length} color="red" />
+            <StatCard title="Analytic Sync" value="Live Feed" color="blue" />
+          </div>
 
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="flex justify-center gap-2 mt-6">
-                  <button
-                    onClick={() => setPage(Math.max(1, page - 1))}
-                    disabled={page === 1}
-                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700"
+          {/* Central Reports Ledger */}
+          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+            <div className="p-10 border-b border-gray-100 dark:border-gray-800">
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+                <h2 className="text-xl font-black uppercase tracking-tighter italic text-orange-600">Incident Ingress Ledger</h2>
+                <div className="flex flex-wrap gap-4 w-full lg:w-auto font-sans">
+                  <div className="relative flex-1 lg:w-80">
+                    <input
+                      placeholder="Query ingress metadata..."
+                      className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-6 py-4 text-xs w-full focus:ring-2 focus:ring-orange-500 transition-all shadow-inner"
+                      value={search}
+                      onChange={e => { setSearch(e.target.value); setPage(1); }}
+                    />
+                  </div>
+                  <select
+                    value={statusFilter}
+                    onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
+                    className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-4 py-3 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-orange-500 transition-all font-sans"
                   >
-                    Previous
-                  </button>
-                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + Math.max(1, page - 2)).map((p) => (
+                    <option value="">All Statuses</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Reviewed">Reviewed</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Converted">Converted</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto font-sans">
+              <table className="w-full text-xs">
+                <thead className="bg-gray-50/50 dark:bg-gray-800/50 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] italic">
+                  <tr>
+                    <th className="px-10 py-6 text-left">Subject designation</th>
+                    <th className="px-10 py-6 text-left">Classification</th>
+                    <th className="px-10 py-6 text-center">Severity Index</th>
+                    <th className="px-10 py-6 text-right">Operational Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {studentReports.map((r, i) => (
+                    <tr key={r._id || i} className="hover:bg-orange-50/30 dark:hover:bg-orange-950/10 group transition-all duration-300">
+                      <td className="px-10 py-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-2xl bg-orange-100 dark:bg-orange-900/50 flex items-center justify-center text-orange-600 font-black text-xs uppercase group-hover:rotate-12 transition-transform">
+                            {r.student_name?.charAt(0) || 'A'}
+                          </div>
+                          <div>
+                            <div className="font-extrabold text-gray-900 dark:text-gray-100 uppercase text-sm tracking-tighter">
+                              {r.student_name || 'Anonymous Submission'}
+                            </div>
+                            <div className="text-[10px] text-gray-400 font-mono tracking-tighter mt-0.5">{new Date(r.incident_date).toLocaleDateString()}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-10 py-6">
+                        <div className="font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tight truncate max-w-[200px]">{r.description}</div>
+                        <div className="text-[10px] text-gray-400 mt-1 uppercase font-black tracking-widest">{r.offense_type || 'Unclassified'}</div>
+                      </td>
+                      <td className="px-10 py-6 text-center">
+                        <span className={`px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest ${r.severity === 'High' ? 'bg-red-100 text-red-600 border border-red-200 shadow-sm' : 'bg-gray-100 text-gray-500 border border-gray-200'}`}>
+                          {r.severity} Priority
+                        </span>
+                      </td>
+                      <td className="px-10 py-6 text-right">
+                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                          {r.status === 'Pending' && (
+                            <button onClick={() => handleApproveReport(r._id)} className="bg-emerald-600 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest hover:scale-105 transition-transform">Authorize</button>
+                          )}
+                          {(r.status === 'Pending' || r.status === 'Approved') && (
+                            <button onClick={() => handleConvertToCase(r._id)} className="bg-orange-600 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest hover:scale-105 transition-transform">Convert</button>
+                          )}
+                          <span className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest bg-gray-100 dark:bg-gray-800 text-gray-400 border border-gray-200 dark:border-gray-700`}>
+                            {r.status}
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {studentReports.length === 0 && !loading && (
+                    <tr>
+                      <td colSpan={4} className="py-24 text-center text-gray-400 italic text-sm">Ingress query returned zero entities.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Premium Pagination */}
+            <div className="p-10 bg-gray-50/50 dark:bg-gray-800/20 border-t border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-center gap-6">
+              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Showing {studentReports.length} of {total} Ingress Clusters</span>
+              <div className="flex items-center gap-1">
+                <PaginationButton onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Prev Cluster</PaginationButton>
+                {Array.from({ length: Math.ceil(total / limit) }, (_, i) => i + 1).filter(p => p === 1 || p === Math.ceil(total / limit) || Math.abs(p - page) <= 1).map((p, idx, arr) => (
+                  <div key={p} className="flex items-center">
+                    {idx > 0 && arr[idx - 1] !== p - 1 && <span className="px-2 text-gray-400">...</span>}
                     <button
-                      key={p}
                       onClick={() => setPage(p)}
-                      className={`px-4 py-2 rounded-lg ${page === p
-                        ? 'bg-kmuGreen text-white'
-                        : 'border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
-                        }`}
+                      className={`w-10 h-10 rounded-xl font-black text-[10px] transition-all ${p === page ? 'bg-orange-600 text-white shadow-lg shadow-orange-500/30' : 'bg-white dark:bg-gray-800 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
                     >
                       {p}
                     </button>
-                  ))}
-                  <button
-                    onClick={() => setPage(Math.min(totalPages, page + 1))}
-                    disabled={page === totalPages}
-                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700"
-                  >
-                    Next
-                  </button>
-                </div>
-              )}
-            </>
-          )}
+                  </div>
+                ))}
+                <PaginationButton onClick={() => setPage(p => Math.min(Math.ceil(total / limit), p + 1))} disabled={page === Math.ceil(total / limit) || total === 0}>Next Cluster</PaginationButton>
+              </div>
+            </div>
+          </div>
         </div>
-      </section>
+      </div>
 
-      {/* Notification */}
-      {notification?.isVisible && (
-        <Notification
-          type={notification.type}
-          message={notification.message}
-          isVisible={notification.isVisible}
-          onClose={hideNotification}
-        />
-      )}
-    </>
+      {notification?.isVisible && <Notification type={notification.type} message={notification.message} isVisible={notification.isVisible} onClose={hideNotification} />}
+    </div>
+  );
+}
+
+function StatCard({ title, value, color }: any) {
+  const colors: any = {
+    orange: 'text-orange-700 bg-orange-50/30 border-orange-100 dark:bg-orange-950/10 dark:border-orange-900/50',
+    amber: 'text-amber-700 bg-amber-50/30 border-amber-100 dark:bg-amber-950/10 dark:border-amber-900/50',
+    blue: 'text-blue-700 bg-blue-50/30 border-blue-100 dark:bg-blue-950/10 dark:border-blue-900/50',
+    red: 'text-red-700 bg-red-50/30 border-red-100 dark:bg-red-950/10 dark:border-red-900/50'
+  };
+  return (
+    <div className={`bg-white dark:bg-gray-900 rounded-[2rem] shadow-sm border p-8 transition-all duration-300 ${colors[color]}`}>
+      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">{title}</div>
+      <div className="text-4xl font-black tracking-tighter italic">{value}</div>
+    </div>
+  );
+}
+
+function PaginationButton({ children, onClick, disabled }: any) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${disabled ? 'text-gray-300' : 'text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-900/20'}`}
+    >
+      {children}
+    </button>
   );
 }

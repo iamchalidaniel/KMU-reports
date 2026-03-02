@@ -5,18 +5,17 @@ import { useRouter } from 'next/navigation';
 import { API_BASE_URL } from '../../config/constants';
 import { authHeaders } from '../../utils/api';
 import { useOfflineApi } from '../../hooks/useOfflineSync';
-
+import Notification, { useNotification } from '../../components/Notification';
+import Link from 'next/link';
 
 interface Evidence {
   _id?: string;
   id?: string;
   fileName?: string;
   filename?: string;
-  filePath?: string;
   case?: { _id: string; description: string } | string;
   uploadedBy?: { _id: string; name: string } | string;
   uploadedAt?: string;
-  date?: string;
 }
 
 interface Case {
@@ -27,9 +26,17 @@ interface Case {
 export default function EvidencePage() {
   const { user, token, loading: authLoading } = useAuth();
   const router = useRouter();
+  const { notification, showNotification, hideNotification } = useNotification();
 
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [evidence, setEvidence] = useState<Evidence[]>([]);
+  const [cases, setCases] = useState<Case[]>([]);
+  const [caseId, setCaseId] = useState('');
+  const [file, setFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [offlineMode, setOfflineMode] = useState(false);
+  const { apiCall } = useOfflineApi();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -45,70 +52,35 @@ export default function EvidencePage() {
       setIsCheckingAuth(false);
     }
   }, [authLoading, token, router]);
-  const [cases, setCases] = useState<Case[]>([]);
-  const [caseId, setCaseId] = useState('');
-  const [file, setFile] = useState<File | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [offlineMode, setOfflineMode] = useState(false);
-  const { apiCall, isLoading: apiLoading, error: apiError } = useOfflineApi();
 
-  useEffect(() => {
-    async function fetchEvidence() {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await apiCall<any>('get', '/evidence');
-        const data = response.data;
-        // Handle both array and { evidence, total } response formats
-        setEvidence(Array.isArray(data) ? data : (data.evidence || data || []));
-        setOfflineMode(response.offline);
-      } catch (err: any) {
-        console.error('Error fetching evidence:', err);
-        setError(err?.message || 'Network error, please try again');
-        setEvidence([]);
-      }
+  async function fetchData() {
+    setLoading(true);
+    try {
+      const evRes = await apiCall<any>('get', '/evidence');
+      setEvidence(Array.isArray(evRes.data) ? evRes.data : (evRes.data.evidence || []));
+      setOfflineMode(evRes.offline);
+
+      const casesRes = await apiCall<any>('get', '/cases');
+      setCases(Array.isArray(casesRes.data) ? casesRes.data : (casesRes.data.cases || []));
+    } catch (err: any) {
+      console.error('Fetch error:', err);
+    } finally {
       setLoading(false);
     }
+  }
 
-    async function fetchCases() {
-      try {
-        const response = await apiCall<any>('get', '/cases');
-        const data = response.data;
-        // Handle both array and { cases, total } response formats
-        setCases(Array.isArray(data) ? data : (data.cases || data || []));
-      } catch (err: any) {
-        console.error('Error fetching cases:', err);
-        setCases([]);
-      }
-    }
-
-    if (user && (user.role === 'admin' || user.role === 'security_officer')) {
-      fetchEvidence();
-      fetchCases();
+  useEffect(() => {
+    if (user && (user.role === 'admin' || user.role === 'security_officer' || user.role === 'chief_security_officer')) {
+      fetchData();
     } else {
       setLoading(false);
     }
-  }, [apiCall, user]);
-
-  useEffect(() => {
-    if (success) {
-      const timer = setTimeout(() => setSuccess(null), 4000);
-      return () => clearTimeout(timer);
-    }
-  }, [success]);
+  }, [user]);
 
   async function handleUpload(e: React.FormEvent) {
     e.preventDefault();
-    if (!file || !caseId) {
-      setError('Please select a case and a file.');
-      return;
-    }
+    if (!file || !caseId) return;
     setUploading(true);
-    setError(null);
-    setSuccess(null);
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -118,21 +90,14 @@ export default function EvidencePage() {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: formData,
       });
-      if (!res.ok) throw new Error(await res.text());
-      setSuccess('Evidence uploaded successfully!');
-      setFile(null);
-      setCaseId('');
-      // Refresh evidence list
-      const updated = await fetch(`${API_BASE_URL}/evidence`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (updated.ok) {
-        const data = await updated.json();
-        setEvidence(Array.isArray(data) ? data : (data.evidence || data || []));
+      if (res.ok) {
+        showNotification('success', 'Forensic metadata synchronized');
+        setFile(null);
+        setCaseId('');
+        fetchData();
       }
-    } catch (err: any) {
-      console.error('Error uploading evidence:', err);
-      setError(err?.message || 'Network error, please try again');
+    } catch (err) {
+      showNotification('error', 'Upload integrity failure');
     } finally {
       setUploading(false);
     }
@@ -143,237 +108,143 @@ export default function EvidencePage() {
       const res = await fetch(`${API_BASE_URL}/evidence/${id}/download`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
-      if (!res.ok) throw new Error(await res.text());
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename || 'evidence';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (err: any) {
-      console.error('Error downloading evidence:', err);
-      setError(err.message || 'Failed to download evidence');
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+      }
+    } catch (err) {
+      showNotification('error', 'Retrieval failed');
     }
   }
 
   async function handleDelete(id: string) {
-    if (!window.confirm('Are you sure you want to delete this evidence?')) return;
-    setError(null);
-    setSuccess(null);
+    if (!window.confirm('Purge forensic evidence? This is irreversible.')) return;
     try {
       const res = await fetch(`${API_BASE_URL}/evidence/${id}`, {
         method: 'DELETE',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
-      if (!res.ok) throw new Error(await res.text());
-      setSuccess('Evidence deleted successfully!');
-      setEvidence(evidence => evidence.filter(e => {
-        const evidenceId = getEvidenceId(e);
-        return evidenceId !== id;
-      }));
-    } catch (err: any) {
-      console.error('Error deleting evidence:', err);
-      setError(err.message || 'Failed to delete evidence');
+      if (res.ok) {
+        showNotification('success', 'Evidence purged');
+        fetchData();
+      }
+    } catch (err) {
+      showNotification('error', 'Purge failed');
     }
-  }
-
-  function getFileType(filename: string) {
-    if (!filename) return 'other';
-    const ext = filename.split('.').pop()?.toLowerCase();
-    if (!ext) return 'other';
-    if (["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(ext)) return "image";
-    if (["pdf"].includes(ext)) return "pdf";
-    return "other";
-  }
-
-  function getEvidenceId(item: any) {
-    return item._id || item.id || '';
-  }
-
-  function getEvidenceFilename(item: any) {
-    return item.fileName || item.filename || 'Unknown file';
-  }
-
-  function getEvidenceDate(item: any) {
-    const date = item.uploadedAt || item.date;
-    if (!date) return 'Unknown date';
-    try {
-      return new Date(date).toLocaleString();
-    } catch {
-      return 'Invalid date';
-    }
-  }
-
-  function getCaseDescription(item: any) {
-    if (!item.case) return 'No case associated';
-    if (typeof item.case === 'object' && item.case !== null) {
-      return item.case.description || 'No description';
-    }
-    return String(item.case);
-  }
-
-  function getUploadedBy(item: any) {
-    if (!item.uploadedBy) return 'Unknown user';
-    if (typeof item.uploadedBy === 'object' && item.uploadedBy !== null) {
-      return item.uploadedBy.name || 'Unknown user';
-    }
-    return String(item.uploadedBy);
   }
 
   if (isCheckingAuth) {
-    return <div className="text-center text-kmuGreen">Loading...</div>;
+    return <div className="text-center p-12 text-kmuGreen font-serif">Initializing Forensic Vault...</div>;
   }
-
-  if (!user || (user.role !== 'admin' && user.role !== 'security_officer')) {
-    return <div className="text-red-600">Access denied.</div>;
-  }
-
-  const safeEvidence = Array.isArray(evidence) ? evidence : [];
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <h1 className="text-2xl font-bold text-kmuGreen">Evidence Management</h1>
-          {offlineMode && (
-            <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded">
-              Offline Mode
-            </span>
-          )}
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-serif">
+      <div className="max-w-7xl mx-auto py-6">
+        <div className="animate-in fade-in duration-300 space-y-6">
+
+          {/* Executive Command Bar */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-8 rounded-[2rem] border-t-4 border-blue-600 shadow-xl gap-4">
+            <div>
+              <h1 className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white uppercase italic">Forensic Vault</h1>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">
+                KMU Unified Evidence Repository & Metadata Archive {offlineMode && <span className="text-orange-500 font-black ml-2">• OFFLINE PROTOCOL</span>}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2">
+                🔒 {evidence.length} Secured Assets
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Upload Terminal */}
+            <div className="lg:col-span-1 bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-sm border border-gray-200 dark:border-gray-800 p-10">
+              <h2 className="text-xl font-black uppercase tracking-tighter italic text-blue-600 mb-8">Asset Ingress</h2>
+              <form onSubmit={handleUpload} className="space-y-6 font-sans">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Case Dossier Association</label>
+                  <select
+                    className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-6 py-4 text-xs font-bold uppercase focus:ring-2 focus:ring-blue-500 transition-all shadow-inner outline-none"
+                    value={caseId}
+                    onChange={e => setCaseId(e.target.value)}
+                    required
+                  >
+                    <option value="">Select Target...</option>
+                    {cases.map(c => <option key={c._id} value={c._id}>{c.description || 'Unlabeled Case'}</option>)}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">File Payload</label>
+                  <input
+                    type="file"
+                    className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-6 py-4 text-xs font-bold focus:ring-2 focus:ring-blue-500 transition-all shadow-inner"
+                    onChange={e => setFile(e.target.files?.[0] || null)}
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={uploading}
+                  className="w-full bg-blue-600 text-white font-black py-5 rounded-[2rem] hover:shadow-xl hover:shadow-blue-500/30 transition-all text-[10px] uppercase tracking-widest"
+                >
+                  {uploading ? 'Archiving Payload...' : 'Authorize Vault Entry'}
+                </button>
+              </form>
+            </div>
+
+            {/* Asset Ledger Grid */}
+            <div className="lg:col-span-2 space-y-4">
+              <h2 className="text-xs font-black uppercase tracking-[0.3em] text-gray-400 ml-6 mb-4 font-bold italic">Secured Asset Ledger</h2>
+              {loading ? (
+                <div className="text-center py-20 text-blue-600 font-black text-xs uppercase animate-pulse tracking-widest">Scanning Repository...</div>
+              ) : evidence.length === 0 ? (
+                <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-20 text-center border border-gray-100 dark:border-gray-800 italic text-gray-400 text-sm">Vault contains zero forensic entities.</div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {evidence.map((item) => {
+                    const id = item._id || item.id || '';
+                    const filename = item.fileName || item.filename || 'Unknown Metadata';
+                    const fileUrl = `${API_BASE_URL}/evidence/${id}/download`;
+                    const ext = filename.split('.').pop()?.toLowerCase();
+                    const isImg = ['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext || '');
+
+                    return (
+                      <div key={id} className="bg-white dark:bg-gray-900 rounded-[2rem] border border-gray-100 dark:border-gray-800 p-6 hover:shadow-xl transition-all group overflow-hidden">
+                        <div className="h-40 bg-gray-50 dark:bg-gray-800 rounded-2xl mb-4 overflow-hidden border border-gray-100 dark:border-gray-800 flex items-center justify-center relative">
+                          {isImg ? (
+                            <img src={fileUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={filename} />
+                          ) : (
+                            <span className="text-4xl">📎</span>
+                          )}
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-sm">
+                            <button onClick={() => handleDownload(id, filename)} className="bg-white text-black font-black px-4 py-2 rounded-xl text-[9px] uppercase tracking-widest hover:bg-gray-100 transition">Download</button>
+                            <button onClick={() => handleDelete(id)} className="bg-red-600 text-white font-black px-4 py-2 rounded-xl text-[9px] uppercase tracking-widest hover:bg-red-700 transition">Purge</button>
+                          </div>
+                        </div>
+                        <div>
+                          <h3 className="font-extrabold text-gray-900 dark:text-white uppercase text-xs truncate italic tracking-tighter" title={filename}>{filename}</h3>
+                          <p className="text-[10px] text-gray-400 font-mono mt-1 uppercase tracking-tight">Case Dossier Index</p>
+                          <div className="mt-4 flex flex-col gap-1">
+                            <div className="text-[9px] font-black text-blue-600 uppercase tracking-widest">Metadata Hash</div>
+                            <div className="text-[10px] font-bold text-gray-600 dark:text-gray-400 truncate">{id}</div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Upload Form */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-        <h2 className="text-lg font-semibold text-kmuOrange mb-4">Upload Evidence</h2>
-        <form className="space-y-4" onSubmit={handleUpload} aria-label="Upload evidence form">
-          <div>
-            <label htmlFor="caseId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Case
-            </label>
-            <select
-              id="caseId"
-              className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              value={caseId}
-              onChange={e => setCaseId(e.target.value)}
-              required
-              aria-label="Case"
-            >
-              <option value="">Select case...</option>
-              {cases.map(c => (
-                <option key={c._id} value={c._id}>
-                  {c.description || 'No description'}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label htmlFor="evidenceFile" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              File
-            </label>
-            <input
-              id="evidenceFile"
-              type="file"
-              className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              onChange={e => setFile(e.target.files?.[0] || null)}
-              required
-              aria-label="Evidence file"
-            />
-          </div>
-          {error && <div className="text-red-600 text-sm" aria-live="polite">{error}</div>}
-          {success && <div className="text-kmuGreen text-sm" aria-live="polite">{success}</div>}
-          <button
-            type="submit"
-            className="bg-kmuGreen text-white px-4 py-2 rounded hover:bg-kmuOrange transition disabled:opacity-50"
-            disabled={uploading}
-            aria-label="Upload evidence"
-          >
-            {uploading ? "Uploading..." : "Upload"}
-          </button>
-        </form>
-      </div>
-
-      {/* Evidence List */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold mb-4 text-kmuOrange">Uploaded Evidence</h2>
-        {loading ? (
-          <div className="text-gray-500 dark:text-gray-400">Loading...</div>
-        ) : safeEvidence.length === 0 ? (
-          <div className="text-gray-400 dark:text-gray-500">No evidence available.</div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {safeEvidence.map((item) => {
-              const filename = getEvidenceFilename(item);
-              const id = getEvidenceId(item);
-              const fileType = getFileType(filename);
-              const fileUrl = `${API_BASE_URL}/evidence/${id}/download`;
-
-              return (
-                <div key={id} className="border border-gray-200 dark:border-gray-600 rounded-lg p-4">
-                  <div className="mb-3">
-                    <h3 className="font-medium text-gray-900 dark:text-white truncate" title={filename}>
-                      {filename}
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Case: {getCaseDescription(item)}
-                    </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Uploaded by: {getUploadedBy(item)}
-                    </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Date: {getEvidenceDate(item)}
-                    </p>
-                  </div>
-
-                  {/* File preview */}
-                  <div className="mb-3">
-                    {fileType === 'image' ? (
-                      <img
-                        src={fileUrl}
-                        alt={filename}
-                        className="max-w-full h-32 object-cover rounded border border-gray-200 dark:border-gray-600"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                    ) : fileType === 'pdf' ? (
-                      <iframe
-                        src={fileUrl}
-                        title={filename}
-                        className="w-full h-32 border border-gray-200 dark:border-gray-600 rounded"
-                      />
-                    ) : (
-                      <div className="w-full h-32 bg-gray-100 dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 flex items-center justify-center">
-                        <span className="text-gray-500 dark:text-gray-400 text-sm">No preview available</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-2">
-                    <button
-                      className="flex-1 bg-kmuGreen text-white px-3 py-1 rounded text-sm hover:bg-kmuOrange transition"
-                      onClick={() => handleDownload(id, filename)}
-                    >
-                      Download
-                    </button>
-                    <button
-                      className="flex-1 bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition"
-                      onClick={() => handleDelete(id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+      {notification?.isVisible && <Notification type={notification.type} message={notification.message} isVisible={notification.isVisible} onClose={hideNotification} />}
     </div>
   );
-} 
+}

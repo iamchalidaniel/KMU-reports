@@ -217,143 +217,168 @@ export default function AssistantDeanDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-serif">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div className="animate-in fade-in duration-300 space-y-6">
 
-
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Side Navigation */}
-          <div className="lg:w-1/4">
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden sticky top-24">
-              <nav className="flex flex-col">
-                <NavButton label="Dashboard" icon="📊" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
-                <NavButton label="Disciplinary Cases" icon="⚖️" active={activeTab === 'cases'} onClick={() => setActiveTab('cases')} />
-                <NavButton label="Manage Students" icon="🎓" active={activeTab === 'students'} onClick={() => setActiveTab('students')} />
-              </nav>
+          {/* Executive Command Bar */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-8 rounded-3xl border-t-4 border-purple-600 shadow-xl gap-4 text-sm">
+            <div>
+              <h1 className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white uppercase">Assistant Dean Oversight</h1>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">Student Affairs & Disciplinary Governance</p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={exportCasesToWord}
+                className="bg-kmuGreen text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:shadow-lg hover:shadow-emerald-500/20 transition flex items-center gap-2 group"
+              >
+                <span className="group-hover:animate-bounce">📄</span> Export Registry
+              </button>
+              <Link
+                href="/reports"
+                className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:shadow-lg hover:shadow-blue-500/20 transition flex items-center gap-2 group"
+              >
+                <span className="group-hover:animate-pulse">📂</span> Analytics Portal
+              </Link>
             </div>
           </div>
 
-          {/* Right Column Content */}
-          <div className="lg:w-3/4 space-y-6">
-
-            {activeTab === 'dashboard' && (
-              <div className="animate-in fade-in duration-300 space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <StatCard title="Total Students" value={totalStudentsCount} color="indigo" />
-                  <StatCard title="Total Cases" value={totalCasesCount} color="purple" />
-                  <StatCard title="Pending" value={pendingCases} color="orange" />
-                  <StatCard title="Resolved" value={resolvedCases} color="green" />
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 text-center">
-                    <h3 className="text-lg font-bold mb-6">Cases by Status</h3>
-                    <div className="h-64 flex items-center justify-center">
-                      <Doughnut data={statusChartData} options={{ maintainAspectRatio: false }} />
-                    </div>
-                  </div>
-                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                    <div className="flex justify-between items-center mb-6">
-                      <h3 className="text-lg font-bold">Common Offences</h3>
-                      <select
-                        className="bg-gray-50 dark:bg-gray-800 border-none rounded-lg px-3 py-1 text-xs outline-none"
-                        value={programFilter}
-                        onChange={(e) => setProgramFilter(e.target.value)}
-                      >
-                        <option value="">All Programs</option>
-                        {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
-                      </select>
-                    </div>
-                    <div className="h-64 flex items-center justify-center">
-                      <Bar data={offenseChartData} options={{ maintainAspectRatio: false }} />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                  <h3 className="text-lg font-bold mb-6">Most Common Offenders</h3>
-                  <div className="space-y-4">
-                    {topOffenders.length > 0 ? topOffenders.map(([name, count], i) => (
-                      <div key={i} className="flex justify-between items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors border-b border-gray-50 dark:border-gray-800 last:border-0">
-                        <span className="font-medium text-sm">{name}</span>
-                        <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase">{count} Cases</span>
-                      </div>
-                    )) : <p className="text-center text-gray-500 py-8 italic text-sm">No offender data found.</p>}
-                  </div>
-                </div>
-
-                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                  <h3 className="text-lg font-bold mb-4">Export Reports</h3>
-                  <div className="flex gap-4">
-                    <button onClick={exportCasesToWord} className="bg-kmuGreen text-white px-6 py-2 rounded-lg font-bold hover:opacity-90 transition">Export All Cases (DOCX)</button>
-                    <Link href="/reports" className="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:opacity-90 transition">Analytics Portal</Link>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'cases' && (
-              <div className="animate-in fade-in duration-300 space-y-6">
-                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                  <div className="flex justify-between items-center mb-6 text-sm">
-                    <h2 className="text-xl font-bold">Pending Cases Review</h2>
-                    <input
-                      placeholder="Search cases..."
-                      className="bg-gray-100 dark:bg-gray-800 border-none rounded-lg px-4 py-2 min-w-[250px]"
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                    />
-                  </div>
-                  <div className="overflow-x-auto border border-gray-100 dark:border-gray-800 rounded-xl">
-                    <table className="w-full text-xs">
-                      <thead className="bg-gray-50 dark:bg-gray-800 uppercase font-bold text-gray-500">
-                        <tr>
-                          <th className="px-4 py-4 text-left">Student</th>
-                          <th className="px-4 py-4 text-left">Offense</th>
-                          <th className="px-4 py-4 text-center">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                        {filteredCases
-                          .filter(c => c.status === 'Open' || c.status === 'Under Investigation')
-                          .slice(0, 15)
-                          .map((c, i) => (
-                            <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
-                              <td className="px-4 py-4">
-                                <div className="font-bold">{c.student?.fullName}</div>
-                                <div className="text-[10px] text-gray-400">{c.student?.studentId} • {c.student?.program}</div>
-                              </td>
-                              <td className="px-4 py-4">{c.offenseType}</td>
-                              <td className="px-4 py-4 text-center">
-                                <span className="px-2 py-1 rounded-full bg-orange-100 text-orange-700 font-bold">{c.status}</span>
-                              </td>
-                            </tr>
-                          ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'students' && (
-              <div className="animate-in fade-in duration-300 space-y-6">
-                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 text-sm text-center py-20">
-                  <h2 className="text-2xl font-bold mb-4">Student Management</h2>
-                  <p className="text-gray-500 mb-8 max-w-sm mx-auto">Access the full student registry to manage records, enrollments, and disciplinary histories.</p>
-                  <Link href="/students" className="bg-purple-600 text-white px-8 py-3 rounded-xl font-bold hover:shadow-lg transition inline-block">Open Student Registry</Link>
-                </div>
-              </div>
-            )}
-
-
+          {/* Strategic Metrics */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard title="Total Students" value={totalStudentsCount} color="indigo" />
+            <StatCard title="Total Cases" value={totalCasesCount} color="purple" />
+            <StatCard title="Open Inquiries" value={pendingCases} color="orange" />
+            <StatCard title="Resolved" value={resolvedCases} color="green" />
           </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 text-sm">
+            {/* Case Status Distribution */}
+            <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
+              <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-8 font-bold">Case Status Distribution</h3>
+              <div className="h-64 flex items-center justify-center">
+                <Doughnut
+                  data={statusChartData}
+                  options={{
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10, weight: 'bold' } } } }
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Offense Frequency */}
+            <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
+              <div className="flex justify-between items-center mb-8">
+                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 font-bold">Primary Offense Index</h3>
+                <select
+                  className="bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-purple-500 transition-all font-sans"
+                  value={programFilter}
+                  onChange={(e) => setProgramFilter(e.target.value)}
+                >
+                  <option value="">All Academic Units</option>
+                  {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
+                </select>
+              </div>
+              <div className="h-64 flex items-center justify-center">
+                <Bar
+                  data={offenseChartData}
+                  options={{
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 text-sm">
+            {/* Recurrent Offenders */}
+            <div className="lg:col-span-1 bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
+              <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-6 font-bold">Recurrent Subjects</h3>
+              <div className="space-y-4 font-sans">
+                {topOffenders.length > 0 ? topOffenders.map(([name, count], i) => (
+                  <div key={i} className="flex justify-between items-center p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-2xl transition-colors border-b border-gray-50 dark:border-gray-800 last:border-0 group">
+                    <span className="font-bold text-xs tracking-tight text-gray-700 dark:text-gray-300 group-hover:text-purple-600 transition-colors uppercase">{name}</span>
+                    <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter">{count} Incidents</span>
+                  </div>
+                )) : <p className="text-center text-gray-500 py-12 italic text-sm">No offender telemetry found.</p>}
+              </div>
+            </div>
+
+            {/* Case Registry Ledger */}
+            <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
+              <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <h2 className="text-lg font-black uppercase tracking-tighter">Case Registry Ledger</h2>
+                <div className="relative w-full md:w-64 font-sans">
+                  <input
+                    placeholder="Search ledger..."
+                    className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-5 py-3 text-xs w-full focus:ring-2 focus:ring-purple-500 transition-all shadow-inner"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="overflow-x-auto flex-1 font-sans">
+                <table className="w-full text-xs">
+                  <thead className="bg-gray-50/50 dark:bg-gray-800/50 text-[10px] font-black uppercase text-gray-400 tracking-widest">
+                    <tr>
+                      <th className="px-8 py-5 text-left">Subject / Identification</th>
+                      <th className="px-8 py-5 text-left">Classification</th>
+                      <th className="px-8 py-5 text-center">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                    {filteredCases
+                      .filter(c => c.status === 'Open' || c.status === 'Under Investigation')
+                      .slice(0, 8)
+                      .map((c, i) => (
+                        <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 group transition-colors cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
+                          <td className="px-8 py-5">
+                            <div className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-purple-600 transition-colors uppercase">{c.student?.fullName}</div>
+                            <div className="text-[10px] text-gray-400 font-mono mt-0.5">{c.student?.studentId} • {c.student?.program}</div>
+                          </td>
+                          <td className="px-8 py-5">
+                            <div className="text-gray-700 dark:text-gray-300 font-medium uppercase">{c.offenseType}</div>
+                          </td>
+                          <td className="px-8 py-5 text-center">
+                            <span className="px-3 py-1 rounded-lg bg-orange-100 dark:bg-orange-950/30 text-orange-700 dark:text-orange-400 font-black text-[9px] uppercase tracking-tighter border border-orange-200 dark:border-orange-900/50">{c.status}</span>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+                {filteredCases.filter(c => c.status === 'Open' || c.status === 'Under Investigation').length === 0 && (
+                  <div className="text-center py-20 text-gray-400 italic text-sm">No active inquiries found.</div>
+                )}
+              </div>
+              <div className="p-6 bg-gray-50/30 dark:bg-gray-800/20 text-center border-t border-gray-100 dark:border-gray-800">
+                <Link href="/students" className="text-[10px] font-black text-purple-600 hover:text-purple-700 uppercase tracking-[0.2em] transition-all">Expand Student Registry →</Link>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
       {notification?.isVisible && (
         <Notification type={notification.type} message={notification.message} isVisible={notification.isVisible} onClose={hideNotification} />
       )}
+    </div>
+  );
+}
+
+function StatCard({ title, value, color }: any) {
+  const colors: any = {
+    indigo: 'text-indigo-700 bg-indigo-50/30 border-indigo-100 hover:bg-indigo-50 dark:bg-indigo-950/10 dark:border-indigo-900/50',
+    purple: 'text-purple-700 bg-purple-50/30 border-purple-100 hover:bg-purple-50 dark:bg-purple-950/10 dark:border-purple-900/50',
+    orange: 'text-orange-700 bg-orange-50/30 border-orange-100 hover:bg-orange-50 dark:bg-orange-950/10 dark:border-orange-900/50',
+    green: 'text-green-700 bg-green-50/30 border-green-100 hover:bg-green-50 dark:bg-green-950/10 dark:border-green-900/50'
+  };
+  return (
+    <div className={`bg-white dark:bg-gray-900 rounded-3xl shadow-sm border p-8 transition-all duration-300 ${colors[color]}`}>
+      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">{title}</div>
+      <div className="text-4xl font-black tracking-tight">{value}</div>
     </div>
   );
 }
@@ -370,21 +395,6 @@ function NavButton({ label, icon, active, onClick }: any) {
       <span className="text-xl">{icon}</span>
       <span className="font-semibold">{label}</span>
     </button>
-  );
-}
-
-function StatCard({ title, value, color }: any) {
-  const colors: any = {
-    indigo: 'text-indigo-600 border-indigo-100',
-    purple: 'text-purple-600 border-purple-100',
-    orange: 'text-orange-600 border-orange-100',
-    green: 'text-green-600 border-green-100'
-  };
-  return (
-    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border ${colors[color]} p-5`}>
-      <div className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mb-1">{title}</div>
-      <div className={`text-3xl font-bold ${colors[color].split(' ')[0]}`}>{value}</div>
-    </div>
   );
 }
 
