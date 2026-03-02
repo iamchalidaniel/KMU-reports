@@ -42,20 +42,20 @@ export default function SplashPage() {
       <div className="text-center flex-grow flex flex-col items-center justify-center">
         {/* Logo */}
         <div className="mb-8 animate-fade-in">
-          <img 
-            src="/kmu_logo.svg" 
-            alt="KMU Logo" 
+          <img
+            src="/kmu_logo.svg"
+            alt="KMU Logo"
             className="h-28 w-28 mx-auto object-contain drop-shadow-lg"
           />
         </div>
 
         {/* Main Text */}
-        <div className="text-gray-900 dark:text-white mb-12">
-          <h1 className="text-5xl md:text-6xl font-bold mb-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            CampusCare
+        <div className="text-gray-900 dark:text-white mb-10 translate-y-2">
+          <h1 className="text-6xl md:text-7xl font-extrabold mb-2 animate-fade-in tracking-tight" style={{ animationDelay: '0.2s' }}>
+            Campus<span className="text-kmuGreen">Care</span>
           </h1>
-          <p className="text-lg md:text-xl text-gray-700 dark:text-gray-300 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-            AI-Powered Campus Safety Reporting
+          <p className="text-lg md:text-xl text-gray-500 dark:text-gray-400 font-medium animate-fade-in" style={{ animationDelay: '0.4s' }}>
+            AI-Powered Campus Safety Management
           </p>
         </div>
 
@@ -72,9 +72,9 @@ export default function SplashPage() {
         </div>
 
         {/* Progress Bar */}
-        <div className="w-64 h-1 bg-gray-200 dark:bg-gray-700 rounded-full mt-8 overflow-hidden">
-          <div 
-            className="h-full bg-gradient-to-r from-green-400 to-green-600 transition-all duration-100 ease-linear"
+        <div className="w-64 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full mt-8 overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-kmuGreen to-teal-500 transition-all duration-100 ease-linear shadow-[0_0_10px_rgba(16,185,129,0.5)]"
             style={{ width: `${progress}%` }}
           ></div>
         </div>

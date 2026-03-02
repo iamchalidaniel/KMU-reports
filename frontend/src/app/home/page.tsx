@@ -29,33 +29,33 @@ export default function HomePage() {
   }, [router, searchParams]);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950">
+    <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col">
       {/* Navigation Bar */}
-      <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-2 flex items-center justify-between">
+      <nav className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
           <Link href="/home" className="flex items-center space-x-2">
-            <img 
-              src="/kmu_logo.svg" 
-              alt="KMU Logo" 
+            <img
+              src="/kmu_logo.svg"
+              alt="KMU Logo"
               width={32}
               height={32}
               className="h-8 w-8 object-contain"
             />
             <div>
-              <div className="text-base font-bold text-gray-900 dark:text-white">CampusCare</div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">AI-Powered Campus Safety</div>
+              <div className="text-base font-bold text-gray-900 dark:text-white leading-tight">CampusCare</div>
+              <div className="text-[10px] text-gray-500 dark:text-gray-400 font-medium tracking-tight">AI-Powered Campus Safety</div>
             </div>
           </Link>
-          <div className="flex items-center space-x-4">
-            <Link 
+          <div className="flex items-center space-x-1 sm:space-x-4">
+            <Link
               href="/login"
-              className="px-6 py-2 text-gray-900 dark:text-white font-medium hover:text-kmuGreen transition-colors"
+              className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 font-semibold hover:text-kmuGreen transition-colors"
             >
               Login
             </Link>
-            <Link 
+            <Link
               href="/public/report"
-              className="px-6 py-2 bg-kmuGreen text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
+              className="px-5 py-2 bg-kmuGreen text-white rounded-full text-sm font-bold hover:bg-green-700 transition-all active:scale-95 shadow-lg shadow-green-500/20"
             >
               Create Report
             </Link>
@@ -64,83 +64,78 @@ export default function HomePage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="py-16 md:py-24 bg-white dark:bg-gray-950">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="mb-8">
-              {/* Logo removed from hero; navbar already shows it */}
-              <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-2">CampusCare</h1>
-              <p className="text-gray-600 dark:text-gray-400 text-lg">Secure Campus Safety Reporting</p>
-            </div>
-            <p className="text-xl text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-              Report incidents, maintenance issues, and sensitive concerns safely and anonymously.
-            </p>
-            <p className="text-gray-600 dark:text-gray-400 text-lg mb-12">
-              AI-assisted categorization, secure tracking, and real-time resolution.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link 
-                href="/public/report"
-                className="px-8 py-3 bg-kmuGreen text-white rounded-lg font-bold text-lg hover:bg-green-700 transition-colors"
-              >
-                Create Report
-              </Link>
-              <Link 
-                href="/login"
-                className="px-8 py-3 border-2 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg font-bold text-lg hover:border-kmuGreen hover:text-kmuGreen transition-colors"
-              >
-                Login
-              </Link>
-            </div>
+      <section className="relative py-20 md:py-32 overflow-hidden bg-white dark:bg-gray-950">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl">
+          <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-kmuGreen/5 rounded-full blur-[120px]"></div>
+          <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-500/5 rounded-full blur-[120px]"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
+          <div className="inline-flex items-center px-3 py-1 rounded-full bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-800 text-kmuGreen text-xs font-bold mb-8 animate-in fade-in slide-in-from-bottom-2">
+            ✨ AI-POWERED CAMPUS SAFETY MANGEMENT
+          </div>
+          <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 dark:text-white mb-6 tracking-tight leading-[1.1]">
+            Your Safety, <span className="bg-gradient-to-r from-kmuGreen to-teal-500 bg-clip-text text-transparent">Our Priority.</span>
+          </h1>
+          <p className="text-xl text-gray-600 dark:text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed font-medium">
+            Join thousands of students and staff in creating a safer, more transparent campus environment at Kapasa Makasa University.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Link
+              href="/public/report"
+              className="w-full sm:w-auto px-10 py-4 bg-kmuGreen text-white rounded-full font-bold text-lg hover:bg-green-700 transition-all hover:scale-105 shadow-xl shadow-green-500/20 active:scale-95"
+            >
+              Start a Report
+            </Link>
+            <Link
+              href="/login"
+              className="w-full sm:w-auto px-10 py-4 border-2 border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white rounded-full font-bold text-lg hover:border-kmuGreen hover:text-kmuGreen transition-all active:scale-95 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm"
+            >
+              Sign In
+            </Link>
           </div>
         </div>
       </section>
 
       {/* Feature Cards Section */}
-      <section className="py-20 md:py-28 bg-gray-50 dark:bg-gray-900">
-        <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center text-gray-900 dark:text-white mb-16">Comprehensive Reporting Solutions</h2>
-          <p className="text-center text-gray-600 dark:text-gray-400 text-lg mb-16 max-w-3xl mx-auto">
-            Secure, anonymous, and AI-enhanced reporting for all campus safety concerns
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <section className="py-24 bg-gray-50 dark:bg-gray-900/50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-20">
+            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">How it works</h2>
+            <div className="h-1.5 w-24 bg-kmuGreen mx-auto rounded-full"></div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
             {/* Card 1: Security */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-8 hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 bg-kmuGreen/10 rounded-lg flex items-center justify-center mb-6">
-                <svg className="w-8 h-8 text-kmuGreen" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
+            <div className="bg-white dark:bg-gray-800 p-8 rounded-3xl border border-gray-100 dark:border-gray-700 hover:shadow-2xl transition-all group">
+              <div className="w-14 h-14 bg-red-50 dark:bg-red-900/20 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+                <span className="text-3xl">🛡️</span>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Security Incidents</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Report suspicious activity, theft, vandalism, assault, and other security concerns
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Security Incidents</h3>
+              <p className="text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
+                Instant reporting for suspicious activity, safety hazards, and emergency concerns on campus.
               </p>
             </div>
 
             {/* Card 2: Maintenance */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-8 hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 bg-kmuGreen/10 rounded-lg flex items-center justify-center mb-6">
-                <svg className="w-8 h-8 text-kmuGreen" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 17v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.381z" clipRule="evenodd" />
-                </svg>
+            <div className="bg-white dark:bg-gray-800 p-8 rounded-3xl border border-gray-100 dark:border-gray-700 hover:shadow-2xl transition-all group">
+              <div className="w-14 h-14 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+                <span className="text-3xl">🔧</span>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Maintenance Issues</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Report plumbing, electrical, HVAC, and facility maintenance needs
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Maintenance</h3>
+              <p className="text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
+                Track and resolve hostel plumbing, electrical issues, and general facility maintenance reports.
               </p>
             </div>
 
             {/* Card 3: Anonymous */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-8 hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 bg-kmuGreen/10 rounded-lg flex items-center justify-center mb-6">
-                <svg className="w-8 h-8 text-kmuGreen" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                  <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-                </svg>
+            <div className="bg-white dark:bg-gray-800 p-8 rounded-3xl border border-gray-100 dark:border-gray-700 hover:shadow-2xl transition-all group">
+              <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+                <span className="text-3xl">👁️</span>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Anonymous Reporting</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Safely report academic misconduct, harassment, and other sensitive concerns
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Confidentiality</h3>
+              <p className="text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
+                Submit sensitive reports anonymously with encrypted tracking and secure case management.
               </p>
             </div>
           </div>
@@ -151,9 +146,9 @@ export default function HomePage() {
       <footer className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-300 py-12">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center mb-4">
-            <img 
-              src="/kmu_logo.svg" 
-              alt="KMU Logo" 
+            <img
+              src="/kmu_logo.svg"
+              alt="KMU Logo"
               className="w-8 h-8 mr-3"
             />
             <span className="text-lg font-bold">CampusCare</span>

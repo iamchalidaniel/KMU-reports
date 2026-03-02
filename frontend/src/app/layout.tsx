@@ -86,11 +86,14 @@ function AppContent({ isLogin, isPublic, children }: { isLogin: boolean; isPubli
       >
         {/* Main Navbar */}
         {shouldShowNav && (
-          <Suspense fallback={<div className="h-16 border-b border-gray-200 dark:border-gray-700" />}>
+          <Suspense fallback={<div className="h-14 border-b border-gray-200 dark:border-gray-700" />}>
             <Navbar />
           </Suspense>
         )}
-        <main className="flex-1 px-2 py-2 md:px-6 md:py-8 overflow-x-hidden">
+        <main className={clsx(
+          "flex-1 overflow-x-hidden",
+          shouldShowNav ? "px-2 py-2 md:px-6 md:py-8" : "px-0 py-0"
+        )}>
           <Suspense fallback={<LoadingFallback />}>
             {children}
           </Suspense>

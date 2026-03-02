@@ -29,9 +29,9 @@ export default function Navbar() {
     if (!user) return null;
 
     return (
-        <nav className="sticky top-0 z-30 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm transition-all duration-200">
+        <nav className="sticky top-0 z-30 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 shadow-sm transition-all duration-200">
             <div className="max-w-full px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between h-16 items-center">
+                <div className="flex justify-between h-14 items-center">
                     {/* Left Side: Mobile Menu Button & Brand */}
                     <div className="flex items-center gap-4">
                         <button

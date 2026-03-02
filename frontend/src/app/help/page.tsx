@@ -6,11 +6,14 @@ import { useState } from 'react';
 
 export default function HelpPage() {
   return (
-    <section className="max-w-4xl mx-auto">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold mb-4 text-kmuGreen">Help & Documentation</h1>
-        <p className="text-gray-700 dark:text-gray-300 text-lg">
-          Welcome to CampusCare! Your comprehensive campus incident reporting and tracking system.
+    <div className="max-w-5xl mx-auto px-6 py-12">
+      <div className="text-center mb-16">
+        <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-100 dark:border-emerald-800 text-kmuGreen text-xs font-bold mb-6">
+          📖 USER DOCUMENTATION & SUPPORT
+        </div>
+        <h1 className="text-4xl md:text-6xl font-extrabold mb-6 text-gray-900 dark:text-white tracking-tight">Help & <span className="text-kmuGreen">Support</span></h1>
+        <p className="text-gray-600 dark:text-gray-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+          Need assistance? Our comprehensive guides and FAQs are here to help you navigate CampusCare with ease.
         </p>
       </div>
 
@@ -40,8 +43,8 @@ export default function HelpPage() {
         </div>
       </div>
 
-      
-        
+
+
 
       {/* Key Features */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
@@ -119,11 +122,11 @@ export default function HelpPage() {
         <h2 className="text-2xl font-semibold mb-4 text-kmuOrange">👥 Staff Cases</h2>
         <div className="space-y-4">
           <p className="text-gray-600 dark:text-gray-400">
-            CampusCare now supports incident reports for both students and staff members. 
-            This feature allows you to manage security concerns, facility issues, conduct violations, and other 
+            CampusCare now supports incident reports for both students and staff members.
+            This feature allows you to manage security concerns, facility issues, conduct violations, and other
             campus safety matters involving all university community members.
           </p>
-          
+
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <h3 className="text-lg font-medium mb-3 text-kmuGreen">Staff Case Features</h3>
@@ -146,11 +149,11 @@ export default function HelpPage() {
               </ul>
             </div>
           </div>
-          
+
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded p-4">
             <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">Getting Started with Staff Cases</h4>
             <p className="text-blue-700 dark:text-blue-300 text-sm">
-              To create a staff case, navigate to "Cases" → "New Case" and select "Staff Case" from the case type options. 
+              To create a staff case, navigate to "Cases" → "New Case" and select "Staff Case" from the case type options.
               Then search for the staff member by name or ID, fill in the case details, and submit.
             </p>
           </div>
@@ -171,6 +174,6 @@ export default function HelpPage() {
           </p>
         </div>
       </footer>
-    </section>
+    </div>
   );
 }
