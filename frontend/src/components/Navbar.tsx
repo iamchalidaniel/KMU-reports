@@ -82,17 +82,8 @@ export default function Navbar() {
                                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                                         onClick={() => setDropdownOpen(false)}
                                     >
-                                        <span className="text-lg">👤</span>
-                                        <span>User profile</span>
-                                    </Link>
-
-                                    <Link
-                                        href="/profile"
-                                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                        onClick={() => setDropdownOpen(false)}
-                                    >
                                         <span className="text-lg">⚙️</span>
-                                        <span>Settings</span>
+                                        <span>Profile & Settings</span>
                                     </Link>
 
                                     <div className="md:hidden border-t border-gray-100 dark:border-gray-700 my-1"></div>
