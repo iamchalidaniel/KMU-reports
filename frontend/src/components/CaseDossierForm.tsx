@@ -5,6 +5,8 @@ import SignatureCanvas from 'react-signature-canvas';
 import { API_BASE_URL } from '../config/constants';
 import { authHeaders } from '../utils/api';
 import SmartStudentSearch from './SmartStudentSearch';
+import Notification, { useNotification } from './Notification';
+import ConfirmDialog from './ConfirmDialog';
 
 interface Particulars {
     name: string; address: string; phone: string; yearOfStudy: string; programOfStudy: string;
@@ -70,6 +72,8 @@ interface CaseDossierFormProps {
 }
 
 export default function CaseDossierForm({ onSuccess, onCancel, initialData }: CaseDossierFormProps) {
+    const { notification, showNotification, hideNotification } = useNotification();
+    const [showConfirmDiscard, setShowConfirmDiscard] = useState(false);
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
 
@@ -171,10 +175,12 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
     };
 
     const clearDraft = () => {
-        if (window.confirm('Delete this case draft? All entered information will be lost.')) {
-            localStorage.removeItem('kmu_case_draft');
-            onCancel();
-        }
+        setShowConfirmDiscard(true);
+    };
+
+    const confirmClearDraft = () => {
+        localStorage.removeItem('kmu_case_draft');
+        onCancel();
     };
 
     const handleFinalSubmit = async () => {
@@ -195,7 +201,7 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
             if (!res.ok) throw new Error(await res.text());
             localStorage.removeItem('kmu_case_draft');
             onSuccess();
-        } catch (err: any) { alert(`Error: ${err.message}`); } finally { setLoading(false); }
+        } catch (err: any) { showNotification('error', `Error: ${err.message}`); } finally { setLoading(false); }
     };
 
     return (
@@ -334,7 +340,7 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
 
                 {step === 2 && (
                     <div className="animate-in fade-in slide-in-from-right-8 duration-500">
-                        <StatementList formData={formData} setFormData={updateNested} />
+                        <StatementList formData={formData} setFormData={updateNested} showNotification={showNotification} />
                     </div>
                 )}
 
@@ -386,6 +392,25 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
                     </button>
                 )}
             </div>
+
+            <ConfirmDialog
+                isOpen={showConfirmDiscard}
+                title="Discard Draft"
+                message="Are you sure you want to delete this case draft? All entered information will be lost."
+                confirmLabel="Discard Draft"
+                onConfirm={confirmClearDraft}
+                onCancel={() => setShowConfirmDiscard(false)}
+                type="danger"
+            />
+
+            {notification?.isVisible && (
+                <Notification
+                    type={notification.type}
+                    message={notification.message}
+                    isVisible={notification.isVisible}
+                    onClose={hideNotification}
+                />
+            )}
         </div>
     );
 }
@@ -405,7 +430,7 @@ function Field({ label, value, onChange, type = "text", placeholder = "" }: { la
     );
 }
 
-function StatementList({ formData, setFormData }: { formData: FormData, setFormData: (path: string, value: any) => void }) {
+function StatementList({ formData, setFormData, showNotification }: { formData: FormData, setFormData: (path: string, value: any) => void, showNotification: any }) {
     const [activeStatement, setActiveStatement] = useState<Statement | null>(null);
     const [isRecording, setIsRecording] = useState(false);
     const [isTranscribing, setIsTranscribing] = useState(false);
@@ -449,7 +474,7 @@ function StatementList({ formData, setFormData }: { formData: FormData, setFormD
             mediaRecorder.current.start();
             setIsRecording(true);
             if (recognition.current) { recognition.current.start(); setIsTranscribing(true); }
-        } catch (err) { alert('Microphone access denied'); }
+        } catch (err) { showNotification('error', 'Microphone access denied'); }
     };
 
     const stopRecording = () => {

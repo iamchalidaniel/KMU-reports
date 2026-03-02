@@ -21,7 +21,7 @@ export default function LoginPage() {
   useEffect(() => {
     performanceMonitor.startTimer('login-page-load');
     addResourceHints();
-    
+
     return () => {
       performanceMonitor.endTimer('login-page-load');
     };
@@ -30,13 +30,13 @@ export default function LoginPage() {
   // Check online status
   useEffect(() => {
     setIsOnline(navigator.onLine);
-    
+
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
-    
+
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-    
+
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
@@ -48,7 +48,24 @@ export default function LoginPage() {
     if (user) {
       // Check if we're already on a valid page for this user
       const currentPath = window.location.pathname;
-      const validPaths = ['/admin', '/academic-dashboard', '/security-dashboard', '/dashboard', '/cases', '/students', '/reports', '/evidence', '/audit', '/profile', '/help'];
+      const validPaths = [
+        '/admin',
+        '/assistant-dean-dashboard',
+        '/chief-security-officer-dashboard',
+        '/dean-of-students-dashboard',
+        '/secretary-dashboard',
+        '/security-dashboard',
+        '/hall-warden-dashboard',
+        '/electrician-dashboard',
+        '/student-dashboard',
+        '/cases',
+        '/students',
+        '/reports',
+        '/evidence',
+        '/audit',
+        '/profile',
+        '/help'
+      ];
 
       // If we're on a valid page, don't redirect
       if (validPaths.some(path => currentPath.startsWith(path))) {
@@ -69,8 +86,14 @@ export default function LoginPage() {
         router.push('/secretary-dashboard');
       } else if (role === 'security_officer') {
         router.push('/security-dashboard');
+      } else if (role === 'hall_warden') {
+        router.push('/hall-warden-dashboard');
+      } else if (role === 'electrician') {
+        router.push('/electrician-dashboard');
+      } else if (role === 'student') {
+        router.push('/student-dashboard');
       } else {
-        router.push('/dashboard');
+        router.push('/home');
       }
     }
   }, [user, router]);
@@ -84,7 +107,7 @@ export default function LoginPage() {
 
     try {
       let success = false;
-      
+
       if (isOnline && authIsOnline) {
         success = await login(username, password);
       } else {
@@ -140,11 +163,10 @@ export default function LoginPage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
-                  className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-0 focus:border-kmuGreen transition-colors ${
-                    theme === 'dark' 
-                      ? 'border-gray-700 bg-gray-800 text-white placeholder-gray-500' 
+                  className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-0 focus:border-kmuGreen transition-colors ${theme === 'dark'
+                      ? 'border-gray-700 bg-gray-800 text-white placeholder-gray-500'
                       : 'border-gray-300 bg-gray-50 text-gray-900 placeholder-gray-500'
-                  }`}
+                    }`}
                   placeholder="Enter your username"
                   autoComplete="off"
                   autoCorrect="off"
@@ -164,11 +186,10 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-0 focus:border-kmuGreen transition-colors ${
-                    theme === 'dark' 
-                      ? 'border-gray-700 bg-gray-800 text-white placeholder-gray-500' 
+                  className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-0 focus:border-kmuGreen transition-colors ${theme === 'dark'
+                      ? 'border-gray-700 bg-gray-800 text-white placeholder-gray-500'
                       : 'border-gray-300 bg-gray-50 text-gray-900 placeholder-gray-500'
-                  }`}
+                    }`}
                   placeholder="Enter your password"
                   autoComplete="new-password"
                   autoCorrect="off"
@@ -195,17 +216,16 @@ export default function LoginPage() {
                     Offline mode available
                   </span>
                 )}
-            </div>
+              </div>
 
               {/* Submit Button */}
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full py-3 px-4 rounded-lg font-bold text-lg transition-all duration-200 ${
-                  loading 
-                    ? 'bg-gray-400 text-white cursor-not-allowed' 
+                className={`w-full py-3 px-4 rounded-lg font-bold text-lg transition-all duration-200 ${loading
+                    ? 'bg-gray-400 text-white cursor-not-allowed'
                     : 'bg-kmuGreen text-white hover:bg-green-700 active:scale-95'
-                }`}
+                  }`}
               >
                 {loading ? (
                   <div className="flex items-center justify-center">
@@ -216,13 +236,13 @@ export default function LoginPage() {
                   'Sign In'
                 )}
               </button>
-                      
+
               {/* Register Link */}
               <div className="text-center text-sm">
                 <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                   No account?{' '}
-                  <a 
-                    href="/student-register" 
+                  <a
+                    href="/student-register"
                     className="text-kmuGreen hover:text-green-700 font-semibold transition-colors"
                   >
                     Register here

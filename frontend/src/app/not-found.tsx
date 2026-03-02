@@ -16,7 +16,10 @@ export default function NotFound() {
       else if (user.role === 'assistant_dean') router.replace('/assistant-dean-dashboard');
       else if (user.role === 'secretary') router.replace('/secretary-dashboard');
       else if (user.role === 'security_officer') router.replace('/security-dashboard');
-      else router.replace('/login');
+      else if (user.role === 'hall_warden') router.replace('/hall-warden-dashboard');
+      else if (user.role === 'electrician') router.replace('/electrician-dashboard');
+      else if (user.role === 'student') router.replace('/student-dashboard');
+      else router.replace('/home');
     }
   }, [user, router]);
 

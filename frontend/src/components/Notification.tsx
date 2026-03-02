@@ -10,19 +10,29 @@ interface NotificationProps {
   duration?: number;
 }
 
-export default function Notification({ 
-  type, 
-  message, 
-  isVisible, 
-  onClose, 
-  duration = 4000 
+export default function Notification({
+  type,
+  message,
+  isVisible,
+  onClose,
+  duration = 4000
 }: NotificationProps) {
+  const [progress, setProgress] = useState(100);
+
   useEffect(() => {
     if (isVisible) {
-      const timer = setTimeout(() => {
-        onClose();
-      }, duration);
-      return () => clearTimeout(timer);
+      setProgress(100);
+      const startTime = Date.now();
+      const interval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(0, 100 - (elapsed / duration) * 100);
+        setProgress(remaining);
+        if (remaining <= 0) {
+          clearInterval(interval);
+          onClose();
+        }
+      }, 10);
+      return () => clearInterval(interval);
     }
   }, [isVisible, duration, onClose]);
 
@@ -54,17 +64,25 @@ export default function Notification({
   const getStyles = () => {
     switch (type) {
       case 'success':
-        return 'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400';
+        return 'bg-white dark:bg-gray-900 border-green-200 dark:border-green-900/50 text-green-800 dark:text-green-400';
       case 'error':
-        return 'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400';
+        return 'bg-white dark:bg-gray-900 border-red-200 dark:border-red-900/50 text-red-800 dark:text-red-400';
       case 'info':
-        return 'bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-400';
+        return 'bg-white dark:bg-gray-900 border-blue-200 dark:border-blue-900/50 text-blue-800 dark:text-blue-400';
+    }
+  };
+
+  const getProgressColor = () => {
+    switch (type) {
+      case 'success': return 'bg-green-500';
+      case 'error': return 'bg-red-500';
+      case 'info': return 'bg-blue-500';
     }
   };
 
   return (
-    <div className="fixed top-4 right-4 z-50 max-w-sm w-full">
-      <div className={`border rounded-lg p-4 shadow-lg ${getStyles()}`}>
+    <div className="fixed top-6 right-6 z-[2000] max-w-sm w-full animate-in slide-in-from-right-8 fade-in duration-300">
+      <div className={`relative border rounded-xl p-4 shadow-2xl overflow-hidden ${getStyles()}`}>
         <div className="flex items-start">
           <div className="flex-shrink-0">
             {getIcon()}
@@ -75,13 +93,21 @@ export default function Notification({
           <div className="ml-4 flex-shrink-0">
             <button
               onClick={onClose}
-              className="inline-flex text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none focus:text-gray-600 dark:focus:text-gray-300"
+              className="inline-flex text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
             >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="absolute bottom-0 left-0 h-1 bg-gray-100 dark:bg-gray-800 w-full overflow-hidden">
+          <div
+            className={`h-full transition-all duration-100 ease-linear ${getProgressColor()}`}
+            style={{ width: `${progress}%` }}
+          />
         </div>
       </div>
     </div>
