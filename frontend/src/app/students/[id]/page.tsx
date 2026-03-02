@@ -9,6 +9,7 @@ import { API_BASE_URL } from '../../../config/constants';
 import { OFFENSE_TYPES, SEVERITY_LEVELS } from '../../../config/constants';
 import { authHeaders } from '../../../utils/api';
 import { saveAs } from 'file-saver';
+import CaseDossierForm, { FormData } from "../../../components/CaseDossierForm";
 
 
 function DetailItem({ label, value, className = "" }: { label: string; value: any; className?: string }) {
@@ -466,111 +467,42 @@ export default function StudentDetailsPage({ params }: { params: { id: string } 
 
                         {/* Add Case Tab */}
                         {activeTab === 'add-case' && (
-                            <div>
-                                <h3 className="text-lg font-semibold text-kmuOrange mb-4">Add New Disciplinary Case</h3>
-                                <form onSubmit={handleNewCaseSubmit} className="space-y-4">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">
-                                                Incident Date
-                                            </label>
-                                            <input
-                                                type="date"
-                                                value={newCase.incidentDate}
-                                                onChange={(e) => setNewCase({ ...newCase, incidentDate: e.target.value })}
-                                                className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                                required
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">
-                                                Offense Type
-                                            </label>
-                                            <select
-                                                value={newCase.offenseType}
-                                                onChange={e => handleOffenseTypeChange(e.target.value)}
-                                                className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                                required
-                                            >
-                                                <option value="">Select an offense type</option>
-                                                {OFFENSE_TYPES.map(offense => (
-                                                    <option key={offense.value} value={offense.value}>
-                                                        {offense.label}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            {offenseTypeDescription && (
-                                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                                    {offenseTypeDescription}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">
-                                            Severity
-                                        </label>
-                                        <select
-                                            value={newCase.severity}
-                                            onChange={(e) => setNewCase({ ...newCase, severity: e.target.value })}
-                                            className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                            required
-                                        >
-                                            {SEVERITY_LEVELS.map(severity => (
-                                                <option key={severity.value} value={severity.value.toLowerCase()}>
-                                                    {severity.label}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">
-                                            Description
-                                        </label>
-                                        <textarea
-                                            value={newCase.description}
-                                            onChange={(e) => setNewCase({ ...newCase, description: e.target.value })}
-                                            className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                            rows={4}
-                                            placeholder={offenseTypeDescription || "Provide a detailed description of the incident..."}
-                                            required
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">
-                                            Sanctions (Optional)
-                                        </label>
-                                        <textarea
-                                            value={newCase.sanctions}
-                                            onChange={(e) => setNewCase({ ...newCase, sanctions: e.target.value })}
-                                            className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                            rows={3}
-                                            placeholder="Any sanctions or disciplinary measures applied..."
-                                        />
-                                    </div>
-                                    {submitError && (
-                                        <div className="text-red-600 text-sm">{submitError}</div>
-                                    )}
-                                    {submitSuccess && (
-                                        <div className="text-green-600 text-sm">{submitSuccess}</div>
-                                    )}
-                                    <div className="flex gap-3">
-                                        <button
-                                            type="submit"
-                                            disabled={submitting}
-                                            className="bg-kmuGreen text-white px-6 py-2 rounded hover:bg-kmuOrange transition disabled:opacity-50"
-                                        >
-                                            {submitting ? 'Creating...' : 'Create Case'}
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setActiveTab('overview')}
-                                            className="bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white px-6 py-2 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-                                        >
-                                            Cancel
-                                        </button>
-                                    </div>
-                                </form>
+                            <div className="animate-in fade-in duration-300">
+                                <CaseDossierForm
+                                    onSuccess={() => {
+                                        setActiveTab('cases');
+                                        // Refresh student data
+                                        const fetchStudent = async () => {
+                                            const res = await fetch(`${API_BASE_URL}/students/${params.id}`, {
+                                                headers: { ...authHeaders() },
+                                            });
+                                            if (res.ok) {
+                                                const data = await res.json();
+                                                setStudent(data);
+                                            }
+                                        };
+                                        fetchStudent();
+                                    }}
+                                    onCancel={() => setActiveTab('overview')}
+                                    initialData={{
+                                        dossier: {
+                                            occurrenceDocket: {
+                                                accused: {
+                                                    name: student.fullName,
+                                                    phone: student.studentId,
+                                                    programOfStudy: student.program,
+                                                    yearOfStudy: student.year || student.yearOfStudy || '',
+                                                    sex: student.gender || '',
+                                                    address: student.address || '',
+                                                    nationality: student.nationality || '',
+                                                    village: student.town || '',
+                                                    district: student.province || '',
+                                                    chief: '', age: '', tribe: ''
+                                                }
+                                            }
+                                        } as any
+                                    }}
+                                />
                             </div>
                         )}
                     </div>

@@ -303,7 +303,7 @@ export default function SecretaryDashboard() {
                 )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <StatCard title="Total Students" value={safeStudents.length} color="teal" />
-                  <StatCard title="Total Cases" value={filteredCases.length} color="emerald" />
+                  <StatCard title="Disciplinary Cases" value={filteredCases.length} color="emerald" />
                   <StatCard title="Added Today" value={todayCount} color="blue" />
                   <StatCard title="This Week" value={recentCount} color="orange" />
                 </div>

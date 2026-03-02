@@ -211,7 +211,7 @@ export default function ChiefSecurityOfficerDashboard() {
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden sticky top-24">
               <nav className="flex flex-col">
                 <NavButton label="Dashboard" icon="🚔" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
-                <NavButton label="Case Review" icon="⚖️" active={activeTab === 'cases'} onClick={() => setActiveTab('cases')} />
+                <NavButton label="Disciplinary Cases" icon="⚖️" active={activeTab === 'cases'} onClick={() => setActiveTab('cases')} />
               </nav>
             </div>
           </div>

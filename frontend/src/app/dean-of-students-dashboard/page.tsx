@@ -269,7 +269,7 @@ export default function DeanOfStudentsDashboard() {
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden sticky top-24">
               <nav className="flex flex-col">
                 <NavButton label="Dashboard" icon="📊" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
-                <NavButton label="All Cases" icon="⚖️" active={activeTab === 'cases'} onClick={() => setActiveTab('cases')} />
+                <NavButton label="Disciplinary Cases" icon="⚖️" active={activeTab === 'cases'} onClick={() => setActiveTab('cases')} />
                 <NavButton label="Manage Students" icon="🎓" active={activeTab === 'students'} onClick={() => setActiveTab('students')} />
               </nav>
             </div>
@@ -322,7 +322,7 @@ export default function DeanOfStudentsDashboard() {
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <StatCard title="Total Students" value={totalStudents} color="teal" />
-                  <StatCard title="Total Cases" value={totalCases} color="orange" />
+                  <StatCard title="Disciplinary Cases" value={totalCases} color="orange" />
                   <StatCard title="Open Cases" value={openCases} color="blue" />
                   <StatCard title="High Priority" value={highSeverityCases} color="red" />
                 </div>

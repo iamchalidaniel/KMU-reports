@@ -318,7 +318,7 @@ export default function CasesPage() {
       <section className="max-w-6xl mx-auto p-4">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold text-kmuGreen">Cases</h1>
+            <h1 className="text-2xl font-bold text-kmuGreen">Disciplinary Cases</h1>
             {offlineMode && (
               <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded">
                 Offline Mode
@@ -556,17 +556,17 @@ export default function CasesPage() {
                         </td>
                         <td className="py-2 px-2 md:px-4 hidden md:table-cell">
                           <span className={`px-2 py-1 rounded text-xs ${s.status === 'Open' ? 'bg-red-100 text-red-800' :
-                              s.status === 'Closed' ? 'bg-green-100 text-green-800' :
-                                'bg-gray-100 text-gray-800'
+                            s.status === 'Closed' ? 'bg-green-100 text-green-800' :
+                              'bg-gray-100 text-gray-800'
                             }`}>
                             {s.status || '-'}
                           </span>
                         </td>
                         <td className="py-2 px-2 md:px-4 hidden md:table-cell">
                           <span className={`px-2 py-1 rounded text-xs ${s.severity === 'High' ? 'bg-red-100 text-red-800' :
-                              s.severity === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                                s.severity === 'Low' ? 'bg-green-100 text-green-800' :
-                                  'bg-gray-100 text-gray-800'
+                            s.severity === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                              s.severity === 'Low' ? 'bg-green-100 text-green-800' :
+                                'bg-gray-100 text-gray-800'
                             }`}>
                             {s.severity || '-'}
                           </span>
