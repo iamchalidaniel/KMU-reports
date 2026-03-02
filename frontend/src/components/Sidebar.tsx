@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { usePathname } from 'next/navigation';
 import { useSidebar } from '../context/SidebarContext';
+import { API_BASE_URL } from '../config/constants';
 
 // Optimized nav icons - using simple emojis for faster loading
 const navIcons = {
@@ -45,7 +46,7 @@ export default function Sidebar() {
     async function fetchReportCount() {
       if (!user || user.role === 'student' || user.role === 'hall_warden' || user.role === 'electrician') return;
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/student-reports?status=Pending`, {
+        const res = await fetch(`${API_BASE_URL}/student-reports?status=Pending`, {
           headers: { 'Authorization': `Bearer ${token || localStorage.getItem('token')}` }
         });
         if (res.ok) {

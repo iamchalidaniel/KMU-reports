@@ -39,29 +39,48 @@ export async function POST(request: NextRequest) {
 
     // Map the messages to the format expected by the Gemini SDK
     // Gemini 1.0+ expects { role: 'user' | 'model', parts: [{ text: string }] }
-    // We also ensure roles are mapped correctly if they come in as 'assistant'
-    const transformedMessages = messages.map((msg: any) => ({
-      role: msg.role === 'assistant' || msg.role === 'model' ? 'model' : 'user',
-      parts: [{ text: msg.content || msg.text || '' }]
-    }));
+    let transformedMessages: any[] = [];
+    messages.forEach((msg: any) => {
+      const role = msg.role === 'assistant' || msg.role === 'model' ? 'model' : 'user';
+      const text = msg.content || msg.text || '';
 
-    // Get the system prompt and prepend/apply it
+      if (transformedMessages.length === 0 || transformedMessages[transformedMessages.length - 1].role !== role) {
+        transformedMessages.push({
+          role,
+          parts: [{ text }]
+        });
+      } else {
+        transformedMessages[transformedMessages.length - 1].parts[0].text += `\n${text}`;
+      }
+    });
+
     const systemPrompt = getSystemPrompt(formType || 'other');
 
+    // Prefix the system prompt to the first user message or add it
     if (transformedMessages.length > 0 && transformedMessages[0].role === 'user') {
-      transformedMessages[0].parts[0].text = `${systemPrompt}\n\nUser Question: ${transformedMessages[0].parts[0].text}`;
+      transformedMessages[0].parts[0].text = `${systemPrompt}\n\n${transformedMessages[0].parts[0].text}`;
     } else {
       transformedMessages.unshift({ role: 'user', parts: [{ text: systemPrompt }] });
     }
 
-    const history = transformedMessages.slice(0, -1);
-    const lastMessage = transformedMessages[transformedMessages.length - 1];
+    // Ensure we send a USER message last
+    const lastMsg = transformedMessages[transformedMessages.length - 1];
+    let history = [];
+    let prompt = "";
+
+    if (lastMsg.role === 'user') {
+      history = transformedMessages.slice(0, -1);
+      prompt = lastMsg.parts[0].text;
+    } else {
+      history = transformedMessages;
+      prompt = "Please continue.";
+    }
 
     const chat = model.startChat({
       history: history,
     });
 
-    const result = await chat.sendMessage(lastMessage.parts[0].text);
+    const result = await chat.sendMessage(prompt);
     const response = await result.response;
     const text = response.text();
 

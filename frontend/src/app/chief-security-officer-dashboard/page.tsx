@@ -190,23 +190,6 @@ export default function ChiefSecurityOfficerDashboard() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
 
-        {/* Banner Area */}
-        <div className="relative mb-6 rounded-xl overflow-hidden bg-white dark:bg-gray-900 shadow-sm border border-gray-200 dark:border-gray-800">
-          <div className="h-32 bg-gradient-to-r from-red-600 to-black relative">
-            <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/diamond-upholstery.png')]"></div>
-          </div>
-          <div className="px-6 pb-6 flex flex-col md:flex-row items-center md:items-end -mt-12 gap-6 relative z-10">
-            <div className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-900 bg-white dark:bg-gray-800 shadow-lg flex items-center justify-center overflow-hidden">
-              <div className="w-24 h-24 rounded-full bg-red-600 flex items-center justify-center text-white font-bold text-4xl shadow-inner">
-                {staffData.name ? staffData.name.charAt(0).toUpperCase() : staffData.username.charAt(0).toUpperCase()}
-              </div>
-            </div>
-            <div className="flex-1 text-center md:text-left mb-2">
-              <h1 className="text-2xl font-bold uppercase">{staffData.name || 'Chief Security Officer'}</h1>
-              <p className="text-gray-600 dark:text-gray-400 font-semibold tracking-tight">Staff ID : <span className="text-red-600 dark:text-red-400 font-mono">{staffData.staffId || staffData.username}</span></p>
-            </div>
-          </div>
-        </div>
 
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Side Navigation */}
@@ -215,8 +198,6 @@ export default function ChiefSecurityOfficerDashboard() {
               <nav className="flex flex-col">
                 <NavButton label="Dashboard" icon="🚔" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
                 <NavButton label="Case Review" icon="⚖️" active={activeTab === 'cases'} onClick={() => setActiveTab('cases')} />
-                <NavButton label="Staff Info" icon="👤" active={activeTab === 'info'} onClick={() => setActiveTab('info')} />
-                <NavButton label="Settings" icon="⚙️" active={activeTab === 'password'} onClick={() => setActiveTab('password')} />
               </nav>
             </div>
           </div>
@@ -288,7 +269,7 @@ export default function ChiefSecurityOfficerDashboard() {
                             <td className="px-4 py-4 font-medium">{c.offenseType}</td>
                             <td className="px-4 py-4 text-center">
                               <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${c.severity === 'Critical' ? 'bg-red-100 text-red-700' :
-                                  c.severity === 'High' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'
+                                c.severity === 'High' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'
                                 }`}>{c.severity}</span>
                             </td>
                           </tr>
@@ -300,38 +281,6 @@ export default function ChiefSecurityOfficerDashboard() {
               </div>
             )}
 
-            {activeTab === 'info' && (
-              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 md:p-8 animate-in fade-in duration-300">
-                <div className="space-y-10">
-                  <section>
-                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide border-b border-gray-100 dark:border-gray-800 pb-2 mb-4">Account Details</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                      <InfoField label="Staff ID" value={staffData.staffId || staffData.username} />
-                      <InfoField label="Role" value={staffData.role?.toUpperCase().replace('_', ' ')} />
-                      <InfoField label="Status" value="ACTIVE" />
-                    </div>
-                  </section>
-                  <section>
-                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide border-b border-gray-100 dark:border-gray-800 pb-2 mb-4">Personal Info</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                      <InfoField label="First Name" value={staffData.firstName} />
-                      <InfoField label="Sur Name" value={staffData.surName} />
-                      <InfoField label="NRC" value={staffData.nrc} />
-                      <InfoField label="Gender" value={staffData.gender} />
-                      <InfoField label="Nationality" value={staffData.nationality} />
-                    </div>
-                  </section>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'password' && (
-              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 md:p-8 animate-in fade-in duration-300 max-w-md mx-auto text-center py-12">
-                <h2 className="text-2xl font-bold text-red-600 mb-8">System Security</h2>
-                <p className="text-sm text-gray-500 mb-8">Manage your account security and password settings here.</p>
-                <button onClick={() => showNotification('info', 'Feature coming soon')} className="w-full bg-black dark:bg-white dark:text-gray-900 text-white font-bold py-4 rounded-xl hover:shadow-xl transition">CHANGE ACCESS PASSWORD</button>
-              </div>
-            )}
 
           </div>
         </div>

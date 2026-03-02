@@ -228,23 +228,6 @@ export default function SecretaryDashboard() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
 
-        {/* Banner */}
-        <div className="relative mb-6 rounded-xl overflow-hidden bg-white dark:bg-gray-900 shadow-sm border border-gray-200 dark:border-gray-800">
-          <div className="h-32 bg-gradient-to-r from-emerald-600 to-teal-500 relative">
-            <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/diamond-upholstery.png')]"></div>
-          </div>
-          <div className="px-6 pb-6 flex flex-col md:flex-row items-center md:items-end -mt-12 gap-6 relative z-10">
-            <div className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-900 bg-white dark:bg-gray-800 shadow-lg flex items-center justify-center overflow-hidden">
-              <div className="w-24 h-24 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-4xl shadow-inner">
-                {staffData.name ? staffData.name.charAt(0).toUpperCase() : staffData.username.charAt(0).toUpperCase()}
-              </div>
-            </div>
-            <div className="flex-1 text-center md:text-left mb-2">
-              <h1 className="text-2xl font-bold uppercase">{staffData.name || 'Secretary Name'}</h1>
-              <p className="text-gray-600 dark:text-gray-400 font-semibold tracking-tight">Staff ID : <span className="text-emerald-600 dark:text-emerald-400 font-mono">{staffData.staffId || staffData.username}</span></p>
-            </div>
-          </div>
-        </div>
 
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Nav */}
@@ -253,8 +236,6 @@ export default function SecretaryDashboard() {
               <nav className="flex flex-col">
                 <NavButton label="Dashboard" icon="🏢" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
                 <NavButton label="Registry" icon="📋" active={activeTab === 'registry'} onClick={() => setActiveTab('registry')} />
-                <NavButton label="Staff Info" icon="👤" active={activeTab === 'info'} onClick={() => setActiveTab('info')} />
-                <NavButton label="Settings" icon="⚙️" active={activeTab === 'password'} onClick={() => setActiveTab('password')} />
               </nav>
             </div>
           </div>
