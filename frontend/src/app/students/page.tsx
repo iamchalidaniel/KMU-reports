@@ -208,8 +208,8 @@ export default function StudentsPage() {
             validationErrors.push(`Row ${rowNumber}: Full Name too short (minimum 2 characters)`);
           }
 
-          if (!student.department) {
-            validationErrors.push(`Row ${rowNumber}: Missing Department`);
+          if (!student.program) {
+            validationErrors.push(`Row ${rowNumber}: Missing Program`);
           }
 
           // Validate optional fields
@@ -275,8 +275,8 @@ export default function StudentsPage() {
             validationErrors.push(`Row ${rowNumber}: Full Name too short (minimum 2 characters)`);
           }
 
-          if (!student.department) {
-            validationErrors.push(`Row ${rowNumber}: Missing Department`);
+          if (!student.program) {
+            validationErrors.push(`Row ${rowNumber}: Missing Program`);
           }
 
           // Validate optional fields
