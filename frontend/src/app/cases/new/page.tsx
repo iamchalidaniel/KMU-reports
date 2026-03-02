@@ -18,7 +18,8 @@ function NewCaseContent() {
         dossier: {
           occurrenceDocket: {
             accused: {
-              phone: studentId,
+              sin: studentId,
+              phone: '',
               name: '', address: '', yearOfStudy: '', programOfStudy: '',
               sex: '', age: '', nationality: '', tribe: '', village: '', chief: '', district: ''
             }

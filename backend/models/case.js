@@ -31,7 +31,8 @@ const caseSchema = new mongoose.Schema({
                 tribe: String,
                 village: String,
                 chief: String,
-                district: String
+                district: String,
+                sin: String
             },
             accused: {
                 name: String,
@@ -45,7 +46,8 @@ const caseSchema = new mongoose.Schema({
                 tribe: String,
                 village: String,
                 chief: String,
-                district: String
+                district: String,
+                sin: String
             },
             offence: String,
             occurrenceDetails: String,
