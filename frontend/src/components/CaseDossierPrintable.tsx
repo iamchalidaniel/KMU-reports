@@ -211,26 +211,47 @@ export default function CaseDossierPrintable({ data, documentType }: CaseDossier
     }
 
     if (documentType === 'callout') {
+        const student = data?.student || {};
         return (
-            <div className="p-16 bg-white text-black h-[50vh] border-2 border-double border-black m-8 font-serif" id="printable-callout">
+            <div className="p-16 bg-white text-black min-h-screen font-serif" id="printable-callout">
                 <Header />
-                <SectionTitle>Call Out</SectionTitle>
-                <div className="space-y-4 text-lg">
-                    <InfoRow label="Full Names" value={wc.fullName} />
+                <div className="text-center mb-10">
+                    <h3 className="text-2xl font-black uppercase underline decoration-double">Call Out</h3>
+                </div>
+
+                <div className="space-y-6 text-lg">
+                    <div className="grid grid-cols-1 gap-4">
+                        <InfoRow label="Full Names" value={wc.fullName || docket.accused?.name || student.fullName} />
+                    </div>
+
                     <div className="grid grid-cols-3 gap-4">
-                        <InfoRow label="Sex" value={wc.sex} />
-                        <InfoRow label="Age" value={wc.age} />
-                        <InfoRow label="SIN" value={wc.sin} />
+                        <InfoRow label="Sex" value={wc.sex || docket.accused?.sex} />
+                        <InfoRow label="Age" value={wc.age || docket.accused?.age} />
+                        <InfoRow label="SIN" value={wc.sin || docket.accused?.sin} />
                     </div>
+
                     <div className="grid grid-cols-2 gap-4">
-                        <InfoRow label="Program" value={wc.program} />
-                        <InfoRow label="Year" value={wc.yearOfStudy} />
+                        <InfoRow label="Program of study" value={wc.program || docket.accused?.programOfStudy || student.program} />
+                        <InfoRow label="Year of study" value={wc.yearOfStudy || docket.accused?.yearOfStudy || student.year} />
                     </div>
-                    <InfoRow label="Residential Address" value={wc.address} />
-                    <p className="mt-8 font-bold">You are required to report to the Security Officer's office at ____________ hours on ____________ without fail.</p>
-                    <InfoRow label="Appointment" value="" />
-                    <div className="mt-12 flex justify-end">
-                        <div className="w-48 border-t border-gray-900 pt-2 font-bold uppercase text-center text-xs">Signature</div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <InfoRow label="Residential Address" value={wc.address || docket.accused?.address} />
+                        <InfoRow label="Phone No" value={wc.phone || docket.accused?.phone} />
+                    </div>
+
+                    <div className="mt-12 leading-loose">
+                        <p className="uppercase font-bold">
+                            You are required to report to the Security Officer's office at <span className="border-b border-black inline-block min-w-[100px] px-2">................</span> hours (Time)
+                        </p>
+                        <p className="uppercase font-bold mt-2">
+                            on <span className="border-b border-black inline-block min-w-[200px] px-2">................</span> (Day & Date) without fail.
+                        </p>
+                    </div>
+
+                    <div className="mt-12">
+                        <InfoRow label="Appointment" value="" />
+                        <InfoRow label="Signature" value="" />
                     </div>
                 </div>
             </div>

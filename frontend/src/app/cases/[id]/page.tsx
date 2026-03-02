@@ -7,6 +7,7 @@ import { useAuth } from "../../../context/AuthContext";
 import Link from "next/link";
 import { API_BASE_URL } from '../../../config/constants';
 import { authHeaders } from '../../../utils/api';
+import CaseDossierPrintable from '../../../components/CaseDossierPrintable';
 
 interface Student {
     _id: string;
@@ -45,6 +46,14 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
     const [actionLoading, setActionLoading] = useState(false);
     const [actionMessage, setActionMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [printType, setPrintType] = useState<'docket' | 'statement' | 'callout' | 'warnAndCaution' | null>(null);
+
+    const handlePrint = (type: 'docket' | 'statement' | 'callout' | 'warnAndCaution') => {
+        setPrintType(type);
+        setTimeout(() => {
+            window.print();
+        }, 500);
+    };
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -409,10 +418,45 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
                             >
                                 Create New Case for Student
                             </button>
+
+                            <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+                                <p className="text-[10px] font-black uppercase text-gray-400 mb-2">Registry Documents</p>
+                                <button
+                                    onClick={() => handlePrint('docket')}
+                                    className="block w-full text-center px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition text-sm font-bold"
+                                >
+                                    🖨️ Print Docket Cover
+                                </button>
+                                <button
+                                    onClick={() => handlePrint('statement')}
+                                    className="block w-full text-center px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition text-sm font-bold"
+                                >
+                                    📜 Print Statements
+                                </button>
+                                <button
+                                    onClick={() => handlePrint('warnAndCaution')}
+                                    className="block w-full text-center px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition text-sm font-bold"
+                                >
+                                    ⚖️ Print Warn & Caution
+                                </button>
+                                <button
+                                    onClick={() => handlePrint('callout')}
+                                    className="block w-full text-center px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 transition text-sm font-bold"
+                                >
+                                    📢 Generate Call Out
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* Hidden Printable Area */}
+            {printType && (
+                <div className="hidden print:block fixed inset-0 z-[9999] bg-white">
+                    <CaseDossierPrintable data={caseData} documentType={printType} />
+                </div>
+            )}
 
             {/* Delete Confirmation Modal */}
             {showDeleteConfirm && (

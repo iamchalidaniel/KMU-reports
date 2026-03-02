@@ -276,6 +276,10 @@ export default function SecurityDashboard() {
                                 onClick={(e) => { e.stopPropagation(); setPrintCase(c); setPrintType('statement'); setTimeout(() => window.print(), 500); }}
                                 className="p-1 hover:text-blue-600 font-bold" title="Print Statements"
                               >📜</button>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setPrintCase(c); setPrintType('callout'); setTimeout(() => window.print(), 500); }}
+                                className="p-1 hover:text-blue-600 font-bold" title="Print Call Out"
+                              >📢</button>
                             </div>
                           </td>
                         </tr>
