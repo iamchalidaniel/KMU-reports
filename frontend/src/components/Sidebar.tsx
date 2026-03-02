@@ -151,6 +151,10 @@ export default function Sidebar() {
   } else if (user?.role === 'student') {
     navLinks = [
       { icon: navIcons.dashboard, label: 'Dashboard', path: '/student-dashboard' },
+      { icon: navIcons.reports, label: 'My Statements', path: '/student-dashboard/statements' },
+      { icon: navIcons.cases, label: 'My Cases', path: '/student-dashboard/cases' },
+      { icon: navIcons.secretary, label: 'Appeals', path: '/student-dashboard/appeals' },
+      { icon: navIcons.profile, label: 'Profile & Records', path: '/student-dashboard/profile' },
       { icon: navIcons.help, label: 'Help', path: '/help' },
     ];
   } else {
