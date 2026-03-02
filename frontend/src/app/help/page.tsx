@@ -5,6 +5,47 @@ import { useAuth } from "../../context/AuthContext";
 import { useState } from 'react';
 
 export default function HelpPage() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [aiResponse, setAiResponse] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim() || isLoading) return;
+
+    setIsLoading(true);
+    setAiResponse(null);
+
+    try {
+      // Get all text content from the help sections
+      const sections = document.querySelectorAll('.help-section');
+      const context = Array.from(sections).map(s => (s as HTMLElement).innerText).join("\n\n");
+
+      const res = await fetch('/api/ai-assistant', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: `Context from Manual:\n${context}\n\nUser Question: ${searchQuery}` }],
+          formType: 'help'
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setAiResponse(data.response);
+      } else {
+        setAiResponse("I'm sorry, I couldn't process your request right now.");
+      }
+    } catch (err) {
+      console.error('Help search error:', err);
+      setAiResponse("An error occurred while searching. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto px-6 py-12">
       <div className="text-center mb-16">
@@ -12,13 +53,57 @@ export default function HelpPage() {
           📖 USER DOCUMENTATION & SUPPORT
         </div>
         <h1 className="text-4xl md:text-6xl font-extrabold mb-6 text-gray-900 dark:text-white tracking-tight">Help & <span className="text-kmuGreen">Support</span></h1>
-        <p className="text-gray-600 dark:text-gray-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+
+        {/* AI Semantic Search */}
+        <div className="max-w-3xl mx-auto mt-8 relative">
+          <form onSubmit={handleSearch} className="relative">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Ask anything about policies, cases, or reporting..."
+              className="w-full pl-12 pr-32 py-4 bg-white dark:bg-gray-800 border-2 border-emerald-100 dark:border-emerald-800 focus:border-kmuGreen dark:focus:border-kmuGreen outline-none rounded-2xl shadow-xl shadow-emerald-500/5 dark:shadow-none transition-all text-lg"
+            />
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="absolute right-2 top-2 bottom-2 px-6 bg-kmuGreen hover:bg-emerald-600 text-white rounded-xl font-bold transition-all disabled:opacity-50"
+            >
+              {isLoading ? "Thinking..." : "Search"}
+            </button>
+          </form>
+
+          {aiResponse && (
+            <div className="mt-4 p-5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-2xl text-left animate-in fade-in slide-in-from-top-2">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xl">✨</span>
+                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">AI Suggestion</span>
+              </div>
+              <p className="text-gray-800 dark:text-gray-200 leading-relaxed text-sm">
+                {aiResponse}
+              </p>
+              <button
+                onClick={() => setAiResponse(null)}
+                className="mt-3 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase hover:underline"
+              >
+                Clear Response
+              </button>
+            </div>
+          )}
+        </div>
+
+        <p className="text-gray-600 dark:text-gray-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mt-10">
           Need assistance? Our comprehensive guides and FAQs are here to help you navigate CampusCare with ease.
         </p>
       </div>
 
       {/* Quick Start Guide */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8 help-section">
         <h2 className="text-2xl font-semibold mb-4 text-kmuOrange">🚀 Quick Start Guide</h2>
         <div className="grid md:grid-cols-2 gap-6">
           <div>
@@ -47,7 +132,7 @@ export default function HelpPage() {
 
 
       {/* Key Features */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8 help-section">
         <h2 className="text-2xl font-semibold mb-4 text-kmuOrange">✨ Key Features</h2>
         <div className="grid md:grid-cols-2 gap-6">
           <div>
@@ -74,7 +159,7 @@ export default function HelpPage() {
       </div>
 
       {/* How-To Guides */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8 help-section">
         <h2 className="text-2xl font-semibold mb-4 text-kmuOrange">📋 How-To Guides</h2>
         <div className="space-y-6">
           <div>
@@ -118,7 +203,7 @@ export default function HelpPage() {
       </div>
 
       {/* Staff Cases Information */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8 help-section">
         <h2 className="text-2xl font-semibold mb-4 text-kmuOrange">👥 Staff Cases</h2>
         <div className="space-y-4">
           <p className="text-gray-600 dark:text-gray-400">

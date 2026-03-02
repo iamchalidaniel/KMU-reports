@@ -11,6 +11,8 @@ function getSystemPrompt(formType: string): string {
       return `${basePrompt} You are helping with a Facility Maintenance Report. Help the user describe the maintenance issue (Plumbing, Electrical, HVAC, etc.) and its location accurately.`;
     case 'appeal':
       return `${basePrompt} You are helping with a Disciplinary Appeal. Guide the user on how to justify their appeal and what documentation might be necessary based on university policy.`;
+    case 'help':
+      return `${basePrompt} You are an expert on the university's policies and procedures. Use the provided context from the help manual to answer user questions accurately. If the answer isn't in the context, be honest but helpful based on general campus safety knowledge.`;
     default:
       return `${basePrompt} Help the user complete the reporting form accurately.`;
   }

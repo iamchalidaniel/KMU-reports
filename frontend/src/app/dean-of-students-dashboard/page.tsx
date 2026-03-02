@@ -61,6 +61,8 @@ export default function DeanOfStudentsDashboard() {
   const [students, setStudents] = useState<Student[]>([]);
   const [filteredCases, setFilteredCases] = useState<Case[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
+  const [isSummarizing, setIsSummarizing] = useState(false);
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchStaffProfile() {
@@ -107,6 +109,31 @@ export default function DeanOfStudentsDashboard() {
       fetchData();
     }
   }, [token]);
+
+  const handleGenerateSummary = async () => {
+    if (cases.length === 0 || isSummarizing) return;
+    setIsSummarizing(true);
+    setAiSummary(null);
+    try {
+      const descriptions = cases.slice(0, 30).map(c => c.description).filter(d => !!d);
+      const res = await fetch('/api/ai-summarize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ descriptions })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAiSummary(data.summary);
+      } else {
+        showNotification('error', 'Failed to generate AI summary');
+      }
+    } catch (err) {
+      console.error('Summary error:', err);
+      showNotification('error', 'An error occurred during AI analysis');
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
 
   const safeStudents = Array.isArray(students) ? students : [];
   const safeCases = Array.isArray(cases) ? cases : [];
@@ -255,6 +282,45 @@ export default function DeanOfStudentsDashboard() {
 
             {activeTab === 'dashboard' && (
               <div className="animate-in fade-in duration-300 space-y-6">
+                <div className="flex justify-between items-center bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                  <div>
+                    <h2 className="text-xl font-bold uppercase tracking-tighter">Campus Overview</h2>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase">Live Analytics & AI Behavior Tracking</p>
+                  </div>
+                  <button
+                    onClick={handleGenerateSummary}
+                    disabled={isSummarizing || cases.length === 0}
+                    className="flex items-center gap-2 px-6 py-2.5 bg-kmuGreen hover:bg-emerald-600 text-white rounded-lg font-bold text-xs shadow-lg shadow-emerald-500/20 transition disabled:opacity-50"
+                  >
+                    {isSummarizing ? "⏳ ANALYZING..." : "✨ AI BEHAVIORAL ANALYSIS"}
+                  </button>
+                </div>
+
+                {aiSummary && (
+                  <div className="p-6 bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-800 rounded-2xl animate-in zoom-in duration-300">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex items-center gap-2">
+                        <div className="p-2 bg-emerald-100 dark:bg-emerald-800 rounded-lg">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                          </svg>
+                        </div>
+                        <span className="text-xs font-black text-emerald-800 dark:text-emerald-200 uppercase tracking-widest">Administrative behavioral insight</span>
+                      </div>
+                      <button onClick={() => setAiSummary(null)} className="text-emerald-600 hover:text-emerald-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    </div>
+                    <div className="text-gray-800 dark:text-gray-200 leading-relaxed text-sm whitespace-pre-wrap font-medium">
+                      {aiSummary}
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-emerald-100 dark:border-emerald-800 text-[10px] text-emerald-600/60 italic">
+                      Note: This analysis is synthesized from anonymized incident descriptions to protect student privacy.
+                    </div>
+                  </div>
+                )}
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <StatCard title="Total Students" value={totalStudents} color="teal" />

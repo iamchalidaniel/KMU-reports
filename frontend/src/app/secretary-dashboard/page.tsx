@@ -39,6 +39,8 @@ export default function SecretaryDashboard() {
   const [students, setStudents] = useState<Student[]>([]);
   const [filteredCases, setFilteredCases] = useState<Case[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
+  const [isSummarizing, setIsSummarizing] = useState(false);
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -94,6 +96,31 @@ export default function SecretaryDashboard() {
       fetchData();
     }
   }, [token]);
+
+  const handleGenerateSummary = async () => {
+    if (cases.length === 0 || isSummarizing) return;
+    setIsSummarizing(true);
+    setAiSummary(null);
+    try {
+      const descriptions = cases.slice(0, 20).map(c => c.description).filter(d => !!d);
+      const res = await fetch('/api/ai-summarize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ descriptions })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAiSummary(data.summary);
+      } else {
+        showNotification('error', 'Failed to generate AI summary');
+      }
+    } catch (err) {
+      console.error('Summary error:', err);
+      showNotification('error', 'An error occurred during AI analysis');
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
 
   const safeStudents = Array.isArray(students) ? students : [];
   const safeCases = Array.isArray(cases) ? cases : [];
@@ -237,6 +264,33 @@ export default function SecretaryDashboard() {
 
             {activeTab === 'dashboard' && (
               <div className="animate-in fade-in duration-300 space-y-6">
+                <div className="flex justify-between items-center bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                  <div>
+                    <h2 className="text-xl font-bold uppercase tracking-tight">Administrative Intelligence</h2>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Generative Behavioral summaries</p>
+                  </div>
+                  <button
+                    onClick={handleGenerateSummary}
+                    disabled={isSummarizing || cases.length === 0}
+                    className="flex items-center gap-2 px-6 py-2.5 bg-kmuGreen hover:bg-emerald-600 text-white rounded-xl font-bold text-xs shadow-lg shadow-emerald-500/20 transition disabled:opacity-50"
+                  >
+                    {isSummarizing ? "⏳ ANALYZING..." : "✨ AI SUMMARY"}
+                  </button>
+                </div>
+
+                {aiSummary && (
+                  <div className="p-6 bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-800 rounded-2xl animate-in fade-in slide-in-from-top-4">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-bold uppercase text-[10px] tracking-widest">
+                        <span className="text-xl">✨</span> AI Trends Insight
+                      </div>
+                      <button onClick={() => setAiSummary(null)} className="text-gray-400 hover:text-gray-600">✕</button>
+                    </div>
+                    <div className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap">
+                      {aiSummary}
+                    </div>
+                  </div>
+                )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <StatCard title="Total Students" value={safeStudents.length} color="teal" />
                   <StatCard title="Total Cases" value={filteredCases.length} color="emerald" />

@@ -52,6 +52,8 @@ export default function SecurityDashboard() {
   const [search, setSearch] = useState('');
   const [cases, setCases] = useState<any[]>([]);
   const [filteredCases, setFilteredCases] = useState<any[]>([]);
+  const [isSummarizing, setIsSummarizing] = useState(false);
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -102,6 +104,81 @@ export default function SecurityDashboard() {
       fetchCases();
     }
   }, [token]);
+
+  const handleGenerateSummary = async () => {
+    if (cases.length === 0 || isSummarizing) return;
+    setIsSummarizing(true);
+    setAiSummary(null);
+    try {
+      const descriptions = cases.slice(0, 20).map(c => c.description).filter(d => !!d);
+      const res = await fetch('/api/ai-summarize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ descriptions })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAiSummary(data.summary);
+      } else {
+        showNotification('error', 'Failed to generate AI summary');
+      }
+    } catch (err) {
+      console.error('Summary error:', err);
+      showNotification('error', 'An error occurred during AI analysis');
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
+
+  const [isReviewing, setIsReviewing] = useState(false);
+  const [isGettingSanction, setIsGettingSanction] = useState(false);
+
+  const handleReviewDescription = async () => {
+    if (!description.trim() || isReviewing) return;
+    setIsReviewing(true);
+    try {
+      const res = await fetch('/api/ai-assistant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: `Review this incident description for clarity and detail. Offense Category: ${offenseType}, Severity: ${severity}.\n\nDescription: ${description}` }],
+          formType: 'case'
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        showNotification('info', data.response);
+      }
+    } catch (err) {
+      showNotification('error', 'AI Review failed');
+    } finally {
+      setIsReviewing(false);
+    }
+  };
+
+  const handleGetSanctionSuggestion = async () => {
+    if (!offenseType || !severity || isGettingSanction) return;
+    setIsGettingSanction(true);
+    try {
+      const res = await fetch('/api/ai-assistant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: `Based on university policy, what are the standard sanctions for: Offense: ${offenseType}, Severity: ${severity}?` }],
+          formType: 'appeal' // Using appeal's prompt logic for policy guidance
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setSanctions(data.response);
+        showNotification('success', 'AI suggested a sanction based on policy');
+      }
+    } catch (err) {
+      showNotification('error', 'Failed to get sanction guidance');
+    } finally {
+      setIsGettingSanction(false);
+    }
+  };
 
   useEffect(() => {
     const safeCases = Array.isArray(cases) ? cases : [];
@@ -316,15 +393,48 @@ export default function SecurityDashboard() {
 
             {activeTab === 'history' && (
               <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 animate-in fade-in duration-300">
-                <div className="flex justify-between items-center mb-8">
-                  <h2 className="text-xl font-bold">Recent Incident Registry</h2>
-                  <input
-                    placeholder="Filter records..."
-                    className="bg-gray-100 dark:bg-gray-800 border-none rounded-lg px-4 py-2 text-sm"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                  <div>
+                    <h2 className="text-xl font-bold">Recent Incident Registry</h2>
+                    <p className="text-xs text-gray-500 mt-1 uppercase tracking-tight font-bold">Total Records: {filteredCases.length}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={handleGenerateSummary}
+                      disabled={isSummarizing || cases.length === 0}
+                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20 border border-emerald-100 dark:border-emerald-800 rounded-lg text-emerald-700 dark:text-emerald-400 font-bold text-xs hover:shadow-sm transition disabled:opacity-50"
+                    >
+                      <span>{isSummarizing ? "⏳ Analyzing..." : "✨ AI Trend Insights"}</span>
+                    </button>
+                    <input
+                      placeholder="Filter records..."
+                      className="bg-gray-100 dark:bg-gray-800 border-none rounded-lg px-4 py-2 text-sm"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                    />
+                  </div>
                 </div>
+
+                {aiSummary && (
+                  <div className="mb-6 p-5 bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-800 rounded-2xl animate-in fade-in slide-in-from-top-4 duration-500">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">✨</span>
+                        <span className="text-[10px] font-extrabold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">AI Behavioral Analysis</span>
+                      </div>
+                      <button onClick={() => setAiSummary(null)} className="text-gray-400 hover:text-gray-600 transition">✕</button>
+                    </div>
+                    <div className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap">
+                      {aiSummary}
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-emerald-100 dark:border-emerald-800 text-[10px] text-emerald-600/60 flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      This summary is generated based on anonymized descriptions from current visible cases.
+                    </div>
+                  </div>
+                )}
                 <div className="overflow-x-auto border border-gray-100 dark:border-gray-800 rounded-xl">
                   <table className="w-full text-xs">
                     <thead className="bg-gray-50 dark:bg-gray-800 font-bold uppercase text-gray-400">
