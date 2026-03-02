@@ -9,6 +9,8 @@ import Link from 'next/link';
 import SmartStudentSearch from '../../components/SmartStudentSearch';
 import SmartStaffSearch from '../../components/SmartStaffSearch';
 import Notification, { useNotification } from '../../components/Notification';
+import CaseDossierForm from '../../components/CaseDossierForm';
+import CaseDossierPrintable from '../../components/CaseDossierPrintable';
 
 interface Student {
   studentId: string;
@@ -35,18 +37,9 @@ export default function SecurityDashboard() {
   const [profile, setProfile] = useState<any>(null);
   const [profileLoading, setProfileLoading] = useState(true);
 
-  // Form state
-  const [caseType, setCaseType] = useState<'student' | 'staff'>('student');
-  const [studentId, setStudentId] = useState('');
-  const [staffId, setStaffId] = useState('');
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
-  const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
-  const [incidentDate, setIncidentDate] = useState('');
-  const [offenseType, setOffenseType] = useState('');
-  const [severity, setSeverity] = useState('');
-  const [description, setDescription] = useState('');
-  const [sanctions, setSanctions] = useState('');
   const [loading, setLoading] = useState(false);
+  const [printCase, setPrintCase] = useState<any>(null);
+  const [printType, setPrintType] = useState<'docket' | 'statement' | 'callout' | 'warnAndCaution'>('docket');
 
   // List state
   const [search, setSearch] = useState('');
@@ -139,56 +132,6 @@ export default function SecurityDashboard() {
     }
   };
 
-  const [isReviewing, setIsReviewing] = useState(false);
-  const [isGettingSanction, setIsGettingSanction] = useState(false);
-
-  const handleReviewDescription = async () => {
-    if (!description.trim() || isReviewing) return;
-    setIsReviewing(true);
-    try {
-      const res = await fetch('/api/ai-assistant', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [{ role: 'user', content: `Review this incident description for clarity and detail. Offense Category: ${offenseType}, Severity: ${severity}.\n\nDescription: ${description}` }],
-          formType: 'case'
-        })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        showNotification('info', data.response);
-      }
-    } catch (err) {
-      showNotification('error', 'AI Review failed');
-    } finally {
-      setIsReviewing(false);
-    }
-  };
-
-  const handleGetSanctionSuggestion = async () => {
-    if (!offenseType || !severity || isGettingSanction) return;
-    setIsGettingSanction(true);
-    try {
-      const res = await fetch('/api/ai-assistant', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [{ role: 'user', content: `Based on university policy, what are the standard sanctions for: Offense: ${offenseType}, Severity: ${severity}?` }],
-          formType: 'appeal' // Using appeal's prompt logic for policy guidance
-        })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setSanctions(data.response);
-        showNotification('success', 'AI suggested a sanction based on policy');
-      }
-    } catch (err) {
-      showNotification('error', 'Failed to get sanction guidance');
-    } finally {
-      setIsGettingSanction(false);
-    }
-  };
-
   useEffect(() => {
     const safeCases = Array.isArray(cases) ? cases : [];
     let result = safeCases;
@@ -206,57 +149,7 @@ export default function SecurityDashboard() {
     setFilteredCases(result);
   }, [search, cases, programFilter]);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const requestBody: any = {
-        incident_date: incidentDate,
-        offense_type: offenseType,
-        severity,
-        description,
-        sanctions
-      };
-
-      if (caseType === 'student') {
-        if (!studentId) throw new Error('Please select a student');
-        requestBody.student_id = studentId;
-      } else {
-        if (!staffId) throw new Error('Please select a staff member');
-        requestBody.staff_id = staffId;
-      }
-
-      const res = await fetch(`${API_BASE_URL}/cases`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...authHeaders() },
-        body: JSON.stringify(requestBody),
-      });
-      if (!res.ok) throw new Error(await res.text());
-
-      showNotification('success', 'Case submitted successfully!');
-      // Reset form
-      setStudentId('');
-      setStaffId('');
-      setIncidentDate('');
-      setOffenseType('');
-      setSeverity('');
-      setDescription('');
-      setSanctions('');
-      setSelectedStudent(null);
-      setSelectedStaff(null);
-
-      // Refresh list
-      const casesRes = await fetch(`${API_BASE_URL}/cases`, { headers: { ...authHeaders() } });
-      if (casesRes.ok) {
-        const data = await casesRes.json();
-        setCases(Array.isArray(data) ? data : (data.cases || data || []));
-      }
-    } catch (err: any) {
-      showNotification('error', err?.message || 'Failed to submit case');
-    } finally {
-      setLoading(false);
-    }
-  }
+  // Case submission handled by CaseDossierForm
 
   if (isCheckingAuth) {
     return <div className="text-center text-kmuGreen p-12">Loading...</div>;
@@ -289,99 +182,28 @@ export default function SecurityDashboard() {
           <div className="lg:w-3/4 space-y-6">
 
             {activeTab === 'add-case' && (
-              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 md:p-8 animate-in fade-in duration-300">
-                <h2 className="text-2xl font-bold mb-8 uppercase tracking-tighter">Register Disciplinary Case</h2>
-
-                <div className="mb-8 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl inline-flex gap-2">
-                  <button
-                    onClick={() => setCaseType('student')}
-                    className={`px-6 py-2 rounded-lg font-bold text-xs transition ${caseType === 'student' ? 'bg-white dark:bg-gray-900 shadow text-blue-600' : 'text-gray-400'}`}
-                  >STUDENT</button>
-                  <button
-                    onClick={() => setCaseType('staff')}
-                    className={`px-6 py-2 rounded-lg font-bold text-xs transition ${caseType === 'staff' ? 'bg-white dark:bg-gray-900 shadow text-blue-600' : 'text-gray-400'}`}
-                  >STAFF MEMBER</button>
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="mb-6 flex justify-between items-center">
+                  <div>
+                    <h2 className="text-2xl font-bold">New Disciplinary Dossier</h2>
+                    <p className="text-gray-500 text-sm mt-1 uppercase tracking-tight">Security Department Official Protocol</p>
+                  </div>
+                  <button onClick={() => setActiveTab('dashboard')} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors text-gray-400">✕</button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-extrabold uppercase text-gray-400 ml-1">Search Subject</label>
-                    {caseType === 'student' ? (
-                      <SmartStudentSearch
-                        onStudentSelect={(s) => { setSelectedStudent(s as any); setStudentId((s as any).studentId); }}
-                        placeholder="Search student by name or ID..."
-                      />
-                    ) : (
-                      <SmartStaffSearch
-                        onStaffSelect={(s) => { setSelectedStaff(s); setStaffId(s.staffId); }}
-                        placeholder="Search staff by name or ID..."
-                      />
-                    )}
-                    {(selectedStudent || selectedStaff) && (
-                      <div className="p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 rounded-xl animate-in zoom-in duration-200">
-                        <div className="font-bold text-blue-700 dark:text-blue-300">{(selectedStudent || selectedStaff)?.fullName}</div>
-                        <div className="text-[10px] uppercase text-blue-500 font-bold">
-                          {selectedStudent ? `${selectedStudent.studentId} • ${selectedStudent.program}` : `${(selectedStaff as any)?.staffId} • ${(selectedStaff as any)?.department}`}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-extrabold uppercase text-gray-400 ml-1">Incident Date</label>
-                      <input type="date" value={incidentDate} onChange={(e) => setIncidentDate(e.target.value)} required className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-3" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-extrabold uppercase text-gray-400 ml-1">Offense Type</label>
-                      <select value={offenseType} onChange={(e) => setOffenseType(e.target.value)} required className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-3">
-                        <option value="">Select Category...</option>
-                        {OFFENSE_TYPES.map(ot => <option key={ot.value} value={ot.value}>{ot.label}</option>)}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-extrabold uppercase text-gray-400 ml-1">Severity Level</label>
-                      <select value={severity} onChange={(e) => setSeverity(e.target.value)} required className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-3">
-                        <option value="">Select Severity...</option>
-                        {SEVERITY_LEVELS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-extrabold uppercase text-gray-400 ml-1">Incident Description</label>
-                    <textarea
-                      rows={4}
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      placeholder="Detail the circumstances of the incident..."
-                      required
-                      className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-3"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-extrabold uppercase text-gray-400 ml-1">Immediate Actions / Sanctions</label>
-                    <input
-                      type="text"
-                      value={sanctions}
-                      onChange={(e) => setSanctions(e.target.value)}
-                      placeholder="e.g. Warning issued, Confiscation..."
-                      className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-3"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold py-4 rounded-xl hover:shadow-xl transition disabled:opacity-50 uppercase tracking-widest text-xs"
-                  >
-                    {loading ? 'Submitting...' : 'Register Formal Case'}
-                  </button>
-                </form>
+                <CaseDossierForm
+                  onSuccess={async () => {
+                    showNotification('success', 'Case dossier registered successfully!');
+                    // Refresh list
+                    const casesRes = await fetch(`${API_BASE_URL}/cases`, { headers: { ...authHeaders() } });
+                    if (casesRes.ok) {
+                      const data = await casesRes.json();
+                      setCases(Array.isArray(data) ? data : (data.cases || data || []));
+                    }
+                    setActiveTab('dashboard');
+                  }}
+                  onCancel={() => setActiveTab('dashboard')}
+                />
               </div>
             )}
 
@@ -437,12 +259,13 @@ export default function SecurityDashboard() {
                         <th className="px-4 py-4 text-left">Incident</th>
                         <th className="px-4 py-4 text-center">Date</th>
                         <th className="px-4 py-4 text-center">Status</th>
+                        <th className="px-4 py-4 text-right">Print</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                       {filteredCases.slice(0, 15).map((c, i) => (
-                        <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-900 cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
-                          <td className="px-4 py-4">
+                        <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-900 group">
+                          <td className="px-4 py-4" onClick={() => router.push(`/cases/${c._id}`)}>
                             <div className="font-bold">{c.student ? c.student.fullName : c.staff?.fullName}</div>
                             <div className="text-[10px] text-gray-400">{c.student ? c.student.studentId : c.staff?.staffId}</div>
                           </td>
@@ -450,6 +273,18 @@ export default function SecurityDashboard() {
                           <td className="px-4 py-4 text-center font-mono text-gray-500">{new Date(c.incidentDate).toLocaleDateString()}</td>
                           <td className="px-4 py-4 text-center">
                             <span className={`px-2 py-0.5 rounded font-bold ${c.status === 'Open' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{c.status}</span>
+                          </td>
+                          <td className="px-4 py-4 text-right">
+                            <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setPrintCase(c); setPrintType('docket'); setTimeout(() => window.print(), 500); }}
+                                className="p-1 hover:text-blue-600 font-bold" title="Print Docket"
+                              >🖨️</button>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setPrintCase(c); setPrintType('statement'); setTimeout(() => window.print(), 500); }}
+                                className="p-1 hover:text-blue-600 font-bold" title="Print Statements"
+                              >📜</button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -493,6 +328,13 @@ export default function SecurityDashboard() {
 
       {notification?.isVisible && (
         <Notification type={notification.type} message={notification.message} isVisible={notification.isVisible} onClose={hideNotification} />
+      )}
+
+      {/* Hidden Printable Area */}
+      {printCase && (
+        <div className="hidden print:block fixed inset-0 z-[9999] bg-white">
+          <CaseDossierPrintable data={printCase} documentType={printType} />
+        </div>
       )}
     </div>
   );
