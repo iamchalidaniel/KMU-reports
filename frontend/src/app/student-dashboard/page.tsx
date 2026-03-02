@@ -56,7 +56,7 @@ export default function StudentDashboardPage() {
   const [appeals, setAppeals] = useState<Appeal[]>([]);
   const [loadingReports, setLoadingReports] = useState(true);
   const [loadingCases, setLoadingCases] = useState(true);
-  const [activeTab, setActiveTab] = useState<'info' | 'reports' | 'cases' | 'appeals' | 'password'>('info');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'reports' | 'cases' | 'appeals'>('dashboard');
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
@@ -243,11 +243,10 @@ export default function StudentDashboardPage() {
           <div className="lg:w-1/4">
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden sticky top-24">
               <nav className="flex flex-col">
-                <NavButton label="Your Info" icon="👥" active={activeTab === 'info'} onClick={() => setActiveTab('info')} />
-                <NavButton label="Your Reports" icon="📋" active={activeTab === 'reports'} onClick={() => setActiveTab('reports')} />
-                <NavButton label="Disciplinary Cases" icon="⚖️" active={activeTab === 'cases'} onClick={() => setActiveTab('cases')} />
-                <NavButton label="My Appeals" icon="📁" active={activeTab === 'appeals'} onClick={() => setActiveTab('appeals')} />
-                <NavButton label="Change Password" icon="⚙️" active={activeTab === 'password'} onClick={() => setActiveTab('password')} />
+                <NavButton label="Overview" icon="📊" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
+                <NavButton label="My Reports" icon="📜" active={activeTab === 'reports'} onClick={() => setActiveTab('reports')} />
+                <NavButton label="Disciplinary" icon="⚖️" active={activeTab === 'cases'} onClick={() => setActiveTab('cases')} />
+                <NavButton label="Appeals" icon="🏛️" active={activeTab === 'appeals'} onClick={() => setActiveTab('appeals')} />
               </nav>
             </div>
           </div>
@@ -256,7 +255,25 @@ export default function StudentDashboardPage() {
           <div className="lg:w-3/4">
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 md:p-8 min-h-[500px]">
 
-              {activeTab === 'info' && <PersonalInfoView studentData={studentData} />}
+              {activeTab === 'dashboard' && (
+                <div className="animate-in fade-in duration-300 space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <StatCard title="Total Cases" value={cases.length} color="red" />
+                    <StatCard title="Pending Reports" value={reports.filter(r => r.status === 'Pending').length} color="blue" />
+                    <StatCard title="Active Appeals" value={appeals.filter(a => a.status === 'Pending').length} color="orange" />
+                    <StatCard title="Sanctions" value={cases.filter(c => !!c.sanctions).length} color="indigo" />
+                  </div>
+
+                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
+                    <h3 className="text-xl font-bold mb-4">Welcome back, {studentData.fullName}</h3>
+                    <p className="text-gray-500 text-sm">Review your case status, submit appeals, or file new incident reports using the sidebar navigation.</p>
+                    <div className="mt-8 flex gap-4">
+                      <button onClick={() => setActiveTab('reports')} className="px-6 py-2 bg-kmuGreen text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 transform hover:-translate-y-0.5 transition">Report Incident</button>
+                      <button onClick={() => setActiveTab('appeals')} className="px-6 py-2 border border-kmuGreen text-kmuGreen font-bold rounded-xl hover:bg-emerald-50 transition">My Appeals</button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {activeTab === 'reports' && (
                 <div className="animate-in fade-in duration-300">
@@ -290,7 +307,6 @@ export default function StudentDashboardPage() {
                 </div>
               )}
 
-              {activeTab === 'password' && <ChangePasswordView showNotification={showNotification} />}
             </div>
           </div>
         </div>
@@ -315,13 +331,28 @@ function NavButton({ label, icon, active, onClick }: any) {
     <button
       onClick={onClick}
       className={`flex items-center gap-4 px-6 py-4 transition-all border-l-4 text-left ${active
-        ? 'border-kmuOrange bg-orange-50 dark:bg-orange-900/10 text-kmuOrange'
+        ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/10 text-blue-600'
         : 'border-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
         }`}
     >
       <span className="text-xl">{icon}</span>
       <span className="font-semibold">{label}</span>
     </button>
+  );
+}
+
+function StatCard({ title, value, color }: any) {
+  const colors: any = {
+    red: 'text-red-600 border-red-100',
+    blue: 'text-blue-600 border-blue-100',
+    orange: 'text-orange-600 border-orange-100',
+    indigo: 'text-indigo-600 border-indigo-100'
+  };
+  return (
+    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border ${colors[color]} p-5`}>
+      <div className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mb-1">{title}</div>
+      <div className={`text-3xl font-bold ${colors[color].split(' ')[0]}`}>{value}</div>
+    </div>
   );
 }
 

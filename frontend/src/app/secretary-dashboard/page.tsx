@@ -39,6 +39,7 @@ export default function SecretaryDashboard() {
   const [students, setStudents] = useState<Student[]>([]);
   const [filteredCases, setFilteredCases] = useState<Case[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
+  const [programFilter, setProgramFilter] = useState('');
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [aiSummary, setAiSummary] = useState<string | null>(null);
 
@@ -126,21 +127,29 @@ export default function SecretaryDashboard() {
   const safeCases = Array.isArray(cases) ? cases : [];
 
   useEffect(() => {
-    setFilteredCases(
-      search ? safeCases.filter((c: any) =>
+    let casesResult = safeCases;
+    if (search) {
+      casesResult = casesResult.filter((c: any) =>
         c.student?.fullName?.toLowerCase().includes(search.toLowerCase()) ||
         c.student?.studentId?.toLowerCase().includes(search.toLowerCase()) ||
         c.offenseType?.toLowerCase().includes(search.toLowerCase()) ||
         c.status?.toLowerCase().includes(search.toLowerCase())
-      ) : safeCases
-    );
-    setFilteredStudents(
-      search ? safeStudents.filter((s: any) =>
+      );
+    }
+    if (programFilter) {
+      casesResult = casesResult.filter((c: any) => c.student?.program === programFilter);
+    }
+    setFilteredCases(casesResult);
+
+    let studentsResult = safeStudents;
+    if (search) {
+      studentsResult = studentsResult.filter((s: any) =>
         s.fullName?.toLowerCase().includes(search.toLowerCase()) ||
         s.studentId?.toLowerCase().includes(search.toLowerCase())
-      ) : safeStudents
-    );
-  }, [search, cases, students]);
+      );
+    }
+    setFilteredStudents(studentsResult);
+  }, [search, cases, students, programFilter]);
 
   async function exportCasesToWord() {
     try {
@@ -209,17 +218,37 @@ export default function SecretaryDashboard() {
     }]
   };
 
-  const deptCounts: Record<string, number> = {};
-  filteredCases.forEach(c => {
-    const d = c.student?.department || 'N/A';
-    deptCounts[d] = (deptCounts[d] || 0) + 1;
+  const analyticsCases = programFilter
+    ? safeCases.filter((c: any) => c.student?.program === programFilter)
+    : safeCases;
+
+  const offenseCounts: Record<string, number> = {};
+  const offenderCounts: Record<string, number> = {};
+  analyticsCases.forEach((c: Case) => {
+    if (c.offenseType) offenseCounts[c.offenseType] = (offenseCounts[c.offenseType] || 0) + 1;
+    if (c.student?.fullName) offenderCounts[c.student.fullName] = (offenderCounts[c.student.fullName] || 0) + 1;
   });
 
+  const topOffenses = Object.entries(offenseCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const topOffenders = Object.entries(offenderCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const programs = Array.from(new Set(safeStudents.map((s: any) => s.program).filter(Boolean)));
+
+  const offenseChartData = {
+    labels: topOffenses.map(([offence]) => offence),
+    datasets: [
+      {
+        label: 'Offenses',
+        data: topOffenses.map(([, count]) => count),
+        backgroundColor: '#10B981',
+      },
+    ],
+  };
+
   const deptData = {
-    labels: Object.keys(deptCounts),
+    labels: topOffenses.map(([offence]) => offence),
     datasets: [{
-      label: 'By Department',
-      data: Object.values(deptCounts),
+      label: 'Frequency',
+      data: topOffenses.map(([, count]) => count),
       backgroundColor: '#F59E0B'
     }]
   };
@@ -281,12 +310,29 @@ export default function SecretaryDashboard() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                    <h3 className="text-sm font-bold opacity-50 mb-4 uppercase tracking-widest">Weekly Activity</h3>
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="text-sm font-bold opacity-50 uppercase tracking-widest">Admin Activity</h3>
+                      <select
+                        className="bg-gray-50 dark:bg-gray-800 border-none rounded-lg px-3 py-1 text-xs outline-none"
+                        value={programFilter}
+                        onChange={(e) => setProgramFilter(e.target.value)}
+                      >
+                        <option value="">All Programs</option>
+                        {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
+                      </select>
+                    </div>
                     <Line data={trendData} />
                   </div>
                   <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                    <h3 className="text-sm font-bold opacity-50 mb-4 uppercase tracking-widest">Prog. Distribution</h3>
-                    <Bar data={deptData} />
+                    <h3 className="text-sm font-bold opacity-50 mb-6 uppercase tracking-widest">Top Offenders</h3>
+                    <div className="space-y-4">
+                      {topOffenders.length > 0 ? topOffenders.map(([name, count], i) => (
+                        <div key={i} className="flex justify-between items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors border-b border-gray-50 dark:border-gray-800 last:border-0">
+                          <span className="font-medium text-sm">{name}</span>
+                          <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase">{count} Cases</span>
+                        </div>
+                      )) : <p className="text-center text-gray-500 py-8 italic text-sm">No offender data found.</p>}
+                    </div>
                   </div>
                 </div>
 

@@ -37,6 +37,7 @@ export default function ChiefSecurityOfficerDashboard() {
   const [students, setStudents] = useState<Student[]>([]);
   const [filteredCases, setFilteredCases] = useState<Case[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
+  const [programFilter, setProgramFilter] = useState('');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -105,21 +106,29 @@ export default function ChiefSecurityOfficerDashboard() {
   const safeCases = Array.isArray(cases) ? cases : [];
 
   useEffect(() => {
-    setFilteredCases(
-      search ? safeCases.filter((c: any) =>
+    let casesResult = safeCases;
+    if (search) {
+      casesResult = casesResult.filter((c: any) =>
         c.student?.fullName?.toLowerCase().includes(search.toLowerCase()) ||
         c.student?.studentId?.toLowerCase().includes(search.toLowerCase()) ||
         c.offenseType?.toLowerCase().includes(search.toLowerCase()) ||
         c.status?.toLowerCase().includes(search.toLowerCase())
-      ) : safeCases
-    );
-    setFilteredStudents(
-      search ? safeStudents.filter((s: any) =>
+      );
+    }
+    if (programFilter) {
+      casesResult = casesResult.filter((c: any) => c.student?.program === programFilter);
+    }
+    setFilteredCases(casesResult);
+
+    let studentsResult = safeStudents;
+    if (search) {
+      studentsResult = studentsResult.filter((s: any) =>
         s.fullName?.toLowerCase().includes(search.toLowerCase()) ||
         s.studentId?.toLowerCase().includes(search.toLowerCase())
-      ) : safeStudents
-    );
-  }, [search, cases, students]);
+      );
+    }
+    setFilteredStudents(studentsResult);
+  }, [search, cases, students, programFilter]);
 
   async function exportCasesToWord() {
     try {
@@ -160,14 +169,19 @@ export default function ChiefSecurityOfficerDashboard() {
   const staffData = profile || user;
 
   // Visualization data
+  const analyticsCases = programFilter
+    ? safeCases.filter((c: any) => c.student?.program === programFilter)
+    : safeCases;
+
   const offenceCounts: Record<string, number> = {};
   const offenderCounts: Record<string, number> = {};
-  filteredCases.forEach((c: Case) => {
+  analyticsCases.forEach((c: Case) => {
     if (c.offenseType) offenceCounts[c.offenseType] = (offenceCounts[c.offenseType] || 0) + 1;
     if (c.student?.fullName) offenderCounts[c.student.fullName] = (offenderCounts[c.student.fullName] || 0) + 1;
   });
   const topOffences = Object.entries(offenceCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
   const topOffenders = Object.entries(offenderCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const programs = Array.from(new Set(safeStudents.map((s: any) => s.program).filter(Boolean)));
 
   const offenceChartData = {
     labels: topOffences.map(([offence]) => offence),
@@ -216,12 +230,31 @@ export default function ChiefSecurityOfficerDashboard() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                    <h3 className="text-lg font-bold mb-6 uppercase text-xs tracking-widest text-red-600">Offence Frequency</h3>
-                    <Bar data={offenceChartData} options={{ indexAxis: 'y' }} />
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="text-sm font-bold uppercase tracking-widest text-red-600">Offence Frequency</h3>
+                      <select
+                        className="bg-gray-50 dark:bg-gray-800 border-none rounded-lg px-3 py-1 text-xs outline-none"
+                        value={programFilter}
+                        onChange={(e) => setProgramFilter(e.target.value)}
+                      >
+                        <option value="">All Programs</option>
+                        {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
+                      </select>
+                    </div>
+                    <div className="h-64">
+                      <Bar data={offenceChartData} options={{ maintainAspectRatio: false, indexAxis: 'y' }} />
+                    </div>
                   </div>
                   <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                    <h3 className="text-lg font-bold mb-6 uppercase text-xs tracking-widest text-blue-600">Top Offenders</h3>
-                    <Bar data={offenderChartData} />
+                    <h3 className="text-sm font-bold uppercase tracking-widest text-blue-600 mb-6">Top Offenders</h3>
+                    <div className="space-y-4">
+                      {topOffenders.length > 0 ? topOffenders.map(([name, count], i) => (
+                        <div key={i} className="flex justify-between items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors border-b border-gray-50 dark:border-gray-800 last:border-0">
+                          <span className="font-medium text-sm">{name}</span>
+                          <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase">{count} Cases</span>
+                        </div>
+                      )) : <p className="text-center text-gray-500 py-8 italic text-sm">No offender data found.</p>}
+                    </div>
                   </div>
                 </div>
 
@@ -238,14 +271,24 @@ export default function ChiefSecurityOfficerDashboard() {
             {activeTab === 'cases' && (
               <div className="animate-in fade-in duration-300 space-y-6">
                 <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-bold">Recent Security Incidents</h2>
-                    <input
-                      placeholder="Filter cases..."
-                      className="bg-gray-100 dark:bg-gray-800 border-none rounded-lg px-4 py-2 text-sm"
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                    />
+                  <div className="flex justify-between items-center mb-6 text-sm">
+                    <h2 className="text-xl font-bold font-serif">Security Incident Logs</h2>
+                    <div className="flex gap-2">
+                      <input
+                        placeholder="Search cases..."
+                        className="bg-gray-50 dark:bg-gray-800 border-none rounded-lg px-4 py-2 text-sm outline-none"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                      />
+                      <select
+                        className="bg-gray-50 dark:bg-gray-800 border-none rounded-lg px-4 py-2 text-sm outline-none"
+                        value={programFilter}
+                        onChange={(e) => setProgramFilter(e.target.value)}
+                      >
+                        <option value="">All Programs</option>
+                        {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
+                      </select>
+                    </div>
                   </div>
                   <div className="overflow-x-auto border border-gray-100 dark:border-gray-800 rounded-xl">
                     <table className="w-full text-xs">

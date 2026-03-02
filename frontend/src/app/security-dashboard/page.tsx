@@ -31,7 +31,7 @@ export default function SecurityDashboard() {
   const { notification, showNotification, hideNotification } = useNotification();
 
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [activeTab, setActiveTab] = useState('add-case');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [profile, setProfile] = useState<any>(null);
   const [profileLoading, setProfileLoading] = useState(true);
 
@@ -52,8 +52,10 @@ export default function SecurityDashboard() {
   const [search, setSearch] = useState('');
   const [cases, setCases] = useState<any[]>([]);
   const [filteredCases, setFilteredCases] = useState<any[]>([]);
+  const [programFilter, setProgramFilter] = useState('');
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const [students, setStudents] = useState<Student[]>([]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -89,13 +91,20 @@ export default function SecurityDashboard() {
 
     async function fetchCases() {
       try {
-        const res = await fetch(`${API_BASE_URL}/cases`, { headers: { ...authHeaders() } });
-        if (res.ok) {
-          const data = await res.json();
+        const [casesRes, studentsRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/cases`, { headers: { ...authHeaders() } }),
+          fetch(`${API_BASE_URL}/students`, { headers: { ...authHeaders() } })
+        ]);
+        if (casesRes.ok) {
+          const data = await casesRes.json();
           setCases(Array.isArray(data) ? data : (data.cases || data || []));
         }
+        if (studentsRes.ok) {
+          const data = await studentsRes.json();
+          setStudents(Array.isArray(data) ? data : (data.students || data || []));
+        }
       } catch (err: any) {
-        console.error('Fetch cases error:', err);
+        console.error('Fetch error:', err);
       }
     }
 
@@ -182,17 +191,20 @@ export default function SecurityDashboard() {
 
   useEffect(() => {
     const safeCases = Array.isArray(cases) ? cases : [];
-    setFilteredCases(
-      search ? safeCases.filter((c: any) =>
+    let result = safeCases;
+    if (search) {
+      result = result.filter((c: any) =>
       (c.student?.fullName?.toLowerCase().includes(search.toLowerCase()) ||
         c.student?.studentId?.toLowerCase().includes(search.toLowerCase()) ||
-        c.staff?.fullName?.toLowerCase().includes(search.toLowerCase()) ||
-        c.staff?.staffId?.toLowerCase().includes(search.toLowerCase()) ||
         c.offenseType?.toLowerCase().includes(search.toLowerCase()) ||
         c.status?.toLowerCase().includes(search.toLowerCase()))
-      ) : safeCases
-    );
-  }, [search, cases]);
+      );
+    }
+    if (programFilter) {
+      result = result.filter((c: any) => c.student?.program === programFilter);
+    }
+    setFilteredCases(result);
+  }, [search, cases, programFilter]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -266,6 +278,7 @@ export default function SecurityDashboard() {
           <div className="lg:w-1/4">
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden sticky top-24">
               <nav className="flex flex-col">
+                <NavButton label="Overview" icon="📊" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
                 <NavButton label="Record Case" icon="✍️" active={activeTab === 'add-case'} onClick={() => setActiveTab('add-case')} />
                 <NavButton label="Case History" icon="📜" active={activeTab === 'history'} onClick={() => setActiveTab('history')} />
               </nav>
@@ -446,36 +459,31 @@ export default function SecurityDashboard() {
               </div>
             )}
 
-            {activeTab === 'info' && (
-              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 md:p-8 animate-in fade-in duration-300">
-                <div className="space-y-10">
-                  <section>
-                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide border-b border-gray-100 dark:border-gray-800 pb-2 mb-4">Account Details</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                      <InfoField label="Staff ID" value={staffData.staffId || staffData.username} />
-                      <InfoField label="Role" value={staffData.role?.toUpperCase().replace('_', ' ')} />
-                      <InfoField label="Status" value="ACTIVE" />
-                    </div>
-                  </section>
-                  <section>
-                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide border-b border-gray-100 dark:border-gray-800 pb-2 mb-4">Personal Info</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                      <InfoField label="First Name" value={staffData.firstName} />
-                      <InfoField label="Sur Name" value={staffData.surName} />
-                      <InfoField label="NRC" value={staffData.nrc} />
-                      <InfoField label="Gender" value={staffData.gender} />
-                      <InfoField label="Nationality" value={staffData.nationality} />
-                    </div>
-                  </section>
+            {activeTab === 'dashboard' && (
+              <div className="animate-in fade-in duration-300 space-y-6">
+                {/* Analytics restoration */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <StatCard title="Total Cases" value={cases.length} color="blue" />
+                  <StatCard title="My Reports" value={cases.filter(c => c.createdBy === user?.id).length} color="indigo" />
+                  <StatCard title="Pending" value={cases.filter(c => c.status === 'Open').length} color="orange" />
+                  <StatCard title="Priority" value={cases.filter(c => c.severity === 'High' || c.severity === 'Critical').length} color="red" />
                 </div>
-              </div>
-            )}
 
-            {activeTab === 'password' && (
-              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-12 text-center max-w-md mx-auto animate-in fade-in duration-300">
-                <h2 className="text-2xl font-bold mb-8 uppercase tracking-tighter">Security Settings</h2>
-                <p className="text-sm text-gray-500 mb-8">Change your dashboard access password.</p>
-                <button onClick={() => showNotification('info', 'Feature coming soon')} className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:shadow-lg transition">INITIATE RESET</button>
+                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-lg font-bold">Campus Security Trends</h3>
+                    <select
+                      className="bg-gray-50 dark:bg-gray-800 border-none rounded-lg px-3 py-1 text-xs outline-none"
+                      value={programFilter}
+                      onChange={(e) => setProgramFilter(e.target.value)}
+                    >
+                      <option value="">All Programs</option>
+                      {Array.from(new Set(students.map((s: any) => s.program).filter(Boolean))).map((p: any) => <option key={p} value={p}>{p}</option>)}
+                    </select>
+                  </div>
+                  <p className="text-sm text-gray-500 mb-4">View real-time security analytics and incident distributions.</p>
+                  <Link href="/reports" className="text-blue-600 font-bold text-sm hover:underline">Open Detailed Security Analytics Portal →</Link>
+                </div>
               </div>
             )}
 
@@ -486,6 +494,21 @@ export default function SecurityDashboard() {
       {notification?.isVisible && (
         <Notification type={notification.type} message={notification.message} isVisible={notification.isVisible} onClose={hideNotification} />
       )}
+    </div>
+  );
+}
+
+function StatCard({ title, value, color }: any) {
+  const colors: any = {
+    blue: 'text-blue-600 border-blue-100',
+    indigo: 'text-indigo-600 border-indigo-100',
+    orange: 'text-orange-600 border-orange-100',
+    red: 'text-red-600 border-red-100'
+  };
+  return (
+    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border ${colors[color]} p-5`}>
+      <div className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mb-1">{title}</div>
+      <div className={`text-3xl font-bold ${colors[color].split(' ')[0]}`}>{value}</div>
     </div>
   );
 }

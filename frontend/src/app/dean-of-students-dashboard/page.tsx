@@ -61,6 +61,7 @@ export default function DeanOfStudentsDashboard() {
   const [students, setStudents] = useState<Student[]>([]);
   const [filteredCases, setFilteredCases] = useState<Case[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
+  const [programFilter, setProgramFilter] = useState('');
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [aiSummary, setAiSummary] = useState<string | null>(null);
 
@@ -139,21 +140,29 @@ export default function DeanOfStudentsDashboard() {
   const safeCases = Array.isArray(cases) ? cases : [];
 
   useEffect(() => {
-    setFilteredCases(
-      search ? safeCases.filter((c: any) =>
+    let casesResult = safeCases;
+    if (search) {
+      casesResult = casesResult.filter((c: any) =>
         c.student?.fullName?.toLowerCase().includes(search.toLowerCase()) ||
         c.student?.studentId?.toLowerCase().includes(search.toLowerCase()) ||
         c.offenseType?.toLowerCase().includes(search.toLowerCase()) ||
         c.status?.toLowerCase().includes(search.toLowerCase())
-      ) : safeCases
-    );
-    setFilteredStudents(
-      search ? safeStudents.filter((s: any) =>
+      );
+    }
+    if (programFilter) {
+      casesResult = casesResult.filter((c: any) => c.student?.program === programFilter);
+    }
+    setFilteredCases(casesResult);
+
+    let studentsResult = safeStudents;
+    if (search) {
+      studentsResult = studentsResult.filter((s: any) =>
         s.fullName?.toLowerCase().includes(search.toLowerCase()) ||
         s.studentId?.toLowerCase().includes(search.toLowerCase())
-      ) : safeStudents
-    );
-  }, [search, cases, students]);
+      );
+    }
+    setFilteredStudents(studentsResult);
+  }, [search, cases, students, programFilter]);
 
   if (isCheckingAuth) {
     return <div className="text-center text-kmuGreen">Loading...</div>;
@@ -198,23 +207,34 @@ export default function DeanOfStudentsDashboard() {
   const openCases = filteredCases.filter(c => c.status === 'Open').length;
   const highSeverityCases = filteredCases.filter(c => c.severity === 'High' || c.severity === 'Critical').length;
 
-  const departmentCounts: Record<string, number> = {};
+  const analyticsCases = programFilter
+    ? safeCases.filter((c: any) => c.student?.program === programFilter)
+    : safeCases;
+
+  const offenseCounts: Record<string, number> = {};
+  const offenderCounts: Record<string, number> = {};
   const severityCounts: Record<string, number> = {};
-  filteredCases.forEach((c: Case) => {
-    if (c.student?.department) departmentCounts[c.student.department] = (departmentCounts[c.student.department] || 0) + 1;
+  analyticsCases.forEach((c: Case) => {
+    if (c.offenseType) offenseCounts[c.offenseType] = (offenseCounts[c.offenseType] || 0) + 1;
+    if (c.student?.fullName) offenderCounts[c.student.fullName] = (offenderCounts[c.student.fullName] || 0) + 1;
     if (c.severity) severityCounts[c.severity] = (severityCounts[c.severity] || 0) + 1;
   });
 
-  const departmentChartData = {
-    labels: Object.keys(departmentCounts),
+  const topOffenses = Object.entries(offenseCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const topOffenders = Object.entries(offenderCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+  const offenseChartData = {
+    labels: topOffenses.map(([offence]) => offence),
     datasets: [
       {
-        label: 'Cases by Department',
-        data: Object.values(departmentCounts),
+        label: 'Offenses',
+        data: topOffenses.map(([, count]) => count),
         backgroundColor: 'rgba(16, 185, 129, 0.7)',
       },
     ],
   };
+
+  const programs = Array.from(new Set(safeStudents.map((s: any) => s.program).filter(Boolean)));
 
   const severityChartData = {
     labels: Object.keys(severityCounts),
@@ -309,12 +329,29 @@ export default function DeanOfStudentsDashboard() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                    <h3 className="text-lg font-bold mb-6 text-gray-800 dark:text-gray-200">Cases by Program</h3>
-                    <Bar data={departmentChartData} options={{ responsive: true, plugins: { legend: { display: false } } }} />
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">Common Offenses</h3>
+                      <select
+                        className="bg-gray-50 dark:bg-gray-800 border-none rounded-lg px-3 py-1 text-xs outline-none"
+                        value={programFilter}
+                        onChange={(e) => setProgramFilter(e.target.value)}
+                      >
+                        <option value="">All Programs</option>
+                        {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
+                      </select>
+                    </div>
+                    <Bar data={offenseChartData} options={{ responsive: true, plugins: { legend: { display: false } } }} />
                   </div>
                   <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                    <h3 className="text-lg font-bold mb-6 text-gray-800 dark:text-gray-200">Cases by Severity</h3>
-                    <Bar data={severityChartData} options={{ responsive: true, plugins: { legend: { display: false } } }} />
+                    <h3 className="text-lg font-bold mb-6 text-gray-800 dark:text-gray-200">Most Common Offenders</h3>
+                    <div className="space-y-4">
+                      {topOffenders.length > 0 ? topOffenders.map(([name, count], i) => (
+                        <div key={i} className="flex justify-between items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors border-b border-gray-50 dark:border-gray-800 last:border-0">
+                          <span className="font-medium text-sm">{name}</span>
+                          <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase">{count} Cases</span>
+                        </div>
+                      )) : <p className="text-center text-gray-500 py-8 italic text-sm">No offender data found.</p>}
+                    </div>
                   </div>
                 </div>
 

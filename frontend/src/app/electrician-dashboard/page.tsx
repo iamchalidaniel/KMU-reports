@@ -98,6 +98,7 @@ export default function ElectricianDashboard() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('');
+  const [hallFilter, setHallFilter] = useState('');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -226,25 +227,37 @@ export default function ElectricianDashboard() {
 
   const staffData = profile || user;
 
-  const categoryChartData = analytics ? {
-    labels: analytics.categoryStats?.map((s: any) =>
-      ELECTRICAL_CATEGORIES.find(c => c.value === s.category)?.label || s.category
-    ) || [],
-    datasets: [{
-      label: 'Electrical Reports by Category',
-      data: analytics.categoryStats?.map((s: any) => s.count) || [],
-      backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'],
-    }],
-  } : null;
+  const analyticsReports = hallFilter
+    ? reports.filter(r => r.location.hall === hallFilter)
+    : reports;
 
-  const statusChartData = analytics ? {
-    labels: analytics.statusStats?.map((s: any) => s.status) || [],
+  const categoryCounts: Record<string, number> = {};
+  const statusCounts: Record<string, number> = {};
+
+  analyticsReports.forEach(r => {
+    if (r.category) categoryCounts[r.category] = (categoryCounts[r.category] || 0) + 1;
+    if (r.status) statusCounts[r.status] = (statusCounts[r.status] || 0) + 1;
+  });
+
+  const categoryChartData = {
+    labels: Object.keys(categoryCounts).map(c => c.toUpperCase()),
     datasets: [{
-      label: 'Reports by Status',
-      data: analytics.statusStats?.map((s: any) => s.count) || [],
-      backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
+      label: 'Reports by Category',
+      data: Object.values(categoryCounts),
+      backgroundColor: ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'],
     }],
-  } : null;
+  };
+
+  const statusChartData = {
+    labels: Object.keys(statusCounts),
+    datasets: [{
+      label: 'By Status',
+      data: Object.values(statusCounts),
+      backgroundColor: ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6'],
+    }],
+  };
+
+  const halls = Array.from(new Set(reports.map(r => r.location.hall).filter(Boolean)));
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
@@ -257,7 +270,7 @@ export default function ElectricianDashboard() {
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden sticky top-24">
               <nav className="flex flex-col">
                 <NavButton label="Dashboard" icon="📊" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
-                <NavButton label="Tasks" icon="⚡" active={activeTab === 'tasks'} onClick={() => setActiveTab('tasks')} />
+                <NavButton label="Tasks" icon="🛠️" active={activeTab === 'tasks'} onClick={() => setActiveTab('tasks')} />
               </nav>
             </div>
           </div>
@@ -275,13 +288,27 @@ export default function ElectricianDashboard() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                    <h3 className="text-lg font-bold mb-6 text-gray-800 dark:text-gray-200 uppercase text-xs tracking-widest">Reports by Category</h3>
-                    {categoryChartData && <Bar data={categoryChartData} />}
+                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 text-center">
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="text-lg font-bold">Category Distribution</h3>
+                      <select
+                        className="bg-gray-50 dark:bg-gray-800 border-none rounded-lg px-3 py-1 text-xs outline-none"
+                        value={hallFilter}
+                        onChange={(e) => setHallFilter(e.target.value)}
+                      >
+                        <option value="">All Hostels</option>
+                        {halls.map((h: any) => <option key={h} value={h}>{h}</option>)}
+                      </select>
+                    </div>
+                    <div className="h-64 flex items-center justify-center">
+                      <Doughnut data={categoryChartData} options={{ maintainAspectRatio: false }} />
+                    </div>
                   </div>
-                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                    <h3 className="text-lg font-bold mb-6 text-gray-800 dark:text-gray-200 uppercase text-xs tracking-widest">Reports by Status</h3>
-                    {statusChartData && <Doughnut data={statusChartData} />}
+                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 text-center">
+                    <h3 className="text-lg font-bold mb-6">Status Overview</h3>
+                    <div className="h-64 flex items-center justify-center">
+                      <Doughnut data={statusChartData} options={{ maintainAspectRatio: false }} />
+                    </div>
                   </div>
                 </div>
               </div>
