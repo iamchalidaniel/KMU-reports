@@ -13,6 +13,9 @@ const ROLES = [
   { value: 'dean_of_students', label: 'Dean of Students' },
   { value: 'assistant_dean', label: 'Assistant Dean' },
   { value: 'secretary', label: 'Secretary' },
+  { value: 'hall_warden', label: 'Hall Warden' },
+  { value: 'student', label: 'Student' },
+  { value: 'electrician', label: 'Electrician' },
 ];
 
 export default function UserManagementPage() {
