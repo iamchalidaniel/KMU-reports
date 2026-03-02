@@ -225,29 +225,29 @@ export default function AssistantDeanDashboard() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 gap-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Assistant Dean Dashboard</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Student affairs and disciplinary oversight</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Overview of student affairs and disciplinary cases</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={exportCasesToWord}
                 className="bg-kmuGreen text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-green-700 transition flex items-center gap-2 shadow-sm"
               >
-                📊 Export Registry
+                📊 Export Cases
               </button>
               <Link
                 href="/reports"
                 className="bg-blue-600 text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-blue-700 transition flex items-center gap-2 shadow-sm"
               >
-                📂 Analytics Portal
+                📂 Reports & Analytics
               </Link>
             </div>
           </div>
 
-          {/* Strategic Metrics */}
+          {/* System Overview */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard title="Total Students" value={totalStudentsCount} color="indigo" />
             <StatCard title="Total Cases" value={totalCasesCount} color="purple" />
-            <StatCard title="Open Inquiries" value={pendingCases} color="orange" />
+            <StatCard title="Open Cases" value={pendingCases} color="orange" />
             <StatCard title="Resolved" value={resolvedCases} color="green" />
           </div>
 
@@ -269,13 +269,13 @@ export default function AssistantDeanDashboard() {
             {/* Offense Frequency */}
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Primary Offense Index</h3>
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Common Offenses</h3>
                 <select
                   className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs font-semibold outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
                   value={programFilter}
                   onChange={(e) => setProgramFilter(e.target.value)}
                 >
-                  <option value="">All Academic Units</option>
+                  <option value="">All Programs</option>
                   {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
@@ -296,26 +296,26 @@ export default function AssistantDeanDashboard() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Recurrent Offenders */}
+            {/* Frequent Offenders */}
             <div className="lg:col-span-1 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Recurrent Subjects</h3>
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Frequent Offenders</h3>
               <div className="space-y-3">
                 {topOffenders.length > 0 ? topOffenders.map(([name, count], i) => (
                   <div key={i} className="flex justify-between items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg transition-colors border border-gray-100 dark:border-gray-700 group">
                     <span className="font-bold text-sm text-gray-700 dark:text-gray-300 group-hover:text-kmuGreen transition-colors">{name}</span>
                     <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase">{count} Incidents</span>
                   </div>
-                )) : <p className="text-center text-gray-500 py-12 italic text-sm">No offender telemetry found.</p>}
+                )) : <p className="text-center text-gray-500 py-12 italic text-sm">No offenders found.</p>}
               </div>
             </div>
 
-            {/* Case Registry Ledger */}
+            {/* Recent Cases */}
             <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
               <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white">Active Case Ledger</h2>
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">Recent Active Cases</h2>
                 <div className="relative w-full md:w-64">
                   <input
-                    placeholder="Search ledger..."
+                    placeholder="Search cases..."
                     className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-sm w-full focus:ring-2 focus:ring-kmuGreen transition-all"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
@@ -326,8 +326,8 @@ export default function AssistantDeanDashboard() {
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-xs font-bold uppercase tracking-wider">
                     <tr>
-                      <th className="px-6 py-4 text-left">Subject</th>
-                      <th className="px-6 py-4 text-left">Classification</th>
+                      <th className="px-6 py-4 text-left">Student</th>
+                      <th className="px-6 py-4 text-left">Offense Category</th>
                       <th className="px-6 py-4 text-center">Status</th>
                     </tr>
                   </thead>
@@ -352,11 +352,11 @@ export default function AssistantDeanDashboard() {
                   </tbody>
                 </table>
                 {filteredCases.filter(c => c.status === 'Open' || c.status === 'Under Investigation').length === 0 && (
-                  <div className="text-center py-20 text-gray-400 italic text-sm">No active inquiries found.</div>
+                  <div className="text-center py-20 text-gray-400 italic text-sm">No active cases found.</div>
                 )}
               </div>
               <div className="p-4 bg-gray-50 dark:bg-gray-800/50 text-center border-t border-gray-100 dark:border-gray-800">
-                <Link href="/students" className="text-xs font-bold text-kmuGreen hover:text-green-700 uppercase tracking-wider transition-all">Expand Student Registry →</Link>
+                <Link href="/students" className="text-xs font-bold text-kmuGreen hover:text-green-700 uppercase tracking-wider transition-all">View All Students →</Link>
               </div>
             </div>
           </div>

@@ -236,38 +236,38 @@ export default function ElectricianDashboard() {
           {/* Electrician Header */}
           <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Electrical Command</h1>
-              <p className="text-sm text-gray-500 font-semibold mt-1">Infrastructure Maintenance & Technical Operations</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Electrician Dashboard</h1>
+              <p className="text-sm text-gray-500 font-semibold mt-1">Manage electrical maintenance and technical tasks</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/maintenance"
                 className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition shadow-sm flex items-center gap-2"
               >
-                ⚡ Infrastructure Ledger
+                ⚡ Maintenance History
               </Link>
             </div>
           </div>
 
-          {/* Strategic Metrics */}
+          {/* System Overview */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard title="Asset Reports" value={reports.length} color="blue" />
-            <StatCard title="Assigned Tasks" value={reports.filter(r => r.status === 'Assigned').length} color="indigo" />
-            <StatCard title="In Operation" value={reports.filter(r => r.status === 'In Progress').length} color="orange" />
-            <StatCard title="Restored" value={reports.filter(r => r.status === 'Completed').length} color="emerald" />
+            <StatCard title="Total Issues" value={reports.length} color="blue" />
+            <StatCard title="Assigned" value={reports.filter(r => r.status === 'Assigned').length} color="indigo" />
+            <StatCard title="In Progress" value={reports.filter(r => r.status === 'In Progress').length} color="orange" />
+            <StatCard title="Completed" value={reports.filter(r => r.status === 'Completed').length} color="emerald" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Asset Distribution */}
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Asset Distribution</h3>
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Issues by Category</h3>
                 <select
                   className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs font-bold uppercase outline-none focus:ring-2 focus:ring-blue-500 transition-all font-sans"
                   value={hallFilter}
                   onChange={(e) => setHallFilter(e.target.value)}
                 >
-                  <option value="">All Locations</option>
+                  <option value="">All Halls</option>
                   {halls.map((h: any) => <option key={h} value={h}>{h}</option>)}
                 </select>
               </div>
@@ -284,7 +284,7 @@ export default function ElectricianDashboard() {
 
             {/* Operational Status */}
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Operational Status</h3>
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Issue Status</h3>
               <div className="h-64 flex items-center justify-center">
                 <Doughnut
                   data={statusChartData}
@@ -297,13 +297,13 @@ export default function ElectricianDashboard() {
             </div>
           </div>
 
-          {/* Maintenance Task Ledger */}
+          {/* Technical Tasks */}
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
             <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <h2 className="text-lg font-bold uppercase tracking-tight">Technical Dispatch Ledger</h2>
+              <h2 className="text-lg font-bold uppercase tracking-tight">Assigned Tasks</h2>
               <div className="flex gap-2 w-full md:w-auto font-sans">
                 <input
-                  placeholder="Search assets..."
+                  placeholder="Search reports..."
                   className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-2 text-xs focus:ring-2 focus:ring-blue-500 transition-all w-full md:w-64"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -347,13 +347,13 @@ export default function ElectricianDashboard() {
                     </p>
                     <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100 dark:border-gray-700">
                       <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">REF: {reportId?.slice(-6).toUpperCase()}</span>
-                      <Link href={`/maintenance/${reportId}`} className="text-xs font-bold text-blue-600 hover:underline uppercase tracking-tight transition-all">Command View →</Link>
+                      <Link href={`/maintenance/${reportId}`} className="text-xs font-bold text-blue-600 hover:underline uppercase tracking-tight transition-all">View Details →</Link>
                     </div>
                   </div>
                 );
               })}
               {filteredReports.length === 0 && (
-                <div className="col-span-full text-center py-20 text-gray-400 italic text-sm">No technical dispatches found in registry.</div>
+                <div className="col-span-full text-center py-20 text-gray-400 italic text-sm">No maintenance tasks found.</div>
               )}
             </div>
           </div>

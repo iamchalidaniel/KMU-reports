@@ -253,7 +253,7 @@ export default function SecretaryDashboard() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 gap-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Secretariat Dashboard</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Administrative intelligence and registry hub</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Overview of university student records and cases</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
@@ -267,7 +267,7 @@ export default function SecretaryDashboard() {
                 onClick={exportCasesToWord}
                 className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-6 py-2.5 rounded-lg font-bold text-sm shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
               >
-                📄 Export Ledger
+                📄 Export Case List
               </button>
             </div>
           </div>
@@ -280,7 +280,7 @@ export default function SecretaryDashboard() {
               </div>
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-xl">🧠</span>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Administrative AI Analysis</h3>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">AI Case Analysis</h3>
               </div>
               <div className="text-sm text-emerald-900 dark:text-emerald-100 leading-relaxed p-4 bg-white/60 dark:bg-black/20 rounded-lg border border-emerald-100/50 dark:border-emerald-800/50">
                 {aiSummary}
@@ -288,25 +288,25 @@ export default function SecretaryDashboard() {
             </div>
           )}
 
-          {/* Strategic Metrics */}
+          {/* System Overview */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard title="Student Registry" value={safeStudents.length} color="teal" />
-            <StatCard title="Incident Ledger" value={filteredCases.length} color="emerald" />
-            <StatCard title="New Entries (24h)" value={todayCount} color="blue" />
-            <StatCard title="Weekly Velocity" value={recentCount} color="orange" />
+            <StatCard title="Total Students" value={safeStudents.length} color="teal" />
+            <StatCard title="Total Cases" value={filteredCases.length} color="emerald" />
+            <StatCard title="New Cases (24h)" value={todayCount} color="blue" />
+            <StatCard title="Cases this Week" value={recentCount} color="orange" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Activity Trend */}
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Activity Index</h3>
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Case Activity Trend</h3>
                 <select
                   className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs font-semibold outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
                   value={programFilter}
                   onChange={(e) => setProgramFilter(e.target.value)}
                 >
-                  <option value="">All Academic Units</option>
+                  <option value="">All Programs</option>
                   {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
@@ -327,14 +327,14 @@ export default function SecretaryDashboard() {
 
             {/* Top Offenders List */}
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Registry Anomaly Frequency</h3>
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Frequent Offenders</h3>
               <div className="space-y-3">
                 {topOffenders.slice(0, 5).length > 0 ? topOffenders.map(([name, count], i) => (
                   <div key={i} className="flex justify-between items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg transition-colors border border-gray-100 dark:border-gray-700 group">
                     <span className="font-bold text-sm text-gray-700 dark:text-gray-300 group-hover:text-kmuGreen transition-colors">{name}</span>
-                    <span className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase">{count} Entries</span>
+                    <span className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase">{count} Cases</span>
                   </div>
-                )) : <p className="text-center text-gray-500 py-12 italic text-sm">No significant anomalies detected.</p>}
+                )) : <p className="text-center text-gray-500 py-12 italic text-sm">No offenders found.</p>}
               </div>
             </div>
           </div>
@@ -342,10 +342,10 @@ export default function SecretaryDashboard() {
           {/* Central Registry Ledger */}
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
             <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Central Registry Ledger</h2>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Case Records</h2>
               <div className="relative w-full md:w-80">
                 <input
-                  placeholder="Query central registry..."
+                  placeholder="Search cases..."
                   className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2.5 text-sm w-full focus:ring-2 focus:ring-kmuGreen transition-all shadow-inner"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -356,9 +356,9 @@ export default function SecretaryDashboard() {
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-xs font-bold uppercase tracking-wider">
                   <tr>
-                    <th className="px-6 py-4 text-left">Subject</th>
-                    <th className="px-6 py-4 text-left">Classification</th>
-                    <th className="px-6 py-4 text-center">Timestamp</th>
+                    <th className="px-6 py-4 text-left">Student</th>
+                    <th className="px-6 py-4 text-left">Offense Category</th>
+                    <th className="px-6 py-4 text-center">Date</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">

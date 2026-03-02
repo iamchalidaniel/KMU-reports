@@ -184,38 +184,38 @@ export default function SecurityDashboard() {
           {/* Page Header */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Security Operations</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Direct enforcement and disciplinary governance</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Security Dashboard</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Incident reporting and case management</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => setShowAddCase(true)}
                 className="bg-kmuGreen text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-green-700 transition flex items-center gap-2 shadow-sm"
               >
-                🛡️ Record New Case
+                🛡️ Create New Case
               </button>
             </div>
           </div>
 
-          {/* Strategic Metrics */}
+          {/* System Overview */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard title="Total Index" value={cases.length} color="emerald" />
+            <StatCard title="Total Cases" value={cases.length} color="emerald" />
             <StatCard title="My Reports" value={cases.filter(c => c.createdBy === user?.id).length} color="blue" />
-            <StatCard title="Active Protocols" value={cases.filter(c => c.status === 'Open').length} color="orange" />
-            <StatCard title="Critical Anomalies" value={cases.filter(c => c.severity === 'High' || c.severity === 'Critical').length} color="red" />
+            <StatCard title="Open Cases" value={cases.filter(c => c.status === 'Open').length} color="orange" />
+            <StatCard title="High Severity Cases" value={cases.filter(c => c.severity === 'High' || c.severity === 'Critical').length} color="red" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Incident Intelligence */}
+            {/* Case Analytics */}
             <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Campus Incident Velocity</h3>
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Incidents by Offense Type</h3>
                 <select
                   className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs font-semibold outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
                   value={programFilter}
                   onChange={(e) => setProgramFilter(e.target.value)}
                 >
-                  <option value="">All Regions</option>
+                  <option value="">All Programs</option>
                   {Array.from(new Set(students.map((s: any) => s.program).filter(Boolean))).map((p: any) => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
@@ -234,9 +234,9 @@ export default function SecurityDashboard() {
               </div>
             </div>
 
-            {/* AI Insight Terminal */}
+            {/* AI Analysis */}
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Intelligence Synthesis</h3>
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">AI Case Summary</h3>
               <div className="space-y-4">
                 <button
                   onClick={handleGenerateSummary}
@@ -244,7 +244,7 @@ export default function SecurityDashboard() {
                   className="w-full flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-xl hover:border-emerald-500/50 hover:bg-emerald-50/10 transition group"
                 >
                   <span className="text-2xl mb-2 group-hover:scale-110 transition-transform">🧠</span>
-                  <span className="text-xs font-bold text-gray-500">{isSummarizing ? "Processing..." : "Run AI Pattern Analysis"}</span>
+                  <span className="text-xs font-bold text-gray-500">{isSummarizing ? "Processing..." : "Generate AI Summary"}</span>
                 </button>
                 {aiSummary && (
                   <div className="p-4 bg-emerald-50 dark:bg-emerald-900/10 rounded-lg border border-emerald-100 dark:border-emerald-800/50 text-xs font-medium text-gray-700 dark:text-emerald-100 leading-relaxed">
@@ -255,13 +255,13 @@ export default function SecurityDashboard() {
             </div>
           </div>
 
-          {/* Operational Dispatch Ledger */}
+          {/* Recent Cases */}
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
             <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Operational Dispatch Ledger</h2>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Recent Cases</h2>
               <div className="relative w-full md:w-80">
                 <input
-                  placeholder="Query ledger indices..."
+                  placeholder="Search cases..."
                   className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2.5 text-sm w-full focus:ring-2 focus:ring-kmuGreen transition-all shadow-inner"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -272,9 +272,9 @@ export default function SecurityDashboard() {
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-xs font-bold uppercase tracking-wider">
                   <tr>
-                    <th className="px-6 py-4 text-left">Subject</th>
-                    <th className="px-6 py-4 text-left">Incident Class</th>
-                    <th className="px-6 py-4 text-center">Protocol Date</th>
+                    <th className="px-6 py-4 text-left">Student</th>
+                    <th className="px-6 py-4 text-left">Offense Type</th>
+                    <th className="px-6 py-4 text-center">Date</th>
                     <th className="px-6 py-4 text-center">Status</th>
                     <th className="px-6 py-4 text-right">Actions</th>
                   </tr>
@@ -283,7 +283,7 @@ export default function SecurityDashboard() {
                   {filteredCases.slice(0, 12).map((c, i) => (
                     <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 group transition-colors cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
                       <td className="px-6 py-4">
-                        <div className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-kmuGreen transition-colors uppercase">{c.student?.fullName || 'Anonymous Entity'}</div>
+                        <div className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-kmuGreen transition-colors uppercase">{c.student?.fullName || 'Anonymous Student'}</div>
                         <div className="text-xs text-gray-500 mt-0.5">{c.student?.studentId || 'UNKNOWN_ID'}</div>
                       </td>
                       <td className="px-6 py-4 text-gray-600 dark:text-gray-400 font-bold uppercase">{c.offenseType}</td>
@@ -312,11 +312,11 @@ export default function SecurityDashboard() {
                 </tbody>
               </table>
               {filteredCases.length === 0 && (
-                <div className="text-center py-20 text-gray-400 italic text-sm">Registry query returned zero indices.</div>
+                <div className="text-center py-20 text-gray-400 italic text-sm">No cases found matching your search.</div>
               )}
             </div>
             <div className="p-4 bg-gray-50 dark:bg-gray-800/50 text-center border-t border-gray-100 dark:border-gray-800">
-              <Link href="/cases" className="text-xs font-bold text-kmuGreen hover:text-green-700 uppercase tracking-wider transition-all">Expand Historical Dossier →</Link>
+              <Link href="/cases" className="text-xs font-bold text-kmuGreen hover:text-green-700 uppercase tracking-wider transition-all">View All Cases →</Link>
             </div>
           </div>
         </div>
@@ -329,14 +329,14 @@ export default function SecurityDashboard() {
           <div className="relative bg-white dark:bg-gray-900 w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl border-t-4 border-kmuGreen p-8">
             <div className="flex justify-between items-center mb-8">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Record New Disciplinary Case</h2>
-                <p className="text-sm text-gray-500 mt-1">Official security protocol registration</p>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Create New Case</h2>
+                <p className="text-sm text-gray-500 mt-1">Enter incident details for the university record</p>
               </div>
               <button onClick={() => setShowAddCase(false)} className="bg-gray-100 dark:bg-gray-800 p-2 rounded-full text-gray-400 hover:text-red-500 transition-all">✕</button>
             </div>
             <CaseDossierForm
               onSuccess={() => {
-                showNotification('success', 'Case successfully indexed');
+                showNotification('success', 'Case created successfully');
                 setShowAddCase(false);
                 fetch(`${API_BASE_URL}/cases`, { headers: { ...authHeaders() } })
                   .then(res => res.json())

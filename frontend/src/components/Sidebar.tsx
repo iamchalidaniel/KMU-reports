@@ -86,11 +86,11 @@ export default function Sidebar() {
   let navLinks = [];
   if (user?.role === 'admin') {
     navLinks = [
-      { icon: navIcons.admin, label: 'Admin Panel', path: '/admin' },
-      { icon: navIcons.cases, label: 'Disciplinary Cases', path: '/cases' },
-      { icon: navIcons.reports, label: 'New Disciplinary Reports', path: '/reports' },
+      { icon: navIcons.admin, label: 'Administrator Dashboard', path: '/admin' },
+      { icon: navIcons.cases, label: 'Cases', path: '/cases' },
+      { icon: navIcons.reports, label: 'Student Reports', path: '/reports' },
       { icon: navIcons.students, label: 'Students', path: '/students' },
-      { icon: navIcons.maintenance, label: 'Maintenance Reports', path: '/maintenance' },
+      { icon: navIcons.maintenance, label: 'Maintenance', path: '/maintenance' },
       { icon: navIcons.evidence, label: 'Evidence', path: '/evidence' },
       { icon: navIcons.newcase, label: 'New Case', path: '/cases/new' },
       { icon: navIcons.help, label: 'Help', path: '/help' },
@@ -98,7 +98,7 @@ export default function Sidebar() {
   } else if (user?.role === 'security_officer') {
     navLinks = [
       { icon: navIcons.dashboard, label: 'Home', path: '/security-dashboard' },
-      { icon: navIcons.cases, label: 'Disciplinary Cases', path: '/cases' },
+      { icon: navIcons.cases, label: 'Cases', path: '/cases' },
       { icon: navIcons.evidence, label: 'Evidence', path: '/evidence' },
       { icon: navIcons.students, label: 'Students', path: '/students' },
       { icon: navIcons.newcase, label: 'New Case', path: '/cases/new' },
@@ -107,8 +107,8 @@ export default function Sidebar() {
   } else if (user?.role === 'chief_security_officer') {
     navLinks = [
       { icon: navIcons.security, label: 'Home', path: '/chief-security-officer-dashboard' },
-      { icon: navIcons.cases, label: 'Disciplinary Cases', path: '/cases' },
-      { icon: navIcons.reports, label: 'New Disciplinary Reports', path: '/reports' },
+      { icon: navIcons.cases, label: 'Cases', path: '/cases' },
+      { icon: navIcons.reports, label: 'Student Reports', path: '/reports' },
       { icon: navIcons.students, label: 'Students', path: '/students' },
       { icon: navIcons.evidence, label: 'Evidence', path: '/evidence' },
       { icon: navIcons.newcase, label: 'New Case', path: '/cases/new' },
@@ -118,24 +118,24 @@ export default function Sidebar() {
     navLinks = [
       { icon: navIcons.dean, label: 'Home', path: '/dean-of-students-dashboard' },
       { icon: navIcons.students, label: 'Students', path: '/students' },
-      { icon: navIcons.cases, label: 'Disciplinary Cases', path: '/cases' },
-      { icon: navIcons.reports, label: 'New Disciplinary Reports', path: '/reports' },
+      { icon: navIcons.cases, label: 'Cases', path: '/cases' },
+      { icon: navIcons.reports, label: 'Student Reports', path: '/reports' },
       { icon: navIcons.help, label: 'Help', path: '/help' },
     ];
   } else if (user?.role === 'assistant_dean') {
     navLinks = [
       { icon: navIcons.assistant, label: 'Home', path: '/assistant-dean-dashboard' },
       { icon: navIcons.students, label: 'Students', path: '/students' },
-      { icon: navIcons.cases, label: 'Disciplinary Cases', path: '/cases' },
-      { icon: navIcons.reports, label: 'New Disciplinary Reports', path: '/reports' },
+      { icon: navIcons.cases, label: 'Cases', path: '/cases' },
+      { icon: navIcons.reports, label: 'Student Reports', path: '/reports' },
       { icon: navIcons.help, label: 'Help', path: '/help' },
     ];
   } else if (user?.role === 'secretary') {
     navLinks = [
       { icon: navIcons.secretary, label: 'Home', path: '/secretary-dashboard' },
       { icon: navIcons.students, label: 'Students', path: '/students' },
-      { icon: navIcons.cases, label: 'Disciplinary Cases', path: '/cases' },
-      { icon: navIcons.reports, label: 'New Disciplinary Reports', path: '/reports' },
+      { icon: navIcons.cases, label: 'Cases', path: '/cases' },
+      { icon: navIcons.reports, label: 'Student Reports', path: '/reports' },
       { icon: navIcons.help, label: 'Help', path: '/help' },
     ];
   } else if (user?.role === 'hall_warden') {
@@ -150,7 +150,7 @@ export default function Sidebar() {
     ];
   } else if (user?.role === 'student') {
     navLinks = [
-      { icon: navIcons.dashboard, label: 'My Dashboard', path: '/student-dashboard' },
+      { icon: navIcons.dashboard, label: 'Dashboard', path: '/student-dashboard' },
       { icon: navIcons.help, label: 'Help', path: '/help' },
     ];
   } else {
@@ -236,7 +236,7 @@ export default function Sidebar() {
             >
               <span className="text-xl">{link.icon}</span>
               <span>{link.label}</span>
-              {link.label === 'Reports' && reportCount > 0 && (
+              {link.label === 'Student Reports' && reportCount > 0 && (
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 bg-red-600 text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full animate-pulse shadow-sm">
                   {reportCount > 9 ? '9+' : reportCount}
                 </span>

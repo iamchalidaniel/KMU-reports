@@ -176,37 +176,37 @@ export default function ChiefSecurityOfficerDashboard() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 gap-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Chief Security Officer Dashboard</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Strategic oversight and enforcement protocols</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Overview of university security and disciplinary status</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={exportCasesToWord}
                 className="bg-red-600 text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-red-700 transition flex items-center gap-2 shadow-sm"
               >
-                📊 Generate Intelligence Report
+                📊 Generate Full Security Report
               </button>
             </div>
           </div>
 
-          {/* Strategic Metrics */}
+          {/* Security Overview */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard title="Total Indictments" value={safeCases.length} color="red" />
-            <StatCard title="Active Inquiries" value={safeCases.filter(c => c.status === 'Open').length} color="blue" />
-            <StatCard title="Critical Index" value={safeCases.filter(c => c.severity === 'High' || c.severity === 'Critical').length} color="orange" />
+            <StatCard title="Total Cases" value={safeCases.length} color="red" />
+            <StatCard title="Open Cases" value={safeCases.filter(c => c.status === 'Open').length} color="blue" />
+            <StatCard title="High/Critical Priority" value={safeCases.filter(c => c.severity === 'High' || c.severity === 'Critical').length} color="orange" />
             <StatCard title="Total Students" value={safeStudents.length} color="indigo" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Analytics Ledger */}
+            {/* Case Analytics */}
             <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Criminological Variance</h3>
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Offense Types by Category</h3>
                 <select
                   className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs font-semibold outline-none focus:ring-2 focus:ring-red-500 transition-all font-sans"
                   value={programFilter}
                   onChange={(e) => setProgramFilter(e.target.value)}
                 >
-                  <option value="">Full University</option>
+                  <option value="">All Programs</option>
                   {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
@@ -226,9 +226,9 @@ export default function ChiefSecurityOfficerDashboard() {
               </div>
             </div>
 
-            {/* Target Subjects Watchlist */}
+            {/* Top Offenders */}
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Priority Watch Indices</h3>
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Frequent Offenders</h3>
               <div className="space-y-3">
                 {topOffenders.map(([name, count], i) => (
                   <div key={i} className="flex justify-between items-center p-3 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-all border border-gray-100 dark:border-gray-700 group">
@@ -236,20 +236,20 @@ export default function ChiefSecurityOfficerDashboard() {
                       <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center text-red-600 font-bold text-xs">{name.charAt(0)}</div>
                       <span className="font-bold text-sm text-gray-700 dark:text-gray-300 group-hover:text-red-600 transition-colors uppercase">{name}</span>
                     </div>
-                    <span className="text-[10px] font-bold text-red-600 bg-red-50 dark:bg-red-900/30 px-2 py-1 rounded-lg uppercase">{count} OFFENSES</span>
+                    <span className="text-[10px] font-bold text-red-600 bg-red-50 dark:bg-red-900/30 px-2 py-1 rounded-lg uppercase">{count} Incidents</span>
                   </div>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Operational Dispatch Ledger */}
+          {/* Recent Cases */}
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
             <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Strategic Dispatch Ledger</h2>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Recent Security Cases</h2>
               <div className="relative w-full md:w-80">
                 <input
-                  placeholder="Query command indices..."
+                  placeholder="Search cases..."
                   className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-sm w-full focus:ring-2 focus:ring-red-500 transition-all font-sans"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -260,10 +260,10 @@ export default function ChiefSecurityOfficerDashboard() {
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-xs font-bold uppercase tracking-wider">
                   <tr>
-                    <th className="px-6 py-4 text-left">Subject</th>
-                    <th className="px-6 py-4 text-left">Protocol Class</th>
+                    <th className="px-6 py-4 text-left">Student</th>
+                    <th className="px-6 py-4 text-left">Offense Category</th>
                     <th className="px-6 py-4 text-center">Status</th>
-                    <th className="px-6 py-4 text-right">Escalation</th>
+                    <th className="px-6 py-4 text-right">Severity</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -293,7 +293,7 @@ export default function ChiefSecurityOfficerDashboard() {
               )}
             </div>
             <div className="p-4 bg-gray-50 dark:bg-gray-800/50 text-center border-t border-gray-100 dark:border-gray-800">
-              <Link href="/cases" className="text-xs font-bold text-red-600 hover:text-red-700 uppercase tracking-wider transition-all">Expand Fleet Dossier →</Link>
+              <Link href="/cases" className="text-xs font-bold text-red-600 hover:text-red-700 uppercase tracking-wider transition-all">View All Cases →</Link>
             </div>
           </div>
         </div>

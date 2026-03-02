@@ -91,13 +91,13 @@ export default function EvidencePage() {
         body: formData,
       });
       if (res.ok) {
-        showNotification('success', 'Forensic metadata synchronized');
+        showNotification('success', 'File uploaded successfully');
         setFile(null);
         setCaseId('');
         fetchData();
       }
     } catch (err) {
-      showNotification('error', 'Upload integrity failure');
+      showNotification('error', 'Failed to upload file');
     } finally {
       setUploading(false);
     }
@@ -117,28 +117,28 @@ export default function EvidencePage() {
         a.click();
       }
     } catch (err) {
-      showNotification('error', 'Retrieval failed');
+      showNotification('error', 'Failed to download file');
     }
   }
 
   async function handleDelete(id: string) {
-    if (!window.confirm('Purge forensic evidence? This is irreversible.')) return;
+    if (!window.confirm('Are you sure you want to delete this evidence file? This action cannot be undone.')) return;
     try {
       const res = await fetch(`${API_BASE_URL}/evidence/${id}`, {
         method: 'DELETE',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (res.ok) {
-        showNotification('success', 'Evidence purged');
+        showNotification('success', 'File deleted successfully');
         fetchData();
       }
     } catch (err) {
-      showNotification('error', 'Purge failed');
+      showNotification('error', 'Failed to delete file');
     }
   }
 
   if (isCheckingAuth) {
-    return <div className="text-center p-12 text-kmuGreen font-serif">Initializing Forensic Vault...</div>;
+    return <div className="text-center p-12 text-kmuGreen font-sans">Loading evidence...</div>;
   }
 
   return (
@@ -149,14 +149,14 @@ export default function EvidencePage() {
           {/* Evidence Header */}
           <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Forensic Vault</h1>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Evidence Management</h1>
               <p className="text-sm text-gray-500 font-semibold mt-1">
-                KMU Unified Evidence Repository & Metadata Archive {offlineMode && <span className="text-orange-500 font-bold ml-2">• OFFLINE PROTOCOL</span>}
+                Manage case evidence and uploaded files {offlineMode && <span className="text-orange-500 font-bold ml-2">• OFFLINE MODE</span>}
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
               <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 px-4 py-2 rounded-lg font-bold text-[10px] uppercase tracking-widest flex items-center gap-2 border border-blue-200">
-                🔒 {evidence.length} Secured Assets
+                🔒 {evidence.length} Files
               </span>
             </div>
           </div>
@@ -164,22 +164,22 @@ export default function EvidencePage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Upload Terminal */}
             <div className="lg:col-span-1 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
-              <h2 className="text-lg font-bold uppercase tracking-tight text-blue-600 mb-6">Asset Ingress</h2>
+              <h2 className="text-lg font-bold uppercase tracking-tight text-blue-600 mb-6">Upload Evidence</h2>
               <form onSubmit={handleUpload} className="space-y-5 font-sans">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Case Dossier Association</label>
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Link to Case</label>
                   <select
                     className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-2.5 text-xs font-bold uppercase focus:ring-2 focus:ring-blue-500 transition-all outline-none"
                     value={caseId}
                     onChange={e => setCaseId(e.target.value)}
                     required
                   >
-                    <option value="">Select Target...</option>
+                    <option value="">Select Case...</option>
                     {cases.map(c => <option key={c._id} value={c._id}>{c.description || 'Unlabeled Case'}</option>)}
                   </select>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">File Payload</label>
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Select File</label>
                   <input
                     type="file"
                     className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-2.5 text-xs font-bold focus:ring-2 focus:ring-blue-500 transition-all"
@@ -192,18 +192,18 @@ export default function EvidencePage() {
                   disabled={uploading}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all text-xs uppercase tracking-widest"
                 >
-                  {uploading ? 'Archiving Payload...' : 'Authorize Vault Entry'}
+                  {uploading ? 'Uploading...' : 'Upload Evidence'}
                 </button>
               </form>
             </div>
 
             {/* Asset Ledger Grid */}
             <div className="lg:col-span-2 space-y-4">
-              <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-2 mb-2 italic">Secured Asset Ledger</h2>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-2 mb-2 italic">Evidence List</h2>
               {loading ? (
-                <div className="text-center py-20 text-blue-600 font-bold text-xs uppercase animate-pulse tracking-widest">Scanning Repository...</div>
+                <div className="text-center py-20 text-blue-600 font-bold text-xs uppercase animate-pulse tracking-widest">Loading...</div>
               ) : evidence.length === 0 ? (
-                <div className="bg-white dark:bg-gray-900 rounded-xl p-20 text-center border border-gray-100 dark:border-gray-800 italic text-gray-400 text-sm">Vault contains zero forensic entities.</div>
+                <div className="bg-white dark:bg-gray-900 rounded-xl p-20 text-center border border-gray-100 dark:border-gray-800 italic text-gray-400 text-sm">No evidence files found.</div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {evidence.map((item) => {
@@ -228,9 +228,9 @@ export default function EvidencePage() {
                         </div>
                         <div>
                           <h3 className="font-bold text-gray-900 dark:text-white uppercase text-xs truncate tracking-tight" title={filename}>{filename}</h3>
-                          <p className="text-[10px] text-gray-400 font-semibold mt-1 uppercase tracking-tight">Case Dossier Index</p>
+                          <p className="text-[10px] text-gray-400 font-semibold mt-1 uppercase tracking-tight">Case Description</p>
                           <div className="mt-3 flex flex-col gap-1">
-                            <div className="text-[9px] font-bold text-blue-600 uppercase tracking-widest">Metadata Hash</div>
+                            <div className="text-[9px] font-bold text-blue-600 uppercase tracking-widest">File ID</div>
                             <div className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 truncate uppercase">{id}</div>
                           </div>
                         </div>

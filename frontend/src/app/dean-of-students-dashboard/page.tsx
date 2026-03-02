@@ -225,7 +225,7 @@ export default function DeanOfStudentsDashboard() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 gap-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dean of Students Dashboard</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Student affairs and behavioral management oversight</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Overview of student affairs and behavioral cases</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
@@ -233,23 +233,23 @@ export default function DeanOfStudentsDashboard() {
                 disabled={isSummarizing || cases.length === 0}
                 className="bg-kmuGreen text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-green-700 transition flex items-center gap-2 shadow-sm disabled:opacity-50"
               >
-                {isSummarizing ? "Synthesizing..." : "✨ AI Behavioral Audit"}
+                {isSummarizing ? "Generating summary..." : "✨ AI Case Summary"}
               </button>
               <button
                 onClick={exportCasesToWord}
                 className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-6 py-2.5 rounded-lg font-bold text-sm shadow-sm hover:opacity-90 transition"
               >
-                Export Strategic Dossier
+                Export Full Report
               </button>
             </div>
           </div>
 
-          {/* Strategic Metrics */}
+          {/* System Overview */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard title="University Population" value={safeStudents.length} color="teal" />
-            <StatCard title="Total Infractions" value={safeCases.length} color="orange" />
-            <StatCard title="Active Inquiries" value={safeCases.filter(c => c.status === 'Open').length} color="blue" />
-            <StatCard title="Critical Priority" value={safeCases.filter(c => c.severity === 'High' || c.severity === 'Critical').length} color="red" />
+            <StatCard title="Total Students" value={safeStudents.length} color="teal" />
+            <StatCard title="Total Cases" value={safeCases.length} color="orange" />
+            <StatCard title="Open Cases" value={safeCases.filter(c => c.status === 'Open').length} color="blue" />
+            <StatCard title="High/Critical Priority" value={safeCases.filter(c => c.severity === 'High' || c.severity === 'Critical').length} color="red" />
           </div>
 
           {/* AI behavioral Insight Panel */}
@@ -257,7 +257,7 @@ export default function DeanOfStudentsDashboard() {
             <div className="p-6 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-emerald-100 dark:border-emerald-900/50 relative overflow-hidden group animate-in slide-in-from-top-4 duration-500">
               <div className="relative z-10">
                 <div className="flex justify-between items-center mb-4">
-                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">Administrative Intelligence Synthesis</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">AI Case Analysis</span>
                   <button onClick={() => setAiSummary(null)} className="text-gray-400 hover:text-gray-600 transition">✕</button>
                 </div>
                 <div className="text-gray-800 dark:text-gray-200 leading-relaxed text-sm font-medium italic">
@@ -268,16 +268,16 @@ export default function DeanOfStudentsDashboard() {
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Infraction Distribution */}
+            {/* Case Analysis */}
             <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Campus behavioral Analytics</h3>
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Cases by Category</h3>
                 <select
                   className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs font-semibold outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
                   value={programFilter}
                   onChange={(e) => setProgramFilter(e.target.value)}
                 >
-                  <option value="">Full University</option>
+                  <option value="">All Programs</option>
                   {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
@@ -296,9 +296,9 @@ export default function DeanOfStudentsDashboard() {
               </div>
             </div>
 
-            {/* Recidivism Watchlist */}
+            {/* Top Offenders */}
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Observation Watchlist</h3>
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Frequent Offenders</h3>
               <div className="space-y-3">
                 {topOffenders.length > 0 ? topOffenders.map(([name, count], i) => (
                   <div key={i} className="flex justify-between items-center p-3 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 rounded-lg transition-all border border-gray-100 dark:border-gray-700 group">
@@ -306,20 +306,20 @@ export default function DeanOfStudentsDashboard() {
                       <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center text-emerald-600 font-bold text-xs uppercase">{name.charAt(0)}</div>
                       <span className="font-bold text-sm text-gray-700 dark:text-gray-300 group-hover:text-kmuGreen transition-colors uppercase">{name}</span>
                     </div>
-                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1 rounded-full uppercase">{count} INCIDENTS</span>
+                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1 rounded-full uppercase">{count} Incidents</span>
                   </div>
-                )) : <p className="text-center text-gray-400 py-12 italic text-xs">No watch data.</p>}
+                )) : <p className="text-center text-gray-400 py-12 italic text-xs">No offenders found.</p>}
               </div>
             </div>
           </div>
 
-          {/* Strategic Record Ledger */}
+          {/* Case Ledger */}
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
             <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Disciplinary Ledger</h2>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Recent Cases</h2>
               <div className="relative w-full md:w-80">
                 <input
-                  placeholder="Query behavioral indices..."
+                  placeholder="Search cases..."
                   className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2.5 text-sm w-full focus:ring-2 focus:ring-kmuGreen transition-all shadow-inner"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -330,10 +330,10 @@ export default function DeanOfStudentsDashboard() {
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-xs font-bold uppercase tracking-wider">
                   <tr>
-                    <th className="px-6 py-4 text-left">Subject</th>
-                    <th className="px-6 py-4 text-left">Classification</th>
+                    <th className="px-6 py-4 text-left">Student</th>
+                    <th className="px-6 py-4 text-left">Offense Category</th>
                     <th className="px-6 py-4 text-center">Status</th>
-                    <th className="px-6 py-4 text-right">Escalation</th>
+                    <th className="px-6 py-4 text-right">Severity</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -363,15 +363,15 @@ export default function DeanOfStudentsDashboard() {
               )}
             </div>
             <div className="p-4 bg-gray-50 dark:bg-gray-800/50 text-center border-t border-gray-100 dark:border-gray-800">
-              <Link href="/cases" className="text-xs font-bold text-kmuGreen hover:text-green-700 uppercase tracking-wider transition-all">Expand Campus Dossier →</Link>
+              <Link href="/cases" className="text-xs font-bold text-kmuGreen hover:text-green-700 uppercase tracking-wider transition-all">View All Cases →</Link>
             </div>
           </div>
 
-          {/* Registry Shortcut */}
+          {/* Student Directory */}
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Registry Shortcut</h2>
-              <Link href="/students" className="text-xs font-bold text-kmuGreen hover:underline uppercase tracking-wider">Global Registry →</Link>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Student Directory</h2>
+              <Link href="/students" className="text-xs font-bold text-kmuGreen hover:underline uppercase tracking-wider">View All Students →</Link>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {filteredStudents.slice(0, 12).map((s, i) => (

@@ -44,15 +44,15 @@ function NewCaseContent() {
           {/* New Case Header */}
           <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Inquiry Genesis</h1>
-              <p className="text-sm text-gray-500 font-semibold mt-1">KMU Disciplinary Intake / Protocol Initialization</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Create New Case</h1>
+              <p className="text-sm text-gray-500 font-semibold mt-1">Enter incident details for the university record</p>
             </div>
             <div className="flex gap-2">
               <button
                 onClick={handleCancel}
                 className="bg-gray-100 dark:bg-gray-800 text-gray-600 font-bold text-[10px] uppercase tracking-widest px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-200 transition"
               >
-                Discard Protocol
+                Cancel
               </button>
             </div>
           </div>
@@ -75,7 +75,7 @@ export default function NewCasePage() {
     <ProtectedRoute>
       <Suspense fallback={
         <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
-          <div className="text-center py-12 text-kmuGreen uppercase tracking-[0.5em] font-black text-sm animate-pulse italic">Initializing Case Dossier Matrix...</div>
+          <div className="text-center py-12 text-kmuGreen uppercase tracking-[0.5em] font-black text-sm animate-pulse italic">Loading Case Form...</div>
         </div>
       }>
         <NewCaseContent />

@@ -153,7 +153,7 @@ export default function StaffDetailsPage({ params }: { params: { id: string } })
                         href={`/cases/new?staffId=${staff.staffId}`}
                         className="bg-kmuGreen text-white px-4 py-2 rounded hover:bg-kmuOrange transition"
                     >
-                        + New Case
+                        + Create New Case
                     </Link>
                     <Link
                         href="/staff"
@@ -311,7 +311,7 @@ export default function StaffDetailsPage({ params }: { params: { id: string } })
                             <thead className="bg-gray-50 dark:bg-gray-700">
                                 <tr>
                                     <th className="py-2 px-2 text-left">Case ID</th>
-                                    <th className="py-2 px-2 text-left">Offense</th>
+                                    <th className="py-2 px-2 text-left">Offense Category</th>
                                     <th className="py-2 px-2 text-left hidden md:table-cell">Date</th>
                                     <th className="py-2 px-2 text-left">Severity</th>
                                     <th className="py-2 px-2 text-left">Status</th>
@@ -335,17 +335,17 @@ export default function StaffDetailsPage({ params }: { params: { id: string } })
                                         </td>
                                         <td className="py-2 px-2">
                                             <span className={`px-2 py-1 rounded text-xs ${c.severity === 'Critical' ? 'bg-red-100 text-red-800' :
-                                                    c.severity === 'High' ? 'bg-orange-100 text-orange-800' :
-                                                        c.severity === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                                                            'bg-green-100 text-green-800'
+                                                c.severity === 'High' ? 'bg-orange-100 text-orange-800' :
+                                                    c.severity === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                                                        'bg-green-100 text-green-800'
                                                 }`}>
                                                 {c.severity || 'N/A'}
                                             </span>
                                         </td>
                                         <td className="py-2 px-2">
                                             <span className={`px-2 py-1 rounded text-xs ${c.status === 'Open' ? 'bg-blue-100 text-blue-800' :
-                                                    c.status === 'Closed' ? 'bg-green-100 text-green-800' :
-                                                        'bg-gray-100 text-gray-800'
+                                                c.status === 'Closed' ? 'bg-green-100 text-green-800' :
+                                                    'bg-gray-100 text-gray-800'
                                                 }`}>
                                                 {c.status || 'N/A'}
                                             </span>

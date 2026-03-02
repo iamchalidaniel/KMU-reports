@@ -74,12 +74,12 @@ export default function UserManagementPage() {
     setLoading(true);
     try {
       await register(newUser.username, newUser.password, newUser.name, newUser.role);
-      showNotification('success', 'Operational identity synthesized');
+      showNotification('success', 'User account created');
       setShowCreate(false);
       setNewUser({ username: '', name: '', password: '', role: 'security_officer' });
       fetchUsers();
     } catch (err: any) {
-      showNotification('error', err.message || 'Identity creation failed');
+      showNotification('error', err.message || 'User creation failed');
     } finally {
       setLoading(false);
     }
@@ -94,7 +94,7 @@ export default function UserManagementPage() {
         name: editUser.name,
         role: editUser.role
       });
-      showNotification('success', 'Identity metadata updated');
+      showNotification('success', 'User information updated');
       setEditUser(null);
       setEditingUserId(null);
       fetchUsers();
@@ -106,10 +106,10 @@ export default function UserManagementPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!window.confirm('Commit identity purge? This operation is final.')) return;
+    if (!window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
     try {
       await remove('users', id);
-      showNotification('success', 'Identity purged from registry');
+      showNotification('success', 'User account deleted');
       fetchUsers();
     } catch (err: any) {
       showNotification('error', 'Purge operation failed');
@@ -123,7 +123,7 @@ export default function UserManagementPage() {
   );
 
   if (isCheckingAuth) {
-    return <div className="text-center p-12 text-kmuGreen font-sans font-bold uppercase tracking-widest animate-pulse">Initializing User Registry...</div>;
+    return <div className="text-center p-12 text-kmuGreen font-sans font-bold uppercase tracking-widest animate-pulse">Loading Users...</div>;
   }
 
   return (
@@ -134,9 +134,9 @@ export default function UserManagementPage() {
           {/* Header */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-8 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm gap-4">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white uppercase">User Control</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white uppercase">User Management</h1>
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
-                KMU Identity Management & Access Governance
+                Manage university user accounts and access roles
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -144,28 +144,28 @@ export default function UserManagementPage() {
                 onClick={() => setShowCreate(true)}
                 className="bg-indigo-600 text-white px-6 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-indigo-700 transition shadow-sm flex items-center gap-2"
               >
-                <span>🔑</span> Provision New Identity
+                <span>👤</span> Create New User
               </button>
             </div>
           </div>
 
-          {/* Strategic Metrics Shortcut */}
+          {/* System Overview */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard title="Total Identities" value={users.length} color="indigo" />
-            <StatCard title="Administrative Units" value={users.filter(u => u.role === 'admin').length} color="purple" />
-            <StatCard title="Security Assets" value={users.filter(u => u.role.includes('security')).length} color="blue" />
-            <StatCard title="Platform Integrity" value="Live" color="emerald" />
+            <StatCard title="Total Users" value={users.length} color="indigo" />
+            <StatCard title="Administrators" value={users.filter(u => u.role === 'admin').length} color="purple" />
+            <StatCard title="Security Staff" value={users.filter(u => u.role.includes('security')).length} color="blue" />
+            <StatCard title="System Status" value="Online" color="emerald" />
           </div>
 
-          {/* Central Identity Ledger */}
+          {/* User List */}
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
             <div className="p-8 border-b border-gray-100 dark:border-gray-800 bg-gray-50/30">
               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-                <h2 className="text-lg font-bold uppercase tracking-tight text-indigo-600">Identity Provisioning Ledger</h2>
+                <h2 className="text-lg font-bold uppercase tracking-tight text-indigo-600">User List</h2>
                 <div className="flex flex-wrap gap-4 w-full lg:w-auto">
                   <div className="relative flex-1 lg:w-80">
                     <input
-                      placeholder="Query identity metadata..."
+                      placeholder="Search users..."
                       className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-xs w-full focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
                       value={search}
                       onChange={e => setSearch(e.target.value)}
@@ -176,7 +176,7 @@ export default function UserManagementPage() {
                     onChange={e => setRoleFilter(e.target.value)}
                     className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-[10px] font-bold uppercase outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
                   >
-                    <option value="">All Privileges</option>
+                    <option value="">All Roles</option>
                     {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
                   </select>
                 </div>
@@ -187,8 +187,8 @@ export default function UserManagementPage() {
               <table className="w-full text-xs">
                 <thead className="bg-gray-50 dark:bg-gray-800 text-[10px] font-bold uppercase text-gray-400 tracking-widest">
                   <tr>
-                    <th className="px-8 py-4 text-left">Identity Cluster</th>
-                    <th className="px-8 py-4 text-left">Privilege Class</th>
+                    <th className="px-8 py-4 text-left">User Details</th>
+                    <th className="px-8 py-4 text-left">Role</th>
                     <th className="px-8 py-4 text-center">Status</th>
                     <th className="px-8 py-4 text-right">Actions</th>
                   </tr>
@@ -225,14 +225,14 @@ export default function UserManagementPage() {
                             <button
                               onClick={() => { setEditingUserId(userId); setEditUser({ ...u }); }}
                               className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 hover:bg-gray-200 transition-colors text-sm"
-                              title="Modify Identity"
+                              title="Edit User"
                             >
                               ⚙️
                             </button>
                             <button
                               onClick={() => handleDelete(userId)}
                               className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 hover:bg-red-200 transition-colors text-sm"
-                              title="Terminate Session"
+                              title="Delete User"
                             >
                               🗑️
                             </button>
@@ -255,20 +255,20 @@ export default function UserManagementPage() {
           <div className="relative bg-white dark:bg-gray-900 w-full max-w-xl rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800 p-8 overflow-y-auto max-h-[90vh]">
             <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-100 dark:border-gray-800">
               <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Identity Provisioning</h2>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Unified Access Governance Entry</p>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Create New User</h2>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Enter details to create a new user account</p>
               </div>
               <button onClick={() => setShowCreate(false)} className="bg-gray-100 dark:bg-gray-800 p-2 rounded-lg text-gray-400 hover:text-indigo-600 transition-all">✕</button>
             </div>
             <form onSubmit={handleCreate} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField label="Identity Username" value={newUser.username} onChange={(v: string) => setNewUser({ ...newUser, username: v })} required />
-                <FormField label="Legal Designation" value={newUser.name} onChange={(v: string) => setNewUser({ ...newUser, name: v })} required />
-                <FormField label="Security Password" value={newUser.password} onChange={(v: string) => setNewUser({ ...newUser, password: v })} type="password" required />
-                <FormField label="Privilege Class" value={newUser.role} onChange={(v: string) => setNewUser({ ...newUser, role: v })} type="select" options={ROLES} />
+                <FormField label="Username" value={newUser.username} onChange={(v: string) => setNewUser({ ...newUser, username: v })} required />
+                <FormField label="Full Name" value={newUser.name} onChange={(v: string) => setNewUser({ ...newUser, name: v })} required />
+                <FormField label="Password" value={newUser.password} onChange={(v: string) => setNewUser({ ...newUser, password: v })} type="password" required />
+                <FormField label="Account Role" value={newUser.role} onChange={(v: string) => setNewUser({ ...newUser, role: v })} type="select" options={ROLES} />
               </div>
               <button type="submit" disabled={loading} className="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-lg hover:bg-indigo-700 transition-all text-[10px] uppercase tracking-widest shadow-sm">
-                {loading ? 'Synthesizing...' : 'Commit Identity Provisioning'}
+                {loading ? 'Creating...' : 'Create User Account'}
               </button>
             </form>
           </div>
@@ -282,19 +282,19 @@ export default function UserManagementPage() {
           <div className="relative bg-white dark:bg-gray-900 w-full max-w-xl rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800 p-8 overflow-y-auto max-h-[90vh]">
             <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-100 dark:border-gray-800">
               <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Modify Identity</h2>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Metadata Adjustment Protocol</p>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Edit User Details</h2>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Update user profile information</p>
               </div>
               <button onClick={() => cancelEdit()} className="bg-gray-100 dark:bg-gray-800 p-2 rounded-lg text-gray-400 hover:text-indigo-600 transition-all font-sans">✕</button>
             </div>
             <form onSubmit={handleEdit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField label="Identity Username" value={editUser.username} onChange={(v: string) => setEditUser({ ...editUser, username: v })} required />
-                <FormField label="Legal Designation" value={editUser.name} onChange={(v: string) => setEditUser({ ...editUser, name: v })} required />
-                <FormField label="Privilege Class" value={editUser.role} onChange={(v: string) => setEditUser({ ...editUser, role: v })} type="select" options={ROLES} />
+                <FormField label="Username" value={editUser.username} onChange={(v: string) => setEditUser({ ...editUser, username: v })} required />
+                <FormField label="Full Name" value={editUser.name} onChange={(v: string) => setEditUser({ ...editUser, name: v })} required />
+                <FormField label="Account Role" value={editUser.role} onChange={(v: string) => setEditUser({ ...editUser, role: v })} type="select" options={ROLES} />
               </div>
               <button type="submit" disabled={loading} className="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-lg hover:bg-indigo-700 transition-all text-[10px] uppercase tracking-widest shadow-sm">
-                Update Metadata
+                Update User Information
               </button>
             </form>
           </div>
@@ -332,7 +332,7 @@ function FormField({ label, value, onChange, type = 'text', options = [], requir
       <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">{label}</label>
       {type === 'select' ? (
         <select value={value} onChange={(e) => onChange(e.target.value)} required={required} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-bold uppercase">
-          <option value="">Select Privilege...</option>
+          <option value="">Select Role...</option>
           {options.map((o: any) => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
       ) : (

@@ -218,37 +218,36 @@ export default function AdminPage() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 gap-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Administrator Dashboard</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">System-wide governance and analytics hub</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Overview of university disciplinary and facility status</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={exportCasesToWord}
                 className="bg-kmuGreen text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-green-700 transition flex items-center gap-2 shadow-sm"
               >
-                📊 System Audit Report
+                📊 Full System Report
               </button>
             </div>
           </div>
 
-          {/* Strategic Metrics */}
+          {/* System Overview */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard title="Total Students" value={safeStudents.length} color="indigo" link="/students" />
-            <StatCard title="Index of Cases" value={safeCases.length} color="blue" link="/cases" />
+            <StatCard title="Total Cases" value={safeCases.length} color="blue" link="/cases" />
             <StatCard title="Active Users" value={usersCount} color="emerald" link="/admin/users" />
-            <StatCard title="Maintenance Load" value={safeMaintenance.length} color="teal" link="/maintenance" />
+            <StatCard title="Maintenance Reports" value={safeMaintenance.length} color="teal" link="/maintenance" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Disciplinary Analytics */}
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Disciplinary Distribution</h3>
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Case Distribution</h3>
                 <select
                   className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs font-semibold outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
                   value={programFilter}
                   onChange={(e) => setProgramFilter(e.target.value)}
                 >
-                  <option value="">Full University</option>
+                  <option value="">All Programs</option>
                   {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
@@ -270,13 +269,13 @@ export default function AdminPage() {
             {/* Maintenance Analytics */}
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Facility Infrastructure</h3>
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Maintenance by Category</h3>
                 <select
                   className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs font-semibold outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
                   value={hostelFilter}
                   onChange={(e) => setHostelFilter(e.target.value)}
                 >
-                  <option value="">All Regions</option>
+                  <option value="">All Halls</option>
                   {hostels.map((h: any) => <option key={h} value={h}>{h}</option>)}
                 </select>
               </div>

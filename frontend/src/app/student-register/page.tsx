@@ -128,7 +128,7 @@ export default function StudentRegisterPage() {
           Student Registration
         </h1>
         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-8 text-center">
-          Institutional Enrollment Portal • Authorized Personnel Only
+          University Student Registration Portal
         </p>
 
         {error && (
@@ -160,7 +160,7 @@ export default function StudentRegisterPage() {
               onClick={() => router.push("/login")}
               className="w-full bg-green-600 text-white rounded-lg py-3.5 font-bold hover:bg-green-700 transition-all shadow-sm uppercase text-[10px] tracking-widest"
             >
-              Access Identity Matrix
+              Go to Dashboard
             </button>
           </div>
         )}
@@ -189,10 +189,10 @@ export default function StudentRegisterPage() {
                 ></div>
               </div>
               <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-4 text-center">
-                Phase {step} of 4 • <span className="text-gray-900 dark:text-white">{
-                  step === 1 ? "ACCOUNT SECURITY" :
-                    step === 2 ? "ACADEMIC DETAILS" :
-                      step === 3 ? "PERSONAL INFO" : "ADDRESS & ACCOMMODATION"
+                Step {step} of 4 • <span className="text-gray-900 dark:text-white">{
+                  step === 1 ? "ACCOUNT DETAILS" :
+                    step === 2 ? "PROGRAM DETAILS" :
+                      step === 3 ? "PERSONAL INFORMATION" : "CONTACT & RESIDENCE"
                 }</span>
               </p>
             </div>

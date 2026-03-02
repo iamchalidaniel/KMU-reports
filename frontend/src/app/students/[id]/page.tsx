@@ -326,7 +326,7 @@ export default function StudentDetailsPage({ params }: { params: { id: string } 
                                         : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                                         }`}
                                 >
-                                    Add New Case
+                                    Create New Case
                                 </button>
                             )}
                         </nav>
@@ -399,7 +399,7 @@ export default function StudentDetailsPage({ params }: { params: { id: string } 
                         {/* Cases Tab */}
                         {activeTab === 'cases' && (
                             <div>
-                                <h3 className="text-lg font-semibold text-kmuOrange mb-4">Disciplinary Case History</h3>
+                                <h3 className="text-lg font-semibold text-kmuOrange mb-4">Case History</h3>
                                 {cases.length === 0 ? (
                                     <div className="text-center py-8">
                                         <div className="text-gray-500 dark:text-gray-400">No disciplinary cases found for this student.</div>
@@ -413,7 +413,7 @@ export default function StudentDetailsPage({ params }: { params: { id: string } 
                                                     <th className="py-2 px-2 md:px-4 text-left">Description</th>
                                                     <th className="py-2 px-2 md:px-4 text-left">Severity</th>
                                                     <th className="py-2 px-2 md:px-4 text-left">Status</th>
-                                                    <th className="py-2 px-2 md:px-4 text-left hidden md:table-cell">Sanctions</th>
+                                                    <th className="py-2 px-2 md:px-4 text-left hidden md:table-cell">Disciplinary Actions</th>
                                                     <th className="py-2 px-2 md:px-4 text-left">Actions</th>
                                                 </tr>
                                             </thead>
@@ -430,7 +430,7 @@ export default function StudentDetailsPage({ params }: { params: { id: string } 
                                                             <div className="text-xs text-gray-500 dark:text-gray-400 md:hidden">
                                                                 {caseItem.sanctions && (
                                                                     <div className="mt-1">
-                                                                        Sanctions: {caseItem.sanctions}
+                                                                        Disciplinary Actions: {caseItem.sanctions}
                                                                     </div>
                                                                 )}
                                                             </div>

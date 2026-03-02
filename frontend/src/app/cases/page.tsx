@@ -117,10 +117,10 @@ export default function CasesPage() {
       if (res.ok) {
         const blob = await res.blob();
         saveAs(blob, `cases_ledger_${new Date().toISOString().split('T')[0]}.docx`);
-        showNotification('success', 'Strategic document generated');
+        showNotification('success', 'Report generated successfully');
       }
     } catch (err) {
-      showNotification('error', 'Export failure');
+      showNotification('error', 'Export failed');
     } finally {
       setExporting(false);
       setShowExportDropdown(false);
@@ -128,18 +128,18 @@ export default function CasesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Commit record purge? This operation is final.')) return;
+    if (!window.confirm('Are you sure you want to delete this case record? This action cannot be undone.')) return;
     try {
       await remove('cases', id);
-      showNotification('success', 'Case purged from index');
+      showNotification('success', 'Case deleted successfully');
       fetchCases();
     } catch (err) {
-      showNotification('error', 'Purge operation failed');
+      showNotification('error', 'Failed to delete case');
     }
   };
 
   if (isCheckingAuth) {
-    return <div className="text-center p-12 text-kmuGreen font-serif">Initializing Fleet Dossier...</div>;
+    return <div className="text-center p-12 text-kmuGreen font-sans">Loading cases...</div>;
   }
 
   return (
@@ -150,9 +150,9 @@ export default function CasesPage() {
           {/* Cases Header */}
           <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Case Command</h1>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Case Management</h1>
               <p className="text-sm text-gray-500 font-semibold mt-1">
-                KMU Disciplinary Enforcement & Litigation Registry {offlineMode && <span className="text-orange-500 font-bold ml-2">• OFFLINE PROTOCOL</span>}
+                Manage university disciplinary cases and incident reports {offlineMode && <span className="text-orange-500 font-bold ml-2">• OFFLINE MODE</span>}
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -160,14 +160,14 @@ export default function CasesPage() {
                 href="/cases/new"
                 className="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition shadow-sm flex items-center gap-2"
               >
-                ⚖️ Initiate New Inquiry
+                ⚖️ Create New Case
               </Link>
               <div className="relative" ref={exportRef}>
                 <button
                   onClick={() => setShowExportDropdown(!showExportDropdown)}
                   className="bg-gray-800 dark:bg-gray-700 text-white px-5 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition shadow-sm flex items-center gap-2"
                 >
-                  🚀 {exporting ? 'Synthesizing...' : 'Strategic Export'}
+                  🚀 {exporting ? 'Exporting...' : 'Export Reports'}
                 </button>
                 {showExportDropdown && (
                   <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-100 dark:border-gray-700 py-1 z-50 font-sans animate-in fade-in zoom-in-95 duration-100">
@@ -178,23 +178,23 @@ export default function CasesPage() {
             </div>
           </div>
 
-          {/* Strategic Metrics Shortcut */}
+          {/* Metrics Shortcut */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard title="Global Inquiries" value={total} color="red" />
-            <StatCard title="Open Protocols" value={cases.filter(c => c.status === 'Open').length} color="orange" />
-            <StatCard title="Critical Index" value={cases.filter(c => c.severity === 'High' || c.severity === 'Critical').length} color="indigo" />
-            <StatCard title="Operational Sync" value={offlineMode ? "Cached" : "Live"} color="blue" />
+            <StatCard title="Total Cases" value={total} color="red" />
+            <StatCard title="Open Cases" value={cases.filter(c => c.status === 'Open').length} color="orange" />
+            <StatCard title="High Priority" value={cases.filter(c => c.severity === 'High' || c.severity === 'Critical').length} color="indigo" />
+            <StatCard title="System Status" value={offlineMode ? "Cached" : "Live"} color="blue" />
           </div>
 
-          {/* Central Disciplinary Ledger */}
+          {/* Central Case Ledger */}
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
             <div className="p-6 border-b border-gray-100 dark:border-gray-800">
               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-                <h2 className="text-lg font-bold uppercase tracking-tight text-red-600">Strategic Compliance Ledger</h2>
+                <h2 className="text-lg font-bold uppercase tracking-tight text-red-600">Case Registry</h2>
                 <div className="flex flex-wrap gap-3 w-full lg:w-auto font-sans">
                   <div className="relative flex-1 lg:w-64">
                     <input
-                      placeholder="Query metadata..."
+                      placeholder="Search cases..."
                       className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-2 text-xs w-full focus:ring-2 focus:ring-red-500 transition-all shadow-sm"
                       value={search}
                       onChange={e => { setSearch(e.target.value); setPage(1); }}
@@ -224,9 +224,9 @@ export default function CasesPage() {
               <table className="w-full text-xs">
                 <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-[10px] font-bold uppercase tracking-widest">
                   <tr>
-                    <th className="px-6 py-4 text-left">Entity Cluster</th>
-                    <th className="px-6 py-4 text-left">Incident Classification</th>
-                    <th className="px-6 py-4 text-center">Status Index</th>
+                    <th className="px-6 py-4 text-left">Student Details</th>
+                    <th className="px-6 py-4 text-left">Incident Type</th>
+                    <th className="px-6 py-4 text-center">Status</th>
                     <th className="px-6 py-4 text-right">Actions</th>
                   </tr>
                 </thead>
@@ -263,9 +263,9 @@ export default function CasesPage() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                          <Link href={`/cases/${c._id}`} className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 hover:bg-gray-200 transition-colors" title="View Dossier">📄</Link>
+                          <Link href={`/cases/${c._id}`} className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 hover:bg-gray-200 transition-colors" title="View Case Details">📄</Link>
                           {(user?.role === 'admin' || user?.role === 'security_officer') && (
-                            <button onClick={() => handleDelete(c._id)} className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 hover:bg-red-200 transition-colors" title="Purge Incident">🗑️</button>
+                            <button onClick={() => handleDelete(c._id)} className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 hover:bg-red-200 transition-colors" title="Delete Case">🗑️</button>
                           )}
                         </div>
                       </td>
@@ -273,7 +273,7 @@ export default function CasesPage() {
                   ))}
                   {cases.length === 0 && !loading && (
                     <tr>
-                      <td colSpan={4} className="py-20 text-center text-gray-400 italic text-sm">Compliance registry query returned zero entities.</td>
+                      <td colSpan={4} className="py-20 text-center text-gray-400 italic text-sm">No cases found matching your search.</td>
                     </tr>
                   )}
                 </tbody>
@@ -282,7 +282,7 @@ export default function CasesPage() {
 
             {/* Pagination */}
             <div className="p-6 bg-gray-50 dark:bg-gray-800/20 border-t border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-center gap-6">
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Showing {cases.length} of {total} Compliance Indices</span>
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Showing {cases.length} of {total} Records</span>
               <div className="flex items-center gap-1">
                 <PaginationButton onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Prev</PaginationButton>
                 {Array.from({ length: Math.ceil(total / limit) }, (_, i) => i + 1).filter(p => p === 1 || p === Math.ceil(total / limit) || Math.abs(p - page) <= 1).map((p, idx, arr) => (

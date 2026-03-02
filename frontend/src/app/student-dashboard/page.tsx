@@ -186,7 +186,7 @@ export default function StudentDashboardPage() {
                     onClick={() => setActiveTab('overview')}
                     className={`text-xs font-bold uppercase tracking-wider pb-1.5 border-b-2 transition-all ${activeTab === 'overview' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
                   >
-                    Registry Overview
+                    Overview
                   </button>
                   <button
                     onClick={() => setActiveTab('reports')}
@@ -198,13 +198,13 @@ export default function StudentDashboardPage() {
                     onClick={() => setActiveTab('cases')}
                     className={`text-xs font-bold uppercase tracking-wider pb-1.5 border-b-2 transition-all ${activeTab === 'cases' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
                   >
-                    Disciplinary Ledger
+                    My Cases
                   </button>
                   <button
                     onClick={() => setActiveTab('appeals')}
                     className={`text-xs font-bold uppercase tracking-wider pb-1.5 border-b-2 transition-all ${activeTab === 'appeals' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
                   >
-                    Appeals Portal
+                    Appeals
                   </button>
                 </div>
               </div>
@@ -213,17 +213,17 @@ export default function StudentDashboardPage() {
 
           {activeTab === 'overview' && (
             <div className="animate-in fade-in duration-500 space-y-6">
-              {/* Strategic Metrics */}
+              {/* System Overview */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <StatCard title="Disciplinary Cases" value={cases.length} color="indigo" />
-                <StatCard title="Statement Filings" value={reports.length} color="blue" />
-                <StatCard title="Active Appeals" value={appeals.filter(a => a.status === 'Pending').length} color="orange" />
-                <StatCard title="Current Sanctions" value={cases.filter(c => !!c.sanctions).length} color="emerald" />
+                <StatCard title="Total Cases" value={cases.length} color="indigo" />
+                <StatCard title="My Statements" value={reports.length} color="blue" />
+                <StatCard title="Pending Appeals" value={appeals.filter(a => a.status === 'Pending').length} color="orange" />
+                <StatCard title="Active Sanctions" value={cases.filter(c => !!c.sanctions).length} color="emerald" />
               </div>
 
-              {/* Personal Information Ledger */}
+              {/* Personal Information */}
               <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Official Registry Record</h3>
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Official Student Record</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   <InfoField label="Academic Program" value={studentData.program} />
                   <InfoField label="Year of Study" value={studentData.yearOfStudy} />
@@ -242,14 +242,14 @@ export default function StudentDashboardPage() {
           {activeTab === 'reports' && (
             <div className="animate-in slide-in-from-bottom-4 duration-500 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
               <div className="p-6 border-b border-gray-100 dark:border-gray-800">
-                <h2 className="text-lg font-bold text-indigo-600 uppercase tracking-tight">Statement History Ledger</h2>
+                <h2 className="text-lg font-bold text-indigo-600 uppercase tracking-tight">Statement History</h2>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-xs font-bold uppercase tracking-wider">
                     <tr>
                       <th className="px-6 py-4 text-left">Incident Date</th>
-                      <th className="px-6 py-4 text-left">Classification</th>
+                      <th className="px-6 py-4 text-left">Offense Category</th>
                       <th className="px-6 py-4 text-center">Status</th>
                     </tr>
                   </thead>
@@ -267,7 +267,7 @@ export default function StudentDashboardPage() {
                     ))}
                     {reports.length === 0 && (
                       <tr>
-                        <td colSpan={3} className="px-6 py-10 text-center text-gray-400 italic">Empty statement registry.</td>
+                        <td colSpan={3} className="px-6 py-10 text-center text-gray-400 italic">No statements found.</td>
                       </tr>
                     )}
                   </tbody>
@@ -279,15 +279,15 @@ export default function StudentDashboardPage() {
           {activeTab === 'cases' && (
             <div className="animate-in slide-in-from-bottom-4 duration-500 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
               <div className="p-6 border-b border-gray-100 dark:border-gray-800">
-                <h2 className="text-lg font-bold text-red-600 uppercase tracking-tight">Official Disciplinary Ledger</h2>
+                <h2 className="text-lg font-bold text-red-600 uppercase tracking-tight">Disciplinary Record</h2>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-xs font-bold uppercase tracking-wider">
                     <tr>
-                      <th className="px-6 py-4 text-left">Indictment Date</th>
-                      <th className="px-6 py-4 text-left">Offense Index</th>
-                      <th className="px-6 py-4 text-center">Protocol Status</th>
+                      <th className="px-6 py-4 text-left">Date</th>
+                      <th className="px-6 py-4 text-left">Offense Category</th>
+                      <th className="px-6 py-4 text-center">Status</th>
                       <th className="px-6 py-4 text-center">Actions</th>
                     </tr>
                   </thead>
@@ -311,7 +311,7 @@ export default function StudentDashboardPage() {
                     ))}
                     {cases.length === 0 && (
                       <tr>
-                        <td colSpan={4} className="px-6 py-10 text-center text-gray-400 italic">No disciplinary indictments found in registry.</td>
+                        <td colSpan={4} className="px-6 py-10 text-center text-gray-400 italic">No disciplinary cases found.</td>
                       </tr>
                     )}
                   </tbody>
@@ -323,7 +323,7 @@ export default function StudentDashboardPage() {
           {activeTab === 'appeals' && (
             <div className="animate-in slide-in-from-bottom-4 duration-500 space-y-6">
               <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                <h2 className="text-lg font-bold text-orange-600 uppercase tracking-tight mb-6">Petition for Appeal Registry</h2>
+                <h2 className="text-lg font-bold text-orange-600 uppercase tracking-tight mb-6">My Appeals</h2>
                 <div className="space-y-4">
                   {appeals.map((appeal) => (
                     <div key={appeal._id} className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border border-gray-100 dark:border-gray-700 hover:border-orange-500/30 transition-all">
@@ -346,7 +346,7 @@ export default function StudentDashboardPage() {
                     </div>
                   ))}
                   {appeals.length === 0 && (
-                    <div className="text-center py-16 text-gray-400 italic border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-xl">No active petitions in the registry.</div>
+                    <div className="text-center py-16 text-gray-400 italic border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-xl">No appeals found.</div>
                   )}
                 </div>
               </div>

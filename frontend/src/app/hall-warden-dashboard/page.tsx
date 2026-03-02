@@ -232,7 +232,7 @@ export default function HallWardenDashboard() {
       });
 
       if (res.ok) {
-        showNotification('success', 'Incident protocol initiated');
+        showNotification('success', 'Maintenance report submitted');
         setShowForm(false);
         setFormData({
           category: '', hall: '', room: '', floor: '', building: '',
@@ -242,7 +242,7 @@ export default function HallWardenDashboard() {
         fetchAnalytics();
       }
     } catch (err) {
-      showNotification('error', 'Transmission failure');
+      showNotification('error', 'Failed to submit report');
     } finally {
       setLoading(false);
     }
@@ -256,12 +256,12 @@ export default function HallWardenDashboard() {
         body: JSON.stringify({ status: newStatus }),
       });
       if (res.ok) {
-        showNotification('success', 'Status protocol updated');
+        showNotification('success', 'Status updated successfully');
         fetchReports();
         fetchAnalytics();
       }
     } catch (err) {
-      showNotification('error', 'Update failure');
+      showNotification('error', 'Failed to update status');
     }
   }
 
@@ -277,12 +277,12 @@ export default function HallWardenDashboard() {
         }),
       });
       if (res.ok) {
-        showNotification('success', 'Case assigned to technician');
+        showNotification('success', 'Assigned to technician');
         fetchReports();
         fetchAnalytics();
       }
     } catch (err) {
-      showNotification('error', 'Assignment failure');
+      showNotification('error', 'Failed to assign technician');
     } finally {
       setAssigningReportId(null);
     }
@@ -317,25 +317,25 @@ export default function HallWardenDashboard() {
           {/* Hall Warden Header */}
           <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Hall Warden Command</h1>
-              <p className="text-sm text-gray-500 font-semibold mt-1 text-kmuGreen uppercase tracking-wider">Operational Facility Management & Hostel Oversight</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Hall Warden Dashboard</h1>
+              <p className="text-sm text-gray-500 font-semibold mt-1 text-kmuGreen uppercase tracking-wider">Manage hostel maintenance and student facilities</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => setShowForm(true)}
                 className="bg-kmuGreen hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition shadow-sm flex items-center gap-2"
               >
-                🛠️ Initiate Maintenance Protocol
+                🛠️ Report Maintenance Issue
               </button>
             </div>
           </div>
 
-          {/* Strategic Metrics */}
+          {/* System Overview */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard title="Global Issues" value={reports.length} color="teal" />
-            <StatCard title="Awaiting Review" value={reports.filter(r => r.status === 'Reported').length} color="orange" />
+            <StatCard title="Total Reports" value={reports.length} color="teal" />
+            <StatCard title="Pending Reports" value={reports.filter(r => r.status === 'Reported').length} color="orange" />
             <StatCard title="In Progress" value={reports.filter(r => r.status === 'In Progress' || r.status === 'Assigned').length} color="blue" />
-            <StatCard title="Operational Success" value={reports.filter(r => r.status === 'Completed').length} color="emerald" />
+            <StatCard title="Completed Reports" value={reports.filter(r => r.status === 'Completed').length} color="emerald" />
           </div>
 
           {/* Analytics Matrix */}
@@ -348,7 +348,7 @@ export default function HallWardenDashboard() {
                   value={hallFilter}
                   onChange={(e) => setHallFilter(e.target.value)}
                 >
-                  <option value="">All Regions</option>
+                  <option value="">All Halls</option>
                   {halls.map((h: any) => <option key={h} value={h}>{h}</option>)}
                 </select>
               </div>
@@ -365,7 +365,7 @@ export default function HallWardenDashboard() {
             </div>
 
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Operational Priority</h3>
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Issue Priority</h3>
               <div className="space-y-4 font-sans">
                 {['Urgent', 'High', 'Medium', 'Low'].map(p => {
                   const count = reports.filter(r => r.priority === p).length;
@@ -373,7 +373,7 @@ export default function HallWardenDashboard() {
                   return (
                     <div key={p} className="space-y-2">
                       <div className="flex justify-between text-[10px] font-black uppercase tracking-tighter">
-                        <span className={p === 'Urgent' ? 'text-red-500' : 'text-gray-500'}>{p} Escalation</span>
+                        <span className={p === 'Urgent' ? 'text-red-500' : 'text-gray-500'}>{p} Level</span>
                         <span className="font-bold">{count}</span>
                       </div>
                       <div className="h-2 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
@@ -386,13 +386,13 @@ export default function HallWardenDashboard() {
             </div>
           </div>
 
-          {/* Operational Dispatch Ledger */}
+          {/* Recent Maintenance Reports */}
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
             <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <h2 className="text-lg font-bold uppercase tracking-tight text-kmuGreen">Operational Dispatch Ledger</h2>
+              <h2 className="text-lg font-bold uppercase tracking-tight text-kmuGreen">Recent Maintenance Reports</h2>
               <div className="relative w-full md:w-80 font-sans">
                 <input
-                  placeholder="Query operational indices..."
+                  placeholder="Search reports..."
                   className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-2 text-xs w-full focus:ring-2 focus:ring-kmuGreen transition-all"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -403,10 +403,10 @@ export default function HallWardenDashboard() {
               <table className="w-full text-xs">
                 <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-[10px] font-bold uppercase tracking-widest">
                   <tr>
-                    <th className="px-6 py-4 text-left">Location / Identity</th>
-                    <th className="px-6 py-4 text-left">Category / Description</th>
-                    <th className="px-6 py-4 text-center">Protocol Status</th>
-                    <th className="px-6 py-4 text-right">Technician Dispatch</th>
+                    <th className="px-6 py-4 text-left">Location / Reported By</th>
+                    <th className="px-6 py-4 text-left">Category / Details</th>
+                    <th className="px-6 py-4 text-center">Status</th>
+                    <th className="px-6 py-4 text-right">Assignment</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -450,7 +450,7 @@ export default function HallWardenDashboard() {
                               <span className="text-[10px] font-bold text-emerald-600 uppercase">{report.assigned_to.name}</span>
                             </div>
                           ) : (
-                            <span className="text-[10px] text-gray-300 italic uppercase font-semibold">Station Standby</span>
+                            <span className="text-[10px] text-gray-300 italic uppercase font-semibold">Unassigned</span>
                           )}
                         </td>
                       </tr>
@@ -459,11 +459,11 @@ export default function HallWardenDashboard() {
                 </tbody>
               </table>
               {filteredReports.length === 0 && (
-                <div className="text-center py-20 text-gray-400 italic text-sm">Empty operational registry.</div>
+                <div className="text-center py-20 text-gray-400 italic text-sm">No maintenance reports found.</div>
               )}
             </div>
             <div className="p-6 bg-gray-50 dark:bg-gray-800/20 text-center border-t border-gray-100 dark:border-gray-800">
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">End of Operational Command Ledger</span>
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">End of list</span>
             </div>
           </div>
         </div>
@@ -476,26 +476,26 @@ export default function HallWardenDashboard() {
           <div className="relative bg-white dark:bg-gray-900 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 p-8">
             <div className="flex justify-between items-center mb-8 border-b border-gray-100 dark:border-gray-800 pb-6">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Log Facility Issue</h2>
-                <p className="text-xs text-kmuGreen font-bold uppercase tracking-wider mt-1">Operational Protocol Initiation</p>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Report Maintenance Issue</h2>
+                <p className="text-xs text-kmuGreen font-bold uppercase tracking-wider mt-1">Enter details of the maintenance issue</p>
               </div>
               <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600 transition-all font-bold text-xl">✕</button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-6 font-sans">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField label="Problem Category" value={formData.category} onChange={(v: string) => setFormData({ ...formData, category: v })} type="select" options={CATEGORIES} />
-                <FormField label="Escalation Priority" value={formData.priority} onChange={(v: string) => setFormData({ ...formData, priority: v })} type="select" options={PRIORITIES} />
-                <FormField label="Target Hostel" value={formData.hall} onChange={(v: string) => setFormData({ ...formData, hall: v })} />
-                <FormField label="Unit/Room" value={formData.room} onChange={(v: string) => setFormData({ ...formData, room: v })} />
+                <FormField label="Category" value={formData.category} onChange={(v: string) => setFormData({ ...formData, category: v })} type="select" options={CATEGORIES} />
+                <FormField label="Priority" value={formData.priority} onChange={(v: string) => setFormData({ ...formData, priority: v })} type="select" options={PRIORITIES} />
+                <FormField label="Hall/Hostel" value={formData.hall} onChange={(v: string) => setFormData({ ...formData, hall: v })} />
+                <FormField label="Room Number" value={formData.room} onChange={(v: string) => setFormData({ ...formData, room: v })} />
                 <div className="md:col-span-2">
-                  <FormField label="Technical Description" value={formData.description} onChange={(v: string) => setFormData({ ...formData, description: v })} type="textarea" />
+                  <FormField label="Description" value={formData.description} onChange={(v: string) => setFormData({ ...formData, description: v })} type="textarea" />
                 </div>
-                <FormField label="Subject Entity" value={formData.reported_by_name} onChange={(v: string) => setFormData({ ...formData, reported_by_name: v })} />
-                <FormField label="Contact Index" value={formData.reported_by_contact} onChange={(v: string) => setFormData({ ...formData, reported_by_contact: v })} />
+                <FormField label="Reported By (Name)" value={formData.reported_by_name} onChange={(v: string) => setFormData({ ...formData, reported_by_name: v })} />
+                <FormField label="Contact Information" value={formData.reported_by_contact} onChange={(v: string) => setFormData({ ...formData, reported_by_contact: v })} />
               </div>
               <div className="mt-8 flex gap-4">
                 <button type="submit" disabled={loading} className="flex-1 bg-kmuGreen hover:bg-emerald-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all active:scale-[0.98] text-xs uppercase tracking-widest">
-                  {loading ? 'Transmitting Index...' : 'Commit Operational Record'}
+                  {loading ? 'Submitting...' : 'Submit Maintenance Report'}
                 </button>
                 <button type="button" onClick={() => setShowForm(false)} className="px-8 py-4 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold uppercase tracking-widest hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
                   Cancel
@@ -534,7 +534,7 @@ function FormField({ label, value, onChange, type = 'text', options = [] }: any)
       <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">{label}</label>
       {type === 'select' ? (
         <select value={value} onChange={(e) => onChange(e.target.value)} className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-kmuGreen outline-none transition-all text-xs font-bold uppercase">
-          <option value="">Select Index...</option>
+          <option value="">Select Category/Priority...</option>
           {options.map((o: any) => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
       ) : type === 'textarea' ? (

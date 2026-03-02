@@ -85,11 +85,11 @@ export default function ReportsPage() {
         body: JSON.stringify({ status: 'Approved' }),
       });
       if (res.ok) {
-        showNotification('success', 'Report authorized');
+        showNotification('success', 'Report approved');
         fetchStudentReports();
       }
     } catch (err) {
-      showNotification('error', 'Authorization failed');
+      showNotification('error', 'Approval failed');
     }
   };
 
@@ -100,7 +100,7 @@ export default function ReportsPage() {
         headers: { ...authHeaders() },
       });
       if (res.ok) {
-        showNotification('success', 'Converted to formal case dossier');
+        showNotification('success', 'Converted to official case');
         fetchStudentReports();
       }
     } catch (err) {
@@ -109,7 +109,7 @@ export default function ReportsPage() {
   };
 
   if (isCheckingAuth) {
-    return <div className="text-center p-12 text-kmuGreen font-serif">Initializing Intelligence Ledger...</div>;
+    return <div className="text-center p-12 text-kmuGreen font-sans">Loading reports...</div>;
   }
 
   if (!user || !['admin', 'chief_security_officer', 'dean_of_students', 'assistant_dean', 'secretary', 'security_officer'].includes(user.role)) {
@@ -124,14 +124,14 @@ export default function ReportsPage() {
           {/* Reports Header */}
           <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Intelligence Command</h1>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Incident Reports</h1>
               <p className="text-sm text-gray-500 font-semibold mt-1">
-                KMU Unified Student Incident Reporting & Analytics
+                View and manage student incident reports
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
               <span className="bg-orange-100 dark:bg-orange-900/30 text-orange-600 px-4 py-2 rounded-lg font-bold text-[10px] uppercase tracking-widest flex items-center gap-2 border border-orange-200">
-                📡 {total} Active Ingress
+                📡 {total} Active Reports
               </span>
             </div>
           </div>
@@ -140,19 +140,19 @@ export default function ReportsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard title="Total Reports" value={total} color="orange" />
             <StatCard title="Pending Review" value={studentReports.filter(r => r.status === 'Pending').length} color="amber" />
-            <StatCard title="High Alert" value={studentReports.filter(r => r.severity === 'High').length} color="red" />
-            <StatCard title="Analytic Sync" value="Live Feed" color="blue" />
+            <StatCard title="High Priority" value={studentReports.filter(r => r.severity === 'High').length} color="red" />
+            <StatCard title="System Status" value="Live" color="blue" />
           </div>
 
           {/* Central Reports Ledger */}
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
             <div className="p-6 border-b border-gray-100 dark:border-gray-800">
               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-                <h2 className="text-lg font-bold uppercase tracking-tight text-orange-600">Incident Ingress Ledger</h2>
+                <h2 className="text-lg font-bold uppercase tracking-tight text-orange-600">Reports Registry</h2>
                 <div className="flex flex-wrap gap-3 w-full lg:w-auto font-sans">
                   <div className="relative flex-1 lg:w-80">
                     <input
-                      placeholder="Query ingress metadata..."
+                      placeholder="Search reports..."
                       className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-2 text-xs w-full focus:ring-2 focus:ring-orange-500 transition-all shadow-sm"
                       value={search}
                       onChange={e => { setSearch(e.target.value); setPage(1); }}
@@ -177,9 +177,9 @@ export default function ReportsPage() {
               <table className="w-full text-xs">
                 <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-[10px] font-bold uppercase tracking-widest">
                   <tr>
-                    <th className="px-6 py-4 text-left">Subject designation</th>
-                    <th className="px-6 py-4 text-left">Classification</th>
-                    <th className="px-6 py-4 text-center">Severity Index</th>
+                    <th className="px-6 py-4 text-left">Student Name</th>
+                    <th className="px-6 py-4 text-left">Incident Type</th>
+                    <th className="px-6 py-4 text-center">Severity</th>
                     <th className="px-6 py-4 text-right">Actions</th>
                   </tr>
                 </thead>
@@ -211,7 +211,7 @@ export default function ReportsPage() {
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
                           {r.status === 'Pending' && (
-                            <button onClick={() => handleApproveReport(r._id)} className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all">Authorize</button>
+                            <button onClick={() => handleApproveReport(r._id)} className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all">Approve</button>
                           )}
                           {(r.status === 'Pending' || r.status === 'Approved') && (
                             <button onClick={() => handleConvertToCase(r._id)} className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all">Convert</button>
@@ -225,7 +225,7 @@ export default function ReportsPage() {
                   ))}
                   {studentReports.length === 0 && !loading && (
                     <tr>
-                      <td colSpan={4} className="py-20 text-center text-gray-400 italic text-sm">Ingress query returned zero entities.</td>
+                      <td colSpan={4} className="py-20 text-center text-gray-400 italic text-sm">No reports found matching your search.</td>
                     </tr>
                   )}
                 </tbody>
@@ -234,7 +234,7 @@ export default function ReportsPage() {
 
             {/* Pagination */}
             <div className="p-6 bg-gray-50 dark:bg-gray-800/20 border-t border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-center gap-6">
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Showing {studentReports.length} of {total} Ingress Clusters</span>
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Showing {studentReports.length} of {total} Records</span>
               <div className="flex items-center gap-1">
                 <PaginationButton onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Prev</PaginationButton>
                 {Array.from({ length: Math.ceil(total / limit) }, (_, i) => i + 1).filter(p => p === 1 || p === Math.ceil(total / limit) || Math.abs(p - page) <= 1).map((p, idx, arr) => (

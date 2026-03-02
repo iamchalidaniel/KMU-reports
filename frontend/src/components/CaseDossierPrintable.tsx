@@ -41,17 +41,17 @@ export default function CaseDossierPrintable({ data, documentType }: CaseDossier
         return (
             <div className="p-16 bg-white text-black min-h-screen font-serif" id="printable-docket">
                 <Header />
-                <SectionTitle>Occurrence Docket Cover</SectionTitle>
+                <SectionTitle>Incident Report</SectionTitle>
 
                 <div className="grid grid-cols-1 gap-2 mt-8">
                     <InfoRow label="Investigating Officer" value={docket.investigatingOfficer} />
-                    <InfoRow label="Occurrence Book Number" value={docket.occurrenceBookNumber} />
+                    <InfoRow label="Case Number" value={docket.occurrenceBookNumber} />
                     <InfoRow label="Date & Time Reported" value={docket.dateTimeReported} />
                 </div>
 
                 <div className="grid grid-cols-2 gap-12 mt-12">
                     <div className="space-y-4">
-                        <h4 className="font-bold underline text-center mb-6">PARTICULARS OF THE COMPLAINANT</h4>
+                        <h4 className="font-bold underline text-center mb-6">REPORTING PERSON DETAILS</h4>
                         <InfoRow label="Name" value={docket.complainant?.name} />
                         <InfoRow label="Residential Address" value={docket.complainant?.address} />
                         <InfoRow label="SIN/Phone No" value={docket.complainant?.phone} />
@@ -64,7 +64,7 @@ export default function CaseDossierPrintable({ data, documentType }: CaseDossier
                         <InfoRow label="District" value={docket.complainant?.district} />
                     </div>
                     <div className="space-y-4">
-                        <h4 className="font-bold underline text-center mb-6">PARTICULARS OF THE ACCUSED</h4>
+                        <h4 className="font-bold underline text-center mb-6">ACCUSED PERSON DETAILS</h4>
                         <InfoRow label="Name" value={docket.accused?.name} />
                         <InfoRow label="Residential Address" value={docket.accused?.address} />
                         <InfoRow label="SIN/Phone No" value={docket.accused?.phone} />
@@ -79,7 +79,7 @@ export default function CaseDossierPrintable({ data, documentType }: CaseDossier
                 </div>
 
                 <div className="mt-12 space-y-6">
-                    <InfoRow label="Offence" value={docket.offence} />
+                    <InfoRow label="Offense Category" value={docket.offence} />
                     <div className="flex flex-col gap-2">
                         <span className="font-bold uppercase text-sm">Date, Time and Place of occurrence:</span>
                         <p className="border-b border-dotted border-gray-400 min-h-[4rem] px-2 text-lg">{docket.occurrenceDetails}</p>
@@ -109,7 +109,7 @@ export default function CaseDossierPrintable({ data, documentType }: CaseDossier
         return (
             <div className="p-16 bg-white text-black min-h-screen font-serif" id="printable-statement">
                 <Header />
-                <SectionTitle>Statement Pad</SectionTitle>
+                <SectionTitle>Statement Record</SectionTitle>
                 {dossier.statements?.map((s: any, idx: number) => (
                     <div key={idx} className="page-break-after-always">
                         <div className="grid grid-cols-2 gap-x-12 gap-y-4 mb-8 mt-10">
@@ -153,7 +153,7 @@ export default function CaseDossierPrintable({ data, documentType }: CaseDossier
             <div className="p-16 bg-white text-black min-h-screen font-serif" id="printable-warnandcaution">
                 <Header />
                 <div className="text-center mb-8">
-                    <h3 className="text-xl font-black uppercase text-red-600 underline">Warn and Caution</h3>
+                    <h3 className="text-xl font-black uppercase text-red-600 underline">Warning and Caution Statement</h3>
                 </div>
 
                 <div className="grid grid-cols-2 gap-x-12 gap-y-2 mb-8">
@@ -216,7 +216,7 @@ export default function CaseDossierPrintable({ data, documentType }: CaseDossier
             <div className="p-16 bg-white text-black min-h-screen font-serif" id="printable-callout">
                 <Header />
                 <div className="text-center mb-10">
-                    <h3 className="text-2xl font-black uppercase underline decoration-double">Call Out</h3>
+                    <h3 className="text-2xl font-black uppercase underline decoration-double">Notice to Appear</h3>
                 </div>
 
                 <div className="space-y-6 text-lg">

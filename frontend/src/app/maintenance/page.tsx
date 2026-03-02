@@ -180,7 +180,7 @@ export default function AdminMaintenancePage() {
         ['light', 'socket', 'ac', 'fan', 'fridge'].includes(category.toLowerCase());
 
     if (authLoading || loading) {
-        return <div className="text-center p-12 text-kmuGreen">Loading...</div>;
+        return <div className="text-center p-12 text-kmuGreen font-sans">Loading...</div>;
     }
 
     return (
@@ -191,12 +191,12 @@ export default function AdminMaintenancePage() {
                     {/* Maintenance Header */}
                     <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Maintenance Authority</h1>
-                            <p className="text-sm text-gray-500 font-semibold mt-1">Centralized Facility & Infrastructure Oversight</p>
+                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Maintenance Management</h1>
+                            <p className="text-sm text-gray-500 font-semibold mt-1">Manage university facility maintenance and repairs</p>
                         </div>
                         <div className="flex gap-2">
                             <div className="bg-emerald-50 dark:bg-emerald-950/20 px-4 py-2 rounded-lg border border-emerald-100 dark:border-emerald-900/50">
-                                <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest block mb-0.5">Active Ledger</span>
+                                <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest block mb-0.5">Total Reports</span>
                                 <span className="text-lg font-bold text-emerald-700 dark:text-emerald-400">{reports.length} Reports</span>
                             </div>
                         </div>
@@ -211,7 +211,7 @@ export default function AdminMaintenancePage() {
                                     value={statusFilter}
                                     onChange={(e) => setStatusFilter(e.target.value)}
                                 >
-                                    <option value="">All Status Matrix</option>
+                                    <option value="">All Statuses</option>
                                     {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                                 </select>
                                 <select
@@ -219,13 +219,13 @@ export default function AdminMaintenancePage() {
                                     value={priorityFilter}
                                     onChange={(e) => setPriorityFilter(e.target.value)}
                                 >
-                                    <option value="">Priority Level</option>
+                                    <option value="">All Priorities</option>
                                     {PRIORITIES.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
                                 </select>
                             </div>
                             <div className="relative w-full md:w-96">
                                 <input
-                                    placeholder="Query infrastructure ledger (hall, room, reporter)..."
+                                    placeholder="Search maintenance reports..."
                                     className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-2 text-xs w-full focus:ring-2 focus:ring-kmuGreen transition-all shadow-sm"
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
@@ -238,8 +238,8 @@ export default function AdminMaintenancePage() {
                             <table className="w-full text-xs">
                                 <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-[10px] font-bold uppercase tracking-widest border-b border-gray-100 dark:border-gray-800">
                                     <tr>
-                                        <th className="px-6 py-4 text-left">Location / Deployment</th>
-                                        <th className="px-6 py-4 text-left">Incident Class</th>
+                                        <th className="px-6 py-4 text-left">Location</th>
+                                        <th className="px-6 py-4 text-left">Issue Category</th>
                                         <th className="px-6 py-4 text-center">Status</th>
                                         <th className="px-6 py-4 text-right">Actions</th>
                                     </tr>
@@ -314,12 +314,12 @@ export default function AdminMaintenancePage() {
                             {filteredReports.length === 0 && (
                                 <div className="text-center py-20 bg-gray-50/50 dark:bg-gray-800/20">
                                     <div className="text-3xl mb-3">🔍</div>
-                                    <div className="text-gray-400 italic text-sm">No operational data matches your criteria.</div>
+                                    <div className="text-gray-400 italic text-sm">No maintenance reports found matching your search.</div>
                                 </div>
                             )}
                         </div>
                         <div className="p-6 bg-gray-50 dark:bg-gray-800/20 text-center border-t border-gray-100 dark:border-gray-800">
-                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em]">Facility Management Authority Framework</span>
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em]">KMU Maintenance System</span>
                         </div>
                     </div>
                 </div>

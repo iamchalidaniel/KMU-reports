@@ -97,7 +97,7 @@ export default function StudentsPage() {
       await create('students', formData);
       setFormData({ studentId: '', fullName: '', program: '', year: '', gender: '' });
       setShowAddForm(false);
-      showNotification('success', 'Student record synchronized successfully');
+      showNotification('success', 'Student added successfully');
       loadStudents();
     } catch (err: any) {
       showNotification('error', err.message || 'Operation failed');
@@ -107,18 +107,18 @@ export default function StudentsPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!window.confirm('Commit record deletion? This cannot be undone.')) return;
+    if (!window.confirm('Are you sure you want to delete this student record? This action cannot be undone.')) return;
     try {
       await remove('students', id);
-      showNotification('success', 'Record purged from registry');
+      showNotification('success', 'Student deleted successfully');
       loadStudents();
     } catch (err: any) {
-      showNotification('error', 'Purge operation failed');
+      showNotification('error', 'Failed to delete student');
     }
   }
 
   if (isCheckingAuth) {
-    return <div className="text-center p-12 text-kmuGreen font-serif">Initializing Registry...</div>;
+    return <div className="text-center p-12 text-kmuGreen font-sans">Loading students...</div>;
   }
 
   return (
@@ -129,9 +129,9 @@ export default function StudentsPage() {
           {/* Registry Header */}
           <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Registry Command</h1>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Student Registry</h1>
               <p className="text-sm text-gray-500 font-semibold mt-1">
-                KMU Unified Student Metadata & Enrollment {offlineMode && <span className="text-orange-500 font-bold ml-2">• OFFLINE PROTOCOL ON</span>}
+                Manage student records and enrollment {offlineMode && <span className="text-orange-500 font-bold ml-2">• OFFLINE MODE ON</span>}
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -140,35 +140,35 @@ export default function StudentsPage() {
                   onClick={() => setShowAddForm(true)}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition shadow-sm flex items-center gap-2"
                 >
-                  👤 Enlist New Student
+                  👤 Add New Student
                 </button>
               )}
               <Link
                 href="/students/import"
                 className="bg-gray-800 dark:bg-gray-700 text-white px-5 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition shadow-sm"
               >
-                Bulk Import Portal
+                Bulk Import
               </Link>
             </div>
           </div>
 
-          {/* Strategic Metrics Shortcut */}
+          {/* Metrics Shortcut */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard title="Global Population" value={total} color="emerald" />
+            <StatCard title="Total Students" value={total} color="emerald" />
             <StatCard title="Active Programs" value={PROGRAMS.length} color="teal" />
-            <StatCard title="Registry Status" value={offlineMode ? "Cached" : "Live"} color="blue" />
-            <StatCard title="Data Integrity" value="100% Verified" color="indigo" />
+            <StatCard title="System Status" value={offlineMode ? "Cached" : "Live"} color="blue" />
+            <StatCard title="Verification" value="Verified" color="indigo" />
           </div>
 
           {/* Central Registry Ledger */}
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
             <div className="p-6 border-b border-gray-100 dark:border-gray-800">
               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-                <h2 className="text-lg font-bold uppercase tracking-tight text-emerald-600">Student Enrollment Ledger</h2>
+                <h2 className="text-lg font-bold uppercase tracking-tight text-emerald-600">Students List</h2>
                 <div className="flex flex-wrap gap-3 w-full lg:w-auto font-sans">
                   <div className="relative flex-1 lg:w-80">
                     <input
-                      placeholder="Query registry metadata..."
+                      placeholder="Search students..."
                       className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-2 text-xs w-full focus:ring-2 focus:ring-emerald-500 transition-all shadow-sm"
                       value={search}
                       onChange={e => { setSearch(e.target.value); setPage(1); }}
@@ -179,7 +179,7 @@ export default function StudentsPage() {
                     onChange={e => { setProgramFilter(e.target.value); setPage(1); }}
                     className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-sans"
                   >
-                    <option value="">All Academic Units</option>
+                    <option value="">All Programs</option>
                     {PROGRAMS.map(p => <option key={p} value={p}>{p}</option>)}
                   </select>
                 </div>
@@ -190,9 +190,9 @@ export default function StudentsPage() {
               <table className="w-full text-xs">
                 <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-[10px] font-bold uppercase tracking-widest">
                   <tr>
-                    <th className="px-6 py-4 text-left">Subject Cluster</th>
-                    <th className="px-6 py-4 text-left">Academic Protocol</th>
-                    <th className="px-6 py-4 text-center">Metadata</th>
+                    <th className="px-6 py-4 text-left">Student Details</th>
+                    <th className="px-6 py-4 text-left">Program Details</th>
+                    <th className="px-6 py-4 text-center">Status</th>
                     <th className="px-6 py-4 text-right">Actions</th>
                   </tr>
                 </thead>
@@ -221,9 +221,9 @@ export default function StudentsPage() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                          <button onClick={() => router.push(`/students/${s._id}?tab=add-case`)} className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/30 text-orange-600 hover:bg-orange-200 transition-colors" title="Flag Case">⚖️</button>
+                          <button onClick={() => router.push(`/students/${s._id}?tab=add-case`)} className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/30 text-orange-600 hover:bg-orange-200 transition-colors" title="Add Case">⚖️</button>
                           {(user?.role === 'admin' || user?.role === 'academic_office') && (
-                            <button onClick={() => handleDelete(s._id!)} className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 hover:bg-red-200 transition-colors" title="Purge Record">🗑️</button>
+                            <button onClick={() => handleDelete(s._id!)} className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 hover:bg-red-200 transition-colors" title="Delete Student">🗑️</button>
                           )}
                         </div>
                       </td>
@@ -231,7 +231,7 @@ export default function StudentsPage() {
                   ))}
                   {students.length === 0 && !loading && (
                     <tr>
-                      <td colSpan={4} className="py-20 text-center text-gray-400 italic text-sm">Registry query returned zero entities.</td>
+                      <td colSpan={4} className="py-20 text-center text-gray-400 italic text-sm">No students found matching your search.</td>
                     </tr>
                   )}
                 </tbody>
@@ -240,7 +240,7 @@ export default function StudentsPage() {
 
             {/* Pagination */}
             <div className="p-6 bg-gray-50 dark:bg-gray-800/20 border-t border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-center gap-6">
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Showing {students.length} of {total} Indices</span>
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Showing {students.length} of {total} Records</span>
               <div className="flex items-center gap-1">
                 <PaginationButton onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Prev</PaginationButton>
                 {Array.from({ length: Math.ceil(total / limit) }, (_, i) => i + 1).filter(p => p === 1 || p === Math.ceil(total / limit) || Math.abs(p - page) <= 1).map((p, idx, arr) => (
@@ -268,22 +268,22 @@ export default function StudentsPage() {
           <div className="relative bg-white dark:bg-gray-900 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 p-8">
             <div className="flex justify-between items-center mb-8 border-b border-gray-100 dark:border-gray-800 pb-6">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Student Enlistment</h2>
-                <p className="text-xs text-emerald-600 font-bold uppercase tracking-wider mt-1">Unified Registry Metadata Entry</p>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Add Student</h2>
+                <p className="text-xs text-emerald-600 font-bold uppercase tracking-wider mt-1">Enter student details below</p>
               </div>
               <button onClick={() => setShowAddForm(false)} className="text-gray-400 hover:text-gray-600 transition-all font-bold text-xl">✕</button>
             </div>
             <form onSubmit={handleAdd} className="space-y-6 font-sans">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField label="Subject SIN / ID" value={formData.studentId} onChange={(v: string) => setFormData({ ...formData, studentId: v })} required />
-                <FormField label="Full Legal Designation" value={formData.fullName} onChange={(v: string) => setFormData({ ...formData, fullName: v })} required />
-                <FormField label="Academic Unit (Program)" value={formData.program} onChange={(v: string) => setFormData({ ...formData, program: v })} required />
-                <FormField label="Temporal Level (Year)" value={formData.year} onChange={(v: string) => setFormData({ ...formData, year: v })} type="select" options={YEARS.map(y => ({ value: y, label: `Year ${y}` }))} />
-                <FormField label="Biological Designation" value={formData.gender} onChange={(v: string) => setFormData({ ...formData, gender: v })} type="select" options={GENDERS.map(g => ({ value: g, label: g }))} />
+                <FormField label="Student ID" value={formData.studentId} onChange={(v: string) => setFormData({ ...formData, studentId: v })} required />
+                <FormField label="Full Name" value={formData.fullName} onChange={(v: string) => setFormData({ ...formData, fullName: v })} required />
+                <FormField label="Program" value={formData.program} onChange={(v: string) => setFormData({ ...formData, program: v })} required />
+                <FormField label="Year" value={formData.year} onChange={(v: string) => setFormData({ ...formData, year: v })} type="select" options={YEARS.map(y => ({ value: y, label: `Year ${y}` }))} />
+                <FormField label="Gender" value={formData.gender} onChange={(v: string) => setFormData({ ...formData, gender: v })} type="select" options={GENDERS.map(g => ({ value: g, label: g }))} />
               </div>
               <div className="mt-8 flex gap-4">
                 <button type="submit" disabled={loading} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all active:scale-[0.98] text-xs uppercase tracking-widest">
-                  {loading ? 'Synthesizing Index...' : 'Commit Protocol Entry'}
+                  {loading ? 'Saving...' : 'Add Student'}
                 </button>
                 <button type="button" onClick={() => setShowAddForm(false)} className="px-8 py-4 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold uppercase tracking-widest hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
                   Cancel
@@ -320,7 +320,7 @@ function FormField({ label, value, onChange, type = 'text', options = [], requir
       <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">{label}</label>
       {type === 'select' ? (
         <select value={value} onChange={(e) => onChange(e.target.value)} required={required} className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-xs font-bold uppercase">
-          <option value="">Select Protocol...</option>
+          <option value="">Select...</option>
           {options.map((o: any) => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
       ) : (

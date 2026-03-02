@@ -119,7 +119,7 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
 
             const updatedCase = await res.json();
             setCaseData(updatedCase);
-            setActionMessage({ type: 'success', text: `Case ${newStatus} successfully!` });
+            setActionMessage({ type: 'success', text: `Case updated successfully!` });
         } catch (err: any) {
             setActionMessage({ type: 'error', text: err.message || 'Failed to update case status' });
         } finally {
@@ -243,7 +243,7 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
                                 <div className="mt-1">{caseData.incidentDate ? new Date(caseData.incidentDate).toLocaleDateString() : 'N/A'}</div>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Offense Type</label>
+                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Offense Category</label>
                                 <div className="mt-1">{caseData.offenseType || 'N/A'}</div>
                             </div>
                             <div>
@@ -263,7 +263,7 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
 
                         {caseData.sanctions && (
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Sanctions</label>
+                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Disciplinary Actions</label>
                                 <div className="mt-1 bg-gray-50 dark:bg-gray-700 p-3 rounded">
                                     {caseData.sanctions}
                                 </div>
@@ -420,12 +420,12 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
                             </button>
 
                             <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
-                                <p className="text-[10px] font-black uppercase text-gray-400 mb-2">Registry Documents</p>
+                                <p className="text-[10px] font-black uppercase text-gray-400 mb-2">Official Documents</p>
                                 <button
                                     onClick={() => handlePrint('docket')}
                                     className="block w-full text-center px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition text-sm font-bold"
                                 >
-                                    🖨️ Print Docket Cover
+                                    🖨️ Print Case Cover
                                 </button>
                                 <button
                                     onClick={() => handlePrint('statement')}
@@ -437,13 +437,13 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
                                     onClick={() => handlePrint('warnAndCaution')}
                                     className="block w-full text-center px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition text-sm font-bold"
                                 >
-                                    ⚖️ Print Warn & Caution
+                                    ⚖️ Print Warning Letter
                                 </button>
                                 <button
                                     onClick={() => handlePrint('callout')}
                                     className="block w-full text-center px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 transition text-sm font-bold"
                                 >
-                                    📢 Generate Call Out
+                                    📢 Create Call Notice
                                 </button>
                             </div>
                         </div>

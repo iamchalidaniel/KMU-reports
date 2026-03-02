@@ -72,7 +72,7 @@ export default function HomePage() {
 
         <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
           <div className="inline-flex items-center px-3 py-1 rounded-full bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-800 text-kmuGreen text-xs font-bold mb-8 animate-in fade-in slide-in-from-bottom-2">
-            ✨ AI-POWERED CAMPUS SAFETY MANGEMENT
+            ✨ AI-POWERED CAMPUS SAFETY MANAGEMENT
           </div>
           <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 dark:text-white mb-6 tracking-tight leading-[1.1]">
             Your Safety, <span className="bg-gradient-to-r from-kmuGreen to-teal-500 bg-clip-text text-transparent">Our Priority.</span>
