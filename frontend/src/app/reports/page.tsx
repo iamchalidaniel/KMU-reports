@@ -549,7 +549,6 @@ export default function ReportsPage() {
             </>
           )}
         </div>
-        )}
       </section>
 
       {/* Notification */}

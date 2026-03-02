@@ -35,6 +35,7 @@ export default function Sidebar() {
   const [isResizing, setIsResizing] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { sidebarWidth, setSidebarWidth, isSidebarOpen: open, setIsSidebarOpen: setOpen } = useSidebar();
+  const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
   const [reportCount, setReportCount] = useState(0);
@@ -227,21 +228,23 @@ export default function Sidebar() {
           />
         </div>
         <nav className="flex flex-col gap-0.5 mt-6 px-4 pb-6 flex-1 justify-start overflow-y-auto">
-          <Link
-            key={link.path + link.label}
-            href={link.path}
-            className={
-              `${linkBase} ${pathname === link.path ? linkActive : ''} text-gray-900 dark:text-white relative`}
-            onClick={() => setOpen(false)} // Close sidebar on mobile when clicking a link
-          >
-            <span className="text-xl">{link.icon}</span>
-            <span>{link.label}</span>
-            {link.label === 'Reports' && reportCount > 0 && (
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 bg-red-600 text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full animate-pulse shadow-sm">
-                {reportCount > 9 ? '9+' : reportCount}
-              </span>
-            )}
-          </Link>
+          {navLinks.map(link => (
+            <Link
+              key={link.path + link.label}
+              href={link.path}
+              className={
+                `${linkBase} ${pathname === link.path ? linkActive : ''} text-gray-900 dark:text-white relative`}
+              onClick={() => setOpen(false)} // Close sidebar on mobile when clicking a link
+            >
+              <span className="text-xl">{link.icon}</span>
+              <span>{link.label}</span>
+              {link.label === 'Reports' && reportCount > 0 && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 bg-red-600 text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full animate-pulse shadow-sm">
+                  {reportCount > 9 ? '9+' : reportCount}
+                </span>
+              )}
+            </Link>
+          ))}
         </nav>
 
         {/* Resize handle - only visible on desktop */}
