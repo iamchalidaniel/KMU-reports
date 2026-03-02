@@ -343,9 +343,9 @@ function PersonalInfoView({ studentData }: any) {
       <section>
         <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide border-b border-gray-100 dark:border-gray-800 pb-2 mb-4">Personal Info</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-          <InfoField label="First Name" value={studentData.firstName || studentData.name?.split(' ')[1] || 'DANIEL'} />
-          <InfoField label="Sur Name" value={studentData.surName || studentData.name?.split(' ')[0] || 'CHALI'} />
-          <InfoField label="NRC" value={studentData.nrc || '310820/46/1'} />
+          <InfoField label="First Name" value={studentData.firstName || studentData.name?.split(' ')[1] || ''} />
+          <InfoField label="Sur Name" value={studentData.surName || studentData.name?.split(' ')[0] || ''} />
+          <InfoField label="NRC" value={studentData.nrc || ''} />
           <InfoField label="Passport" value={studentData.passport || ''} />
           <InfoField label="Marital Status" value={studentData.maritalStatus || 'SINGLE'} />
           <InfoField label="Nationality" value={studentData.nationality || 'zambian'} />
@@ -357,7 +357,7 @@ function PersonalInfoView({ studentData }: any) {
       <section>
         <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide border-b border-gray-100 dark:border-gray-800 pb-2 mb-4">Accomodation</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-          <InfoField label="Room Number" value={studentData.roomNo || 'Z407'} />
+          <InfoField label="Room Number" value={studentData.roomNo || ''} />
         </div>
       </section>
 

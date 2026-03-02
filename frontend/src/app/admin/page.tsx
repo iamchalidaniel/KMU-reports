@@ -34,6 +34,8 @@ export default function AdminPage() {
   const [search, setSearch] = useState('');
   const [cases, setCases] = useState([]);
   const [students, setStudents] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [reports, setReports] = useState([]);
   const [filteredCases, setFilteredCases] = useState([]);
 
   useEffect(() => {
@@ -80,6 +82,20 @@ export default function AdminPage() {
         if (studentsRes.ok) {
           const data = await studentsRes.json();
           setStudents(data.students || data || []);
+        }
+
+        const [usersRes, reportsRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/api/users`, { headers: { ...authHeaders() } }),
+          fetch(`${API_BASE_URL}/api/student-reports`, { headers: { ...authHeaders() } })
+        ]);
+
+        if (usersRes.ok) {
+          const data = await usersRes.json();
+          setUsers(data.users || data || []);
+        }
+        if (reportsRes.ok) {
+          const data = await reportsRes.json();
+          setReports(data.reports || data || []);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -163,23 +179,6 @@ export default function AdminPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
 
-        {/* Banner */}
-        <div className="relative mb-6 rounded-xl overflow-hidden bg-white dark:bg-gray-900 shadow-sm border border-gray-200 dark:border-gray-800">
-          <div className="h-32 bg-gradient-to-r from-emerald-800 to-black relative">
-            <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/diamond-upholstery.png')]"></div>
-          </div>
-          <div className="px-6 pb-6 flex flex-col md:flex-row items-center md:items-end -mt-12 gap-6 relative z-10">
-            <div className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-900 bg-white dark:bg-gray-800 shadow-lg flex items-center justify-center overflow-hidden">
-              <div className="w-24 h-24 rounded-full bg-emerald-700 flex items-center justify-center text-white font-bold text-4xl shadow-inner">
-                {staffData.name ? staffData.name.charAt(0).toUpperCase() : staffData.username.charAt(0).toUpperCase()}
-              </div>
-            </div>
-            <div className="flex-1 text-center md:text-left mb-2">
-              <h1 className="text-2xl font-bold uppercase">{staffData.name || 'System Admin'}</h1>
-              <p className="text-gray-600 dark:text-gray-400 font-semibold tracking-tight">Access Level : <span className="text-emerald-700 dark:text-emerald-500 font-mono">SUPERNODE / ADMIN</span></p>
-            </div>
-          </div>
-        </div>
 
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Side Nav */}
@@ -189,8 +188,6 @@ export default function AdminPage() {
                 <NavButton label="System Health" icon="📊" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
                 <NavButton label="User Management" icon="👥" active={activeTab === 'users'} onClick={() => setActiveTab('users')} />
                 <NavButton label="Logs & History" icon="📜" active={activeTab === 'logs'} onClick={() => setActiveTab('logs')} />
-                <NavButton label="Staff Info" icon="👤" active={activeTab === 'info'} onClick={() => setActiveTab('info')} />
-                <NavButton label="Settings" icon="⚙️" active={activeTab === 'password'} onClick={() => setActiveTab('password')} />
               </nav>
             </div>
           </div>
@@ -201,9 +198,9 @@ export default function AdminPage() {
             {activeTab === 'dashboard' && (
               <div className="animate-in fade-in duration-300 space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <StatCard title="Total Users" value={safeStudents.length + 10} color="emerald" />
+                  <StatCard title="Total Users" value={safeStudents.length + users.length} color="emerald" />
                   <StatCard title="Total Cases" value={safeCases.length} color="teal" />
-                  <StatCard title="Active Reports" value={5} color="blue" />
+                  <StatCard title="Reports" value={reports.length} color="blue" />
                   <StatCard title="System Alerts" value={0} color="green" />
                 </div>
 
@@ -227,11 +224,10 @@ export default function AdminPage() {
             {activeTab === 'users' && (
               <div className="animate-in fade-in duration-300 space-y-6">
                 <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-8 text-center py-24">
-                  <h2 className="text-3xl font-bold mb-4">Identity Management</h2>
-                  <p className="text-gray-500 mb-8 max-w-sm mx-auto">Oversee all student profiles, staff accounts, and role-based permissions.</p>
+                  <h2 className="text-3xl font-bold mb-4">Registry Operations</h2>
+                  <p className="text-gray-500 mb-8 max-w-sm mx-auto">Access the central registry to manage students and academic staff records.</p>
                   <div className="flex justify-center gap-4">
-                    <Link href="/admin/users" className="bg-emerald-600 text-white px-8 py-3 rounded-xl font-bold hover:opacity-90 transition">Manage Staff/Admins</Link>
-                    <Link href="/students" className="border border-emerald-600 text-emerald-600 px-8 py-3 rounded-xl font-bold hover:bg-emerald-50 transition">Registry Operations</Link>
+                    <Link href="/students" className="bg-emerald-600 text-white px-8 py-3 rounded-xl font-bold hover:opacity-90 transition shadow-lg">Open Registry</Link>
                   </div>
                 </div>
               </div>
@@ -273,36 +269,6 @@ export default function AdminPage() {
               </div>
             )}
 
-            {activeTab === 'info' && (
-              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 md:p-8 animate-in fade-in duration-300">
-                <div className="space-y-10">
-                  <section>
-                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide border-b border-gray-100 dark:border-gray-800 pb-2 mb-4">Administrative Profile</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                      <InfoField label="Admin ID" value={staffData.staffId || staffData.username} />
-                      <InfoField label="System Role" value="ROOT_ADMINISTRATOR" />
-                      <InfoField label="Status" value="PROVISIONED" />
-                    </div>
-                  </section>
-                  <section>
-                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide border-b border-gray-100 dark:border-gray-800 pb-2 mb-4">Meta Data</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                      <InfoField label="First Name" value={staffData.firstName} />
-                      <InfoField label="Sur Name" value={staffData.surName} />
-                      <InfoField label="Phone" value={staffData.phone} />
-                    </div>
-                  </section>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'password' && (
-              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-12 text-center max-w-md mx-auto animate-in fade-in duration-300">
-                <h2 className="text-2xl font-bold mb-8 uppercase tracking-widest text-emerald-700">Access Key</h2>
-                <p className="text-sm text-gray-500 mb-8">Update your administrative credentials and multi-factor settings.</p>
-                <button onClick={() => showNotification('info', 'Feature coming soon')} className="w-full bg-emerald-800 text-white font-bold py-4 rounded-xl hover:shadow-2xl transition tracking-widest text-xs uppercase">ROTATE ACCESS KEY</button>
-              </div>
-            )}
 
           </div>
         </div>

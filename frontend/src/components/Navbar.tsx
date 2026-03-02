@@ -49,16 +49,7 @@ export default function Navbar() {
                     {/* Right Side: Theme, Profile & Actions */}
                     <div className="flex items-center gap-2 sm:gap-4">
                         {/* Theme Toggle */}
-                        <div className="hidden xs:block">
-                            <DarkModeToggle />
-                        </div>
-
-                        {/* Sponsor Info */}
-                        <div className="hidden lg:flex flex-col items-end text-[10px] leading-tight text-gray-500 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700 pr-4 mr-2">
-                            <span className="text-red-500 font-bold uppercase">Sponsor</span>
-                            <span className="font-semibold uppercase tracking-tight">{user.name || user.username}</span>
-                            <span className="text-blue-500 uppercase font-mono">{user.studentId || 'STAFF'}</span>
-                        </div>
+                        <DarkModeToggle />
 
                         {/* Profile Dropdown */}
                         <div className="relative" ref={dropdownRef}>
