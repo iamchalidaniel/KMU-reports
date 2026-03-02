@@ -15,23 +15,12 @@ interface Student {
     program?: string;
 }
 
-interface Staff {
-    _id: string;
-    staffId: string;
-    fullName: string;
-    department?: string;
-    position?: string;
-}
-
 interface Case {
     _id: string;
     student?: Student;
     students?: Student[];
     student_ids?: string[];
-    staff?: Staff;
-    staffMembers?: Staff[];
-    staff_ids?: string[];
-    case_type?: 'single_student' | 'group_student' | 'single_staff' | 'group_staff';
+    case_type?: 'single_student' | 'group_student';
     incidentDate: string;
     description: string;
     offenseType: string;
@@ -205,18 +194,16 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
         }
     };
 
-    // Determine if this is a student or staff case
+    // Determine if this is a student case
     const isStudentCase = caseData.student || caseData.students;
-    const isStaffCase = caseData.staff || caseData.staffMembers;
 
     // Get the primary person associated with the case
-    const primaryPerson = isStudentCase ? caseData.student : caseData.staff;
-    const personType = isStudentCase ? 'Student' : 'Staff';
-    const personId = isStudentCase ? caseData.student?.studentId : caseData.staff?.staffId;
-    const personName = isStudentCase ? caseData.student?.fullName : caseData.staff?.fullName;
-    const personDepartment = isStudentCase ? (caseData.student as any)?.program : (caseData.staff as any)?.department;
-    const personPosition = isStaffCase ? caseData.staff?.position : undefined;
-    const personYear = isStudentCase ? (caseData.student as any)?.year : undefined;
+    const primaryPerson = caseData.student;
+    const personType = 'Student';
+    const personId = caseData.student?.studentId;
+    const personName = caseData.student?.fullName;
+    const personDepartment = (caseData.student as any)?.program;
+    const personYear = (caseData.student as any)?.year;
 
     return (
         <div className="max-w-4xl mx-auto p-6">
@@ -310,7 +297,7 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
                                     </label>
                                     <div className="mt-1 font-medium">
                                         <Link
-                                            href={isStudentCase ? `/students/${caseData.student?._id}` : `/staff/${caseData.staff?._id}`}
+                                            href={`/students/${caseData.student?._id}`}
                                             className="text-kmuGreen hover:underline"
                                         >
                                             {personName}
@@ -340,15 +327,6 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
                                         <div className="mt-1">{personYear}</div>
                                     </div>
                                 )}
-
-                                {personPosition && (
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">
-                                            Position
-                                        </label>
-                                        <div className="mt-1">{personPosition}</div>
-                                    </div>
-                                )}
                             </div>
                         ) : (
                             <div className="text-gray-500 dark:text-gray-400">
@@ -357,17 +335,16 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
                         )}
 
                         {/* For group cases, show all associated people */}
-                        {(caseData.students && caseData.students.length > 1) ||
-                            (caseData.staffMembers && caseData.staffMembers.length > 1) ? (
+                        {(caseData.students && caseData.students.length > 1) ? (
                             <div className="mt-4">
                                 <h3 className="text-md font-medium mb-2">
-                                    All {personType}s in this Case
+                                    All Students in this Case
                                 </h3>
                                 <div className="flex flex-wrap gap-2">
-                                    {(caseData.students || caseData.staffMembers || []).map((person: any) => (
+                                    {(caseData.students || []).map((person: any) => (
                                         <Link
-                                            key={person._id || person.studentId || person.staffId}
-                                            href={isStudentCase ? `/students/${person._id || person.studentId}` : `/staff/${person._id || person.staffId}`}
+                                            key={person._id || person.studentId}
+                                            href={`/students/${person._id || person.studentId}`}
                                             className="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition"
                                         >
                                             {person.fullName}
@@ -427,10 +404,10 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
                             </Link>
 
                             <button
-                                onClick={() => router.push(`/cases/new?${isStudentCase ? 'studentId' : 'staffId'}=${personId}`)}
+                                onClick={() => router.push(`/cases/new?studentId=${personId}`)}
                                 className="block w-full text-center px-4 py-2 bg-kmuGreen text-white rounded hover:bg-kmuOrange transition"
                             >
-                                Create New Case for {personType}
+                                Create New Case for Student
                             </button>
                         </div>
                     </div>

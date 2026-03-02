@@ -17,20 +17,10 @@ interface Student {
   department?: string;
 }
 
-interface Staff {
-  _id: string;
-  staffId: string;
-  fullName: string;
-  department?: string;
-  position?: string;
-}
-
 interface Case {
   _id: string;
   student_id?: string; // Raw student ID from database
   student?: Student;
-  staff_id?: string; // Raw staff ID from database
-  staff?: Staff;
   incidentDate: string;
   description: string;
   offenseType: string;
@@ -88,7 +78,6 @@ export default function CasesPage() {
 
   const searchParams = useSearchParams();
   const studentIdFilter = searchParams?.get('studentId') || '';
-  const staffIdFilter = searchParams?.get('staffId') || '';
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -119,9 +108,6 @@ export default function CasesPage() {
         if (studentIdFilter) {
           params.append('studentId', studentIdFilter);
         }
-        if (staffIdFilter) {
-          params.append('staffId', staffIdFilter);
-        }
         if (search) {
           params.append('search', search);
         }
@@ -148,11 +134,10 @@ export default function CasesPage() {
 
         // Debug: Log cases with missing person data
         casesArray.forEach((caseItem: any, index: number) => {
-          if (!caseItem.student && !caseItem.staff) {
-            console.warn(`Case ${index} has no person data:`, {
+          if (!caseItem.student) {
+            console.warn(`Case ${index} has no student data:`, {
               caseId: caseItem._id,
               studentId: caseItem.student_id,
-              staffId: caseItem.staff_id,
               caseData: caseItem
             });
           }
@@ -172,7 +157,7 @@ export default function CasesPage() {
       }
     }
     fetchCases();
-  }, [apiCall, studentIdFilter, staffIdFilter, search, statusFilter, severityFilter, page, limit]);
+  }, [apiCall, studentIdFilter, search, statusFilter, severityFilter, page, limit]);
 
   if (isCheckingAuth) {
     return <div className="text-center text-kmuGreen">Loading...</div>;
@@ -260,8 +245,7 @@ export default function CasesPage() {
             search,
             status: statusFilter,
             severity: severityFilter,
-            studentId: studentIdFilter,
-            staffId: staffIdFilter
+            studentId: studentIdFilter
           }
         }),
       });
@@ -283,26 +267,18 @@ export default function CasesPage() {
         department: caseItem.student.department,
         link: `/students/${caseItem.student._id}`
       };
-    } else if (caseItem.staff) {
-      return {
-        type: 'staff',
-        id: caseItem.staff.staffId,
-        name: caseItem.staff.fullName,
-        department: caseItem.staff.department,
-        link: `/staff/${caseItem.staff._id}`
-      };
     }
     return null;
   };
 
   // Get person ID for a case
   const getCasePersonId = (caseItem: Case) => {
-    return caseItem.student?.studentId || caseItem.staff?.staffId || 'N/A';
+    return caseItem.student?.studentId || 'N/A';
   };
 
   // Get person name for a case
   const getCasePersonName = (caseItem: Case) => {
-    return caseItem.student?.fullName || caseItem.staff?.fullName || 'Unknown';
+    return caseItem.student?.fullName || 'Unknown';
   };
 
   if (loading) {
@@ -444,22 +420,6 @@ export default function CasesPage() {
                 className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
-
-            <div>
-              <label htmlFor="staffId" className="block text-sm font-medium mb-1">Staff ID</label>
-              <input
-                id="staffId"
-                type="text"
-                value={staffIdFilter}
-                onChange={(e) => {
-                  const url = new URL(window.location.href);
-                  url.searchParams.set('staffId', e.target.value);
-                  window.history.replaceState({}, '', url);
-                }}
-                placeholder="Filter by staff ID"
-                className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              />
-            </div>
           </div>
         </div>
 
@@ -533,7 +493,7 @@ export default function CasesPage() {
                                 {person.department || '-'} • {s.incidentDate ? new Date(s.incidentDate).toLocaleDateString() : '-'}
                               </div>
                               <div className="text-xs text-gray-500 dark:text-gray-400">
-                                {person.type === 'student' ? 'Student' : 'Staff'} • {person.id}
+                                Student • {person.id}
                               </div>
                             </div>
                           ) : (

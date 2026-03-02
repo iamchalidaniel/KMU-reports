@@ -12,14 +12,13 @@ function NewCaseContent() {
 
   useEffect(() => {
     const studentId = searchParams.get('studentId');
-    const staffId = searchParams.get('staffId');
 
-    if (studentId || staffId) {
+    if (studentId) {
       setInitialData({
         dossier: {
           occurrenceDocket: {
             accused: {
-              phone: studentId || staffId || '',
+              phone: studentId,
               name: '', address: '', yearOfStudy: '', programOfStudy: '',
               sex: '', age: '', nationality: '', tribe: '', village: '', chief: '', district: ''
             }

@@ -5,7 +5,6 @@ import SignatureCanvas from 'react-signature-canvas';
 import { API_BASE_URL } from '../config/constants';
 import { authHeaders } from '../utils/api';
 import SmartStudentSearch from './SmartStudentSearch';
-import SmartStaffSearch from './SmartStaffSearch';
 
 interface Particulars {
     name: string; address: string; phone: string; yearOfStudy: string; programOfStudy: string;
@@ -176,8 +175,7 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
                     incident_date: formData.dossier.occurrenceDocket.dateTimeReported.split('T')[0],
                     description: formData.dossier.occurrenceDocket.occurrenceDetails,
                     offense_type: formData.dossier.occurrenceDocket.offence,
-                    student_id: formData.dossier.occurrenceDocket.accused.phone.includes('-') || formData.dossier.occurrenceDocket.accused.phone.length > 10 ? null : formData.dossier.occurrenceDocket.accused.phone,
-                    staff_id: formData.dossier.occurrenceDocket.accused.phone.startsWith('STF') ? formData.dossier.occurrenceDocket.accused.phone : null
+                    student_id: formData.dossier.occurrenceDocket.accused.phone.includes('-') || formData.dossier.occurrenceDocket.accused.phone.length > 10 ? null : formData.dossier.occurrenceDocket.accused.phone
                 })
             });
 
@@ -225,28 +223,16 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
                         <section className="space-y-4">
                             <div className="flex justify-between items-center bg-gray-100 dark:bg-gray-800 p-2 rounded">
                                 <h3 className="font-bold text-sm uppercase tracking-wider">Particulars of Complainant</h3>
-                                <div className="flex gap-2">
-                                    <SmartStudentSearch
-                                        placeholder="Search Student..."
-                                        className="w-40"
-                                        onStudentSelect={(s) => {
-                                            updateNested('dossier.occurrenceDocket.complainant', {
-                                                name: s.fullName, address: '', phone: s.studentId, yearOfStudy: s.year,
-                                                programOfStudy: s.department, sex: s.gender, age: '', nationality: '', tribe: '', village: '', chief: '', district: ''
-                                            });
-                                        }}
-                                    />
-                                    <SmartStaffSearch
-                                        placeholder="Search Staff..."
-                                        className="w-40"
-                                        onStaffSelect={(s) => {
-                                            updateNested('dossier.occurrenceDocket.complainant', {
-                                                name: s.fullName, address: '', phone: s.staffId, yearOfStudy: '',
-                                                programOfStudy: s.department, sex: '', age: '', nationality: '', tribe: '', village: '', chief: '', district: ''
-                                            });
-                                        }}
-                                    />
-                                </div>
+                                <SmartStudentSearch
+                                    placeholder="Search Student..."
+                                    className="w-full"
+                                    onStudentSelect={(s) => {
+                                        updateNested('dossier.occurrenceDocket.complainant', {
+                                            name: s.fullName, address: '', phone: s.studentId, yearOfStudy: s.year,
+                                            programOfStudy: s.department, sex: s.gender, age: '', nationality: '', tribe: '', village: '', chief: '', district: ''
+                                        });
+                                    }}
+                                />
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <Field label="Full Name" value={formData.dossier.occurrenceDocket.complainant.name} onChange={(v: string) => updateNested('dossier.occurrenceDocket.complainant.name', v)} />
@@ -262,22 +248,11 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
                                 <div className="flex gap-2">
                                     <SmartStudentSearch
                                         placeholder="Search Student..."
-                                        className="w-40"
+                                        className="w-full"
                                         onStudentSelect={(s) => {
                                             updateNested('dossier.occurrenceDocket.accused', {
                                                 name: s.fullName, address: '', phone: s.studentId, yearOfStudy: s.year,
                                                 programOfStudy: s.department, sex: s.gender, age: '', nationality: '', tribe: '', village: '', chief: '', district: ''
-                                            });
-                                            updateNested('dossier.warnAndCaution.fullName', s.fullName);
-                                        }}
-                                    />
-                                    <SmartStaffSearch
-                                        placeholder="Search Staff..."
-                                        className="w-40"
-                                        onStaffSelect={(s) => {
-                                            updateNested('dossier.occurrenceDocket.accused', {
-                                                name: s.fullName, address: '', phone: s.staffId, yearOfStudy: '',
-                                                programOfStudy: s.department, sex: '', age: '', nationality: '', tribe: '', village: '', chief: '', district: ''
                                             });
                                             updateNested('dossier.warnAndCaution.fullName', s.fullName);
                                         }}

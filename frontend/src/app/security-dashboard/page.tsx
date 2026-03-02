@@ -7,7 +7,6 @@ import { authHeaders, getProfile } from '../../utils/api';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import SmartStudentSearch from '../../components/SmartStudentSearch';
-import SmartStaffSearch from '../../components/SmartStaffSearch';
 import Notification, { useNotification } from '../../components/Notification';
 import CaseDossierForm from '../../components/CaseDossierForm';
 import CaseDossierPrintable from '../../components/CaseDossierPrintable';
@@ -18,13 +17,6 @@ interface Student {
   program: string;
   year?: string;
   gender?: string;
-}
-
-interface Staff {
-  staffId: string;
-  fullName: string;
-  department: string;
-  position?: string;
 }
 
 export default function SecurityDashboard() {
@@ -266,8 +258,8 @@ export default function SecurityDashboard() {
                       {filteredCases.slice(0, 15).map((c, i) => (
                         <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-900 group">
                           <td className="px-4 py-4" onClick={() => router.push(`/cases/${c._id}`)}>
-                            <div className="font-bold">{c.student ? c.student.fullName : c.staff?.fullName}</div>
-                            <div className="text-[10px] text-gray-400">{c.student ? c.student.studentId : c.staff?.staffId}</div>
+                            <div className="font-bold">{c.student?.fullName || 'Unknown Object'}</div>
+                            <div className="text-[10px] text-gray-400">{c.student?.studentId || 'N/A'}</div>
                           </td>
                           <td className="px-4 py-4">{c.offenseType}</td>
                           <td className="px-4 py-4 text-center font-mono text-gray-500">{new Date(c.incidentDate).toLocaleDateString()}</td>

@@ -61,8 +61,8 @@ export default function Navbar() {
                                     {user.name ? user.name.charAt(0).toUpperCase() : user.username.charAt(0).toUpperCase()}
                                 </div>
                                 <div className="hidden md:flex flex-col items-start leading-tight">
-                                    <span className="text-xs font-semibold text-gray-900 dark:text-white">{user.name || user.username}</span>
-                                    <span className="text-[10px] text-gray-500 dark:text-gray-400 capitalize">{user.role.replace('_', ' ')}</span>
+                                    <span className="text-sm font-bold text-gray-900 dark:text-white underline decoration-kmuGreen decoration-2 underline-offset-4">{user.name || user.username}</span>
+                                    <span className="text-[10px] text-gray-400 font-medium uppercase tracking-tighter">Authorized Personnel</span>
                                 </div>
                                 <svg className={`w-4 h-4 text-gray-500 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
