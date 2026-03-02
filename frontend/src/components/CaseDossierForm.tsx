@@ -9,6 +9,7 @@ import SmartStudentSearch from './SmartStudentSearch';
 interface Particulars {
     name: string; address: string; phone: string; yearOfStudy: string; programOfStudy: string;
     sex: string; age: string; nationality: string; tribe: string; village: string; chief: string; district: string;
+    sin?: string;
 }
 
 interface OccurrenceDocket {
@@ -35,6 +36,8 @@ interface Statement {
     village: string;
     active: boolean;
     audioUrl: string;
+    sin?: string;
+    signature?: string | null;
 }
 
 interface WarnAndCaution {
@@ -226,10 +229,21 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
                                 <SmartStudentSearch
                                     placeholder="Search Student..."
                                     className="w-full"
-                                    onStudentSelect={(s) => {
+                                    onStudentSelect={(s: any) => {
                                         updateNested('dossier.occurrenceDocket.complainant', {
-                                            name: s.fullName, address: '', phone: s.studentId, yearOfStudy: s.year,
-                                            programOfStudy: s.department, sex: s.gender, age: '', nationality: '', tribe: '', village: '', chief: '', district: ''
+                                            name: s.fullName,
+                                            address: s.address || `${s.province || ''}, ${s.town || ''}`,
+                                            phone: s.phone || s.studentId,
+                                            yearOfStudy: s.yearOfStudy || s.year,
+                                            programOfStudy: s.program || s.department,
+                                            sex: s.gender,
+                                            age: s.age || '',
+                                            nationality: s.nationality || '',
+                                            tribe: s.tribe || '',
+                                            village: s.village || '',
+                                            chief: s.chief || '',
+                                            district: s.district || '',
+                                            sin: s.nrc || ''
                                         });
                                     }}
                                 />
@@ -249,12 +263,38 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
                                     <SmartStudentSearch
                                         placeholder="Search Student..."
                                         className="w-full"
-                                        onStudentSelect={(s) => {
+                                        onStudentSelect={(s: any) => {
+                                            const addr = s.address || `${s.province || ''}, ${s.town || ''}`;
+                                            const phoneNum = s.phone || s.studentId;
+                                            const prog = s.program || s.department;
+                                            const yr = s.yearOfStudy || s.year;
+
                                             updateNested('dossier.occurrenceDocket.accused', {
-                                                name: s.fullName, address: '', phone: s.studentId, yearOfStudy: s.year,
-                                                programOfStudy: s.department, sex: s.gender, age: '', nationality: '', tribe: '', village: '', chief: '', district: ''
+                                                name: s.fullName, address: addr, phone: phoneNum, yearOfStudy: yr,
+                                                programOfStudy: prog, sex: s.gender, age: s.age || '',
+                                                nationality: s.nationality || '', tribe: s.tribe || '',
+                                                village: s.village || s.town || '', chief: s.chief || '',
+                                                district: s.district || s.province || '',
+                                                sin: s.nrc || ''
                                             });
-                                            updateNested('dossier.warnAndCaution.fullName', s.fullName);
+
+                                            // Pre-fill Warn & Caution
+                                            updateNested('dossier.warnAndCaution', {
+                                                ...formData.dossier.warnAndCaution,
+                                                fullName: s.fullName,
+                                                sex: s.gender,
+                                                tribe: s.tribe || '',
+                                                age: s.age || '',
+                                                address: addr,
+                                                village: s.village || s.town || '',
+                                                chief: s.chief || '',
+                                                district: s.district || s.province || '',
+                                                program: prog,
+                                                sin: s.nrc || '',
+                                                phone: phoneNum,
+                                                takenAt: new Date().toLocaleDateString(),
+                                                place: 'Kapasa Makasa University'
+                                            });
                                         }}
                                     />
                                 </div>
@@ -455,7 +495,15 @@ function StatementList({ formData, setFormData }: { formData: FormData, setFormD
     };
 
     const saveActive = () => {
-        const updated = [...formData.dossier.statements, activeStatement];
+        if (!activeStatement) return;
+        const existingIndex = formData.dossier.statements.findIndex(st => st.id === activeStatement.id);
+        let updated;
+        if (existingIndex > -1) {
+            updated = [...formData.dossier.statements];
+            updated[existingIndex] = activeStatement;
+        } else {
+            updated = [...formData.dossier.statements, activeStatement];
+        }
         setFormData('dossier.statements', updated);
         setActiveStatement(null);
         stopRecording();
@@ -475,7 +523,14 @@ function StatementList({ formData, setFormData }: { formData: FormData, setFormD
                             <span>{s.fullName}</span>
                             <div className="flex items-center gap-3">
                                 {s.audioUrl && <span className="text-emerald-500 text-[10px] bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full uppercase tracking-tighter">Audio Attached</span>}
+                                {s.signature && <span className="text-blue-500 text-[10px] bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded-full uppercase tracking-tighter">Signed</span>}
                                 <span className="text-gray-400">{s.takenAt}</span>
+                                <button
+                                    onClick={() => setActiveStatement(s)}
+                                    className="text-kmuGreen hover:text-kmuOrange text-[10px] font-bold uppercase tracking-widest ml-4 transition"
+                                >
+                                    Edit
+                                </button>
                             </div>
                         </div>
                         <p className="text-xs text-gray-500 mt-1 line-clamp-2">{s.content}</p>
@@ -510,10 +565,10 @@ function StatementList({ formData, setFormData }: { formData: FormData, setFormD
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                            <Field label="Full Name" value={activeStatement.fullName} onChange={(v: string) => setActiveStatement({ ...activeStatement, fullName: v })} />
-                            <Field label="Date" type="date" value={activeStatement.takenAt} onChange={(v: string) => setActiveStatement({ ...activeStatement, takenAt: v })} />
-                            <Field label="Phone" value={activeStatement.phone} onChange={(v: string) => setActiveStatement({ ...activeStatement, phone: v })} />
-                            <Field label="Residential Address" value={activeStatement.residentialAddress} onChange={(v: string) => setActiveStatement({ ...activeStatement, residentialAddress: v })} />
+                            <Field label="Full Name" value={activeStatement.fullName} onChange={(v: string) => setActiveStatement(prev => prev ? ({ ...prev, fullName: v }) : null)} />
+                            <Field label="Date" type="date" value={activeStatement.takenAt} onChange={(v: string) => setActiveStatement(prev => prev ? ({ ...prev, takenAt: v }) : null)} />
+                            <Field label="Phone" value={activeStatement.phone} onChange={(v: string) => setActiveStatement(prev => prev ? ({ ...prev, phone: v }) : null)} />
+                            <Field label="Residential Address" value={activeStatement.residentialAddress} onChange={(v: string) => setActiveStatement(prev => prev ? ({ ...prev, residentialAddress: v }) : null)} />
                         </div>
 
                         <div className="relative">
@@ -528,11 +583,23 @@ function StatementList({ formData, setFormData }: { formData: FormData, setFormD
                             )}
                             <textarea
                                 placeholder="Start recording or type the statement here..."
-                                rows={10}
+                                rows={8}
                                 className={`w-full bg-gray-50 dark:bg-gray-800 border-2 rounded-xl px-4 py-3 text-sm mb-6 transition-all ${isTranscribing ? 'border-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.1)]' : 'border-gray-100 dark:border-gray-800'}`}
                                 value={activeStatement.content}
-                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setActiveStatement({ ...activeStatement, content: e.target.value })}
+                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setActiveStatement(prev => prev ? ({ ...prev, content: e.target.value }) : null)}
                             />
+                        </div>
+
+                        <div className="mb-6">
+                            <SignatureField
+                                label="Statement Signature"
+                                onEnd={(data) => setActiveStatement(prev => prev ? ({ ...prev, signature: data }) : null)}
+                            />
+                            {activeStatement.signature && (
+                                <div className="mt-2 text-center">
+                                    <div className="text-[10px] text-emerald-500 font-bold uppercase">Signature Saved Successfully</div>
+                                </div>
+                            )}
                         </div>
 
                         <div className="flex justify-end gap-3">
@@ -548,19 +615,96 @@ function StatementList({ formData, setFormData }: { formData: FormData, setFormD
 
 function WarnAndCaution({ formData, updateNested }: { formData: FormData, updateNested: (path: string, value: any) => void }) {
     const wc = formData.dossier.warnAndCaution;
+    const docket = formData.dossier.occurrenceDocket;
+
     return (
         <div className="space-y-6">
-            <div className="p-6 bg-red-50 dark:bg-red-900/10 rounded-2xl border border-red-100 dark:border-red-900/30 text-xs leading-relaxed text-red-900 dark:text-red-300 italic">
-                "I have been warned and cautioned that a case of <strong>{formData.dossier.occurrenceDocket.offence || '[OFFENCE]'}</strong> which was committed on {formData.dossier.occurrenceDocket.dateTimeReported.split('T')[0]} is being investigated against me. I have further been warned and cautioned to make any statement in reply to the allegation but that, I am not obliged to make any statement against myself..."
+            <div className="text-center border-b pb-4 mb-6">
+                <h2 className="text-lg font-bold uppercase tracking-tight">KAPASA MAKASA UNIVERSITY</h2>
+                <h3 className="text-md font-bold uppercase">Security Department</h3>
+                <h4 className="text-sm font-bold uppercase text-red-600">Warn and Caution</h4>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Field label="Statement Place" value={wc.place} onChange={(v: string) => updateNested('dossier.warnAndCaution.place', v)} placeholder="e.g. Kapasa Makasa University" />
-                <Field label="Village" value={wc.village} onChange={(v: string) => updateNested('dossier.warnAndCaution.village', v)} />
-                <Field label="Chief" value={wc.chief} onChange={(v: string) => updateNested('dossier.warnAndCaution.chief', v)} />
-                <Field label="District" value={wc.district} onChange={(v: string) => updateNested('dossier.warnAndCaution.district', v)} />
-                <Field label="Tribe" value={wc.tribe} onChange={(v: string) => updateNested('dossier.warnAndCaution.tribe', v)} />
-                <Field label="Age" value={wc.age} onChange={(v: string) => updateNested('dossier.warnAndCaution.age', v)} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Field label="Full Names" value={wc.fullName} onChange={(v) => updateNested('dossier.warnAndCaution.fullName', v)} />
+                <div className="grid grid-cols-2 gap-2">
+                    <Field label="Sex" value={wc.sex} onChange={(v) => updateNested('dossier.warnAndCaution.sex', v)} />
+                    <Field label="Age" value={wc.age} onChange={(v) => updateNested('dossier.warnAndCaution.age', v)} />
+                </div>
+                <Field label="Tribe" value={wc.tribe} onChange={(v) => updateNested('dossier.warnAndCaution.tribe', v)} />
+                <Field label="Residential Address" value={wc.address} onChange={(v) => updateNested('dossier.warnAndCaution.address', v)} />
+                <Field label="Village" value={wc.village} onChange={(v) => updateNested('dossier.warnAndCaution.village', v)} />
+                <Field label="Chief" value={wc.chief} onChange={(v) => updateNested('dossier.warnAndCaution.chief', v)} />
+                <Field label="District" value={wc.district} onChange={(v) => updateNested('dossier.warnAndCaution.district', v)} />
+                <Field label="Program of Study" value={wc.program} onChange={(v) => updateNested('dossier.warnAndCaution.program', v)} />
+                <Field label="Occupation" value={wc.occupation} onChange={(v) => updateNested('dossier.warnAndCaution.occupation', v)} />
+                <Field label="SIN / NRC" value={wc.sin} onChange={(v) => updateNested('dossier.warnAndCaution.sin', v)} />
+                <Field label="Phone No" value={wc.phone} onChange={(v) => updateNested('dossier.warnAndCaution.phone', v)} />
+            </div>
+
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="md:col-span-2">
+                        <Field label="Taken on (Day & Date)" value={wc.takenAt} onChange={(v) => updateNested('dossier.warnAndCaution.takenAt', v)} />
+                    </div>
+                    <Field label="at (Time)" type="time" value={wc.occurrenceTime || ''} onChange={(v) => updateNested('dossier.warnAndCaution.occurrenceTime', v)} />
+                    <Field label="At (Place)" value={wc.place} onChange={(v) => updateNested('dossier.warnAndCaution.place', v)} />
+                </div>
+                <p className="text-[11px] text-gray-500 italic">
+                    At Kapasa Makasa University in the Chinsali District of Muchinga Province of the Republic of Zambia.
+                </p>
+            </div>
+
+            <div className="p-6 bg-red-50 dark:bg-red-900/10 rounded-2xl border border-red-100 dark:border-red-900/30 text-[13px] leading-relaxed text-gray-800 dark:text-gray-200">
+                <div className="space-y-4">
+                    <p>
+                        I have been warned and cautioned that a case of
+                        <input
+                            className="inline-block mx-1 border-b border-gray-400 bg-transparent px-1 font-bold min-w-[200px] outline-none text-red-700"
+                            value={wc.offence || docket.offence}
+                            onChange={(e) => updateNested('dossier.warnAndCaution.offence', e.target.value)}
+                            placeholder="[OFFENCE]"
+                        />
+                        which was committed on
+                        <input
+                            type="date"
+                            className="inline-block mx-1 border-b border-gray-400 bg-transparent outline-none"
+                            value={wc.occurrenceDate || (docket.dateTimeReported ? docket.dateTimeReported.split('T')[0] : '')}
+                            onChange={(e) => updateNested('dossier.warnAndCaution.occurrenceDate', e.target.value)}
+                        />
+                        at
+                        <input
+                            type="time"
+                            className="inline-block mx-1 border-b border-gray-400 bg-transparent outline-none"
+                            value={wc.occurrenceTime || ''}
+                            onChange={(e) => updateNested('dossier.warnAndCaution.occurrenceTime', e.target.value)}
+                        />
+                        hours (at place)
+                        <input
+                            className="inline-block mx-1 border-b border-gray-400 bg-transparent px-1 outline-none w-32"
+                            value={wc.occurrencePlace || ''}
+                            onChange={(e) => updateNested('dossier.warnAndCaution.occurrencePlace', e.target.value)}
+                            placeholder="[at place]"
+                        />
+                        is being investigated against me.
+                    </p>
+
+                    <p>
+                        I have further been warned and cautioned to make any statement in reply to the allegation against me but that, I am not obliged to make any statement against myself. I have also been informed that any statement that will be taken down in writing, I am not obliged to answer any question put across to me but if I do, it will be taken down in writing and may be used in the University disciplinary proceedings.
+                    </p>
+
+                    <p>
+                        I have been informed that should this matter be referred to a disciplinary hearing, I may bring my own witness(es) to the hearing. I have also been informed that I am not obliged to answer any question that may incriminate me, whether civil or criminal arising out of the alleged conduct.
+                    </p>
+                </div>
+
+                <div className="mt-8 border-t pt-6">
+                    <SignatureField label="Accused Signature" onEnd={(data) => updateNested('dossier.warnAndCaution.signature', data)} />
+                    <div className="grid grid-cols-2 gap-4 mt-4">
+                        <Field label="Date" type="date" value={new Date().toISOString().split('T')[0]} onChange={() => { }} />
+                        <Field label="Time" type="time" value={new Date().toTimeString().slice(0, 5)} onChange={() => { }} />
+                    </div>
+                </div>
             </div>
         </div>
     );

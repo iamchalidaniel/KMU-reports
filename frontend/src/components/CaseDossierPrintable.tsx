@@ -152,9 +152,11 @@ export default function CaseDossierPrintable({ data, documentType }: CaseDossier
         return (
             <div className="p-16 bg-white text-black min-h-screen font-serif" id="printable-warnandcaution">
                 <Header />
-                <SectionTitle>Warn and Caution</SectionTitle>
+                <div className="text-center mb-8">
+                    <h3 className="text-xl font-black uppercase text-red-600 underline">Warn and Caution</h3>
+                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 mb-8 mt-10">
+                <div className="grid grid-cols-2 gap-x-12 gap-y-2 mb-8">
                     <InfoRow label="Full Names" value={wc.fullName} />
                     <InfoRow label="Sex" value={wc.sex} />
                     <InfoRow label="Tribe" value={wc.tribe} />
@@ -169,16 +171,22 @@ export default function CaseDossierPrintable({ data, documentType }: CaseDossier
                     <InfoRow label="Phone No" value={wc.phone} />
                 </div>
 
-                <div className="bg-gray-50 border p-6 my-8 italic text-sm font-bold">
-                    Taken on: {wc.takenAt} at {wc.time} hours. <br />
-                    At: {wc.place} At Kapasa Makasa University in the Chinsali District of Muchinga Province...
+                <div className="border border-black p-4 my-6 text-sm">
+                    <p className="mb-2 uppercase font-bold">
+                        Taken on (Day & Date): <span className="border-b border-black inline-block min-w-[150px] px-2">{wc.takenAt}</span>
+                        at (Time): <span className="border-b border-black inline-block min-w-[100px] px-2">{wc.occurrenceTime}</span> hours
+                    </p>
+                    <p className="uppercase font-bold">
+                        At (Place): <span className="border-b border-black inline-block min-w-[200px] px-2">{wc.place}</span>
+                    </p>
+                    <p className="text-[10px] mt-2 italic">At Kapasa Makasa University in the Chinsali District of Muchinga Province of the Republic of Zambia.</p>
                 </div>
 
-                <div className="text-lg leading-relaxed space-y-6 text-justify">
+                <div className="text-[16px] leading-[2.2rem] space-y-8 text-justify mt-10">
                     <p>
-                        I have been warned and cautioned that a case of <strong>{wc.offence}</strong>
-                        which was committed on <strong>{wc.occurrenceDate}</strong> at <strong>{wc.occurrenceTime}</strong> hours
-                        at {wc.occurrencePlace} is being investigated against me.
+                        I have been warned and cautioned that a case of <strong>{wc.offence || docket.offence || '________________________________'}</strong>
+                        which was committed on <strong>{wc.occurrenceDate || (docket.dateTimeReported ? docket.dateTimeReported.split('T')[0] : '________________')}</strong> at <strong>{wc.occurrenceTime || '________________'}</strong> hours
+                        at <strong>{wc.occurrencePlace || '________________'}</strong> is being investigated against me.
                     </p>
                     <p>
                         I have further been warned and cautioned to make any statement in reply to the allegation against me but that, I am not obliged to make any statement against myself. I have also been informed that any statement that will be taken down in writing, I am not obliged to answer any question put across to me but if I do, it will be taken down in writing and may be used in the University disciplinary proceedings.
@@ -188,11 +196,14 @@ export default function CaseDossierPrintable({ data, documentType }: CaseDossier
                     </p>
                 </div>
 
-                <div className="mt-24 flex justify-end">
-                    <div className="text-center">
+                <div className="mt-24 grid grid-cols-2 items-end">
+                    <div>
+                        <div className="w-64 border-b border-black h-12"></div>
+                        <div className="font-bold uppercase text-[10px] mt-1">Date / Time</div>
+                    </div>
+                    <div className="text-center ml-auto">
                         {wc.signature && <img src={wc.signature} className="h-16 w-32 mx-auto object-contain" />}
                         <div className="w-64 border-t border-gray-900 pt-2 font-bold uppercase text-xs">Accused Signature / Left Thumb Print</div>
-                        <div className="text-[10px] mt-1">Date: {wc.takenAt} • Time: {wc.time}</div>
                     </div>
                 </div>
             </div>

@@ -10,6 +10,15 @@ interface Student {
   department: string;
   year: string;
   gender: string;
+  program?: string;
+  yearOfStudy?: string;
+  nrc?: string;
+  phone?: string;
+  address?: string;
+  nationality?: string;
+  province?: string;
+  town?: string;
+  tribe?: string;
 }
 
 interface SmartStudentSearchProps {
@@ -18,8 +27,8 @@ interface SmartStudentSearchProps {
   className?: string;
 }
 
-export default function SmartStudentSearch({ 
-  onStudentSelect, 
+export default function SmartStudentSearch({
+  onStudentSelect,
   placeholder = "Search by name or student ID...",
   className = ""
 }: SmartStudentSearchProps) {
@@ -61,7 +70,7 @@ export default function SmartStudentSearch({
       const response = await fetch(`${API_BASE_URL}/students/search?q=${encodeURIComponent(query)}`, {
         headers: { ...authHeaders() }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setSuggestions(data);
@@ -82,7 +91,7 @@ export default function SmartStudentSearch({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setSelectedIndex(prev => 
+      setSelectedIndex(prev =>
         prev < suggestions.length - 1 ? prev + 1 : prev
       );
     } else if (e.key === 'ArrowUp') {
@@ -111,7 +120,7 @@ export default function SmartStudentSearch({
     if (!query) return text;
     const regex = new RegExp(`(${query})`, 'gi');
     const parts = text.split(regex);
-    return parts.map((part, index) => 
+    return parts.map((part, index) =>
       regex.test(part) ? (
         <span key={index} className="bg-yellow-200 font-semibold">{part}</span>
       ) : part
@@ -143,28 +152,24 @@ export default function SmartStudentSearch({
             <div
               key={student._id}
               onClick={() => selectStudent(student)}
-              className={`px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                index === selectedIndex ? 'bg-kmuGreen text-white' : ''
-              }`}
+              className={`px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${index === selectedIndex ? 'bg-kmuGreen text-white' : ''
+                }`}
             >
               <div className="flex justify-between items-start">
                 <div className="flex-1">
-                  <div className={`font-medium ${
-                    index === selectedIndex ? 'text-white' : 'text-gray-900 dark:text-white'
-                  }`}>
+                  <div className={`font-medium ${index === selectedIndex ? 'text-white' : 'text-gray-900 dark:text-white'
+                    }`}>
                     {highlightMatch(student.fullName, searchTerm)}
                   </div>
-                  <div className={`text-sm ${
-                    index === selectedIndex ? 'text-white' : 'text-gray-500 dark:text-gray-400'
-                  }`}>
+                  <div className={`text-sm ${index === selectedIndex ? 'text-white' : 'text-gray-500 dark:text-gray-400'
+                    }`}>
                     ID: {student.studentId} • {student.department} • Year {student.year}
                   </div>
                 </div>
-                <div className={`text-xs px-2 py-1 rounded ${
-                  index === selectedIndex 
-                    ? 'bg-white text-kmuGreen' 
+                <div className={`text-xs px-2 py-1 rounded ${index === selectedIndex
+                    ? 'bg-white text-kmuGreen'
                     : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'
-                }`}>
+                  }`}>
                   {student.gender}
                 </div>
               </div>
