@@ -33,7 +33,7 @@ export default function IncidentReportForm({ onSuccess }: IncidentReportFormProp
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!form.offense_type || !form.description) {
-            showNotification('Please fill in all required fields', 'error');
+            showNotification('error', 'Please fill in all required fields');
             return;
         }
 
@@ -52,7 +52,7 @@ export default function IncidentReportForm({ onSuccess }: IncidentReportFormProp
                 throw new Error(await res.text());
             }
 
-            showNotification('Incident report submitted successfully', 'success');
+            showNotification('success', 'Incident report submitted successfully');
             setForm({
                 incident_date: new Date().toISOString().split('T')[0],
                 description: '',

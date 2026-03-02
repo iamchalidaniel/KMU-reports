@@ -224,26 +224,48 @@ export default function AssistantDeanDashboard() {
           {/* Page Header */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Assistant Dean Dashboard</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Overview of student affairs and disciplinary cases</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Assistant Dean Dashboard</h1>
+              <p className="text-sm text-gray-500 font-medium mt-1 uppercase tracking-wider">Academic oversight and disciplinary control center</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={exportCasesToWord}
-                className="bg-kmuGreen text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-green-700 transition flex items-center gap-2 shadow-sm"
+                className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-6 py-2.5 rounded-lg font-bold text-xs hover:opacity-90 transition flex items-center gap-2 shadow-sm uppercase tracking-wider"
               >
-                📊 Export Cases
+                📊 Export Registry
               </button>
               <Link
                 href="/reports"
-                className="bg-blue-600 text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-blue-700 transition flex items-center gap-2 shadow-sm"
+                className="bg-blue-600 text-white px-6 py-2.5 rounded-lg font-bold text-xs hover:bg-blue-700 transition flex items-center gap-2 shadow-sm uppercase tracking-wider"
               >
-                📂 Reports & Analytics
+                📂 Full Reports
               </Link>
             </div>
           </div>
 
-          {/* System Overview */}
+          {/* Quick Navigation Panel */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Link href="/assistant-dean-dashboard/cases" className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-red-500/50 transition-all group shadow-sm">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-lg font-bold uppercase tracking-tight group-hover:text-red-600 transition-colors">Manage Cases</h3>
+                  <p className="text-xs text-gray-500 font-medium mt-1">Review, update, and export disciplinary records</p>
+                </div>
+                <span className="text-2xl group-hover:translate-x-1 transition-transform">➡️</span>
+              </div>
+            </Link>
+            <Link href="/assistant-dean-dashboard/students" className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-kmuGreen/50 transition-all group shadow-sm">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-lg font-bold uppercase tracking-tight group-hover:text-kmuGreen transition-colors">Student Registry</h3>
+                  <p className="text-xs text-gray-500 font-medium mt-1">View student profiles, programs, and academic status</p>
+                </div>
+                <span className="text-2xl group-hover:translate-x-1 transition-transform">➡️</span>
+              </div>
+            </Link>
+          </div>
+
+          {/* System Overview Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard title="Total Students" value={totalStudentsCount} color="indigo" />
             <StatCard title="Total Cases" value={totalCasesCount} color="purple" />
@@ -254,7 +276,7 @@ export default function AssistantDeanDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Case Status Distribution */}
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Case Status Distribution</h3>
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Case Status Metrics</h3>
               <div className="h-64">
                 <Doughnut
                   data={statusChartData}
@@ -269,7 +291,7 @@ export default function AssistantDeanDashboard() {
             {/* Offense Frequency */}
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Common Offenses</h3>
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Offense Intensity</h3>
                 <select
                   className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs font-semibold outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
                   value={programFilter}
@@ -295,69 +317,16 @@ export default function AssistantDeanDashboard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Frequent Offenders */}
-            <div className="lg:col-span-1 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Frequent Offenders</h3>
-              <div className="space-y-3">
-                {topOffenders.length > 0 ? topOffenders.map(([name, count], i) => (
-                  <div key={i} className="flex justify-between items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg transition-colors border border-gray-100 dark:border-gray-700 group">
-                    <span className="font-bold text-sm text-gray-700 dark:text-gray-300 group-hover:text-kmuGreen transition-colors">{name}</span>
-                    <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase">{count} Incidents</span>
-                  </div>
-                )) : <p className="text-center text-gray-500 py-12 italic text-sm">No offenders found.</p>}
-              </div>
-            </div>
-
-            {/* Recent Cases */}
-            <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
-              <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white">Recent Active Cases</h2>
-                <div className="relative w-full md:w-64">
-                  <input
-                    placeholder="Search cases..."
-                    className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-sm w-full focus:ring-2 focus:ring-kmuGreen transition-all"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
+          {/* Frequent Offenders Snippet */}
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+            <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Frequent Offenders (Critical Watchlist)</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {topOffenders.length > 0 ? topOffenders.map(([name, count], i) => (
+                <div key={i} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-100 dark:border-gray-700">
+                  <span className="font-bold text-xs text-gray-700 dark:text-gray-300 uppercase">{name}</span>
+                  <span className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-2.5 py-1 rounded-full text-[9px] font-black uppercase">{count} Incidents</span>
                 </div>
-              </div>
-              <div className="overflow-x-auto flex-1">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-xs font-bold uppercase tracking-wider">
-                    <tr>
-                      <th className="px-6 py-4 text-left">Student</th>
-                      <th className="px-6 py-4 text-left">Offense Category</th>
-                      <th className="px-6 py-4 text-center">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                    {filteredCases
-                      .filter(c => c.status === 'Open' || c.status === 'Under Investigation')
-                      .slice(0, 8)
-                      .map((c, i) => (
-                        <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 group transition-colors cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
-                          <td className="px-6 py-4">
-                            <div className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-kmuGreen transition-colors">{c.student?.fullName}</div>
-                            <div className="text-xs text-gray-500 mt-0.5">{c.student?.studentId} • {c.student?.program}</div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="text-gray-600 dark:text-gray-400 font-medium">{c.offenseType}</div>
-                          </td>
-                          <td className="px-6 py-4 text-center">
-                            <span className="px-2.5 py-1 rounded-full bg-orange-100 dark:bg-orange-950/30 text-orange-700 dark:text-orange-400 font-bold text-[10px] uppercase border border-orange-200 dark:border-orange-900/50">{c.status}</span>
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-                {filteredCases.filter(c => c.status === 'Open' || c.status === 'Under Investigation').length === 0 && (
-                  <div className="text-center py-20 text-gray-400 italic text-sm">No active cases found.</div>
-                )}
-              </div>
-              <div className="p-4 bg-gray-50 dark:bg-gray-800/50 text-center border-t border-gray-100 dark:border-gray-800">
-                <Link href="/students" className="text-xs font-bold text-kmuGreen hover:text-green-700 uppercase tracking-wider transition-all">View All Students →</Link>
-              </div>
+              )) : <p className="text-center text-gray-500 py-12 italic text-sm col-span-full uppercase tracking-widest">No critical watchlist items.</p>}
             </div>
           </div>
 

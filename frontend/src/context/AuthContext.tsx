@@ -41,11 +41,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
-    
+
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
     setIsOnline(navigator.onLine);
-    
+
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
@@ -58,17 +58,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const storedToken = localStorage.getItem('auth_token');
       const storedUser = localStorage.getItem('auth_user');
       const storedOfflineData = localStorage.getItem('offline_auth_data');
-      
+
       if (storedToken && storedUser) {
         try {
           // Validate token if it's not an offline token
           if (storedToken !== 'offline_token') {
             try {
-              // Test token by making a simple API call
-              const response = await fetch(`${API_BASE_URL}/cases?limit=1`, {
+              // Test token by making a simple API call (using profile which is role-agnostic)
+              const response = await fetch(`${API_BASE_URL}/users/me`, {
                 headers: { 'Authorization': `Bearer ${storedToken}` }
               });
-              
+
               if (!response.ok) {
                 throw new Error('Token validation failed');
               }
@@ -80,7 +80,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               return;
             }
           }
-          
+
           setToken(storedToken);
           setUser(JSON.parse(storedUser));
         } catch (error) {
@@ -89,10 +89,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           localStorage.removeItem('auth_user');
         }
       }
-      
+
       setLoading(false);
     };
-    
+
     loadStoredAuth();
   }, []);
 
@@ -123,11 +123,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const data = await response.json();
-      
+
       // Store auth data
       localStorage.setItem('auth_token', data.token);
       localStorage.setItem('auth_user', JSON.stringify(data.user));
-      
+
       // Store encrypted offline data for offline login
       const offlineData = encryptData(JSON.stringify({
         username,
@@ -136,11 +136,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         timestamp: Date.now()
       }));
       localStorage.setItem('offline_auth_data', offlineData);
-      
+
       // Set auth state immediately for instant login
       setToken(data.token);
       setUser(data.user);
-      
+
       // Start preloading data in the background (non-blocking)
       // Use requestIdleCallback for better performance, fallback to setTimeout
       const startPreload = () => {
@@ -152,13 +152,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           });
         }, 100);
       };
-      
+
       if ('requestIdleCallback' in window) {
         requestIdleCallback(startPreload);
       } else {
         startPreload();
       }
-      
+
       return true;
     } catch (error) {
       console.error('Login error:', error);
@@ -175,7 +175,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const decryptedData = decryptData(storedOfflineData);
       const offlineData = JSON.parse(decryptedData);
-      
+
       // Check if stored credentials match
       if (offlineData.username === username && offlineData.password === password) {
         // Check if data is not too old (e.g., 30 days)
@@ -183,12 +183,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (offlineData.timestamp < thirtyDaysAgo) {
           throw new Error('Offline data expired');
         }
-        
+
         setUser(offlineData.user);
         setToken('offline_token'); // Special token for offline mode
         return true;
       }
-      
+
       throw new Error('Invalid credentials');
     } catch (error) {
       console.error('Offline login error:', error);
@@ -199,13 +199,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     // Stop background sync
     backgroundSync.stop();
-    
+
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user');
     localStorage.removeItem('offline_auth_data');
     setToken(null);
     setUser(null);
-    
+
     // Force redirect to login page
     if (typeof window !== 'undefined') {
       window.location.href = '/login';
@@ -217,7 +217,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Update password in online database
       const response = await fetch(`${API_BASE_URL}/users/me/password`, {
         method: 'PUT',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
@@ -234,14 +234,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           const decryptedData = decryptData(storedOfflineData);
           const offlineData = JSON.parse(decryptedData);
-          
+
           // Update the password in offline data
           const updatedOfflineData = encryptData(JSON.stringify({
             ...offlineData,
             password: newPassword,
             timestamp: Date.now() // Update timestamp
           }));
-          
+
           localStorage.setItem('offline_auth_data', updatedOfflineData);
         } catch (error) {
           console.error('Error updating offline data:', error);
@@ -259,11 +259,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Preload critical data for offline functionality
   const preloadData = async (): Promise<void> => {
     if (!token || isPreloading) return;
-    
+
     setIsPreloading(true);
     try {
       console.log('Starting background data preload...');
-      
+
       // Initialize offline API service (non-blocking)
       await Promise.race([
         offlineApi.init(),
@@ -272,7 +272,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.warn('Offline API init timeout or error:', error);
         return;
       });
-      
+
       // Preload critical data with timeout
       await Promise.race([
         offlineApi.preloadCriticalData(),
@@ -280,7 +280,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       ]).catch(error => {
         console.warn('Critical data preload timeout or error:', error);
       });
-      
+
       // Preload role-specific data with timeout
       if (user?.role) {
         await Promise.race([
@@ -290,7 +290,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.warn('Role-specific data preload timeout or error:', error);
         });
       }
-      
+
       // Start background sync service (non-blocking)
       setTimeout(() => {
         try {
@@ -299,9 +299,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.warn('Background sync start failed:', error);
         }
       }, 1000);
-      
+
       console.log('Background data preload completed');
-      
+
     } catch (error) {
       console.error('Data preload failed:', error);
     } finally {

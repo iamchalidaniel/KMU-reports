@@ -315,40 +315,46 @@ export default function HallWardenDashboard() {
         <div className="animate-in fade-in duration-300 space-y-6">
 
           {/* Hall Warden Header */}
-          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Hall Warden Dashboard</h1>
-              <p className="text-sm text-gray-500 font-semibold mt-1 text-kmuGreen uppercase tracking-wider">Manage hostel maintenance and student facilities</p>
+              <h1 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Command Center</h1>
+              <p className="text-sm text-emerald-600 font-black uppercase tracking-widest mt-1">Hostel Infrastructure & behavioral Oversight</p>
             </div>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href="/hall-warden-dashboard/maintenance"
+                className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition shadow-xl hover:scale-[1.02] active:scale-95 flex items-center gap-2"
+              >
+                📊 Full Maintenance Logs
+              </Link>
               <button
                 onClick={() => setShowForm(true)}
-                className="bg-kmuGreen hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition shadow-sm flex items-center gap-2"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition shadow-xl hover:scale-[1.02] active:scale-95 flex items-center gap-2"
               >
-                🛠️ Report Maintenance Issue
+                🛠️ Dispatch New Report
               </button>
             </div>
           </div>
 
           {/* System Overview */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard title="Total Reports" value={reports.length} color="teal" />
-            <StatCard title="Pending Reports" value={reports.filter(r => r.status === 'Reported').length} color="orange" />
+            <StatCard title="Active Reports" value={reports.length} color="teal" />
+            <StatCard title="Unassigned" value={reports.filter(r => r.status === 'Reported').length} color="orange" />
             <StatCard title="In Progress" value={reports.filter(r => r.status === 'In Progress' || r.status === 'Assigned').length} color="blue" />
-            <StatCard title="Completed Reports" value={reports.filter(r => r.status === 'Completed').length} color="emerald" />
+            <StatCard title="Resolved (24h)" value={reports.filter(r => r.status === 'Completed').length} color="emerald" />
           </div>
 
           {/* Analytics Matrix */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Infrastructural Fault Variance</h3>
+              <div className="flex justify-between items-center mb-12">
+                <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Infrastructural Fault Variance</h3>
                 <select
-                  className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs font-bold uppercase outline-none focus:ring-2 focus:ring-kmuGreen transition-all font-sans"
+                  className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-sans"
                   value={hallFilter}
                   onChange={(e) => setHallFilter(e.target.value)}
                 >
-                  <option value="">All Halls</option>
+                  <option value="">All University Halls</option>
                   {halls.map((h: any) => <option key={h} value={h}>{h}</option>)}
                 </select>
               </div>
@@ -357,113 +363,80 @@ export default function HallWardenDashboard() {
                   data={categoryChartData}
                   options={{
                     maintainAspectRatio: false,
-                    cutout: '70%',
-                    plugins: { legend: { position: 'right', labels: { boxWidth: 8, font: { family: 'sans-serif', size: 10, weight: 'bold' } } } }
+                    cutout: '75%',
+                    plugins: { legend: { position: 'right', labels: { boxWidth: 10, padding: 20, font: { family: 'sans-serif', size: 10, weight: 'bold' } } } }
                   }}
                 />
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Issue Priority</h3>
-              <div className="space-y-4 font-sans">
-                {['Urgent', 'High', 'Medium', 'Low'].map(p => {
-                  const count = reports.filter(r => r.priority === p).length;
-                  const percentage = reports.length ? (count / reports.length) * 100 : 0;
-                  return (
-                    <div key={p} className="space-y-2">
-                      <div className="flex justify-between text-[10px] font-black uppercase tracking-tighter">
-                        <span className={p === 'Urgent' ? 'text-red-500' : 'text-gray-500'}>{p} Level</span>
-                        <span className="font-bold">{count}</span>
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 flex flex-col justify-between">
+              <div>
+                <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-12">Hostel Severity Metrics</h3>
+                <div className="space-y-6 font-sans">
+                  {['Urgent', 'High', 'Medium', 'Low'].map(p => {
+                    const count = reports.filter(r => r.priority === p).length;
+                    const percentage = reports.length ? (count / reports.length) * 100 : 0;
+                    return (
+                      <div key={p} className="space-y-2">
+                        <div className="flex justify-between text-[10px] font-black uppercase tracking-widest mb-1">
+                          <span className={p === 'Urgent' ? 'text-red-500 underline underline-offset-4' : 'text-gray-400'}>{p} Severity</span>
+                          <span className="text-gray-900 dark:text-gray-100">{count}</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                          <div className={`h-full rounded-full transition-all duration-1000 ${p === 'Urgent' ? 'bg-red-500' : p === 'High' ? 'bg-orange-500' : 'bg-emerald-500'}`} style={{ width: `${percentage}%` }} />
+                        </div>
                       </div>
-                      <div className="h-2 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                        <div className={`h-full rounded-full transition-all duration-500 ${p === 'Urgent' ? 'bg-red-500' : p === 'High' ? 'bg-orange-500' : 'bg-kmuGreen'}`} style={{ width: `${percentage}%` }} />
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 text-center">
+                <Link href="/hall-warden-dashboard/maintenance" className="text-[10px] font-black text-emerald-600 uppercase tracking-widest hover:underline transition-all">Export Detailed Audit →</Link>
               </div>
             </div>
           </div>
 
-          {/* Recent Maintenance Reports */}
-          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
-            <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <h2 className="text-lg font-bold uppercase tracking-tight text-kmuGreen">Recent Maintenance Reports</h2>
-              <div className="relative w-full md:w-80 font-sans">
-                <input
-                  placeholder="Search reports..."
-                  className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-2 text-xs w-full focus:ring-2 focus:ring-kmuGreen transition-all"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </div>
+          {/* Quick List (Snippet of Recent Reports) */}
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+            <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/20">
+              <h2 className="text-xl font-black uppercase tracking-tight">Active Dispatches</h2>
+              <Link href="/hall-warden-dashboard/maintenance" className="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-emerald-600 transition-colors">Manage Full Registry</Link>
             </div>
-            <div className="overflow-x-auto font-sans">
-              <table className="w-full text-xs">
-                <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-[10px] font-bold uppercase tracking-widest">
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs font-sans">
+                <thead className="text-gray-400 text-[9px] font-black uppercase tracking-[0.2em]">
                   <tr>
-                    <th className="px-6 py-4 text-left">Location / Reported By</th>
-                    <th className="px-6 py-4 text-left">Category / Details</th>
-                    <th className="px-6 py-4 text-center">Status</th>
-                    <th className="px-6 py-4 text-right">Assignment</th>
+                    <th className="px-8 py-6 text-left">Location</th>
+                    <th className="px-8 py-6 text-left">Categorization</th>
+                    <th className="px-8 py-6 text-center">Status</th>
+                    <th className="px-8 py-6 text-right">Dispatch</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {filteredReports.slice(0, 15).map((report, i) => {
-                    const reportId = report._id || report.id;
-                    return (
-                      <tr key={reportId} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 group transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="font-bold text-gray-900 dark:text-gray-100 uppercase">{report.location.hall}</div>
-                          <div className="text-[10px] text-gray-400 font-semibold italic mt-0.5">Unit {report.location.room || 'N/A'} • {getRelativeTime(report.created_at)}</div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="font-bold text-gray-700 dark:text-gray-200 uppercase tracking-tight">{report.category}</div>
-                          <div className="text-[10px] text-gray-400 mt-1 line-clamp-1 italic">"{report.description}"</div>
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <select
-                            value={report.status}
-                            onChange={(e) => updateStatus(reportId!, e.target.value)}
-                            className={`text-[10px] font-bold uppercase bg-transparent outline-none cursor-pointer border-b border-transparent hover:border-kmuGreen transition-all ${report.status === 'Completed' ? 'text-emerald-600' : 'text-blue-600'}`}
-                          >
-                            {STATUSES.map(s => <option key={s.value} value={s.value} className="bg-white dark:bg-gray-900">{s.label}</option>)}
-                          </select>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          {['light', 'socket', 'ac', 'fan', 'fridge'].includes(report.category) && report.status === 'Reported' ? (
-                            <select
-                              className="text-[10px] font-bold uppercase bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-2 py-1.5 outline-none focus:ring-1 focus:ring-kmuGreen transition-all"
-                              onChange={(e) => {
-                                const elec = electricians.find(el => el._id === e.target.value);
-                                if (elec) assignToElectrician(reportId!, elec._id, elec.name);
-                              }}
-                              defaultValue=""
-                            >
-                              <option value="" disabled>Dispatch Tech</option>
-                              {electricians.map(el => <option key={el._id} value={el._id}>{el.name}</option>)}
-                            </select>
-                          ) : report.assigned_to?.name ? (
-                            <div className="flex flex-col items-end">
-                              <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tight">Technician Assigned</span>
-                              <span className="text-[10px] font-bold text-emerald-600 uppercase">{report.assigned_to.name}</span>
-                            </div>
-                          ) : (
-                            <span className="text-[10px] text-gray-300 italic uppercase font-semibold">Unassigned</span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
+                <tbody className="divide-y divide-gray-50 dark:divide-gray-800/50">
+                  {filteredReports.slice(0, 5).map((report, i) => (
+                    <tr key={report._id || i} className="hover:bg-emerald-50/5 transition-colors group">
+                      <td className="px-8 py-6">
+                        <div className="font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight group-hover:text-emerald-600 transition-colors">{report.location.hall}</div>
+                        <div className="text-[9px] font-black text-gray-400 mt-1 uppercase tracking-tighter">Room {report.location.room} • {getRelativeTime(report.created_at)}</div>
+                      </td>
+                      <td className="px-8 py-6">
+                        <span className="font-black text-gray-700 dark:text-gray-300 uppercase text-[10px] tracking-tight">{report.category}</span>
+                      </td>
+                      <td className="px-8 py-6 text-center">
+                        <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${report.status === 'Completed' ? 'bg-green-100 text-green-700 border-green-200' : 'bg-blue-100 text-blue-700 border-blue-200 whitespace-nowrap'
+                          }`}>{report.status}</span>
+                      </td>
+                      <td className="px-8 py-6 text-right font-black text-[10px] text-gray-400 uppercase tracking-widest">
+                        {report.assigned_to?.name || 'Unassigned'}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
               {filteredReports.length === 0 && (
-                <div className="text-center py-20 text-gray-400 italic text-sm">No maintenance reports found.</div>
+                <div className="text-center py-20 text-gray-400 italic font-black uppercase tracking-widest">No active dispatches.</div>
               )}
-            </div>
-            <div className="p-6 bg-gray-50 dark:bg-gray-800/20 text-center border-t border-gray-100 dark:border-gray-800">
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">End of list</span>
             </div>
           </div>
         </div>
@@ -472,33 +445,33 @@ export default function HallWardenDashboard() {
       {/* Initiation Modal */}
       {showForm && (
         <div className="fixed inset-0 z-[1001] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => setShowForm(false)} />
-          <div className="relative bg-white dark:bg-gray-900 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 p-8">
-            <div className="flex justify-between items-center mb-8 border-b border-gray-100 dark:border-gray-800 pb-6">
+          <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-md" onClick={() => setShowForm(false)} />
+          <div className="relative bg-white dark:bg-gray-900 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-800 p-10 animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center mb-10 pb-6 border-b border-gray-100 dark:border-gray-800">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Report Maintenance Issue</h2>
-                <p className="text-xs text-kmuGreen font-bold uppercase tracking-wider mt-1">Enter details of the maintenance issue</p>
+                <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Initiate Repair Dispatch</h2>
+                <p className="text-[10px] text-emerald-600 font-black uppercase tracking-[0.2em] mt-2">Enter infrastructure failure telemetry</p>
               </div>
-              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600 transition-all font-bold text-xl">✕</button>
+              <button onClick={() => setShowForm(false)} className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 hover:text-black dark:hover:text-white transition-all font-black">✕</button>
             </div>
-            <form onSubmit={handleSubmit} className="space-y-6 font-sans">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField label="Category" value={formData.category} onChange={(v: string) => setFormData({ ...formData, category: v })} type="select" options={CATEGORIES} />
-                <FormField label="Priority" value={formData.priority} onChange={(v: string) => setFormData({ ...formData, priority: v })} type="select" options={PRIORITIES} />
-                <FormField label="Hall/Hostel" value={formData.hall} onChange={(v: string) => setFormData({ ...formData, hall: v })} />
-                <FormField label="Room Number" value={formData.room} onChange={(v: string) => setFormData({ ...formData, room: v })} />
+            <form onSubmit={handleSubmit} className="space-y-8 font-sans">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <FormField label="Failure Category" value={formData.category} onChange={(v: string) => setFormData({ ...formData, category: v })} type="select" options={CATEGORIES} />
+                <FormField label="Priority Level" value={formData.priority} onChange={(v: string) => setFormData({ ...formData, priority: v })} type="select" options={PRIORITIES} />
+                <FormField label="Hall / Location" value={formData.hall} onChange={(v: string) => setFormData({ ...formData, hall: v })} />
+                <FormField label="Specific Unit / Room" value={formData.room} onChange={(v: string) => setFormData({ ...formData, room: v })} />
                 <div className="md:col-span-2">
-                  <FormField label="Description" value={formData.description} onChange={(v: string) => setFormData({ ...formData, description: v })} type="textarea" />
+                  <FormField label="Telemetric Description of Failure" value={formData.description} onChange={(v: string) => setFormData({ ...formData, description: v })} type="textarea" />
                 </div>
-                <FormField label="Reported By (Name)" value={formData.reported_by_name} onChange={(v: string) => setFormData({ ...formData, reported_by_name: v })} />
-                <FormField label="Contact Information" value={formData.reported_by_contact} onChange={(v: string) => setFormData({ ...formData, reported_by_contact: v })} />
+                <FormField label="Source of Truth (Name)" value={formData.reported_by_name} onChange={(v: string) => setFormData({ ...formData, reported_by_name: v })} />
+                <FormField label="Direct Contact Uplink" value={formData.reported_by_contact} onChange={(v: string) => setFormData({ ...formData, reported_by_contact: v })} />
               </div>
-              <div className="mt-8 flex gap-4">
-                <button type="submit" disabled={loading} className="flex-1 bg-kmuGreen hover:bg-emerald-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all active:scale-[0.98] text-xs uppercase tracking-widest">
-                  {loading ? 'Submitting...' : 'Submit Maintenance Report'}
+              <div className="mt-12 flex gap-4">
+                <button type="submit" disabled={loading} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-5 rounded-2xl shadow-xl transition-all active:scale-[0.98] text-[10px] uppercase tracking-[0.2em]">
+                  {loading ? 'PROCESSING...' : 'AUTHORIZE DISPATCH'}
                 </button>
-                <button type="button" onClick={() => setShowForm(false)} className="px-8 py-4 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold uppercase tracking-widest hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
-                  Cancel
+                <button type="button" onClick={() => setShowForm(false)} className="px-10 py-5 rounded-2xl border border-gray-200 dark:border-gray-700 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-gray-50 dark:hover:bg-gray-800 transition-all text-gray-500">
+                  ABORT
                 </button>
               </div>
             </form>

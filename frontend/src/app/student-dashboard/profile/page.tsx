@@ -54,7 +54,7 @@ export default function StudentProfilePage() {
         e.preventDefault();
         try {
             await updateProfile(form);
-            showNotification('Profile updated successfully', 'success');
+            showNotification('success', 'Profile updated successfully');
             setEditMode(false);
             const data = await getProfile();
             setProfile(data);
@@ -68,11 +68,11 @@ export default function StudentProfilePage() {
         try {
             const success = await changePassword(oldPassword, newPassword);
             if (success) {
-                showNotification('Security credentials updated', 'success');
+                showNotification('success', 'Security credentials updated');
                 setOldPassword('');
                 setNewPassword('');
             } else {
-                showNotification('Credential update failed', 'error');
+                showNotification('error', 'Credential update failed');
             }
         } catch (err: any) {
             showNotification(err.message || 'Credential update failed', 'error');

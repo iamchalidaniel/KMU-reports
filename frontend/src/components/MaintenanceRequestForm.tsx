@@ -43,7 +43,7 @@ export default function MaintenanceRequestForm({ onSuccess }: MaintenanceRequest
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!form.category || !form.description || !form.location.hall) {
-            showNotification('Please fill in all required fields', 'error');
+            showNotification('error', 'Please fill in all required fields');
             return;
         }
 
@@ -62,7 +62,7 @@ export default function MaintenanceRequestForm({ onSuccess }: MaintenanceRequest
                 throw new Error(await res.text());
             }
 
-            showNotification('Maintenance report submitted successfully', 'success');
+            showNotification('success', 'Maintenance report submitted successfully');
             setForm({
                 category: '',
                 description: '',
@@ -71,7 +71,7 @@ export default function MaintenanceRequestForm({ onSuccess }: MaintenanceRequest
             });
             if (onSuccess) onSuccess();
         } catch (err: any) {
-            showNotification(err.message || 'Failed to submit report', 'error');
+            showNotification('error', err.message || 'Failed to submit report');
         } finally {
             setLoading(false);
         }

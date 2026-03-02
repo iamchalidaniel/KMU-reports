@@ -117,17 +117,17 @@ export default function Sidebar() {
   } else if (user?.role === 'dean_of_students') {
     navLinks = [
       { icon: navIcons.dean, label: 'Home', path: '/dean-of-students-dashboard' },
-      { icon: navIcons.students, label: 'Students', path: '/students' },
-      { icon: navIcons.cases, label: 'Cases', path: '/cases' },
-      { icon: navIcons.reports, label: 'Student Reports', path: '/reports' },
+      { icon: navIcons.students, label: 'Student Registry', path: '/dean-of-students-dashboard/students' },
+      { icon: navIcons.cases, label: 'Behavioral Ledger', path: '/dean-of-students-dashboard/cases' },
+      { icon: navIcons.reports, label: 'Reports & Analytics', path: '/dean-of-students-dashboard/reports' },
       { icon: navIcons.help, label: 'Help', path: '/help' },
     ];
   } else if (user?.role === 'assistant_dean') {
     navLinks = [
       { icon: navIcons.assistant, label: 'Home', path: '/assistant-dean-dashboard' },
-      { icon: navIcons.students, label: 'Students', path: '/students' },
-      { icon: navIcons.cases, label: 'Cases', path: '/cases' },
-      { icon: navIcons.reports, label: 'Student Reports', path: '/reports' },
+      { icon: navIcons.students, label: 'Student Registry', path: '/assistant-dean-dashboard/students' },
+      { icon: navIcons.cases, label: 'Behavioral Ledger', path: '/assistant-dean-dashboard/cases' },
+      { icon: navIcons.reports, label: 'Reports', path: '/reports' },
       { icon: navIcons.help, label: 'Help', path: '/help' },
     ];
   } else if (user?.role === 'secretary') {
@@ -135,17 +135,19 @@ export default function Sidebar() {
       { icon: navIcons.secretary, label: 'Home', path: '/secretary-dashboard' },
       { icon: navIcons.students, label: 'Students', path: '/students' },
       { icon: navIcons.cases, label: 'Cases', path: '/cases' },
-      { icon: navIcons.reports, label: 'Student Reports', path: '/reports' },
+      { icon: navIcons.reports, label: 'Reports', path: '/reports' },
       { icon: navIcons.help, label: 'Help', path: '/help' },
     ];
   } else if (user?.role === 'hall_warden') {
     navLinks = [
-      { icon: navIcons.hall, label: 'Dashboard', path: '/hall-warden-dashboard' },
+      { icon: navIcons.hall, label: 'Command Center', path: '/hall-warden-dashboard' },
+      { icon: navIcons.maintenance, label: 'Maintenance Ledger', path: '/hall-warden-dashboard/maintenance' },
       { icon: navIcons.help, label: 'Help', path: '/help' },
     ];
   } else if (user?.role === 'electrician') {
     navLinks = [
-      { icon: navIcons.electrician, label: 'Dashboard', path: '/electrician-dashboard' },
+      { icon: navIcons.electrician, label: 'Technical Hub', path: '/electrician-dashboard' },
+      { icon: navIcons.maintenance, label: 'Task Ledger', path: '/electrician-dashboard/tasks' },
       { icon: navIcons.help, label: 'Help', path: '/help' },
     ];
   } else if (user?.role === 'student') {
