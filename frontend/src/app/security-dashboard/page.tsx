@@ -13,7 +13,7 @@ import Notification, { useNotification } from '../../components/Notification';
 interface Student {
   studentId: string;
   fullName: string;
-  department: string;
+  program: string;
   year?: string;
   gender?: string;
 }
@@ -237,7 +237,7 @@ export default function SecurityDashboard() {
                     <label className="text-[10px] font-extrabold uppercase text-gray-400 ml-1">Search Subject</label>
                     {caseType === 'student' ? (
                       <SmartStudentSearch
-                        onStudentSelect={(s) => { setSelectedStudent(s); setStudentId(s.studentId); }}
+                        onStudentSelect={(s) => { setSelectedStudent(s as any); setStudentId((s as any).studentId); }}
                         placeholder="Search student by name or ID..."
                       />
                     ) : (
@@ -249,7 +249,9 @@ export default function SecurityDashboard() {
                     {(selectedStudent || selectedStaff) && (
                       <div className="p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 rounded-xl animate-in zoom-in duration-200">
                         <div className="font-bold text-blue-700 dark:text-blue-300">{(selectedStudent || selectedStaff)?.fullName}</div>
-                        <div className="text-[10px] uppercase text-blue-500 font-bold">{(selectedStudent || selectedStaff)?.studentId || (selectedStaff as any)?.staffId} • {(selectedStudent || selectedStaff)?.department}</div>
+                        <div className="text-[10px] uppercase text-blue-500 font-bold">
+                          {selectedStudent ? `${selectedStudent.studentId} • ${selectedStudent.program}` : `${(selectedStaff as any)?.staffId} • ${(selectedStaff as any)?.department}`}
+                        </div>
                       </div>
                     )}
                   </div>

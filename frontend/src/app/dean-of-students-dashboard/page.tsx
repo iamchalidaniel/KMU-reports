@@ -265,7 +265,7 @@ export default function DeanOfStudentsDashboard() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                    <h3 className="text-lg font-bold mb-6 text-gray-800 dark:text-gray-200">Cases by Department</h3>
+                    <h3 className="text-lg font-bold mb-6 text-gray-800 dark:text-gray-200">Cases by Program</h3>
                     <Bar data={departmentChartData} options={{ responsive: true, plugins: { legend: { display: false } } }} />
                   </div>
                   <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
@@ -338,15 +338,15 @@ export default function DeanOfStudentsDashboard() {
                               </td>
                               <td className="px-4 py-4 text-center">
                                 <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${c.severity === 'Critical' ? 'bg-red-100 text-red-700' :
-                                    c.severity === 'High' ? 'bg-orange-100 text-orange-700' :
-                                      c.severity === 'Medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
+                                  c.severity === 'High' ? 'bg-orange-100 text-orange-700' :
+                                    c.severity === 'Medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
                                   }`}>
                                   {c.severity}
                                 </span>
                               </td>
                               <td className="px-4 py-4 text-center">
                                 <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${c.status === 'Open' ? 'bg-blue-100 text-blue-700' :
-                                    c.status === 'Closed' ? 'bg-gray-100 text-gray-700' : 'bg-yellow-100 text-yellow-700'
+                                  c.status === 'Closed' ? 'bg-gray-100 text-gray-700' : 'bg-yellow-100 text-yellow-700'
                                   }`}>
                                   {c.status}
                                 </span>

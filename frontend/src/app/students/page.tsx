@@ -13,12 +13,12 @@ import * as XLSX from 'xlsx';
 interface Student {
   studentId: string;
   fullName: string;
-  department: string;
+  program: string;
   year?: string;
   gender?: string;
 }
 
-const DEPARTMENTS = ['Computer Science', 'Biology', 'Mathematics'];
+const PROGRAMS = ['BSc ICT Education', 'BSc Biology Education', 'BSc Mathematics Education'];
 const YEARS = ['1', '2', '3', '4'];
 const GENDERS = ['Male', 'Female', 'Other'];
 
@@ -31,7 +31,7 @@ export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [studentId, setStudentId] = useState('');
   const [fullName, setFullName] = useState('');
-  const [department, setDepartment] = useState('');
+  const [program, setProgram] = useState('');
   const [year, setYear] = useState('');
   const [gender, setGender] = useState('');
   const [loading, setLoading] = useState(false);
@@ -39,7 +39,7 @@ export default function StudentsPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<string[]>([]);
-  const [departmentFilter, setDepartmentFilter] = useState('');
+  const [programFilter, setProgramFilter] = useState('');
   const [yearFilter, setYearFilter] = useState('');
   const [genderFilter, setGenderFilter] = useState('');
   const [page, setPage] = useState(1);
@@ -76,8 +76,8 @@ export default function StudentsPage() {
       if (search) {
         params.append('search', search);
       }
-      if (departmentFilter) {
-        params.append('department', departmentFilter);
+      if (programFilter) {
+        params.append('program', programFilter);
       }
       if (yearFilter) {
         params.append('year', yearFilter);
@@ -101,7 +101,7 @@ export default function StudentsPage() {
   useEffect(() => {
     loadStudents(page);
     // eslint-disable-next-line
-  }, [apiCall, page, limit, search, departmentFilter, yearFilter, genderFilter]);
+  }, [apiCall, page, limit, search, programFilter, yearFilter, genderFilter]);
 
   // Auto-clear success message
   useEffect(() => {
@@ -117,9 +117,9 @@ export default function StudentsPage() {
     setError(null);
     setSuccess(null);
     try {
-      const student: Student = { studentId, fullName, department, year, gender };
+      const student: Student = { studentId, fullName, program, year, gender };
       await create('students', student);
-      setStudentId(''); setFullName(''); setDepartment(''); setYear(''); setGender('');
+      setStudentId(''); setFullName(''); setProgram(''); setYear(''); setGender('');
       setSuccess('Student added successfully!');
       loadStudents();
     } catch (err: any) {
@@ -187,10 +187,10 @@ export default function StudentsPage() {
         studentsToImport = parsed.data.map((row: any, index: number) => {
           rowNumber = index + 2; // +2 because index starts at 0 and we have header row
 
-          const student = {
+          const student: Student = {
             studentId: (row.studentId || row.StudentId || row.ID || row.id || '').toString().trim(),
             fullName: (row.fullName || row.FullName || row.Name || row.name || '').toString().trim(),
-            department: (row.department || row.Department || '').toString().trim(),
+            program: (row.program || row.Program || row.department || row.Department || '').toString().trim(),
             year: (row.year || row.Year || '').toString().trim(),
             gender: (row.gender || row.Gender || '').toString().trim(),
           };
@@ -254,10 +254,10 @@ export default function StudentsPage() {
         studentsToImport = (rows as any[]).map((row: any, index: number) => {
           rowNumber = index + 2; // +2 because index starts at 0 and we have header row
 
-          const student = {
+          const student: Student = {
             studentId: (row.studentId || row.StudentId || row.ID || row.id || '').toString().trim(),
             fullName: (row.fullName || row.FullName || row.Name || row.name || '').toString().trim(),
-            department: (row.department || row.Department || '').toString().trim(),
+            program: (row.program || row.Program || row.department || row.Department || '').toString().trim(),
             year: (row.year || row.Year || '').toString().trim(),
             gender: (row.gender || row.Gender || '').toString().trim(),
           };
@@ -301,10 +301,10 @@ export default function StudentsPage() {
       }
 
       // Filter out invalid records
-      const validStudents = studentsToImport.filter(s => s.studentId && s.fullName && s.department);
+      const validStudents = studentsToImport.filter(s => s.studentId && s.fullName && s.program);
 
       if (validStudents.length === 0) {
-        setError('No valid students found in the file. Please ensure all required fields (Student ID, Full Name, Department) are filled.');
+        setError('No valid students found in the file. Please ensure all required fields (Student ID, Full Name, Program) are filled.');
         setLoading(false);
         return;
       }
@@ -420,7 +420,7 @@ export default function StudentsPage() {
         },
         body: JSON.stringify({
           filters: {
-            department: departmentFilter,
+            program: programFilter,
             year: yearFilter,
             gender: genderFilter,
             search: search
@@ -462,8 +462,8 @@ export default function StudentsPage() {
           <input id="studentId" type="text" placeholder="Student ID" value={studentId} onChange={e => setStudentId(e.target.value)} className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" required aria-label="Student ID" />
           <label htmlFor="fullName" className="sr-only">Full Name</label>
           <input id="fullName" type="text" placeholder="Full Name" value={fullName} onChange={e => setFullName(e.target.value)} className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" required aria-label="Full Name" />
-          <label htmlFor="department" className="sr-only">Department</label>
-          <input id="department" type="text" placeholder="Department" value={department} onChange={e => setDepartment(e.target.value)} className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" required aria-label="Department" />
+          <label htmlFor="program" className="sr-only">Program</label>
+          <input id="program" type="text" placeholder="Program" value={program} onChange={e => setProgram(e.target.value)} className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" required aria-label="Program" />
           <label htmlFor="year" className="sr-only">Year</label>
           <input id="year" type="text" placeholder="Year" value={year} onChange={e => setYear(e.target.value)} className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" aria-label="Year" />
           <label htmlFor="gender" className="sr-only">Gender</label>
@@ -504,9 +504,9 @@ export default function StudentsPage() {
             onChange={e => setSearch(e.target.value)}
             className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm"
           />
-          <select value={departmentFilter} onChange={e => setDepartmentFilter(e.target.value)} className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-            <option value="">All Departments</option>
-            {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+          <select value={programFilter} onChange={e => setProgramFilter(e.target.value)} className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
+            <option value="">All Programs</option>
+            {PROGRAMS.map(p => <option key={p} value={p}>{p}</option>)}
           </select>
           <select value={yearFilter} onChange={e => setYearFilter(e.target.value)} className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
             <option value="">All Years</option>
@@ -569,7 +569,7 @@ export default function StudentsPage() {
               </th>
               <th className="py-2 px-2 md:px-4 text-left">ID</th>
               <th className="py-2 px-2 md:px-4 text-left">Name</th>
-              <th className="py-2 px-2 md:px-4 text-left hidden sm:table-cell">Department</th>
+              <th className="py-2 px-2 md:px-4 text-left hidden sm:table-cell">Program</th>
             </tr>
           </thead>
           <tbody>
@@ -580,7 +580,7 @@ export default function StudentsPage() {
                 </td>
                 <td className="py-2 px-2 md:px-4">
                   <div className="font-medium">{s.studentId}</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 sm:hidden">{s.department}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 sm:hidden">{s.program}</div>
                 </td>
                 <td className="py-2 px-2 md:px-4">
                   <div>
@@ -604,7 +604,7 @@ export default function StudentsPage() {
                     </div>
                   </div>
                 </td>
-                <td className="py-2 px-2 md:px-4 hidden sm:table-cell">{s.department}</td>
+                <td className="py-2 px-2 md:px-4 hidden sm:table-cell">{s.program}</td>
               </tr>
             ))}
           </tbody>

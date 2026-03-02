@@ -409,41 +409,100 @@ function AppealsList({ appeals, formatDate, getStatusColor }: any) {
 }
 
 function ChangePasswordView({ showNotification }: any) {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      showNotification('error', 'Please fill in all fields');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      showNotification('error', 'New passwords do not match');
+      return;
+    }
+    if (newPassword.length < 6) {
+      showNotification('error', 'New password must be at least 6 characters');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/auth/change-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders()
+        },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed to update password");
+      }
+
+      showNotification('success', 'Password updated successfully');
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err: any) {
+      showNotification('error', err.message || "Failed to update password");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="max-w-md mx-auto animate-in fade-in duration-300 py-8">
       <h2 className="text-2xl font-bold text-kmuGreen mb-8 text-center">Change Your Password</h2>
-      <div className="space-y-6">
+      <form onSubmit={handleUpdatePassword} className="space-y-6">
         <div className="space-y-1">
           <label className="text-[10px] font-extrabold text-blue-800 dark:text-blue-400 uppercase tracking-tighter ml-1">Current Password</label>
           <input
             type="password"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
             className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-kmuOrange outline-none transition-all"
             placeholder="••••••••"
+            required
           />
         </div>
         <div className="space-y-1">
           <label className="text-[10px] font-extrabold text-blue-800 dark:text-blue-400 uppercase tracking-tighter ml-1">New Password</label>
           <input
             type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
             className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-kmuOrange outline-none transition-all"
             placeholder="••••••••"
+            required
+            minLength={6}
           />
         </div>
         <div className="space-y-1">
           <label className="text-[10px] font-extrabold text-blue-800 dark:text-blue-400 uppercase tracking-tighter ml-1">Confirm New Password</label>
           <input
             type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-kmuOrange outline-none transition-all"
             placeholder="••••••••"
+            required
           />
         </div>
         <button
-          onClick={() => showNotification('info', 'Password change feature coming soon')}
-          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl transition shadow-lg transform active:scale-[0.98] uppercase tracking-wider"
+          type="submit"
+          disabled={loading}
+          className={`w-full text-white font-bold py-4 rounded-xl transition shadow-lg transform active:scale-[0.98] uppercase tracking-wider ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"
+            }`}
         >
-          Update Password
+          {loading ? "Updating..." : "Update Password"}
         </button>
-      </div>
+      </form>
     </div>
   );
 }

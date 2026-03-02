@@ -295,7 +295,7 @@ export default function AssistantDeanDashboard() {
                             <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
                               <td className="px-4 py-4">
                                 <div className="font-bold">{c.student?.fullName}</div>
-                                <div className="text-[10px] text-gray-400">{c.student?.studentId} • {c.student?.department}</div>
+                                <div className="text-[10px] text-gray-400">{c.student?.studentId} • {c.student?.program}</div>
                               </td>
                               <td className="px-4 py-4">{c.offenseType}</td>
                               <td className="px-4 py-4 text-center">

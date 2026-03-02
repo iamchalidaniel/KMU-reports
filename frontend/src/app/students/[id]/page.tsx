@@ -31,9 +31,25 @@ interface Student {
     _id: string;
     studentId: string;
     fullName: string;
-    department?: string;
+    program: string;
     year?: string;
+    yearOfStudy?: string;
     gender?: string;
+    status?: string;
+    deliveryMode?: string;
+    firstName?: string;
+    surName?: string;
+    nrc?: string;
+    passport?: string;
+    maritalStatus?: string;
+    nationality?: string;
+    dateOfBirth?: string;
+    province?: string;
+    town?: string;
+    address?: string;
+    phone?: string;
+    email?: string;
+    roomNo?: string;
     disciplinaryHistory?: Case[];
 }
 
@@ -48,7 +64,7 @@ export default function StudentDetailsPage({ params }: { params: { id: string } 
     const [activeTab, setActiveTab] = useState<'overview' | 'cases' | 'add-case'>(
         (initialActiveTab as 'overview' | 'cases' | 'add-case') || 'overview'
     );
-    
+
     // New case form state
     const [newCase, setNewCase] = useState({
         incidentDate: '',
@@ -119,7 +135,7 @@ export default function StudentDetailsPage({ params }: { params: { id: string } 
             });
 
             if (!res.ok) throw new Error(await res.text());
-            
+
             setSubmitSuccess('Case created successfully!');
             setNewCase({
                 incidentDate: '',
@@ -128,7 +144,7 @@ export default function StudentDetailsPage({ params }: { params: { id: string } 
                 severity: 'medium',
                 sanctions: ''
             });
-            
+
             // Refresh student data to show new case
             const studentRes = await fetch(`${API_BASE_URL}/students/${params.id}`, {
                 headers: { ...authHeaders() },
@@ -273,32 +289,29 @@ export default function StudentDetailsPage({ params }: { params: { id: string } 
                         <nav className="flex space-x-8 px-6">
                             <button
                                 onClick={() => setActiveTab('overview')}
-                                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                                    activeTab === 'overview'
-                                        ? 'border-kmuGreen text-kmuGreen'
-                                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                                }`}
+                                className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'overview'
+                                    ? 'border-kmuGreen text-kmuGreen'
+                                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                                    }`}
                             >
                                 Overview
                             </button>
                             <button
                                 onClick={() => setActiveTab('cases')}
-                                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                                    activeTab === 'cases'
-                                        ? 'border-kmuGreen text-kmuGreen'
-                                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                                }`}
+                                className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'cases'
+                                    ? 'border-kmuGreen text-kmuGreen'
+                                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                                    }`}
                             >
                                 Case History ({totalCases})
                             </button>
                             {(user?.role === 'admin' || user?.role === 'security_officer' || user?.role === 'chief_security_officer' || user?.role === 'dean_of_students' || user?.role === 'assistant_dean') && (
                                 <button
                                     onClick={() => setActiveTab('add-case')}
-                                    className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                                        activeTab === 'add-case'
-                                            ? 'border-kmuGreen text-kmuGreen'
-                                            : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                                    }`}
+                                    className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'add-case'
+                                        ? 'border-kmuGreen text-kmuGreen'
+                                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                                        }`}
                                 >
                                     Add New Case
                                 </button>
@@ -309,61 +322,61 @@ export default function StudentDetailsPage({ params }: { params: { id: string } 
                     <div className="p-6">
                         {/* Overview Tab */}
                         {activeTab === 'overview' && (
-                            <div className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-kmuOrange mb-4">Student Information</h3>
-                                        <div className="space-y-3">
-                                <div>
-                                                <span className="text-gray-600 dark:text-gray-400 text-sm">Full Name</span>
-                                                <p className="font-medium text-gray-900 dark:text-white">{student.fullName}</p>
-                                </div>
-                                <div>
-                                                <span className="text-gray-600 dark:text-gray-400 text-sm">Student ID</span>
-                                                <p className="font-medium text-gray-900 dark:text-white">{student.studentId}</p>
+                            <div className="space-y-8 animate-in fade-in duration-300">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    {/* Academic Details */}
+                                    <div className="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-2xl border border-gray-100 dark:border-gray-700">
+                                        <h3 className="text-xs font-extrabold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-4 flex items-center">
+                                            <span className="mr-2">🎓</span> Academic Details
+                                        </h3>
+                                        <div className="space-y-4">
+                                            <DetailItem label="Program" value={student.program} />
+                                            <DetailItem label="Student ID" value={student.studentId} />
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <DetailItem label="Year" value={student.year} />
+                                                <DetailItem label="Year of Study" value={student.yearOfStudy} />
                                             </div>
-                                            {student.department && (
-                                                <div>
-                                                    <span className="text-gray-600 dark:text-gray-400 text-sm">Department</span>
-                                                    <p className="font-medium text-gray-900 dark:text-white">{student.department}</p>
-                                </div>
-                                            )}
-                                            {student.year && (
-                                <div>
-                                                    <span className="text-gray-600 dark:text-gray-400 text-sm">Year</span>
-                                                    <p className="font-medium text-gray-900 dark:text-white">{student.year}</p>
-                                </div>
-                                            )}
-                                            {student.gender && (
-                                <div>
-                                                    <span className="text-gray-600 dark:text-gray-400 text-sm">Gender</span>
-                                                    <p className="font-medium text-gray-900 dark:text-white">{student.gender}</p>
-                                </div>
-                                            )}
-                            </div>
-                        </div>
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-kmuOrange mb-4">Quick Actions</h3>
-                                        <div className="space-y-3">
-                                            <button
-                                                onClick={() => setActiveTab('add-case')}
-                                                className="block w-full bg-kmuGreen text-white px-4 py-2 rounded hover:bg-kmuOrange transition text-center"
-                                            >
-                                                Add New Case
-                                            </button>
-                                            <button className="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition" onClick={handleViewAllCases}>
-                                                View All Cases
-                                            </button>
-                                            <button className="w-full bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white px-4 py-2 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition" onClick={handleExportRecords}>
-                                                Export Student Cases
-                                            </button>
+                                            <DetailItem label="Delivery Mode" value={student.deliveryMode} />
+                                            <div className="pt-2">
+                                                <span className={`inline-flex px-3 py-1 text-[10px] font-bold rounded-full ${student.status === 'REGISTERED' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                                                    }`}>
+                                                    {student.status || 'ACTIVE'}
+                                                </span>
+                                            </div>
                                         </div>
-                                        
-                                        <h4 className="text-md font-semibold text-kmuOrange mb-3 mt-6">Export Lists</h4>
-                                        <div className="space-y-2">
-                                            <button className="w-full bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition text-sm" onClick={handleExportStudentList}>
-                                                Export Students List (DOCX)
-                                            </button>
+                                    </div>
+
+                                    {/* Personal Info */}
+                                    <div className="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-2xl border border-gray-100 dark:border-gray-700">
+                                        <h3 className="text-xs font-extrabold text-orange-600 dark:text-orange-400 uppercase tracking-widest mb-4 flex items-center">
+                                            <span className="mr-2">👤</span> Personal Info
+                                        </h3>
+                                        <div className="space-y-4">
+                                            <DetailItem label="Name" value={student.fullName} />
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <DetailItem label="Gender" value={student.gender} />
+                                                <DetailItem label="Nationality" value={student.nationality} />
+                                            </div>
+                                            <DetailItem label="NRC" value={student.nrc} />
+                                            {student.passport && <DetailItem label="Passport" value={student.passport} />}
+                                            <DetailItem label="Date of Birth" value={student.dateOfBirth} />
+                                            <DetailItem label="Marital Status" value={student.maritalStatus} />
+                                        </div>
+                                    </div>
+
+                                    {/* Contact & Housing */}
+                                    <div className="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-2xl border border-gray-100 dark:border-gray-700">
+                                        <h3 className="text-xs font-extrabold text-purple-600 dark:text-purple-400 uppercase tracking-widest mb-4 flex items-center">
+                                            <span className="mr-2">🏠</span> Contact & Details
+                                        </h3>
+                                        <div className="space-y-4">
+                                            <DetailItem label="Phone" value={student.phone || student.studentId} />
+                                            <DetailItem label="Email" value={student.email} />
+                                            <DetailItem label="Province/Town" value={`${student.province || ''} / ${student.town || ''}`} />
+                                            <DetailItem label="Address" value={student.address} />
+                                            <div className="mt-4 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                                                <DetailItem label="Room Number" value={student.roomNo} className="text-kmuGreen font-bold" />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -372,12 +385,12 @@ export default function StudentDetailsPage({ params }: { params: { id: string } 
 
                         {/* Cases Tab */}
                         {activeTab === 'cases' && (
-                                <div>
+                            <div>
                                 <h3 className="text-lg font-semibold text-kmuOrange mb-4">Disciplinary Case History</h3>
                                 {cases.length === 0 ? (
                                     <div className="text-center py-8">
                                         <div className="text-gray-500 dark:text-gray-400">No disciplinary cases found for this student.</div>
-                                </div>
+                                    </div>
                                 ) : (
                                     <div className="overflow-x-auto -mx-3 md:mx-0">
                                         <table className="min-w-full bg-white dark:bg-gray-800 rounded-lg shadow text-sm md:text-base">
@@ -481,7 +494,7 @@ export default function StudentDetailsPage({ params }: { params: { id: string } 
                                             )}
                                         </div>
                                     </div>
-                                <div>
+                                    <div>
                                         <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">
                                             Severity
                                         </label>
@@ -497,8 +510,8 @@ export default function StudentDetailsPage({ params }: { params: { id: string } 
                                                 </option>
                                             ))}
                                         </select>
-                                </div>
-                                <div>
+                                    </div>
+                                    <div>
                                         <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">
                                             Description
                                         </label>
@@ -510,7 +523,7 @@ export default function StudentDetailsPage({ params }: { params: { id: string } 
                                             placeholder={offenseTypeDescription || "Provide a detailed description of the incident..."}
                                             required
                                         />
-                                </div>
+                                    </div>
                                     <div>
                                         <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">
                                             Sanctions (Optional)
@@ -536,21 +549,21 @@ export default function StudentDetailsPage({ params }: { params: { id: string } 
                                             className="bg-kmuGreen text-white px-6 py-2 rounded hover:bg-kmuOrange transition disabled:opacity-50"
                                         >
                                             {submitting ? 'Creating...' : 'Create Case'}
-                                    </button>
+                                        </button>
                                         <button
                                             type="button"
                                             onClick={() => setActiveTab('overview')}
                                             className="bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white px-6 py-2 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition"
                                         >
                                             Cancel
-                                    </button>
-                                </div>
+                                        </button>
+                                    </div>
                                 </form>
                             </div>
                         )}
                     </div>
                 </div>
-            </div>
-        </ProtectedRoute>
+            </div >
+        </ProtectedRoute >
     );
 }

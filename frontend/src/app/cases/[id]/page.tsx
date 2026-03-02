@@ -12,7 +12,7 @@ interface Student {
     _id: string;
     studentId: string;
     fullName: string;
-    department?: string;
+    program?: string;
 }
 
 interface Staff {
@@ -214,7 +214,7 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
     const personType = isStudentCase ? 'Student' : 'Staff';
     const personId = isStudentCase ? caseData.student?.studentId : caseData.staff?.staffId;
     const personName = isStudentCase ? caseData.student?.fullName : caseData.staff?.fullName;
-    const personDepartment = isStudentCase ? caseData.student?.department : caseData.staff?.department;
+    const personDepartment = isStudentCase ? (caseData.student as any)?.program : (caseData.staff as any)?.department;
     const personPosition = isStaffCase ? caseData.staff?.position : undefined;
     const personYear = isStudentCase ? (caseData.student as any)?.year : undefined;
 
@@ -279,8 +279,8 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
                                 onClick={() => handleStatusUpdate(caseData.status === 'Open' ? 'Closed' : 'Open')}
                                 disabled={actionLoading}
                                 className={`px-4 py-2 rounded ${caseData.status === 'Open'
-                                        ? 'bg-green-600 hover:bg-green-700 text-white'
-                                        : 'bg-red-600 hover:bg-red-700 text-white'
+                                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                                    : 'bg-red-600 hover:bg-red-700 text-white'
                                     } transition disabled:opacity-50`}
                             >
                                 {actionLoading ? 'Updating...' : (caseData.status === 'Open' ? 'Close Case' : 'Reopen Case')}
@@ -327,7 +327,7 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">
-                                        Department
+                                        {isStudentCase ? 'Program' : 'Department'}
                                     </label>
                                     <div className="mt-1">{personDepartment || 'N/A'}</div>
                                 </div>
@@ -468,8 +468,8 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
             {/* Action Message Toast */}
             {actionMessage && (
                 <div className={`fixed bottom-4 right-4 px-4 py-2 rounded shadow-lg z-50 ${actionMessage.type === 'success'
-                        ? 'bg-green-500 text-white'
-                        : 'bg-red-500 text-white'
+                    ? 'bg-green-500 text-white'
+                    : 'bg-red-500 text-white'
                     }`}>
                     {actionMessage.text}
                 </div>

@@ -250,7 +250,7 @@ export default function SecretaryDashboard() {
                     <Line data={trendData} />
                   </div>
                   <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-                    <h3 className="text-sm font-bold opacity-50 mb-4 uppercase tracking-widest">Dept. Distribution</h3>
+                    <h3 className="text-sm font-bold opacity-50 mb-4 uppercase tracking-widest">Prog. Distribution</h3>
                     <Bar data={deptData} />
                   </div>
                 </div>

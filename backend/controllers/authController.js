@@ -106,7 +106,12 @@ export async function register(req, res) {
 }
 
 export async function registerStudent(req, res) {
-    const { sin, name, contact, email, program, roomNo, password } = req.body;
+    const {
+        sin, name, contact, email, program, roomNo, password,
+        year, gender, yearOfStudy, status, deliveryMode,
+        firstName, surName, nrc, passport, maritalStatus, nationality,
+        dateOfBirth, province, town, address, phone
+    } = req.body;
 
     try {
         // Validate required fields
@@ -155,7 +160,7 @@ export async function registerStudent(req, res) {
             studentId: sin // Store SIN for reference
         });
 
-        // Create Student record
+        // Create Student record with all fields
         const student = await StudentModel.create({
             studentId: sin,
             fullName: name,
@@ -163,7 +168,22 @@ export async function registerStudent(req, res) {
             contact: contact || '',
             program: program,
             roomNo: roomNo,
-            department: program.split(' ')[0] || '', // Extract department from program if possible
+            year,
+            gender,
+            yearOfStudy,
+            status: status || 'REGISTERED',
+            deliveryMode: deliveryMode || 'FULLTIME',
+            firstName,
+            surName,
+            nrc,
+            passport,
+            maritalStatus,
+            nationality,
+            dateOfBirth,
+            province,
+            town,
+            address,
+            phone: phone || contact || ''
         });
 
         // Audit log for student registration
@@ -207,5 +227,37 @@ export async function registerStudent(req, res) {
         }
 
         res.status(500).json({ error: 'Server error during registration' });
+    }
+}
+
+export async function changePassword(req, res) {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.id;
+
+    try {
+        const user = await UserModel.findById(userId);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        const valid = await bcrypt.compare(currentPassword, user.password);
+        if (!valid) return res.status(401).json({ error: 'Incorrect current password' });
+
+        const hashed = await bcrypt.hash(newPassword, 10);
+        user.password = hashed;
+        await user.save();
+
+        await logAudit({
+            action: 'password_changed',
+            entity: 'user',
+            entityId: user._id,
+            user: user.username,
+            details: { timestamp: new Date().toISOString() },
+            ipAddress: req.ip,
+            userAgent: req.get('User-Agent')
+        });
+
+        res.json({ success: true, message: 'Password updated successfully' });
+    } catch (err) {
+        console.error('Change password error:', err);
+        res.status(500).json({ error: 'Server error' });
     }
 }
