@@ -9,7 +9,7 @@ import SmartStudentSearch from './SmartStudentSearch';
 interface Particulars {
     name: string; address: string; phone: string; yearOfStudy: string; programOfStudy: string;
     sex: string; age: string; nationality: string; tribe: string; village: string; chief: string; district: string;
-    sin?: string;
+    sin: string;
 }
 
 interface OccurrenceDocket {
@@ -58,7 +58,7 @@ export interface CaseDossier {
 }
 
 export interface FormData {
-    ob_number: string;
+    case_number: string;
     case_type: string;
     dossier: CaseDossier;
 }
@@ -73,9 +73,16 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
 
+    // Helpers
+    const generateCaseNumber = () => {
+        const year = new Date().getFullYear();
+        const rand = Math.floor(1000 + Math.random() * 9000);
+        return `KMU/SEC/${year}/${rand}`;
+    };
+
     // Form State
     const [formData, setFormData] = useState<FormData>({
-        ob_number: '',
+        case_number: '',
         case_type: 'single_student',
         dossier: {
             occurrenceDocket: {
@@ -84,11 +91,11 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
                 dateTimeReported: new Date().toISOString().slice(0, 16),
                 complainant: {
                     name: '', address: '', phone: '', yearOfStudy: '', programOfStudy: '',
-                    sex: '', age: '', nationality: '', tribe: '', village: '', chief: '', district: ''
+                    sex: '', age: '', nationality: '', tribe: '', village: '', chief: '', district: '', sin: ''
                 },
                 accused: {
                     name: '', address: '', phone: '', yearOfStudy: '', programOfStudy: '',
-                    sex: '', age: '', nationality: '', tribe: '', village: '', chief: '', district: ''
+                    sex: '', age: '', nationality: '', tribe: '', village: '', chief: '', district: '', sin: ''
                 },
                 offence: '',
                 occurrenceDetails: '',
@@ -110,20 +117,24 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
         }
     });
 
+    // Auto-generate Case Number on load if empty
+    useEffect(() => {
+        if (!formData.case_number && !initialData?.case_number) {
+            const num = generateCaseNumber();
+            setFormData(prev => ({ ...prev, case_number: num }));
+            updateNested('dossier.occurrenceDocket.occurrenceBookNumber', num);
+        }
+    }, []);
+
     // Persistence
     useEffect(() => {
         const saved = localStorage.getItem('kmu_case_draft');
         let baseData = formData;
         if (saved) {
-            try {
-                baseData = JSON.parse(saved);
-            } catch (e) {
-                console.error('Failed to load draft', e);
-            }
+            try { baseData = JSON.parse(saved); } catch (e) { console.error('Failed to load draft', e); }
         }
 
         if (initialData) {
-            // Deep merge initialData into baseData
             const merged = { ...baseData, ...initialData };
             if (initialData.dossier) {
                 merged.dossier = { ...baseData.dossier, ...initialData.dossier };
@@ -171,27 +182,20 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
         try {
             const res = await fetch(`${API_BASE_URL}/cases`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...authHeaders()
-                },
+                headers: { 'Content-Type': 'application/json', ...authHeaders() },
                 body: JSON.stringify({
                     ...formData,
+                    ob_number: formData.case_number, // Maintain compatibility with backend field name
                     incident_date: formData.dossier.occurrenceDocket.dateTimeReported.split('T')[0],
                     description: formData.dossier.occurrenceDocket.occurrenceDetails,
                     offense_type: formData.dossier.occurrenceDocket.offence,
-                    student_id: formData.dossier.occurrenceDocket.accused.phone.includes('-') || formData.dossier.occurrenceDocket.accused.phone.length > 10 ? null : formData.dossier.occurrenceDocket.accused.phone
+                    student_id: formData.dossier.occurrenceDocket.accused.sin || formData.dossier.occurrenceDocket.accused.phone
                 })
             });
-
             if (!res.ok) throw new Error(await res.text());
             localStorage.removeItem('kmu_case_draft');
             onSuccess();
-        } catch (err: any) {
-            alert(`Error: ${err.message}`);
-        } finally {
-            setLoading(false);
-        }
+        } catch (err: any) { alert(`Error: ${err.message}`); } finally { setLoading(false); }
     };
 
     return (
@@ -201,7 +205,7 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
                 <div className="flex justify-between items-center mb-8">
                     <div>
                         <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase italic tracking-tighter">Forensic Dossier Initialization</h2>
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Operational Protocol v2.5</p>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Operational Protocol v3.0 • Status: Securing Metadata</p>
                     </div>
                     <button onClick={clearDraft} className="text-[10px] bg-red-50 dark:bg-red-900/10 text-red-600 px-4 py-2 rounded-xl font-black hover:bg-red-100 transition uppercase tracking-widest">Discard Metadata</button>
                 </div>
@@ -224,7 +228,7 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
                     <div className="space-y-12 animate-in fade-in slide-in-from-right-8 duration-500">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             <Field label="Investigating Officer" value={formData.dossier.occurrenceDocket.investigatingOfficer} onChange={(v: string) => updateNested('dossier.occurrenceDocket.investigatingOfficer', v)} />
-                            <Field label="OB Number" value={formData.ob_number} onChange={(v: string) => { setFormData({ ...formData, ob_number: v }); updateNested('dossier.occurrenceDocket.occurrenceBookNumber', v); }} />
+                            <Field label="Case Number (Automatic)" value={formData.case_number} onChange={(v: string) => { setFormData({ ...formData, case_number: v }); updateNested('dossier.occurrenceDocket.occurrenceBookNumber', v); }} />
                             <Field label="Protocol Datetime" type="datetime-local" value={formData.dossier.occurrenceDocket.dateTimeReported} onChange={(v: string) => updateNested('dossier.occurrenceDocket.dateTimeReported', v)} />
                         </div>
 
@@ -242,12 +246,12 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
                                             updateNested('dossier.occurrenceDocket.complainant', {
                                                 name: s.fullName,
                                                 address: s.address || `${s.province || ''}, ${s.town || ''}`,
-                                                phone: s.phone || s.studentId,
-                                                yearOfStudy: s.yearOfStudy || s.year,
-                                                programOfStudy: s.program || s.department,
+                                                phone: s.phone || '',
+                                                yearOfStudy: String(s.yearOfStudy || s.year || ''),
+                                                programOfStudy: s.program || s.department || '',
                                                 sex: s.gender, age: s.age || '', nationality: s.nationality || '',
                                                 tribe: s.tribe || '', village: s.village || '',
-                                                chief: s.chief || '', district: s.district || '', sin: s.nrc || ''
+                                                chief: s.chief || '', district: s.district || '', sin: s.studentId || s.nrc || ''
                                             });
                                         }}
                                     />
@@ -255,9 +259,15 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <Field label="Legal Full Name" value={formData.dossier.occurrenceDocket.complainant.name} onChange={(v: string) => updateNested('dossier.occurrenceDocket.complainant.name', v)} />
-                                <Field label="SIN / Contact Index" value={formData.dossier.occurrenceDocket.complainant.phone} onChange={(v: string) => updateNested('dossier.occurrenceDocket.complainant.phone', v)} />
                                 <Field label="Residential Matrix" value={formData.dossier.occurrenceDocket.complainant.address} onChange={(v: string) => updateNested('dossier.occurrenceDocket.complainant.address', v)} />
-                                <Field label="Programmatic Status" value={formData.dossier.occurrenceDocket.complainant.programOfStudy} onChange={(v: string) => updateNested('dossier.occurrenceDocket.complainant.programOfStudy', v)} />
+                                <div className="grid grid-cols-2 gap-6">
+                                    <Field label="SIN (Student ID)" value={formData.dossier.occurrenceDocket.complainant.sin} onChange={(v: string) => updateNested('dossier.occurrenceDocket.complainant.sin', v)} />
+                                    <Field label="Contact Phone" value={formData.dossier.occurrenceDocket.complainant.phone} onChange={(v: string) => updateNested('dossier.occurrenceDocket.complainant.phone', v)} />
+                                </div>
+                                <div className="grid grid-cols-2 gap-6">
+                                    <Field label="Program of Study" value={formData.dossier.occurrenceDocket.complainant.programOfStudy} onChange={(v: string) => updateNested('dossier.occurrenceDocket.complainant.programOfStudy', v)} />
+                                    <Field label="Year of Study" value={formData.dossier.occurrenceDocket.complainant.yearOfStudy} onChange={(v: string) => updateNested('dossier.occurrenceDocket.complainant.yearOfStudy', v)} />
+                                </div>
                             </div>
                         </section>
 
@@ -273,16 +283,17 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
                                         className="w-full"
                                         onStudentSelect={(s: any) => {
                                             const addr = s.address || `${s.province || ''}, ${s.town || ''}`;
-                                            const phoneNum = s.phone || s.studentId;
-                                            const prog = s.program || s.department;
-                                            const yr = s.yearOfStudy || s.year;
+                                            const phoneNum = s.phone || '';
+                                            const prog = s.program || s.department || '';
+                                            const yr = String(s.yearOfStudy || s.year || '');
+                                            const sinId = s.studentId || s.nrc || '';
 
                                             updateNested('dossier.occurrenceDocket.accused', {
                                                 name: s.fullName, address: addr, phone: phoneNum, yearOfStudy: yr,
                                                 programOfStudy: prog, sex: s.gender, age: s.age || '',
                                                 nationality: s.nationality || '', tribe: s.tribe || '',
                                                 village: s.village || s.town || '', chief: s.chief || '',
-                                                district: s.district || s.province || '', sin: s.nrc || ''
+                                                district: s.district || s.province || '', sin: sinId
                                             });
 
                                             updateNested('dossier.warnAndCaution', {
@@ -290,7 +301,7 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
                                                 fullName: s.fullName, sex: s.gender, tribe: s.tribe || '',
                                                 age: s.age || '', address: addr, village: s.village || s.town || '',
                                                 chief: s.chief || '', district: s.district || s.province || '',
-                                                program: prog, sin: s.nrc || '', phone: phoneNum,
+                                                program: prog, sin: sinId, phone: phoneNum,
                                                 takenAt: new Date().toLocaleDateString(), place: 'Kapasa Makasa University'
                                             });
                                         }}
@@ -299,9 +310,15 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <Field label="Legal Full Name" value={formData.dossier.occurrenceDocket.accused.name} onChange={(v: string) => updateNested('dossier.occurrenceDocket.accused.name', v)} />
-                                <Field label="SIN / Contact Index" value={formData.dossier.occurrenceDocket.accused.phone} onChange={(v: string) => updateNested('dossier.occurrenceDocket.accused.phone', v)} />
                                 <Field label="Residential Matrix" value={formData.dossier.occurrenceDocket.accused.address} onChange={(v: string) => updateNested('dossier.occurrenceDocket.accused.address', v)} />
-                                <Field label="Programmatic Status" value={formData.dossier.occurrenceDocket.accused.programOfStudy} onChange={(v: string) => updateNested('dossier.occurrenceDocket.accused.programOfStudy', v)} />
+                                <div className="grid grid-cols-2 gap-6">
+                                    <Field label="SIN (Student ID)" value={formData.dossier.occurrenceDocket.accused.sin} onChange={(v: string) => updateNested('dossier.occurrenceDocket.accused.sin', v)} />
+                                    <Field label="Contact Phone" value={formData.dossier.occurrenceDocket.accused.phone} onChange={(v: string) => updateNested('dossier.occurrenceDocket.accused.phone', v)} />
+                                </div>
+                                <div className="grid grid-cols-2 gap-6">
+                                    <Field label="Program of Study" value={formData.dossier.occurrenceDocket.accused.programOfStudy} onChange={(v: string) => updateNested('dossier.occurrenceDocket.accused.programOfStudy', v)} />
+                                    <Field label="Year of Study" value={formData.dossier.occurrenceDocket.accused.yearOfStudy} onChange={(v: string) => updateNested('dossier.occurrenceDocket.accused.yearOfStudy', v)} />
+                                </div>
                             </div>
                         </section>
 
