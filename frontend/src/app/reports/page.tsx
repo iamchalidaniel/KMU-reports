@@ -358,287 +358,197 @@ export default function ReportsPage() {
     <>
       <section>
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-kmuGreen">Reports</h1>
+          <h1 className="text-2xl font-bold text-kmuGreen">Reports Management</h1>
+          <div className="flex gap-2">
+            <span className="bg-kmuOrange/10 text-kmuOrange px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+              {total} Student Reports
+            </span>
+          </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700">
-          <button
-            onClick={() => {
-              setActiveTab('analytics');
-              setPage(1);
-            }}
-            className={`px-4 py-2 font-medium transition-colors ${activeTab === 'analytics'
-                ? 'border-b-2 border-kmuGreen text-kmuGreen'
-                : 'text-gray-600 dark:text-gray-400 hover:text-kmuGreen'
-              }`}
-          >
-            Analytics
-          </button>
-          <button
-            onClick={() => {
-              setActiveTab('studentReports');
-              setPage(1);
-            }}
-            className={`px-4 py-2 font-medium transition-colors ${activeTab === 'studentReports'
-                ? 'border-b-2 border-kmuGreen text-kmuGreen'
-                : 'text-gray-600 dark:text-gray-400 hover:text-kmuGreen'
-              }`}
-          >
-            Student Reports ({total})
-          </button>
-        </div>
+        {/* Student Reports View */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <h2 className="text-2xl font-bold text-kmuGreen mb-6">Student-Submitted Reports</h2>
 
-        {/* Analytics Tab */}
-        {activeTab === 'analytics' && (
-          <>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-              <h2 className="text-lg font-semibold mb-2 text-kmuOrange">Offense Trends</h2>
-              {loading ? (
-                <div className="text-gray-500 dark:text-gray-400">Loading...</div>
-              ) : error ? (
-                <div className="text-red-600">{error}</div>
-              ) : (
-                <div
-                  id="offense-trends-chart"
-                  data-chart-export="true"
-                  data-chart-title="Offense Trends"
-                  data-chart-description="Distribution of disciplinary cases by offense type"
-                  style={{ height: 300 }}
-                >
-                  <Bar data={offenseData} options={{ responsive: true, plugins: { legend: { display: false }, title: { display: false } } }} />
-                </div>
-              )}
-            </div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-              <h2 className="text-lg font-semibold mb-2 text-kmuOrange">Department Stats</h2>
-              {loading ? (
-                <div className="text-gray-500 dark:text-gray-400">Loading...</div>
-              ) : error ? (
-                <div className="text-red-600">{error}</div>
-              ) : (
-                <div
-                  id="department-stats-chart"
-                  data-chart-export="true"
-                  data-chart-title="Department Statistics"
-                  data-chart-description="Distribution of disciplinary cases by department"
-                  style={{ height: 300 }}
-                >
-                  <Bar data={deptData} options={{ responsive: true, plugins: { legend: { display: false }, title: { display: false } } }} />
-                </div>
-              )}
-            </div>
-            {/* Export buttons for analytics */}
-            <div className="flex gap-4">
-              <button
-                className="bg-kmuOrange text-white px-4 py-2 rounded hover:bg-kmuGreen transition disabled:opacity-50"
-                onClick={handleExcelExport}
-                disabled={exportingExcel}
-              >
-                {exportingExcel ? 'Exporting...' : 'Export to Excel'}
-              </button>
-              <button
-                className="bg-gray-200 text-kmuGreen px-4 py-2 rounded hover:bg-kmuOrange/20 transition disabled:opacity-50"
-                onClick={handleDocxExport}
-                disabled={exportingDocx}
-              >
-                {exportingDocx ? 'Exporting...' : 'Export to DOCX'}
-              </button>
-              <button
-                className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition disabled:opacity-50"
-                onClick={handleExportWithCharts}
-                disabled={exportingWithCharts}
-              >
-                {exportingWithCharts ? 'Exporting...' : 'Export with Charts (DOCX)'}
-              </button>
-            </div>
-          </>
-        )}
+          {/* Filters */}
+          <div className="flex flex-col md:flex-row gap-4 mb-6">
+            <input
+              type="text"
+              placeholder="Search by student name or description..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            />
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setPage(1);
+              }}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            >
+              <option value="">All Statuses</option>
+              <option value="Pending">Pending</option>
+              <option value="Reviewed">Reviewed</option>
+              <option value="Approved">Approved</option>
+              <option value="Rejected">Rejected</option>
+              <option value="Converted">Converted to Case</option>
+            </select>
+            <select
+              value={severityFilter}
+              onChange={(e) => {
+                setSeverityFilter(e.target.value);
+                setPage(1);
+              }}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            >
+              <option value="">All Severity Levels</option>
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+            </select>
+          </div>
 
-        {/* Student Reports Tab */}
-        {activeTab === 'studentReports' && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h2 className="text-2xl font-bold text-kmuGreen mb-6">Student-Submitted Reports</h2>
-
-            {/* Filters */}
-            <div className="flex flex-col md:flex-row gap-4 mb-6">
-              <input
-                type="text"
-                placeholder="Search by student name or description..."
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setPage(1);
-                }}
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              />
-              <select
-                value={statusFilter}
-                onChange={(e) => {
-                  setStatusFilter(e.target.value);
-                  setPage(1);
-                }}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              >
-                <option value="">All Statuses</option>
-                <option value="Pending">Pending</option>
-                <option value="Reviewed">Reviewed</option>
-                <option value="Approved">Approved</option>
-                <option value="Rejected">Rejected</option>
-                <option value="Converted">Converted to Case</option>
-              </select>
-              <select
-                value={severityFilter}
-                onChange={(e) => {
-                  setSeverityFilter(e.target.value);
-                  setPage(1);
-                }}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              >
-                <option value="">All Severity Levels</option>
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="High">High</option>
-              </select>
+          {/* Reports Table */}
+          {loadingReports ? (
+            <div className="text-center py-8">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-kmuGreen"></div>
             </div>
-
-            {/* Reports Table */}
-            {loadingReports ? (
-              <div className="text-center py-8">
-                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-kmuGreen"></div>
-              </div>
-            ) : studentReports.length === 0 ? (
-              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                No student reports found.
-              </div>
-            ) : (
-              <>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
-                      <tr>
-                        <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
-                          Student
-                        </th>
-                        <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
-                          Date
-                        </th>
-                        <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
-                          Description
-                        </th>
-                        <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
-                          Type
-                        </th>
-                        <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
-                          Status
-                        </th>
-                        <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
-                          Severity
-                        </th>
-                        <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {studentReports.map((report) => (
-                        <tr
-                          key={report._id}
-                          className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-                        >
-                          <td className="px-4 py-2 text-gray-900 dark:text-white">
-                            {report.student_name || 'N/A'}
-                          </td>
-                          <td className="px-4 py-2 text-gray-900 dark:text-white">
-                            {formatDate(report.incident_date)}
-                          </td>
-                          <td className="px-4 py-2 text-gray-900 dark:text-white truncate max-w-xs">
-                            {report.description}
-                          </td>
-                          <td className="px-4 py-2 text-gray-900 dark:text-white text-xs">
-                            {report.offense_type}
-                          </td>
-                          <td className="px-4 py-2">
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(report.status)}`}>
-                              {report.status}
-                            </span>
-                          </td>
-                          <td className="px-4 py-2">
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${report.severity === 'High'
-                                ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                                : report.severity === 'Medium'
-                                  ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                                  : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                              }`}>
-                              {report.severity}
-                            </span>
-                          </td>
-                          <td className="px-4 py-2 text-sm space-x-2">
-                            {report.status === 'Pending' && (
-                              <>
-                                <button
-                                  onClick={() => handleApproveReport(report._id)}
-                                  className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600"
-                                >
-                                  Approve
-                                </button>
-                                <button
-                                  onClick={() => handleConvertToCase(report._id)}
-                                  className="px-2 py-1 bg-kmuGreen text-white rounded text-xs hover:bg-kmuGreen/90"
-                                >
-                                  Convert
-                                </button>
-                              </>
-                            )}
-                            {report.status === 'Approved' && (
+          ) : studentReports.length === 0 ? (
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              No student reports found.
+            </div>
+          ) : (
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                    <tr>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
+                        Student
+                      </th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
+                        Date
+                      </th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
+                        Description
+                      </th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
+                        Type
+                      </th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
+                        Status
+                      </th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
+                        Severity
+                      </th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {studentReports.map((report) => (
+                      <tr
+                        key={report._id}
+                        className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      >
+                        <td className="px-4 py-2 text-gray-900 dark:text-white">
+                          {report.student_name || 'N/A'}
+                        </td>
+                        <td className="px-4 py-2 text-gray-900 dark:text-white">
+                          {formatDate(report.incident_date)}
+                        </td>
+                        <td className="px-4 py-2 text-gray-900 dark:text-white truncate max-w-xs">
+                          {report.description}
+                        </td>
+                        <td className="px-4 py-2 text-gray-900 dark:text-white text-xs">
+                          {report.offense_type}
+                        </td>
+                        <td className="px-4 py-2">
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(report.status)}`}>
+                            {report.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-2">
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${report.severity === 'High'
+                            ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                            : report.severity === 'Medium'
+                              ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                              : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                            }`}>
+                            {report.severity}
+                          </span>
+                        </td>
+                        <td className="px-4 py-2 text-sm space-x-2">
+                          {report.status === 'Pending' && (
+                            <>
+                              <button
+                                onClick={() => handleApproveReport(report._id)}
+                                className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600"
+                              >
+                                Approve
+                              </button>
                               <button
                                 onClick={() => handleConvertToCase(report._id)}
                                 className="px-2 py-1 bg-kmuGreen text-white rounded text-xs hover:bg-kmuGreen/90"
                               >
-                                Create Case
+                                Convert
                               </button>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex justify-center gap-2 mt-6">
-                    <button
-                      onClick={() => setPage(Math.max(1, page - 1))}
-                      disabled={page === 1}
-                      className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700"
-                    >
-                      Previous
-                    </button>
-                    {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + Math.max(1, page - 2)).map((p) => (
-                      <button
-                        key={p}
-                        onClick={() => setPage(p)}
-                        className={`px-4 py-2 rounded-lg ${page === p
-                            ? 'bg-kmuGreen text-white'
-                            : 'border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
-                          }`}
-                      >
-                        {p}
-                      </button>
+                            </>
+                          )}
+                          {report.status === 'Approved' && (
+                            <button
+                              onClick={() => handleConvertToCase(report._id)}
+                              className="px-2 py-1 bg-kmuGreen text-white rounded text-xs hover:bg-kmuGreen/90"
+                            >
+                              Create Case
+                            </button>
+                          )}
+                        </td>
+                      </tr>
                     ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex justify-center gap-2 mt-6">
+                  <button
+                    onClick={() => setPage(Math.max(1, page - 1))}
+                    disabled={page === 1}
+                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    Previous
+                  </button>
+                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + Math.max(1, page - 2)).map((p) => (
                     <button
-                      onClick={() => setPage(Math.min(totalPages, page + 1))}
-                      disabled={page === totalPages}
-                      className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      key={p}
+                      onClick={() => setPage(p)}
+                      className={`px-4 py-2 rounded-lg ${page === p
+                        ? 'bg-kmuGreen text-white'
+                        : 'border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                        }`}
                     >
-                      Next
+                      {p}
                     </button>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
+                  ))}
+                  <button
+                    onClick={() => setPage(Math.min(totalPages, page + 1))}
+                    disabled={page === totalPages}
+                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
         )}
       </section>
 

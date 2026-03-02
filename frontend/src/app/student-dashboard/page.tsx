@@ -22,6 +22,17 @@ interface Report {
   appealReason?: string;
 }
 
+interface Case {
+  _id: string;
+  incidentDate: string;
+  description: string;
+  offenseType: string;
+  severity: string;
+  status: string;
+  sanctions?: string;
+  createdAt: string;
+}
+
 interface Appeal {
   _id: string;
   reportId: string;
@@ -41,9 +52,11 @@ export default function StudentDashboardPage() {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [profile, setProfile] = useState<any>(null);
   const [reports, setReports] = useState<Report[]>([]);
+  const [cases, setCases] = useState<Case[]>([]);
   const [appeals, setAppeals] = useState<Appeal[]>([]);
   const [loadingReports, setLoadingReports] = useState(true);
-  const [activeTab, setActiveTab] = useState<'info' | 'academics' | 'appeals' | 'password'>('info');
+  const [loadingCases, setLoadingCases] = useState(true);
+  const [activeTab, setActiveTab] = useState<'info' | 'reports' | 'cases' | 'appeals' | 'password'>('info');
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
@@ -86,10 +99,11 @@ export default function StudentDashboardPage() {
     }
   }, [token, user]);
 
-  // Fetch student's reports
+  // Fetch student's reports and cases
   useEffect(() => {
     if (user?.studentId) {
       fetchReports();
+      fetchCases();
     }
   }, [user?.studentId, page, statusFilter, search]);
 
@@ -124,6 +138,22 @@ export default function StudentDashboardPage() {
       showNotification('error', 'Failed to load reports');
     } finally {
       setLoadingReports(false);
+    }
+  };
+
+  const fetchCases = async () => {
+    setLoadingCases(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/cases?studentId=${user?.studentId}`, {
+        headers: { ...authHeaders() },
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      setCases(Array.isArray(data) ? data : (data.cases || []));
+    } catch (err: any) {
+      console.error('Failed to fetch cases:', err);
+    } finally {
+      setLoadingCases(false);
     }
   };
 
@@ -214,8 +244,9 @@ export default function StudentDashboardPage() {
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden sticky top-24">
               <nav className="flex flex-col">
                 <NavButton label="Your Info" icon="👥" active={activeTab === 'info'} onClick={() => setActiveTab('info')} />
-                <NavButton label="Academics" icon="📖" active={activeTab === 'academics'} onClick={() => setActiveTab('academics')} />
-                <NavButton label="Appeals" icon="⚖️" active={activeTab === 'appeals'} onClick={() => setActiveTab('appeals')} />
+                <NavButton label="Your Reports" icon="📋" active={activeTab === 'reports'} onClick={() => setActiveTab('reports')} />
+                <NavButton label="Disciplinary Cases" icon="⚖️" active={activeTab === 'cases'} onClick={() => setActiveTab('cases')} />
+                <NavButton label="My Appeals" icon="📁" active={activeTab === 'appeals'} onClick={() => setActiveTab('appeals')} />
                 <NavButton label="Change Password" icon="⚙️" active={activeTab === 'password'} onClick={() => setActiveTab('password')} />
               </nav>
             </div>
@@ -227,13 +258,28 @@ export default function StudentDashboardPage() {
 
               {activeTab === 'info' && <PersonalInfoView studentData={studentData} />}
 
-              {activeTab === 'academics' && (
+              {activeTab === 'reports' && (
                 <div className="animate-in fade-in duration-300">
                   <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-kmuGreen">Academic Reports</h2>
+                    <h2 className="text-2xl font-bold text-kmuGreen">My Submitted Reports</h2>
                     <span className="text-sm font-medium text-gray-500">Total: {total}</span>
                   </div>
                   <ReportsTable reports={reports} formatDate={formatDate} getStatusColor={getStatusColor} loading={loadingReports} />
+                </div>
+              )}
+
+              {activeTab === 'cases' && (
+                <div className="animate-in fade-in duration-300">
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-red-600">Disciplinary Cases</h2>
+                    <span className="text-sm font-medium text-gray-500">History: {cases.length}</span>
+                  </div>
+                  <CasesTable cases={cases} formatDate={formatDate} getStatusColor={getStatusColor} loading={loadingCases} />
+                  <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
+                    <p className="text-sm text-blue-700 dark:text-blue-300">
+                      <strong>Need to appeal?</strong> You can submit an appeal for any case that you believe was wrongly decided. Click the appeal button next to the case.
+                    </p>
+                  </div>
                 </div>
               )}
 
@@ -404,6 +450,45 @@ function AppealsList({ appeals, formatDate, getStatusColor }: any) {
           )}
         </div>
       ))}
+    </div>
+  );
+}
+
+function CasesTable({ cases, formatDate, getStatusColor, loading }: any) {
+  if (loading) return <div className="text-center py-10 italic text-gray-500">Loading cases...</div>;
+  if (cases.length === 0) return <div className="text-center py-10 italic text-gray-500">No disciplinary cases found.</div>;
+
+  return (
+    <div className="overflow-x-auto border rounded-xl border-gray-100 dark:border-gray-800">
+      <table className="w-full text-sm">
+        <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-800">
+          <tr>
+            <th className="px-5 py-4 text-left font-bold text-gray-700 dark:text-gray-300 uppercase text-[10px] tracking-wider">Date</th>
+            <th className="px-5 py-4 text-left font-bold text-gray-700 dark:text-gray-300 uppercase text-[10px] tracking-wider">Offense</th>
+            <th className="px-5 py-4 text-left font-bold text-gray-700 dark:text-gray-300 uppercase text-[10px] tracking-wider">Status</th>
+            <th className="px-5 py-4 text-center font-bold text-gray-700 dark:text-gray-300 uppercase text-[10px] tracking-wider">Action</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+          {cases.map((c: any) => (
+            <tr key={c._id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+              <td className="px-5 py-4">{formatDate(c.incidentDate)}</td>
+              <td className="px-5 py-4">
+                <div className="font-semibold">{c.offenseType}</div>
+                <div className="text-[10px] text-gray-400 truncate max-w-[200px]">{c.description}</div>
+              </td>
+              <td className="px-5 py-4">
+                <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${getStatusColor(c.status)}`}>
+                  {c.status}
+                </span>
+              </td>
+              <td className="px-5 py-4 text-center">
+                <button className="text-blue-600 hover:text-blue-800 font-bold text-xs uppercase">Appeal</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

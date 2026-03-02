@@ -567,3 +567,14 @@ export default function StudentDetailsPage({ params }: { params: { id: string } 
         </ProtectedRoute >
     );
 }
+
+function DetailItem({ label, value, className = "" }: { label: string; value: any; className?: string }) {
+    return (
+        <div className={`flex flex-col gap-1 ${className}`}>
+            <span className="text-[10px] font-extrabold text-blue-800 dark:text-blue-400 uppercase tracking-tighter">{label}</span>
+            <div className="bg-white dark:bg-gray-800 rounded border border-gray-100 dark:border-gray-700 px-3 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 min-h-[38px] flex items-center shadow-sm">
+                {value || '-'}
+            </div>
+        </div>
+    );
+}
