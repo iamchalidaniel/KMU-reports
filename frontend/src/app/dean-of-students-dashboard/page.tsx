@@ -79,8 +79,8 @@ export default function DeanOfStudentsDashboard() {
 
     async function fetchData() {
       try {
-        const casesRes = await fetch(`${API_BASE_URL}/api/cases`, { headers: { ...authHeaders() } });
-        const studentsRes = await fetch(`${API_BASE_URL}/api/students`, { headers: { ...authHeaders() } });
+        const casesRes = await fetch(`${API_BASE_URL}/cases`, { headers: { ...authHeaders() } });
+        const studentsRes = await fetch(`${API_BASE_URL}/students`, { headers: { ...authHeaders() } });
 
         if (casesRes.ok) {
           const casesData = await casesRes.json();

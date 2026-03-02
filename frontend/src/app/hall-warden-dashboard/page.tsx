@@ -167,7 +167,7 @@ export default function HallWardenDashboard() {
   async function fetchElectricians() {
     try {
       // Fetch users with electrician role
-      const res = await fetch(`${API_BASE_URL}/api/users`, {
+      const res = await fetch(`${API_BASE_URL}/users`, {
         headers: { ...authHeaders() }
       });
       if (!res.ok) throw new Error('Failed to fetch electricians');
@@ -186,7 +186,7 @@ export default function HallWardenDashboard() {
   async function fetchReports() {
     try {
       setLoading(true);
-      const res = await fetch(`${API_BASE_URL}/api/maintenance`, {
+      const res = await fetch(`${API_BASE_URL}/maintenance`, {
         headers: { ...authHeaders() }
       });
       if (!res.ok) throw new Error('Failed to fetch reports');

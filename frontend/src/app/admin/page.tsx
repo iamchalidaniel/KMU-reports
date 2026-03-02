@@ -85,8 +85,8 @@ export default function AdminPage() {
         }
 
         const [usersRes, reportsRes] = await Promise.all([
-          fetch(`${API_BASE_URL}/api/users`, { headers: { ...authHeaders() } }),
-          fetch(`${API_BASE_URL}/api/student-reports`, { headers: { ...authHeaders() } })
+          fetch(`${API_BASE_URL}/users`, { headers: { ...authHeaders() } }),
+          fetch(`${API_BASE_URL}/student-reports`, { headers: { ...authHeaders() } })
         ]);
 
         if (usersRes.ok) {

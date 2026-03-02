@@ -125,7 +125,7 @@ export default function StudentDashboardPage() {
       if (statusFilter) params.append('status', statusFilter);
       if (search) params.append('search', search);
 
-      const res = await fetch(`${API_BASE_URL}/api/student-reports?${params}`, {
+      const res = await fetch(`${API_BASE_URL}/student-reports?${params}`, {
         headers: { ...authHeaders() },
       });
 

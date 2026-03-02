@@ -135,7 +135,7 @@ export default function ReportsPage() {
       if (severityFilter) params.append('severity', severityFilter);
       if (search) params.append('search', search);
 
-      const res = await fetch(`${API_BASE_URL}/api/student-reports?${params}`, {
+      const res = await fetch(`${API_BASE_URL}/student-reports?${params}`, {
         headers: { ...authHeaders() },
       });
 

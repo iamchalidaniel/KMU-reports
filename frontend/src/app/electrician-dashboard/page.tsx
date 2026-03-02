@@ -134,7 +134,7 @@ export default function ElectricianDashboard() {
     async function fetchReports() {
       try {
         setLoading(true);
-        const res = await fetch(`${API_BASE_URL}/api/maintenance`, {
+        const res = await fetch(`${API_BASE_URL}/maintenance`, {
           headers: { ...authHeaders() }
         });
         if (!res.ok) throw new Error('Failed to fetch reports');
@@ -152,7 +152,7 @@ export default function ElectricianDashboard() {
 
     async function fetchAnalytics() {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/maintenance/analytics`, {
+        const res = await fetch(`${API_BASE_URL}/maintenance/analytics`, {
           headers: { ...authHeaders() }
         });
         if (!res.ok) throw new Error('Failed to fetch analytics');
