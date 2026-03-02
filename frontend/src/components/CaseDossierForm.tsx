@@ -7,6 +7,60 @@ import { authHeaders } from '../utils/api';
 import SmartStudentSearch from './SmartStudentSearch';
 import SmartStaffSearch from './SmartStaffSearch';
 
+interface Particulars {
+    name: string; address: string; phone: string; yearOfStudy: string; programOfStudy: string;
+    sex: string; age: string; nationality: string; tribe: string; village: string; chief: string; district: string;
+}
+
+interface OccurrenceDocket {
+    investigatingOfficer: string;
+    occurrenceBookNumber: string;
+    dateTimeReported: string;
+    complainant: Particulars;
+    accused: Particulars;
+    offence: string;
+    occurrenceDetails: string;
+    damagedValue: string;
+    recoveredValue: string;
+    disposalManner: string;
+}
+
+interface Statement {
+    id: number;
+    fullName: string;
+    content: string;
+    takenAt: string;
+    phone: string;
+    residentialAddress: string;
+    tribe: string;
+    village: string;
+    active: boolean;
+    audioUrl: string;
+}
+
+interface WarnAndCaution {
+    fullName: string; sex: string; tribe: string; age: string; address: string; village: string;
+    chief: string; district: string; program: string; occupation: string; sin: string; phone: string;
+    takenAt: string; place: string; offence: string; occurrenceDate: string; occurrenceTime: string;
+    occurrencePlace: string; signature: string;
+}
+
+interface CaseDossier {
+    occurrenceDocket: OccurrenceDocket;
+    statements: Statement[];
+    warnAndCaution: WarnAndCaution;
+    signatures: {
+        investigatingOfficer?: string | null;
+        complainant?: string | null;
+    };
+}
+
+interface FormData {
+    ob_number: string;
+    case_type: string;
+    dossier: CaseDossier;
+}
+
 interface CaseDossierFormProps {
     onSuccess: () => void;
     onCancel: () => void;
@@ -15,10 +69,9 @@ interface CaseDossierFormProps {
 export default function CaseDossierForm({ onSuccess, onCancel }: CaseDossierFormProps) {
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
-    const sigPad = useRef<any>(null);
 
     // Form State
-    const [formData, setFormData] = useState<any>({
+    const [formData, setFormData] = useState<FormData>({
         ob_number: '',
         case_type: 'single_student',
         dossier: {
@@ -46,6 +99,10 @@ export default function CaseDossierForm({ onSuccess, onCancel }: CaseDossierForm
                 chief: '', district: '', program: '', occupation: '', sin: '', phone: '',
                 takenAt: '', place: '', offence: '', occurrenceDate: '', occurrenceTime: '',
                 occurrencePlace: '', signature: ''
+            },
+            signatures: {
+                investigatingOfficer: null,
+                complainant: null
             }
         }
     });
@@ -55,7 +112,8 @@ export default function CaseDossierForm({ onSuccess, onCancel }: CaseDossierForm
         const saved = localStorage.getItem('kmu_case_draft');
         if (saved) {
             try {
-                setFormData(JSON.parse(saved));
+                const data = JSON.parse(saved);
+                setFormData(data);
             } catch (e) {
                 console.error('Failed to load draft', e);
             }
@@ -68,7 +126,7 @@ export default function CaseDossierForm({ onSuccess, onCancel }: CaseDossierForm
 
     const updateNested = (path: string, value: any) => {
         const keys = path.split('.');
-        const newData = { ...formData };
+        const newData = { ...formData } as any;
         let current = newData;
         for (let i = 0; i < keys.length - 1; i++) {
             current[keys[i]] = { ...current[keys[i]] };
@@ -166,7 +224,7 @@ export default function CaseDossierForm({ onSuccess, onCancel }: CaseDossierForm
                             <Field label="Offence" value={formData.dossier.occurrenceDocket.offence} onChange={(v: string) => updateNested('dossier.occurrenceDocket.offence', v)} placeholder="e.g. Theft of university property" />
                             <div className="space-y-2">
                                 <label className="text-[10px] font-extrabold uppercase text-gray-400 ml-1">Details of Occurrence</label>
-                                <textarea rows={4} className="w-full bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm" value={formData.dossier.occurrenceDocket.occurrenceDetails} onChange={(e) => updateNested('dossier.occurrenceDocket.occurrenceDetails', e.target.value)} />
+                                <textarea rows={4} className="w-full bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm" value={formData.dossier.occurrenceDocket.occurrenceDetails} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => updateNested('dossier.occurrenceDocket.occurrenceDetails', e.target.value)} />
                             </div>
                         </section>
                     </div>
@@ -236,7 +294,7 @@ function Field({ label, value, onChange, type = "text", placeholder = "" }: { la
             <input
                 type={type}
                 value={value}
-                onChange={(e) => onChange(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
                 placeholder={placeholder}
                 className="w-full bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-kmuGreen outline-none transition"
             />
@@ -244,8 +302,8 @@ function Field({ label, value, onChange, type = "text", placeholder = "" }: { la
     );
 }
 
-function StatementList({ formData, setFormData }: { formData: any, setFormData: (path: string, value: any) => void }) {
-    const [activeStatement, setActiveStatement] = useState<any>(null);
+function StatementList({ formData, setFormData }: { formData: FormData, setFormData: (path: string, value: any) => void }) {
+    const [activeStatement, setActiveStatement] = useState<Statement | null>(null);
     const [isRecording, setIsRecording] = useState(false);
     const [isTranscribing, setIsTranscribing] = useState(false);
     const mediaRecorder = useRef<MediaRecorder | null>(null);
@@ -265,10 +323,10 @@ function StatementList({ formData, setFormData }: { formData: any, setFormData: 
                     transcript += event.results[i][0].transcript;
                 }
                 if (activeStatement) {
-                    setActiveStatement((prev: any) => ({
+                    setActiveStatement((prev) => prev ? ({
                         ...prev,
                         content: (prev.content + ' ' + transcript).trim()
-                    }));
+                    }) : null);
                 }
             };
 
@@ -285,7 +343,7 @@ function StatementList({ formData, setFormData }: { formData: any, setFormData: 
             mediaRecorder.current = new MediaRecorder(stream);
             chunks.current = [];
 
-            mediaRecorder.current.ondataavailable = (e) => {
+            mediaRecorder.current.ondataavailable = (e: any) => {
                 if (e.data.size > 0) chunks.current.push(e.data);
             };
 
@@ -334,7 +392,7 @@ function StatementList({ formData, setFormData }: { formData: any, setFormData: 
             });
             if (res.ok) {
                 const data = await res.json();
-                setActiveStatement((prev: any) => ({ ...prev, audioUrl: data.filename }));
+                setActiveStatement((prev) => prev ? ({ ...prev, audioUrl: data.filename }) : null);
             }
         } catch (err) {
             console.error('Audio upload failed:', err);
@@ -364,7 +422,7 @@ function StatementList({ formData, setFormData }: { formData: any, setFormData: 
             </div>
 
             <div className="grid grid-cols-1 gap-4">
-                {formData.dossier.statements.map((s: any, i: number) => (
+                {formData.dossier.statements.map((s: Statement, i: number) => (
                     <div key={i} className="p-4 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800/40 relative group">
                         <div className="flex justify-between font-bold text-sm">
                             <span>{s.fullName}</span>
@@ -405,10 +463,10 @@ function StatementList({ formData, setFormData }: { formData: any, setFormData: 
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                            <Field label="Full Name" value={activeStatement.fullName} onChange={(v: any) => setActiveStatement({ ...activeStatement, fullName: v })} />
-                            <Field label="Date" type="date" value={activeStatement.takenAt} onChange={(v: any) => setActiveStatement({ ...activeStatement, takenAt: v })} />
-                            <Field label="Phone" value={activeStatement.phone} onChange={(v: any) => setActiveStatement({ ...activeStatement, phone: v })} />
-                            <Field label="Residential Address" value={activeStatement.residentialAddress} onChange={(v: any) => setActiveStatement({ ...activeStatement, residentialAddress: v })} />
+                            <Field label="Full Name" value={activeStatement.fullName} onChange={(v: string) => setActiveStatement({ ...activeStatement, fullName: v })} />
+                            <Field label="Date" type="date" value={activeStatement.takenAt} onChange={(v: string) => setActiveStatement({ ...activeStatement, takenAt: v })} />
+                            <Field label="Phone" value={activeStatement.phone} onChange={(v: string) => setActiveStatement({ ...activeStatement, phone: v })} />
+                            <Field label="Residential Address" value={activeStatement.residentialAddress} onChange={(v: string) => setActiveStatement({ ...activeStatement, residentialAddress: v })} />
                         </div>
 
                         <div className="relative">
@@ -426,7 +484,7 @@ function StatementList({ formData, setFormData }: { formData: any, setFormData: 
                                 rows={10}
                                 className={`w-full bg-gray-50 dark:bg-gray-800 border-2 rounded-xl px-4 py-3 text-sm mb-6 transition-all ${isTranscribing ? 'border-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.1)]' : 'border-gray-100 dark:border-gray-800'}`}
                                 value={activeStatement.content}
-                                onChange={(e) => setActiveStatement({ ...activeStatement, content: e.target.value })}
+                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setActiveStatement({ ...activeStatement, content: e.target.value })}
                             />
                         </div>
 
@@ -441,7 +499,7 @@ function StatementList({ formData, setFormData }: { formData: any, setFormData: 
     );
 }
 
-function WarnAndCaution({ formData, updateNested }: any) {
+function WarnAndCaution({ formData, updateNested }: { formData: FormData, updateNested: (path: string, value: any) => void }) {
     const wc = formData.dossier.warnAndCaution;
     return (
         <div className="space-y-6">
@@ -450,18 +508,18 @@ function WarnAndCaution({ formData, updateNested }: any) {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Field label="Statement Place" value={wc.place} onChange={(v: any) => updateNested('dossier.warnAndCaution.place', v)} placeholder="e.g. Kapasa Makasa University" />
-                <Field label="Village" value={wc.village} onChange={(v: any) => updateNested('dossier.warnAndCaution.village', v)} />
-                <Field label="Chief" value={wc.chief} onChange={(v: any) => updateNested('dossier.warnAndCaution.chief', v)} />
-                <Field label="District" value={wc.district} onChange={(v: any) => updateNested('dossier.warnAndCaution.district', v)} />
-                <Field label="Tribe" value={wc.tribe} onChange={(v: any) => updateNested('dossier.warnAndCaution.tribe', v)} />
-                <Field label="Age" value={wc.age} onChange={(v: any) => updateNested('dossier.warnAndCaution.age', v)} />
+                <Field label="Statement Place" value={wc.place} onChange={(v: string) => updateNested('dossier.warnAndCaution.place', v)} placeholder="e.g. Kapasa Makasa University" />
+                <Field label="Village" value={wc.village} onChange={(v: string) => updateNested('dossier.warnAndCaution.village', v)} />
+                <Field label="Chief" value={wc.chief} onChange={(v: string) => updateNested('dossier.warnAndCaution.chief', v)} />
+                <Field label="District" value={wc.district} onChange={(v: string) => updateNested('dossier.warnAndCaution.district', v)} />
+                <Field label="Tribe" value={wc.tribe} onChange={(v: string) => updateNested('dossier.warnAndCaution.tribe', v)} />
+                <Field label="Age" value={wc.age} onChange={(v: string) => updateNested('dossier.warnAndCaution.age', v)} />
             </div>
         </div>
     );
 }
 
-function SignatureField({ label, onEnd }: any) {
+function SignatureField({ label, onEnd }: { label: string, onEnd: (data: string | null) => void }) {
     const sigCanvas = useRef<any>(null);
 
     const handleClear = () => {
