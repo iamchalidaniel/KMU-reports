@@ -222,9 +222,9 @@ export default function StudentDashboardPage() {
               </div>
 
               {/* Personal Information Ledger */}
-              <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
-                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-8 font-bold">Official Student Registry Record</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-sans">
+              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Official Registry Record</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   <InfoField label="Academic Program" value={studentData.program} />
                   <InfoField label="Year of Study" value={studentData.yearOfStudy} />
                   <InfoField label="Delivery Mode" value={studentData.deliveryMode} />
@@ -240,26 +240,26 @@ export default function StudentDashboardPage() {
           )}
 
           {activeTab === 'reports' && (
-            <div className="animate-in slide-in-from-bottom-4 duration-500 bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
-              <div className="p-8 border-b border-gray-100 dark:border-gray-800">
-                <h2 className="text-lg font-black uppercase tracking-tighter italic text-indigo-600">Statement History Ledger</h2>
+            <div className="animate-in slide-in-from-bottom-4 duration-500 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+              <div className="p-6 border-b border-gray-100 dark:border-gray-800">
+                <h2 className="text-lg font-bold text-indigo-600 uppercase tracking-tight">Statement History Ledger</h2>
               </div>
-              <div className="overflow-x-auto font-sans">
-                <table className="w-full text-xs">
-                  <thead className="bg-gray-50/50 dark:bg-gray-800/50 text-[10px] font-black uppercase text-gray-400 tracking-widest">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-xs font-bold uppercase tracking-wider">
                     <tr>
-                      <th className="px-8 py-5 text-left">Incident Date</th>
-                      <th className="px-8 py-5 text-left">Classification</th>
-                      <th className="px-8 py-5 text-center">Status</th>
+                      <th className="px-6 py-4 text-left">Incident Date</th>
+                      <th className="px-6 py-4 text-left">Classification</th>
+                      <th className="px-6 py-4 text-center">Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                     {reports.map((r) => (
                       <tr key={r._id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                        <td className="px-8 py-5 font-mono text-gray-500">{formatDate(r.incidentDate)}</td>
-                        <td className="px-8 py-5 font-bold uppercase text-gray-900 dark:text-gray-100">{r.offenseType}</td>
-                        <td className="px-8 py-5 text-center">
-                          <span className={`px-3 py-1 rounded-lg font-black text-[9px] uppercase tracking-tighter border ${r.status === 'Resolved' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-blue-100 text-blue-700 border-blue-200'}`}>
+                        <td className="px-6 py-4 font-mono text-gray-500 text-xs">{formatDate(r.incidentDate)}</td>
+                        <td className="px-6 py-4 font-bold uppercase text-gray-900 dark:text-gray-100">{r.offenseType}</td>
+                        <td className="px-6 py-4 text-center">
+                          <span className={`px-2.5 py-1 rounded-full font-bold text-[10px] uppercase border ${r.status === 'Resolved' ? 'bg-green-100 text-green-700 border-green-200' : 'bg-blue-100 text-blue-700 border-blue-200'}`}>
                             {r.status}
                           </span>
                         </td>
@@ -267,7 +267,7 @@ export default function StudentDashboardPage() {
                     ))}
                     {reports.length === 0 && (
                       <tr>
-                        <td colSpan={3} className="px-8 py-10 text-center text-gray-400 italic font-serif">Empty statement registry.</td>
+                        <td colSpan={3} className="px-6 py-10 text-center text-gray-400 italic">Empty statement registry.</td>
                       </tr>
                     )}
                   </tbody>
@@ -277,41 +277,41 @@ export default function StudentDashboardPage() {
           )}
 
           {activeTab === 'cases' && (
-            <div className="animate-in slide-in-from-bottom-4 duration-500 bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
-              <div className="p-8 border-b border-gray-100 dark:border-gray-800">
-                <h2 className="text-lg font-black uppercase tracking-tighter italic text-red-600">Official Disciplinary Ledger</h2>
+            <div className="animate-in slide-in-from-bottom-4 duration-500 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+              <div className="p-6 border-b border-gray-100 dark:border-gray-800">
+                <h2 className="text-lg font-bold text-red-600 uppercase tracking-tight">Official Disciplinary Ledger</h2>
               </div>
-              <div className="overflow-x-auto font-sans">
-                <table className="w-full text-xs">
-                  <thead className="bg-gray-50/50 dark:bg-gray-800/50 text-[10px] font-black uppercase text-gray-400 tracking-widest">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-xs font-bold uppercase tracking-wider">
                     <tr>
-                      <th className="px-8 py-5 text-left">Indictment Date</th>
-                      <th className="px-8 py-5 text-left">Offense Index</th>
-                      <th className="px-8 py-5 text-center">Protocol Status</th>
-                      <th className="px-8 py-5 text-center">Actions</th>
+                      <th className="px-6 py-4 text-left">Indictment Date</th>
+                      <th className="px-6 py-4 text-left">Offense Index</th>
+                      <th className="px-6 py-4 text-center">Protocol Status</th>
+                      <th className="px-6 py-4 text-center">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                     {cases.map((c) => (
                       <tr key={c._id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                        <td className="px-8 py-5 font-mono text-gray-500">{formatDate(c.incidentDate)}</td>
-                        <td className="px-8 py-5">
+                        <td className="px-6 py-4 font-mono text-gray-500 text-xs">{formatDate(c.incidentDate)}</td>
+                        <td className="px-6 py-4">
                           <div className="font-bold uppercase text-gray-900 dark:text-gray-100">{c.offenseType}</div>
-                          <div className="text-[10px] text-gray-400 mt-0.5 line-clamp-1 italic">{c.description}</div>
+                          <div className="text-xs text-gray-500 mt-0.5 line-clamp-1 italic">{c.description}</div>
                         </td>
-                        <td className="px-8 py-5 text-center">
-                          <span className="px-3 py-1 rounded-lg bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400 font-black text-[9px] uppercase tracking-tighter border border-red-200">
+                        <td className="px-6 py-4 text-center">
+                          <span className="px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400 font-bold text-[10px] uppercase border border-red-200">
                             {c.status}
                           </span>
                         </td>
-                        <td className="px-8 py-5 text-center">
-                          <button className="text-[10px] font-black text-indigo-600 hover:text-indigo-800 uppercase tracking-widest transition-all">Command View →</button>
+                        <td className="px-6 py-4 text-center">
+                          <button className="text-xs font-bold text-indigo-600 hover:text-indigo-800 uppercase tracking-wider transition-all">View Details →</button>
                         </td>
                       </tr>
                     ))}
                     {cases.length === 0 && (
                       <tr>
-                        <td colSpan={4} className="px-8 py-10 text-center text-gray-400 italic font-serif">No disciplinary indictments found in registry.</td>
+                        <td colSpan={4} className="px-6 py-10 text-center text-gray-400 italic">No disciplinary indictments found in registry.</td>
                       </tr>
                     )}
                   </tbody>
@@ -322,31 +322,31 @@ export default function StudentDashboardPage() {
 
           {activeTab === 'appeals' && (
             <div className="animate-in slide-in-from-bottom-4 duration-500 space-y-6">
-              <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
-                <h2 className="text-lg font-black uppercase tracking-tighter italic text-orange-600 mb-8">Petition for Appeal Registry</h2>
-                <div className="space-y-4 font-sans">
+              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+                <h2 className="text-lg font-bold text-orange-600 uppercase tracking-tight mb-6">Petition for Appeal Registry</h2>
+                <div className="space-y-4">
                   {appeals.map((appeal) => (
-                    <div key={appeal._id} className="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-2xl border border-transparent hover:border-orange-500/30 transition-all">
-                      <div className="flex justify-between items-start mb-4">
+                    <div key={appeal._id} className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border border-gray-100 dark:border-gray-700 hover:border-orange-500/30 transition-all">
+                      <div className="flex justify-between items-start mb-3">
                         <div>
-                          <h3 className="text-xs font-black uppercase tracking-tighter text-gray-900 dark:text-white">Appeal Ref: {appeal._id.substring(0, 8).toUpperCase()}</h3>
+                          <h3 className="text-xs font-bold uppercase tracking-tight text-gray-900 dark:text-white">Appeal Ref: {appeal._id.substring(0, 8).toUpperCase()}</h3>
                           <p className="text-[10px] text-gray-500 font-bold uppercase mt-1">Submitted: {formatDate(appeal.createdAt)}</p>
                         </div>
-                        <span className="px-3 py-1 rounded-lg bg-orange-100 text-orange-700 font-black text-[9px] uppercase tracking-tighter">
+                        <span className="px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 font-bold text-[10px] uppercase border border-orange-200">
                           {appeal.status}
                         </span>
                       </div>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 italic line-clamp-2 mb-4">"{appeal.reason}"</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 italic line-clamp-2 mb-3">"{appeal.reason}"</p>
                       {appeal.adminResponse && (
-                        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700/50">
-                          <p className="text-[9px] font-black text-emerald-600 uppercase mb-2">Registry Response:</p>
+                        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                          <p className="text-[10px] font-bold text-green-600 uppercase mb-1.5 tracking-wider">Dean Response:</p>
                           <p className="text-xs text-gray-800 dark:text-gray-200 font-medium">{appeal.adminResponse}</p>
                         </div>
                       )}
                     </div>
                   ))}
                   {appeals.length === 0 && (
-                    <div className="text-center py-24 text-gray-400 italic text-sm font-serif border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-3xl">No active petitions in the registry.</div>
+                    <div className="text-center py-16 text-gray-400 italic border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-xl">No active petitions in the registry.</div>
                   )}
                 </div>
               </div>
@@ -366,24 +366,24 @@ export default function StudentDashboardPage() {
 
 function StatCard({ title, value, color }: any) {
   const colors: any = {
-    indigo: 'text-indigo-700 bg-indigo-50/30 border-indigo-100 dark:bg-indigo-950/10 dark:border-indigo-900/50',
-    blue: 'text-blue-700 bg-blue-50/30 border-blue-100 dark:bg-blue-950/10 dark:border-blue-900/50',
-    orange: 'text-orange-700 bg-orange-50/30 border-orange-100 dark:bg-orange-950/10 dark:border-orange-900/50',
-    emerald: 'text-emerald-700 bg-emerald-50/30 border-emerald-100 dark:bg-emerald-950/10 dark:border-emerald-900/50'
+    indigo: 'border-indigo-500 dark:border-indigo-400',
+    blue: 'border-blue-500 dark:border-blue-400',
+    orange: 'border-orange-500 dark:border-orange-400',
+    emerald: 'border-emerald-500 dark:border-emerald-400'
   };
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-3xl shadow-sm border p-8 transition-all duration-300 ${colors[color]}`}>
-      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">{title}</div>
-      <div className="text-4xl font-black tracking-tight italic">{value}</div>
+    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-6 transition-all hover:shadow-md ${colors[color]}`}>
+      <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{title}</div>
+      <div className="text-3xl font-bold text-gray-900 dark:text-white">{value}</div>
     </div>
   );
 }
 
 function InfoField({ label, value }: any) {
   return (
-    <div className="flex flex-col gap-1.5 bg-gray-50/30 dark:bg-gray-800/30 p-4 rounded-2xl border border-transparent hover:border-indigo-500/10 transition-all">
-      <label className="text-[9px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-widest">{label}</label>
-      <div className="text-xs font-bold text-gray-800 dark:text-gray-200 uppercase tracking-tight">
+    <div className="flex flex-col gap-1 bg-gray-50/50 dark:bg-gray-800/50 p-3 rounded-lg border border-gray-100 dark:border-gray-700 hover:border-indigo-500/20 transition-all">
+      <label className="text-[10px] font-bold text-indigo-700 dark:text-indigo-400 uppercase tracking-wider">{label}</label>
+      <div className="text-sm font-bold text-gray-800 dark:text-gray-100 uppercase tracking-tight">
         {value || 'Not Registered'}
       </div>
     </div>

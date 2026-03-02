@@ -229,22 +229,22 @@ export default function ElectricianDashboard() {
   const halls = Array.from(new Set(reports.map(r => r.location.hall).filter(Boolean)));
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-serif">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="animate-in fade-in duration-300 space-y-6">
 
-          {/* Executive Command Bar */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-8 rounded-3xl border-t-4 border-blue-600 shadow-xl gap-4">
+          {/* Electrician Header */}
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <h1 className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white uppercase italic">Electrical Command</h1>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">Infrastructure Maintenance & Technical Operations</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Electrical Command</h1>
+              <p className="text-sm text-gray-500 font-semibold mt-1">Infrastructure Maintenance & Technical Operations</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/maintenance"
-                className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:shadow-lg hover:shadow-blue-500/20 transition flex items-center gap-2 group border-none"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition shadow-sm flex items-center gap-2"
               >
-                <span className="group-hover:animate-pulse">⚡</span> Infrastructure Ledger
+                ⚡ Infrastructure Ledger
               </Link>
             </div>
           </div>
@@ -259,11 +259,11 @@ export default function ElectricianDashboard() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Asset Distribution */}
-            <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
-              <div className="flex justify-between items-center mb-8">
-                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 font-bold">Asset Type Distribution</h3>
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Asset Distribution</h3>
                 <select
-                  className="bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-blue-500 transition-all font-sans"
+                  className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs font-bold uppercase outline-none focus:ring-2 focus:ring-blue-500 transition-all font-sans"
                   value={hallFilter}
                   onChange={(e) => setHallFilter(e.target.value)}
                 >
@@ -283,8 +283,8 @@ export default function ElectricianDashboard() {
             </div>
 
             {/* Operational Status */}
-            <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
-              <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-8 font-bold">Operational Status Index</h3>
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Operational Status</h3>
               <div className="h-64 flex items-center justify-center">
                 <Doughnut
                   data={statusChartData}
@@ -298,18 +298,18 @@ export default function ElectricianDashboard() {
           </div>
 
           {/* Maintenance Task Ledger */}
-          <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
-            <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <h2 className="text-lg font-black uppercase tracking-tighter italic">Technical Dispatch Ledger</h2>
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <h2 className="text-lg font-bold uppercase tracking-tight">Technical Dispatch Ledger</h2>
               <div className="flex gap-2 w-full md:w-auto font-sans">
                 <input
                   placeholder="Search assets..."
-                  className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-5 py-3 text-xs focus:ring-2 focus:ring-blue-500 transition-all shadow-inner w-full md:w-64"
+                  className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-2 text-xs focus:ring-2 focus:ring-blue-500 transition-all w-full md:w-64"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
                 <select
-                  className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-5 py-3 text-xs focus:ring-2 focus:ring-blue-500 transition-all shadow-inner"
+                  className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-2 text-xs focus:ring-2 focus:ring-blue-500 transition-all"
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                 >
@@ -322,38 +322,38 @@ export default function ElectricianDashboard() {
               {filteredReports.slice(0, 12).map(report => {
                 const reportId = report._id || report.id;
                 return (
-                  <div key={reportId} className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-6 border border-transparent hover:border-blue-500/30 transition-all group relative overflow-hidden">
+                  <div key={reportId} className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 border border-gray-100 dark:border-gray-700 hover:border-blue-500/30 transition-all group relative overflow-hidden shadow-sm">
                     <div className="absolute top-0 right-0 p-4">
                       <select
                         value={report.status}
                         onChange={(e) => updateStatus(reportId!, e.target.value)}
-                        className={`text-[9px] font-black uppercase tracking-widest border-none rounded-lg px-3 py-1.5 focus:ring-0 cursor-pointer ${report.status === 'Completed' ? 'bg-emerald-100 text-emerald-700' :
+                        className={`text-[10px] font-bold uppercase tracking-wider border-none rounded-full px-3 py-1 focus:ring-0 cursor-pointer ${report.status === 'Completed' ? 'bg-green-100 text-green-700' :
                           report.status === 'In Progress' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'
                           }`}
                       >
                         {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                       </select>
                     </div>
-                    <div className="mb-4">
-                      <span className="text-[9px] font-black tracking-[0.2em] text-blue-500 uppercase mb-2 block">
+                    <div className="mb-3">
+                      <span className="text-[10px] font-bold text-blue-600 uppercase mb-1.5 block tracking-wider">
                         {ELECTRICAL_CATEGORIES.find(c => c.value === report.category)?.label || report.category}
                       </span>
                       <h3 className="font-bold text-sm text-gray-900 dark:text-gray-100 uppercase group-hover:text-blue-600 transition-colors">
                         {report.location.hall} {report.location.room ? `• ${report.location.room}` : ''}
                       </h3>
                     </div>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs mb-6 line-clamp-3 leading-relaxed">
-                      {report.description}
+                    <p className="text-gray-500 dark:text-gray-400 text-xs mb-4 line-clamp-2 leading-relaxed italic">
+                      "{report.description}"
                     </p>
-                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100 dark:border-gray-700/50">
-                      <span className="text-[9px] text-gray-400 font-black uppercase tracking-tighter">REF: {reportId?.slice(-6).toUpperCase()}</span>
-                      <Link href={`/maintenance/${reportId}`} className="text-[9px] font-black text-blue-600 hover:text-blue-700 uppercase tracking-widest transition-all">Command View →</Link>
+                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100 dark:border-gray-700">
+                      <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">REF: {reportId?.slice(-6).toUpperCase()}</span>
+                      <Link href={`/maintenance/${reportId}`} className="text-xs font-bold text-blue-600 hover:underline uppercase tracking-tight transition-all">Command View →</Link>
                     </div>
                   </div>
                 );
               })}
               {filteredReports.length === 0 && (
-                <div className="col-span-full text-center py-24 text-gray-400 italic text-sm font-serif">No technical dispatches found in registry.</div>
+                <div className="col-span-full text-center py-20 text-gray-400 italic text-sm">No technical dispatches found in registry.</div>
               )}
             </div>
           </div>
@@ -370,15 +370,15 @@ export default function ElectricianDashboard() {
 
 function StatCard({ title, value, color }: any) {
   const colors: any = {
-    blue: 'text-blue-700 bg-blue-50/30 border-blue-100 dark:bg-blue-950/10 dark:border-blue-900/50',
-    indigo: 'text-indigo-700 bg-indigo-50/30 border-indigo-100 dark:bg-indigo-950/10 dark:border-indigo-900/50',
-    orange: 'text-orange-700 bg-orange-50/30 border-orange-100 dark:bg-orange-950/10 dark:border-orange-900/50',
-    emerald: 'text-emerald-700 bg-emerald-50/30 border-emerald-100 dark:bg-emerald-950/10 dark:border-emerald-900/50'
+    blue: 'border-blue-500 dark:border-blue-400',
+    indigo: 'border-indigo-500 dark:border-indigo-400',
+    orange: 'border-orange-500 dark:border-orange-400',
+    emerald: 'border-emerald-500 dark:border-emerald-400'
   };
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-3xl shadow-sm border p-8 transition-all duration-300 ${colors[color]}`}>
-      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">{title}</div>
-      <div className="text-4xl font-black tracking-tight">{value}</div>
+    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-6 transition-all hover:shadow-md ${colors[color]}`}>
+      <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{title}</div>
+      <div className="text-3xl font-bold text-gray-900 dark:text-white">{value}</div>
     </div>
   );
 }

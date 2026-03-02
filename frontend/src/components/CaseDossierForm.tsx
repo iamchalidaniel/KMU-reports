@@ -199,23 +199,23 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
     };
 
     return (
-        <div className="bg-white dark:bg-gray-900 rounded-[3rem] shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden max-w-5xl mx-auto font-serif">
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden max-w-5xl mx-auto">
             {/* Header & Progress */}
-            <div className="bg-gray-50 dark:bg-gray-800/50 p-10 border-b border-gray-100 dark:border-gray-800">
-                <div className="flex justify-between items-center mb-8">
+            <div className="bg-gray-50 dark:bg-gray-800/50 p-6 border-b border-gray-100 dark:border-gray-800">
+                <div className="flex justify-between items-center mb-6">
                     <div>
-                        <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase italic tracking-tighter">Forensic Dossier Initialization</h2>
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Forensic Dossier Initialization</h2>
                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Operational Protocol v3.0 • Status: Securing Metadata</p>
                     </div>
-                    <button onClick={clearDraft} className="text-[10px] bg-red-50 dark:bg-red-900/10 text-red-600 px-4 py-2 rounded-xl font-black hover:bg-red-100 transition uppercase tracking-widest">Discard Metadata</button>
+                    <button onClick={clearDraft} className="text-[10px] bg-red-50 dark:bg-red-900/10 text-red-600 px-3 py-1.5 rounded-lg font-bold border border-red-100 dark:border-red-900/30 hover:bg-red-100 transition uppercase tracking-widest">Discard Metadata</button>
                 </div>
 
-                <div className="flex gap-3 h-2 w-full mb-4">
+                <div className="flex gap-2 h-1.5 w-full mb-3">
                     {[1, 2, 3, 4].map(s => (
-                        <div key={s} className={`flex-1 rounded-full transition-all duration-700 ${step >= s ? 'bg-red-600 shadow-sm shadow-red-500/20' : 'bg-gray-200 dark:bg-gray-700'}`} />
+                        <div key={s} className={`flex-1 rounded-full transition-all duration-500 ${step >= s ? 'bg-red-600' : 'bg-gray-200 dark:bg-gray-700'}`} />
                     ))}
                 </div>
-                <div className="flex justify-between text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] italic">
+                <div className="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                     <span className={step === 1 ? 'text-red-600' : ''}>I. Occurrence Docket</span>
                     <span className={step === 2 ? 'text-red-600' : ''}>II. Testimony Registry</span>
                     <span className={step === 3 ? 'text-red-600' : ''}>III. Cautionary Phase</span>
@@ -225,18 +225,18 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
 
             <div className="p-12 max-h-[65vh] overflow-y-auto custom-scrollbar">
                 {step === 1 && (
-                    <div className="space-y-12 animate-in fade-in slide-in-from-right-8 duration-500">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="space-y-8 animate-in fade-in slide-in-from-right-8 duration-500">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <Field label="Investigating Officer" value={formData.dossier.occurrenceDocket.investigatingOfficer} onChange={(v: string) => updateNested('dossier.occurrenceDocket.investigatingOfficer', v)} />
                             <Field label="Case Number (Automatic)" value={formData.case_number} onChange={(v: string) => { setFormData({ ...formData, case_number: v }); updateNested('dossier.occurrenceDocket.occurrenceBookNumber', v); }} />
                             <Field label="Protocol Datetime" type="datetime-local" value={formData.dossier.occurrenceDocket.dateTimeReported} onChange={(v: string) => updateNested('dossier.occurrenceDocket.dateTimeReported', v)} />
                         </div>
 
-                        <section className="space-y-6">
-                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-gray-50 dark:bg-gray-800/50 p-6 rounded-3xl border border-gray-100 dark:border-gray-800 gap-4">
+                        <section className="space-y-4">
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl border border-gray-100 dark:border-gray-800 gap-4">
                                 <div>
-                                    <h3 className="font-black text-[11px] uppercase tracking-[0.2em] text-gray-400">Complainant Designation</h3>
-                                    <p className="text-[10px] text-gray-500 font-bold mt-0.5">Identify or manually input particulars</p>
+                                    <h3 className="font-bold text-[10px] uppercase tracking-widest text-gray-400">Complainant Designation</h3>
+                                    <p className="text-[10px] text-gray-500 font-semibold mt-0.5">Identify or manually input particulars</p>
                                 </div>
                                 <div className="w-full md:w-64">
                                     <SmartStudentSearch
@@ -257,25 +257,25 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
                                     />
                                 </div>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <Field label="Legal Full Name" value={formData.dossier.occurrenceDocket.complainant.name} onChange={(v: string) => updateNested('dossier.occurrenceDocket.complainant.name', v)} />
                                 <Field label="Residential Matrix" value={formData.dossier.occurrenceDocket.complainant.address} onChange={(v: string) => updateNested('dossier.occurrenceDocket.complainant.address', v)} />
-                                <div className="grid grid-cols-2 gap-6">
+                                <div className="grid grid-cols-2 gap-4">
                                     <Field label="SIN (Student ID)" value={formData.dossier.occurrenceDocket.complainant.sin} onChange={(v: string) => updateNested('dossier.occurrenceDocket.complainant.sin', v)} />
                                     <Field label="Contact Phone" value={formData.dossier.occurrenceDocket.complainant.phone} onChange={(v: string) => updateNested('dossier.occurrenceDocket.complainant.phone', v)} />
                                 </div>
-                                <div className="grid grid-cols-2 gap-6">
-                                    <Field label="Program of Study" value={formData.dossier.occurrenceDocket.complainant.programOfStudy} onChange={(v: string) => updateNested('dossier.occurrenceDocket.complainant.programOfStudy', v)} />
-                                    <Field label="Year of Study" value={formData.dossier.occurrenceDocket.complainant.yearOfStudy} onChange={(v: string) => updateNested('dossier.occurrenceDocket.complainant.yearOfStudy', v)} />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Field label="Program" value={formData.dossier.occurrenceDocket.complainant.programOfStudy} onChange={(v: string) => updateNested('dossier.occurrenceDocket.complainant.programOfStudy', v)} />
+                                    <Field label="Year" value={formData.dossier.occurrenceDocket.complainant.yearOfStudy} onChange={(v: string) => updateNested('dossier.occurrenceDocket.complainant.yearOfStudy', v)} />
                                 </div>
                             </div>
                         </section>
 
-                        <section className="space-y-6">
-                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-red-50/50 dark:bg-red-950/10 p-6 rounded-3xl border border-red-100 dark:border-red-900/30 gap-4">
+                        <section className="space-y-4">
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-red-50/50 dark:bg-red-950/10 p-4 rounded-xl border border-red-100 dark:border-red-900/30 gap-4">
                                 <div>
-                                    <h3 className="font-black text-[11px] uppercase tracking-[0.2em] text-red-600">Accused Designation</h3>
-                                    <p className="text-[10px] text-red-400 font-bold mt-0.5 whitespace-nowrap">Target core compliance subject</p>
+                                    <h3 className="font-bold text-[10px] uppercase tracking-widest text-red-600">Accused Designation</h3>
+                                    <p className="text-[10px] text-red-400 font-semibold mt-0.5">Target core compliance subject</p>
                                 </div>
                                 <div className="w-full md:w-64">
                                     <SmartStudentSearch
@@ -308,25 +308,25 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
                                     />
                                 </div>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <Field label="Legal Full Name" value={formData.dossier.occurrenceDocket.accused.name} onChange={(v: string) => updateNested('dossier.occurrenceDocket.accused.name', v)} />
                                 <Field label="Residential Matrix" value={formData.dossier.occurrenceDocket.accused.address} onChange={(v: string) => updateNested('dossier.occurrenceDocket.accused.address', v)} />
-                                <div className="grid grid-cols-2 gap-6">
+                                <div className="grid grid-cols-2 gap-4">
                                     <Field label="SIN (Student ID)" value={formData.dossier.occurrenceDocket.accused.sin} onChange={(v: string) => updateNested('dossier.occurrenceDocket.accused.sin', v)} />
                                     <Field label="Contact Phone" value={formData.dossier.occurrenceDocket.accused.phone} onChange={(v: string) => updateNested('dossier.occurrenceDocket.accused.phone', v)} />
                                 </div>
-                                <div className="grid grid-cols-2 gap-6">
-                                    <Field label="Program of Study" value={formData.dossier.occurrenceDocket.accused.programOfStudy} onChange={(v: string) => updateNested('dossier.occurrenceDocket.accused.programOfStudy', v)} />
-                                    <Field label="Year of Study" value={formData.dossier.occurrenceDocket.accused.yearOfStudy} onChange={(v: string) => updateNested('dossier.occurrenceDocket.accused.yearOfStudy', v)} />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Field label="Program" value={formData.dossier.occurrenceDocket.accused.programOfStudy} onChange={(v: string) => updateNested('dossier.occurrenceDocket.accused.programOfStudy', v)} />
+                                    <Field label="Year" value={formData.dossier.occurrenceDocket.accused.yearOfStudy} onChange={(v: string) => updateNested('dossier.occurrenceDocket.accused.yearOfStudy', v)} />
                                 </div>
                             </div>
                         </section>
 
-                        <section className="space-y-6">
+                        <section className="space-y-4">
                             <Field label="Offence Classification" value={formData.dossier.occurrenceDocket.offence} onChange={(v: string) => updateNested('dossier.occurrenceDocket.offence', v)} placeholder="e.g. Strategic Theft / Policy Violation" />
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-2">Occurrence Meta-Details</label>
-                                <textarea rows={6} className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-[2rem] px-8 py-6 text-sm focus:ring-2 focus:ring-red-500 shadow-inner font-sans outline-none" value={formData.dossier.occurrenceDocket.occurrenceDetails} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => updateNested('dossier.occurrenceDocket.occurrenceDetails', e.target.value)} placeholder="Describe the operational incident in full chronological detail..." />
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold uppercase text-gray-400 tracking-widest ml-1">Occurrence Meta-Details</label>
+                                <textarea rows={4} className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-red-500 shadow-sm font-sans outline-none transition" value={formData.dossier.occurrenceDocket.occurrenceDetails} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => updateNested('dossier.occurrenceDocket.occurrenceDetails', e.target.value)} placeholder="Describe the operational incident in full chronological detail..." />
                             </div>
                         </section>
                     </div>
@@ -339,20 +339,20 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
                 )}
 
                 {step === 3 && (
-                    <div className="animate-in fade-in slide-in-from-right-8 duration-500 space-y-10">
+                    <div className="animate-in fade-in slide-in-from-right-8 duration-500 space-y-8">
                         <WarnAndCautionComponent formData={formData} updateNested={updateNested} />
                     </div>
                 )}
 
                 {step === 4 && (
-                    <div className="animate-in fade-in slide-in-from-right-8 duration-500 space-y-12">
-                        <div className="bg-emerald-50 dark:bg-emerald-950/20 p-10 rounded-[3rem] border border-emerald-100 dark:border-emerald-900/30 text-center">
-                            <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl">✅</div>
-                            <h3 className="text-2xl font-black text-emerald-800 dark:text-emerald-400 uppercase italic tracking-tighter">Protocol Finalization</h3>
-                            <p className="text-sm text-emerald-600/80 dark:text-emerald-500/80 mt-2 max-w-lg mx-auto font-sans font-medium">Authentication required. By sealing this dossier, you commit all metadata to the formal KMU Disciplinary Registry. This action generates a permanent operational record.</p>
+                    <div className="animate-in fade-in slide-in-from-right-8 duration-500 space-y-10">
+                        <div className="bg-emerald-50 dark:bg-emerald-950/20 p-8 rounded-xl border border-emerald-100 dark:border-emerald-900/30 text-center">
+                            <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center mx-auto mb-4 text-xl">✅</div>
+                            <h3 className="text-xl font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-tight">Protocol Finalization</h3>
+                            <p className="text-xs text-emerald-600/80 dark:text-emerald-500/80 mt-2 max-w-lg mx-auto font-sans font-medium">Authentication required. By sealing this dossier, you commit all metadata to the formal KMU Disciplinary Registry. This action generates a permanent operational record.</p>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <SignatureField label="Investigating Authority Seal" onEnd={(data: string | null) => updateNested('dossier.signatures.investigatingOfficer', data)} />
                             <SignatureField label="Complainant Affirmation Seal" onEnd={(data: string | null) => updateNested('dossier.signatures.complainant', data)} />
                         </div>
@@ -360,11 +360,11 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
                 )}
             </div>
 
-            {/* Premium Navigation */}
-            <div className="p-10 bg-gray-50 dark:bg-gray-800/80 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center">
+            {/* Navigation */}
+            <div className="p-6 bg-gray-50 dark:bg-gray-800/80 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center">
                 <button
                     onClick={() => step > 1 ? setStep(step - 1) : onCancel()}
-                    className="px-8 py-4 font-black text-[10px] text-gray-400 hover:text-red-600 transition uppercase tracking-[0.3em]"
+                    className="px-6 py-2.5 font-bold text-[10px] text-gray-500 hover:text-red-600 transition uppercase tracking-widest border border-gray-200 dark:border-gray-700 rounded-lg"
                 >
                     {step === 1 ? 'Abort' : 'Previous Phase'}
                 </button>
@@ -372,7 +372,7 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
                 {step < 4 ? (
                     <button
                         onClick={() => setStep(step + 1)}
-                        className="px-12 py-5 bg-red-600 text-white font-black rounded-2xl shadow-xl shadow-red-500/30 hover:shadow-red-500/40 hover:-translate-y-1 active:translate-y-0 transition-all text-[10px] uppercase tracking-[0.2em] transform"
+                        className="px-8 py-3 bg-red-600 text-white font-bold rounded-lg shadow-sm hover:bg-red-700 transition-all text-[10px] uppercase tracking-widest"
                     >
                         Advance Protocol: {['Intelligence Ingress', 'Testimony Archive', 'Cautionary Seal'][step - 1]} →
                     </button>
@@ -380,7 +380,7 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
                     <button
                         onClick={handleFinalSubmit}
                         disabled={loading}
-                        className="px-12 py-5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-black rounded-2xl shadow-xl hover:shadow-indigo-500/20 hover:-translate-y-1 transition-all text-[10px] uppercase tracking-[0.2em] disabled:opacity-50"
+                        className="px-8 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold rounded-lg shadow-sm hover:opacity-90 transition-all text-[10px] uppercase tracking-widest disabled:opacity-50"
                     >
                         {loading ? 'Committing Metadata...' : '🔒 Seal Forensic Dossier'}
                     </button>
@@ -392,14 +392,14 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
 
 function Field({ label, value, onChange, type = "text", placeholder = "" }: { label: string, value: string, onChange: (v: string) => void, type?: string, placeholder?: string }) {
     return (
-        <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-2">{label}</label>
+        <div className="space-y-1.5">
+            <label className="text-[10px] font-bold uppercase text-gray-500 tracking-widest ml-1">{label}</label>
             <input
                 type={type}
                 value={value}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
                 placeholder={placeholder}
-                className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-6 py-4 text-xs font-bold focus:ring-2 focus:ring-red-500 shadow-inner outline-none transition font-sans"
+                className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-2 text-xs font-semibold focus:ring-2 focus:ring-red-500 outline-none transition font-sans shadow-sm"
             />
         </div>
     );
@@ -490,69 +490,69 @@ function StatementList({ formData, setFormData }: { formData: FormData, setFormD
     };
 
     return (
-        <div className="space-y-8">
-            <div className="flex justify-between items-center bg-gray-50 dark:bg-gray-800/50 p-8 rounded-[2rem] border border-gray-100 dark:border-gray-800">
+        <div className="space-y-6">
+            <div className="flex justify-between items-center bg-gray-50 dark:bg-gray-800/50 p-6 rounded-xl border border-gray-100 dark:border-gray-800">
                 <div>
-                    <h3 className="font-black text-[11px] uppercase tracking-[0.2em] text-gray-400">Recorded Testimonies</h3>
-                    <p className="text-[10px] text-gray-500 font-bold mt-0.5">{formData.dossier.statements.length} identities processed</p>
+                    <h3 className="font-bold text-[10px] uppercase tracking-widest text-gray-400">Recorded Testimonies</h3>
+                    <p className="text-[10px] text-gray-500 font-semibold mt-0.5">{formData.dossier.statements.length} identities processed</p>
                 </div>
-                <button onClick={() => setActiveStatement({ id: Date.now(), fullName: '', content: '', takenAt: new Date().toISOString().slice(0, 10), phone: '', residentialAddress: '', tribe: '', village: '', active: true, audioUrl: '' })} className="px-6 py-3 bg-red-600 text-white font-black text-[10px] rounded-xl hover:shadow-lg hover:shadow-red-500/20 transition-all uppercase tracking-widest">+ Ingress Testimony</button>
+                <button onClick={() => setActiveStatement({ id: Date.now(), fullName: '', content: '', takenAt: new Date().toISOString().slice(0, 10), phone: '', residentialAddress: '', tribe: '', village: '', active: true, audioUrl: '' })} className="px-4 py-2 bg-red-600 text-white font-bold text-[10px] rounded-lg hover:bg-red-700 transition-all uppercase tracking-widest shadow-sm">+ Ingress Testimony</button>
             </div>
 
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-3">
                 {formData.dossier.statements.map((s: Statement, i: number) => (
-                    <div key={i} className="p-8 border border-gray-100 dark:border-gray-800 rounded-[2rem] bg-white dark:bg-gray-800/20 hover:border-red-200 transition-all group relative overflow-hidden">
+                    <div key={i} className="p-6 border border-gray-100 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-800/20 hover:border-red-200 transition-all group relative">
                         <div className="flex justify-between items-start">
                             <div>
-                                <h4 className="font-black text-sm text-gray-900 dark:text-white uppercase tracking-tighter italic">{s.fullName || 'Unidentified Subject'}</h4>
-                                <div className="flex items-center gap-3 mt-1.5">
-                                    <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">{s.takenAt}</span>
+                                <h4 className="font-bold text-sm text-gray-900 dark:text-white uppercase tracking-tight">{s.fullName || 'Unidentified Subject'}</h4>
+                                <div className="flex items-center gap-3 mt-1">
+                                    <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">{s.takenAt}</span>
                                     {s.audioUrl && <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></span>}
-                                    {s.signature && <span className="text-[8px] font-black text-emerald-600 uppercase tracking-widest">Seal Affixed</span>}
+                                    {s.signature && <span className="text-[8px] font-bold text-emerald-600 uppercase tracking-widest">Seal Affixed</span>}
                                 </div>
                             </div>
                             <button onClick={() => setActiveStatement(s)} className="opacity-0 group-hover:opacity-100 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-400 hover:text-red-600 transition-all">⚙️</button>
                         </div>
-                        <p className="text-[11px] text-gray-500 mt-4 leading-relaxed line-clamp-2 font-sans">{s.content}</p>
+                        <p className="text-[11px] text-gray-500 mt-3 leading-relaxed line-clamp-2 font-sans">{s.content}</p>
                     </div>
                 ))}
             </div>
 
             {activeStatement && (
                 <div className="fixed inset-0 z-[1001] flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-gray-950/80 backdrop-blur-md" onClick={() => { setActiveStatement(null); stopRecording(); }} />
-                    <div className="relative bg-white dark:bg-gray-900 w-full max-w-3xl rounded-[3rem] shadow-2xl border-t-8 border-red-600 p-12 overflow-y-auto max-h-[90vh]">
-                        <div className="flex justify-between items-center mb-10">
+                    <div className="absolute inset-0 bg-gray-950/80 backdrop-blur-sm" onClick={() => { setActiveStatement(null); stopRecording(); }} />
+                    <div className="relative bg-white dark:bg-gray-900 w-full max-w-2xl rounded-xl shadow-2xl border-t-4 border-red-600 p-8 overflow-y-auto max-h-[90vh]">
+                        <div className="flex justify-between items-center mb-8">
                             <div>
-                                <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase italic tracking-tighter">Testimony Submission</h2>
+                                <h2 className="text-xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Testimony Submission</h2>
                                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Ingress Authorization Required</p>
                             </div>
                             <div className="flex gap-2">
                                 {!isRecording ? (
-                                    <button onClick={startRecording} className="bg-red-50 text-red-600 px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-red-100 hover:bg-red-100 transition flex items-center gap-2"><span className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></span> Begin Feed</button>
+                                    <button onClick={startRecording} className="bg-red-50 text-red-600 px-4 py-2 rounded-lg font-bold text-[10px] uppercase tracking-widest border border-red-100 hover:bg-red-100 transition flex items-center gap-2"><span className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></span> Begin Feed</button>
                                 ) : (
-                                    <button onClick={stopRecording} className="bg-gray-900 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2"><span className="w-2 h-2 bg-white rounded-full"></span> Terminate Feed</button>
+                                    <button onClick={stopRecording} className="bg-gray-900 text-white px-4 py-2 rounded-lg font-bold text-[10px] uppercase tracking-widest flex items-center gap-2"><span className="w-2 h-2 bg-white rounded-full"></span> Terminate Feed</button>
                                 )}
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                             <Field label="Subject Designation" value={activeStatement.fullName} onChange={(v: string) => setActiveStatement(prev => prev ? ({ ...prev, fullName: v }) : null)} />
                             <Field label="Dossier Timestamp" type="date" value={activeStatement.takenAt} onChange={(v: string) => setActiveStatement(prev => prev ? ({ ...prev, takenAt: v }) : null)} />
                             <Field label="Contact Identifier" value={activeStatement.phone} onChange={(v: string) => setActiveStatement(prev => prev ? ({ ...prev, phone: v }) : null)} />
                             <Field label="Residential Matrix" value={activeStatement.residentialAddress} onChange={(v: string) => setActiveStatement(prev => prev ? ({ ...prev, residentialAddress: v }) : null)} />
                         </div>
 
-                        <div className="relative mb-10">
-                            {isTranscribing && <div className="absolute top-6 right-8 flex items-center gap-2 px-3 py-1 bg-red-50 rounded-full border border-red-100"><span className="w-1.5 h-1.5 bg-red-600 rounded-full animate-ping"></span><span className="text-[9px] font-black text-red-600 uppercase">Streaming...</span></div>}
-                            <textarea placeholder="Neural feed or manual transcription console..." rows={10} className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-[2rem] px-8 py-8 text-sm focus:ring-2 focus:ring-red-500 shadow-inner font-sans outline-none leading-relaxed" value={activeStatement.content} onChange={(e: any) => setActiveStatement(prev => prev ? ({ ...prev, content: e.target.value }) : null)} />
+                        <div className="relative mb-8">
+                            {isTranscribing && <div className="absolute top-4 right-6 flex items-center gap-2 px-3 py-1 bg-red-50 rounded-full border border-red-100"><span className="w-1.5 h-1.5 bg-red-600 rounded-full animate-ping"></span><span className="text-[9px] font-bold text-red-600 uppercase">Streaming...</span></div>}
+                            <textarea placeholder="Neural feed or manual transcription console..." rows={8} className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl px-6 py-4 text-sm focus:ring-2 focus:ring-red-500 shadow-sm font-sans outline-none leading-relaxed" value={activeStatement.content} onChange={(e: any) => setActiveStatement(prev => prev ? ({ ...prev, content: e.target.value }) : null)} />
                         </div>
 
                         <SignatureField label="Subject Affirmation Seal" onEnd={(data) => setActiveStatement(prev => prev ? ({ ...prev, signature: data }) : null)} />
 
-                        <div className="flex justify-end gap-3 mt-10">
-                            <button onClick={() => { setActiveStatement(null); stopRecording(); }} className="px-8 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">Discard Entry</button>
-                            <button onClick={saveActive} className="px-10 py-4 bg-red-600 text-white font-black rounded-2xl shadow-xl shadow-red-500/20 text-[10px] uppercase tracking-widest">Commit Testimony</button>
+                        <div className="flex justify-end gap-3 mt-8">
+                            <button onClick={() => { setActiveStatement(null); stopRecording(); }} className="px-6 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-red-500 transition">Discard Entry</button>
+                            <button onClick={saveActive} className="px-8 py-3 bg-red-600 text-white font-bold rounded-lg shadow-sm text-[10px] uppercase tracking-widest hover:bg-red-700 transition">Commit Testimony</button>
                         </div>
                     </div>
                 </div>
@@ -565,14 +565,14 @@ function WarnAndCautionComponent({ formData, updateNested }: { formData: FormDat
     const wc = formData.dossier.warnAndCaution;
     const docket = formData.dossier.occurrenceDocket;
     return (
-        <div className="space-y-12">
-            <div className="text-center p-12 bg-gray-50 dark:bg-gray-800/50 rounded-[3rem] border-2 border-dashed border-gray-100 dark:border-gray-800">
-                <h2 className="text-3xl font-black uppercase tracking-tighter italic text-gray-900 dark:text-white">KAPASA MAKASA UNIVERSITY</h2>
-                <h3 className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-400 mt-2">Security Authority • Cautionary Framework</h3>
-                <h4 className="text-xl font-black uppercase text-red-600 italic mt-6 tracking-tight">Official Warn and Caution</h4>
+        <div className="space-y-8">
+            <div className="text-center p-8 bg-gray-50 dark:bg-gray-800/50 rounded-xl border-2 border-dashed border-gray-100 dark:border-gray-800">
+                <h2 className="text-xl font-bold uppercase tracking-tight text-gray-900 dark:text-white">KAPASA MAKASA UNIVERSITY</h2>
+                <h3 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mt-1">Security Authority • Cautionary Framework</h3>
+                <h4 className="text-lg font-bold uppercase text-red-600 mt-4 tracking-tight">Official Warn and Caution</h4>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <Field label="Subject Designation" value={wc.fullName} onChange={(v) => updateNested('dossier.warnAndCaution.fullName', v)} />
                 <Field label="Sex Index" value={wc.sex} onChange={(v) => updateNested('dossier.warnAndCaution.sex', v)} />
                 <Field label="Age Matrix" value={wc.age} onChange={(v) => updateNested('dossier.warnAndCaution.age', v)} />
@@ -584,34 +584,34 @@ function WarnAndCautionComponent({ formData, updateNested }: { formData: FormDat
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-10 bg-gray-50 dark:bg-gray-800/30 rounded-[2.5rem]">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-6 bg-gray-50 dark:bg-gray-800/30 rounded-xl">
                 <Field label="Taken Datetime" value={wc.takenAt} onChange={(v) => updateNested('dossier.warnAndCaution.takenAt', v)} />
                 <Field label="Operational Place" value={wc.place} onChange={(v) => updateNested('dossier.warnAndCaution.place', v)} />
                 <Field label="District Index" value={wc.district} onChange={(v) => updateNested('dossier.warnAndCaution.district', v)} />
                 <Field label="Chiefdom Alpha" value={wc.chief} onChange={(v) => updateNested('dossier.warnAndCaution.chief', v)} />
             </div>
 
-            <div className="p-12 bg-red-50/50 dark:bg-red-950/10 rounded-[3rem] border border-red-100 dark:border-red-900/30 font-sans text-sm leading-relaxed text-gray-800 dark:text-gray-300 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-8 text-red-200/20 text-8xl font-black uppercase -rotate-12 pointer-events-none">CAUTION</div>
-                <div className="space-y-8 relative z-10">
-                    <p className="font-medium italic border-l-4 border-red-600 pl-6 py-2 bg-white/50 dark:bg-black/20 rounded-r-xl">
+            <div className="p-8 bg-red-50/50 dark:bg-red-950/10 rounded-xl border border-red-100 dark:border-red-900/30 font-sans text-sm leading-relaxed text-gray-800 dark:text-gray-300 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-4 text-red-200/10 text-6xl font-bold uppercase -rotate-12 pointer-events-none">CAUTION</div>
+                <div className="space-y-6 relative z-10">
+                    <p className="font-semibold italic border-l-4 border-red-600 pl-4 py-2 bg-white/50 dark:bg-black/20 rounded-r-lg">
                         I have been warned and cautioned that a case of
-                        <input className="inline-block mx-2 border-b-2 border-red-200 bg-transparent px-2 font-black italic text-red-700 outline-none w-64 uppercase tracking-tighter" value={wc.offence || docket.offence} onChange={(e) => updateNested('dossier.warnAndCaution.offence', e.target.value)} />
+                        <input className="inline-block mx-2 border-b-2 border-red-200 bg-transparent px-2 font-bold italic text-red-700 outline-none w-64 uppercase tracking-tighter" value={wc.offence || docket.offence} onChange={(e) => updateNested('dossier.warnAndCaution.offence', e.target.value)} />
                         which was committed on
-                        <input type="date" className="inline-block mx-2 border-b-2 border-red-200 bg-transparent px-2 font-black outline-none italic" value={wc.occurrenceDate || (docket.dateTimeReported ? docket.dateTimeReported.split('T')[0] : '')} onChange={(e) => updateNested('dossier.warnAndCaution.occurrenceDate', e.target.value)} />
+                        <input type="date" className="inline-block mx-2 border-b-2 border-red-200 bg-transparent px-2 font-bold outline-none italic" value={wc.occurrenceDate || (docket.dateTimeReported ? docket.dateTimeReported.split('T')[0] : '')} onChange={(e) => updateNested('dossier.warnAndCaution.occurrenceDate', e.target.value)} />
                         at place
-                        <input className="inline-block mx-2 border-b-2 border-red-200 bg-transparent px-2 font-black outline-none italic w-40" value={wc.occurrencePlace || ''} onChange={(e) => updateNested('dossier.warnAndCaution.occurrencePlace', e.target.value)} />
+                        <input className="inline-block mx-2 border-b-2 border-red-200 bg-transparent px-2 font-bold outline-none italic w-40" value={wc.occurrencePlace || ''} onChange={(e) => updateNested('dossier.warnAndCaution.occurrencePlace', e.target.value)} />
                         is being investigated against me.
                     </p>
                     <p className="font-medium">
                         I am further cautioned that I am not obliged to make any statement against myself. Any statement provided will be documented and may be utilized in formal KMU Disciplinary Proceedings.
                     </p>
-                    <p className="font-medium text-xs text-gray-500 uppercase tracking-widest bg-gray-50 dark:bg-black/20 p-6 rounded-2xl italic border border-gray-100 dark:border-gray-800 opacity-80">
+                    <p className="font-medium text-[10px] text-gray-500 uppercase tracking-widest bg-gray-50 dark:bg-black/20 p-4 rounded-lg italic border border-gray-100 dark:border-gray-800 opacity-80">
                         I acknowledge the right to legal counsel or witnesses. No person shall be compelled to incriminate themselves.
                     </p>
                 </div>
 
-                <div className="mt-12 pt-12 border-t border-red-100 dark:border-red-900/50">
+                <div className="mt-8 pt-8 border-t border-red-100 dark:border-red-900/50">
                     <SignatureField label="Accused Acceptance Seal" onEnd={(data) => updateNested('dossier.warnAndCaution.signature', data)} />
                 </div>
             </div>
@@ -623,12 +623,12 @@ function SignatureField({ label, onEnd }: { label: string, onEnd: (data: string 
     const sigCanvas = useRef<any>(null);
     const [hasSig, setHasSig] = useState(false);
     return (
-        <div className="space-y-4">
-            <div className="flex justify-between items-center px-4">
-                <label className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] italic">{label}</label>
-                <button onClick={() => { sigCanvas.current.clear(); onEnd(null); setHasSig(false); }} className="text-[9px] text-red-500 font-black hover:underline uppercase tracking-widest">Wipe Seal</button>
+        <div className="space-y-3">
+            <div className="flex justify-between items-center px-1">
+                <label className="text-[10px] font-bold uppercase text-gray-400 tracking-widest">{label}</label>
+                <button onClick={() => { sigCanvas.current.clear(); onEnd(null); setHasSig(false); }} className="text-[9px] text-red-500 font-bold hover:underline uppercase tracking-widest">Wipe Seal</button>
             </div>
-            <div className={`bg-gray-50 dark:bg-gray-800/80 border-2 border-dashed rounded-[2rem] overflow-hidden h-48 transition-all duration-500 ${hasSig ? 'border-red-200 bg-white dark:bg-gray-900' : 'border-gray-100 dark:border-gray-800'}`}>
+            <div className={`bg-gray-50 dark:bg-gray-800/80 border border-dashed rounded-xl overflow-hidden h-40 transition-all ${hasSig ? 'border-red-200 bg-white dark:bg-gray-900' : 'border-gray-100 dark:border-gray-800'}`}>
                 <SignatureCanvas
                     ref={sigCanvas}
                     penColor='#000'

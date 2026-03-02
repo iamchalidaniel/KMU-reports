@@ -38,19 +38,22 @@ function NewCaseContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-serif">
-      <div className="max-w-7xl mx-auto py-6">
-        <div className="animate-in fade-in duration-300 space-y-6 px-4 sm:px-0">
-          {/* Executive Command Bar */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-8 rounded-[2rem] border-t-4 border-red-600 shadow-xl gap-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
+      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div className="animate-in fade-in duration-300 space-y-6">
+          {/* New Case Header */}
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <h1 className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white uppercase italic">Inquiry Genesis</h1>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">
-                KMU Disciplinary Intake / Protocol Initialization
-              </p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Inquiry Genesis</h1>
+              <p className="text-sm text-gray-500 font-semibold mt-1">KMU Disciplinary Intake / Protocol Initialization</p>
             </div>
             <div className="flex gap-2">
-              <button onClick={handleCancel} className="bg-gray-100 dark:bg-gray-800 text-gray-500 font-black text-[10px] uppercase tracking-widest px-6 py-3 rounded-2xl hover:bg-gray-200 transition">Discard Protocol</button>
+              <button
+                onClick={handleCancel}
+                className="bg-gray-100 dark:bg-gray-800 text-gray-600 font-bold text-[10px] uppercase tracking-widest px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-200 transition"
+              >
+                Discard Protocol
+              </button>
             </div>
           </div>
 

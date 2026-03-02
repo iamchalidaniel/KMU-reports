@@ -122,30 +122,30 @@ export default function StudentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-serif">
-      <div className="max-w-7xl mx-auto py-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
+      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="animate-in fade-in duration-300 space-y-6">
 
-          {/* Executive Command Bar */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-8 rounded-[2rem] border-t-4 border-emerald-600 shadow-xl gap-4">
+          {/* Registry Header */}
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <h1 className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white uppercase italic">Registry Command</h1>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">
-                KMU Unified Student Metadata & Enrollment {offlineMode && <span className="text-orange-500 font-black ml-2">• OFFLINE PROTOCOL ON</span>}
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Registry Command</h1>
+              <p className="text-sm text-gray-500 font-semibold mt-1">
+                KMU Unified Student Metadata & Enrollment {offlineMode && <span className="text-orange-500 font-bold ml-2">• OFFLINE PROTOCOL ON</span>}
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
               {(user?.role === 'admin' || user?.role === 'academic_office') && (
                 <button
                   onClick={() => setShowAddForm(true)}
-                  className="bg-emerald-600 text-white px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:shadow-lg hover:shadow-emerald-500/20 transition flex items-center gap-2 group"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition shadow-sm flex items-center gap-2"
                 >
-                  <span className="group-hover:animate-bounce">👤</span> Enlist New Student
+                  👤 Enlist New Student
                 </button>
               )}
               <Link
                 href="/students/import"
-                className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:opacity-90 transition"
+                className="bg-gray-800 dark:bg-gray-700 text-white px-5 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition shadow-sm"
               >
                 Bulk Import Portal
               </Link>
@@ -161,15 +161,15 @@ export default function StudentsPage() {
           </div>
 
           {/* Central Registry Ledger */}
-          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
-            <div className="p-10 border-b border-gray-100 dark:border-gray-800">
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+            <div className="p-6 border-b border-gray-100 dark:border-gray-800">
               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-                <h2 className="text-xl font-black uppercase tracking-tighter italic text-emerald-600">Student Enrollment Ledger</h2>
-                <div className="flex flex-wrap gap-4 w-full lg:w-auto font-sans">
+                <h2 className="text-lg font-bold uppercase tracking-tight text-emerald-600">Student Enrollment Ledger</h2>
+                <div className="flex flex-wrap gap-3 w-full lg:w-auto font-sans">
                   <div className="relative flex-1 lg:w-80">
                     <input
                       placeholder="Query registry metadata..."
-                      className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-6 py-4 text-xs w-full focus:ring-2 focus:ring-emerald-500 transition-all shadow-inner"
+                      className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-2 text-xs w-full focus:ring-2 focus:ring-emerald-500 transition-all shadow-sm"
                       value={search}
                       onChange={e => { setSearch(e.target.value); setPage(1); }}
                     />
@@ -177,7 +177,7 @@ export default function StudentsPage() {
                   <select
                     value={programFilter}
                     onChange={e => { setProgramFilter(e.target.value); setPage(1); }}
-                    className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-4 py-3 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-sans"
+                    className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-sans"
                   >
                     <option value="">All Academic Units</option>
                     {PROGRAMS.map(p => <option key={p} value={p}>{p}</option>)}
@@ -188,42 +188,42 @@ export default function StudentsPage() {
 
             <div className="overflow-x-auto font-sans">
               <table className="w-full text-xs">
-                <thead className="bg-gray-50/50 dark:bg-gray-800/50 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] italic">
+                <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-[10px] font-bold uppercase tracking-widest">
                   <tr>
-                    <th className="px-10 py-6 text-left">Subject Cluster</th>
-                    <th className="px-10 py-6 text-left">Academic Protocol</th>
-                    <th className="px-10 py-6 text-center">Metadata</th>
-                    <th className="px-10 py-6 text-right">Actions</th>
+                    <th className="px-6 py-4 text-left">Subject Cluster</th>
+                    <th className="px-6 py-4 text-left">Academic Protocol</th>
+                    <th className="px-6 py-4 text-center">Metadata</th>
+                    <th className="px-6 py-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {students.map((s, i) => (
-                    <tr key={s._id || i} className="hover:bg-emerald-50/30 dark:hover:bg-emerald-950/10 group transition-all duration-300">
-                      <td className="px-10 py-6">
+                    <tr key={s._id || i} className="hover:bg-emerald-50/30 dark:hover:bg-emerald-950/10 group transition-colors">
+                      <td className="px-6 py-4">
                         <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center text-emerald-600 font-black text-xs uppercase group-hover:scale-110 transition-transform">
+                          <div className="w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center text-emerald-600 font-bold text-xs uppercase transition-transform">
                             {s.fullName?.charAt(0)}
                           </div>
                           <div>
-                            <Link href={`/students/${s._id}`} className="font-extrabold text-gray-900 dark:text-gray-100 group-hover:text-emerald-600 transition-colors uppercase text-sm tracking-tighter">
+                            <Link href={`/students/${s._id}`} className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-emerald-600 transition-colors uppercase text-sm tracking-tight">
                               {s.fullName}
                             </Link>
-                            <div className="text-[10px] text-gray-400 font-mono tracking-tighter mt-0.5">{s.studentId}</div>
+                            <div className="text-[10px] text-gray-400 font-semibold mt-0.5 uppercase tracking-tighter">{s.studentId}</div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-10 py-6">
+                      <td className="px-6 py-4">
                         <div className="font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tight">{s.program}</div>
-                        <div className="text-[10px] text-gray-400 mt-0.5 tracking-widest uppercase font-black">Year {s.year || 'N/A'} • {s.gender || 'N/A'}</div>
+                        <div className="text-[10px] text-gray-400 mt-0.5 uppercase font-bold tracking-wider">Year {s.year || 'N/A'} • {s.gender || 'N/A'}</div>
                       </td>
-                      <td className="px-10 py-6 text-center">
-                        <span className="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-[9px] font-black uppercase tracking-widest text-gray-500 rounded-lg">Verified</span>
+                      <td className="px-6 py-4 text-center">
+                        <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-[9px] font-bold uppercase tracking-widest text-gray-500 rounded">Verified</span>
                       </td>
-                      <td className="px-10 py-6 text-right">
-                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => router.push(`/students/${s._id}?tab=add-case`)} className="p-2.5 rounded-xl bg-orange-100 dark:bg-orange-900/30 text-orange-600 hover:bg-orange-200 transition-colors" title="Flag Case">⚖️</button>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                          <button onClick={() => router.push(`/students/${s._id}?tab=add-case`)} className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/30 text-orange-600 hover:bg-orange-200 transition-colors" title="Flag Case">⚖️</button>
                           {(user?.role === 'admin' || user?.role === 'academic_office') && (
-                            <button onClick={() => handleDelete(s._id!)} className="p-2.5 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-600 hover:bg-red-200 transition-colors" title="Purge Record">🗑️</button>
+                            <button onClick={() => handleDelete(s._id!)} className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 hover:bg-red-200 transition-colors" title="Purge Record">🗑️</button>
                           )}
                         </div>
                       </td>
@@ -231,30 +231,30 @@ export default function StudentsPage() {
                   ))}
                   {students.length === 0 && !loading && (
                     <tr>
-                      <td colSpan={4} className="py-24 text-center text-gray-400 italic text-sm">Registry query returned zero entities.</td>
+                      <td colSpan={4} className="py-20 text-center text-gray-400 italic text-sm">Registry query returned zero entities.</td>
                     </tr>
                   )}
                 </tbody>
               </table>
             </div>
 
-            {/* Premium Pagination */}
-            <div className="p-10 bg-gray-50/50 dark:bg-gray-800/20 border-t border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-center gap-6">
-              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Showing {students.length} of {total} Indices</span>
+            {/* Pagination */}
+            <div className="p-6 bg-gray-50 dark:bg-gray-800/20 border-t border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-center gap-6">
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Showing {students.length} of {total} Indices</span>
               <div className="flex items-center gap-1">
-                <PaginationButton onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Prev Cluster</PaginationButton>
+                <PaginationButton onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Prev</PaginationButton>
                 {Array.from({ length: Math.ceil(total / limit) }, (_, i) => i + 1).filter(p => p === 1 || p === Math.ceil(total / limit) || Math.abs(p - page) <= 1).map((p, idx, arr) => (
                   <div key={p} className="flex items-center">
                     {idx > 0 && arr[idx - 1] !== p - 1 && <span className="px-2 text-gray-400">...</span>}
                     <button
                       onClick={() => setPage(p)}
-                      className={`w-10 h-10 rounded-xl font-black text-[10px] transition-all ${p === page ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30' : 'bg-white dark:bg-gray-800 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+                      className={`w-9 h-9 rounded-lg font-bold text-xs transition-all ${p === page ? 'bg-emerald-600 text-white shadow-sm' : 'bg-white dark:bg-gray-800 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
                     >
                       {p}
                     </button>
                   </div>
                 ))}
-                <PaginationButton onClick={() => setPage(p => Math.min(Math.ceil(total / limit), p + 1))} disabled={page === Math.ceil(total / limit) || total === 0}>Next Cluster</PaginationButton>
+                <PaginationButton onClick={() => setPage(p => Math.min(Math.ceil(total / limit), p + 1))} disabled={page === Math.ceil(total / limit) || total === 0}>Next</PaginationButton>
               </div>
             </div>
           </div>
@@ -264,16 +264,16 @@ export default function StudentsPage() {
       {/* Enlistment Modal */}
       {showAddForm && (
         <div className="fixed inset-0 z-[1001] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-gray-950/80 backdrop-blur-md" onClick={() => setShowAddForm(false)} />
-          <div className="relative bg-white dark:bg-gray-900 w-full max-w-2xl rounded-[3rem] shadow-2xl border-t-8 border-emerald-600 p-12 overflow-y-auto max-h-[90vh]">
-            <div className="flex justify-between items-center mb-10">
+          <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => setShowAddForm(false)} />
+          <div className="relative bg-white dark:bg-gray-900 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 p-8">
+            <div className="flex justify-between items-center mb-8 border-b border-gray-100 dark:border-gray-800 pb-6">
               <div>
-                <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase italic tracking-tighter">Student Enlistment</h2>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Unified Registry Metadata Entry</p>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Student Enlistment</h2>
+                <p className="text-xs text-emerald-600 font-bold uppercase tracking-wider mt-1">Unified Registry Metadata Entry</p>
               </div>
-              <button onClick={() => setShowAddForm(false)} className="bg-gray-100 dark:bg-gray-800 p-4 rounded-full text-gray-400 hover:text-emerald-600 transition-all font-sans">✕</button>
+              <button onClick={() => setShowAddForm(false)} className="text-gray-400 hover:text-gray-600 transition-all font-bold text-xl">✕</button>
             </div>
-            <form onSubmit={handleAdd} className="space-y-8 font-sans">
+            <form onSubmit={handleAdd} className="space-y-6 font-sans">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField label="Subject SIN / ID" value={formData.studentId} onChange={(v: string) => setFormData({ ...formData, studentId: v })} required />
                 <FormField label="Full Legal Designation" value={formData.fullName} onChange={(v: string) => setFormData({ ...formData, fullName: v })} required />
@@ -281,9 +281,12 @@ export default function StudentsPage() {
                 <FormField label="Temporal Level (Year)" value={formData.year} onChange={(v: string) => setFormData({ ...formData, year: v })} type="select" options={YEARS.map(y => ({ value: y, label: `Year ${y}` }))} />
                 <FormField label="Biological Designation" value={formData.gender} onChange={(v: string) => setFormData({ ...formData, gender: v })} type="select" options={GENDERS.map(g => ({ value: g, label: g }))} />
               </div>
-              <div className="mt-10 flex gap-4">
-                <button type="submit" disabled={loading} className="flex-1 bg-emerald-600 text-white font-black py-5 rounded-[2rem] hover:shadow-xl hover:shadow-emerald-500/30 transition-all active:scale-[0.98] text-[10px] uppercase tracking-widest">
+              <div className="mt-8 flex gap-4">
+                <button type="submit" disabled={loading} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all active:scale-[0.98] text-xs uppercase tracking-widest">
                   {loading ? 'Synthesizing Index...' : 'Commit Protocol Entry'}
+                </button>
+                <button type="button" onClick={() => setShowAddForm(false)} className="px-8 py-4 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold uppercase tracking-widest hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+                  Cancel
                 </button>
               </div>
             </form>
@@ -298,15 +301,15 @@ export default function StudentsPage() {
 
 function StatCard({ title, value, color }: any) {
   const colors: any = {
-    emerald: 'text-emerald-700 bg-emerald-50/30 border-emerald-100 dark:bg-emerald-950/10 dark:border-emerald-900/50',
-    teal: 'text-teal-700 bg-teal-50/30 border-teal-100 dark:bg-teal-950/10 dark:border-teal-900/50',
-    blue: 'text-blue-700 bg-blue-50/30 border-blue-100 dark:bg-blue-950/10 dark:border-blue-900/50',
-    indigo: 'text-indigo-700 bg-indigo-50/30 border-indigo-100 dark:bg-indigo-950/10 dark:border-indigo-900/50'
+    emerald: 'border-emerald-500 dark:border-emerald-400',
+    teal: 'border-teal-500 dark:border-teal-400',
+    blue: 'border-blue-500 dark:border-blue-400',
+    indigo: 'border-indigo-500 dark:border-indigo-400'
   };
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-[2rem] shadow-sm border p-8 transition-all duration-300 ${colors[color]}`}>
-      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">{title}</div>
-      <div className="text-4xl font-black tracking-tighter italic">{value}</div>
+    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-6 transition-all hover:shadow-md ${colors[color]}`}>
+      <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{title}</div>
+      <div className="text-3xl font-bold text-gray-900 dark:text-white">{value}</div>
     </div>
   );
 }
@@ -314,14 +317,14 @@ function StatCard({ title, value, color }: any) {
 function FormField({ label, value, onChange, type = 'text', options = [], required = false }: any) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">{label}</label>
+      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">{label}</label>
       {type === 'select' ? (
-        <select value={value} onChange={(e) => onChange(e.target.value)} required={required} className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-xs font-bold uppercase shadow-inner">
+        <select value={value} onChange={(e) => onChange(e.target.value)} required={required} className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-xs font-bold uppercase">
           <option value="">Select Protocol...</option>
           {options.map((o: any) => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
       ) : (
-        <input type={type} value={value} onChange={(e) => onChange(e.target.value)} required={required} className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-xs font-bold shadow-inner" />
+        <input type={type} value={value} onChange={(e) => onChange(e.target.value)} required={required} className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-xs font-bold" />
       )}
     </div>
   );
@@ -332,7 +335,7 @@ function PaginationButton({ children, onClick, disabled }: any) {
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${disabled ? 'text-gray-300' : 'text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'}`}
+      className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${disabled ? 'text-gray-300' : 'text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'}`}
     >
       {children}
     </button>

@@ -143,35 +143,35 @@ export default function CasesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-serif">
-      <div className="max-w-7xl mx-auto py-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
+      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="animate-in fade-in duration-300 space-y-6">
 
-          {/* Executive Command Bar */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-8 rounded-[2rem] border-t-4 border-red-600 shadow-xl gap-4">
+          {/* Cases Header */}
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <h1 className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white uppercase italic">Case Command</h1>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">
-                KMU Disciplinary Enforcement & Litigation Registry {offlineMode && <span className="text-orange-500 font-black ml-2">• OFFLINE PROTOCOL</span>}
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Case Command</h1>
+              <p className="text-sm text-gray-500 font-semibold mt-1">
+                KMU Disciplinary Enforcement & Litigation Registry {offlineMode && <span className="text-orange-500 font-bold ml-2">• OFFLINE PROTOCOL</span>}
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/cases/new"
-                className="bg-red-600 text-white px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:shadow-lg hover:shadow-red-500/20 transition flex items-center gap-2 group border-none"
+                className="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition shadow-sm flex items-center gap-2"
               >
-                <span className="group-hover:animate-pulse">⚖️</span> Initiate New Inquiry
+                ⚖️ Initiate New Inquiry
               </Link>
               <div className="relative" ref={exportRef}>
                 <button
                   onClick={() => setShowExportDropdown(!showExportDropdown)}
-                  className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:opacity-90 transition flex items-center gap-2"
+                  className="bg-gray-800 dark:bg-gray-700 text-white px-5 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition shadow-sm flex items-center gap-2"
                 >
                   🚀 {exporting ? 'Synthesizing...' : 'Strategic Export'}
                 </button>
                 {showExportDropdown && (
-                  <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 py-2 z-50 font-sans animate-in zoom-in-95 duration-100">
-                    <button onClick={handleExportList} className="w-full text-left px-6 py-3 text-[10px] font-black uppercase hover:bg-gray-50 dark:hover:bg-gray-700 transition">Full Ledger (DOCX)</button>
+                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-100 dark:border-gray-700 py-1 z-50 font-sans animate-in fade-in zoom-in-95 duration-100">
+                    <button onClick={handleExportList} className="w-full text-left px-4 py-2.5 text-xs font-bold uppercase hover:bg-gray-50 dark:hover:bg-gray-700 transition">Full Ledger (DOCX)</button>
                   </div>
                 )}
               </div>
@@ -187,15 +187,15 @@ export default function CasesPage() {
           </div>
 
           {/* Central Disciplinary Ledger */}
-          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
-            <div className="p-10 border-b border-gray-100 dark:border-gray-800">
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+            <div className="p-6 border-b border-gray-100 dark:border-gray-800">
               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-                <h2 className="text-xl font-black uppercase tracking-tighter italic text-red-600">Strategic Compliance Ledger</h2>
-                <div className="flex flex-wrap gap-4 w-full lg:w-auto font-sans">
+                <h2 className="text-lg font-bold uppercase tracking-tight text-red-600">Strategic Compliance Ledger</h2>
+                <div className="flex flex-wrap gap-3 w-full lg:w-auto font-sans">
                   <div className="relative flex-1 lg:w-64">
                     <input
-                      placeholder="Query compliance metadata..."
-                      className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-6 py-3.5 text-xs w-full focus:ring-2 focus:ring-red-500 transition-all font-sans italic shadow-inner"
+                      placeholder="Query metadata..."
+                      className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-2 text-xs w-full focus:ring-2 focus:ring-red-500 transition-all shadow-sm"
                       value={search}
                       onChange={e => { setSearch(e.target.value); setPage(1); }}
                     />
@@ -203,7 +203,7 @@ export default function CasesPage() {
                   <select
                     value={statusFilter}
                     onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
-                    className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-4 py-3 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-red-500 transition-all font-sans"
+                    className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase outline-none focus:ring-2 focus:ring-red-500 transition-all font-sans"
                   >
                     <option value="">All Statuses</option>
                     {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
@@ -211,7 +211,7 @@ export default function CasesPage() {
                   <select
                     value={severityFilter}
                     onChange={e => { setSeverityFilter(e.target.value); setPage(1); }}
-                    className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-4 py-3 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-red-500 transition-all font-sans"
+                    className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase outline-none focus:ring-2 focus:ring-red-500 transition-all font-sans"
                   >
                     <option value="">All Severities</option>
                     {SEVERITY_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
@@ -222,49 +222,50 @@ export default function CasesPage() {
 
             <div className="overflow-x-auto font-sans">
               <table className="w-full text-xs">
-                <thead className="bg-gray-50/50 dark:bg-gray-800/50 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] italic">
+                <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-[10px] font-bold uppercase tracking-widest">
                   <tr>
-                    <th className="px-10 py-6 text-left">Entity Cluster</th>
-                    <th className="px-10 py-6 text-left">Incident Classification</th>
-                    <th className="px-10 py-6 text-center">Status Index</th>
-                    <th className="px-10 py-6 text-right">Operational Actions</th>
+                    <th className="px-6 py-4 text-left">Entity Cluster</th>
+                    <th className="px-6 py-4 text-left">Incident Classification</th>
+                    <th className="px-6 py-4 text-center">Status Index</th>
+                    <th className="px-6 py-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {cases.map((c, i) => (
-                    <tr key={c._id || i} className="hover:bg-red-50/30 dark:hover:bg-red-950/10 group transition-all duration-300">
-                      <td className="px-10 py-6">
+                    <tr key={c._id || i} className="hover:bg-red-50/30 dark:hover:bg-red-950/10 group transition-colors">
+                      <td className="px-6 py-4">
                         <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-2xl bg-red-100 dark:bg-red-900/50 flex items-center justify-center text-red-600 font-black text-xs group-hover:scale-110 transition-transform uppercase">
+                          <div className="w-9 h-9 rounded-lg bg-red-100 dark:bg-red-900/50 flex items-center justify-center text-red-600 font-bold text-xs uppercase">
                             {c.student?.fullName?.charAt(0) || '?'}
                           </div>
                           <div>
-                            <Link href={`/cases/${c._id}`} className="font-extrabold text-gray-900 dark:text-gray-100 group-hover:text-red-600 transition-colors uppercase text-sm tracking-tighter">
+                            <Link href={`/cases/${c._id}`} className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-red-600 transition-colors uppercase text-sm tracking-tight">
                               {c.student?.fullName || 'Anonymous'}
                             </Link>
-                            <div className="text-[10px] text-gray-400 font-mono tracking-tighter mt-0.5">{c.student?.studentId || 'EXTERNAL'} • {c.student?.program || 'N/A'}</div>
+                            <div className="text-[10px] text-gray-400 font-semibold mt-0.5 uppercase">{c.student?.studentId || 'EXTERNAL'} • {c.student?.program || 'N/A'}</div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-10 py-6">
+                      <td className="px-6 py-4">
                         <div className="font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tight">{c.offenseType}</div>
-                        <div className="text-[10px] text-gray-400 mt-1.5 tracking-tighter uppercase font-black">
-                          <span className={`px-2 py-0.5 rounded ${c.severity === 'Critical' ? 'bg-red-600 text-white animate-pulse' : c.severity === 'High' ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500'}`}>
+                        <div className="text-[10px] text-gray-400 mt-1 uppercase font-bold flex items-center gap-2">
+                          <span className={`${c.severity === 'Critical' ? 'text-red-600 animate-pulse' : c.severity === 'High' ? 'text-red-500' : 'text-gray-500'}`}>
                             {c.severity} Priority
                           </span>
-                          <span className="ml-2 italic font-medium">{new Date(c.incidentDate).toLocaleDateString()}</span>
+                          <span className="text-gray-300 dark:text-gray-700">•</span>
+                          <span className="italic font-normal">{new Date(c.incidentDate).toLocaleDateString()}</span>
                         </div>
                       </td>
-                      <td className="px-10 py-6 text-center">
-                        <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${c.status === 'Open' ? 'bg-red-50 text-red-600 border-red-100 shadow-sm shadow-red-500/10' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
+                      <td className="px-6 py-4 text-center">
+                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase border ${c.status === 'Open' ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`}>
                           {c.status}
                         </span>
                       </td>
-                      <td className="px-10 py-6 text-right">
-                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
-                          <Link href={`/cases/${c._id}`} className="p-3 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-600 hover:bg-gray-200 transition-colors" title="View Dossier">📄</Link>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                          <Link href={`/cases/${c._id}`} className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 hover:bg-gray-200 transition-colors" title="View Dossier">📄</Link>
                           {(user?.role === 'admin' || user?.role === 'security_officer') && (
-                            <button onClick={() => handleDelete(c._id)} className="p-3 rounded-2xl bg-red-100 dark:bg-red-900/30 text-red-600 hover:bg-red-200 transition-colors" title="Purge Incident">🗑️</button>
+                            <button onClick={() => handleDelete(c._id)} className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 hover:bg-red-200 transition-colors" title="Purge Incident">🗑️</button>
                           )}
                         </div>
                       </td>
@@ -272,30 +273,30 @@ export default function CasesPage() {
                   ))}
                   {cases.length === 0 && !loading && (
                     <tr>
-                      <td colSpan={4} className="py-24 text-center text-gray-400 italic text-sm font-serif">Compliance registry query returned zero entities.</td>
+                      <td colSpan={4} className="py-20 text-center text-gray-400 italic text-sm">Compliance registry query returned zero entities.</td>
                     </tr>
                   )}
                 </tbody>
               </table>
             </div>
 
-            {/* Premium Pagination */}
-            <div className="p-10 bg-gray-50/50 dark:bg-gray-800/20 border-t border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-center gap-6">
-              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Showing {cases.length} of {total} Compliance Indices</span>
+            {/* Pagination */}
+            <div className="p-6 bg-gray-50 dark:bg-gray-800/20 border-t border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-center gap-6">
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Showing {cases.length} of {total} Compliance Indices</span>
               <div className="flex items-center gap-1">
-                <PaginationButton onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Prev Cluster</PaginationButton>
+                <PaginationButton onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Prev</PaginationButton>
                 {Array.from({ length: Math.ceil(total / limit) }, (_, i) => i + 1).filter(p => p === 1 || p === Math.ceil(total / limit) || Math.abs(p - page) <= 1).map((p, idx, arr) => (
                   <div key={p} className="flex items-center">
                     {idx > 0 && arr[idx - 1] !== p - 1 && <span className="px-2 text-gray-400">...</span>}
                     <button
                       onClick={() => setPage(p)}
-                      className={`w-10 h-10 rounded-xl font-black text-[10px] transition-all ${p === page ? 'bg-red-600 text-white shadow-lg shadow-red-500/30' : 'bg-white dark:bg-gray-800 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+                      className={`w-9 h-9 rounded-lg font-bold text-xs transition-all ${p === page ? 'bg-red-600 text-white shadow-sm' : 'bg-white dark:bg-gray-800 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
                     >
                       {p}
                     </button>
                   </div>
                 ))}
-                <PaginationButton onClick={() => setPage(p => Math.min(Math.ceil(total / limit), p + 1))} disabled={page === Math.ceil(total / limit) || total === 0}>Next Cluster</PaginationButton>
+                <PaginationButton onClick={() => setPage(p => Math.min(Math.ceil(total / limit), p + 1))} disabled={page === Math.ceil(total / limit) || total === 0}>Next</PaginationButton>
               </div>
             </div>
           </div>
@@ -309,15 +310,15 @@ export default function CasesPage() {
 
 function StatCard({ title, value, color }: any) {
   const colors: any = {
-    red: 'text-red-700 bg-red-50/30 border-red-100 dark:bg-red-950/10 dark:border-red-900/50',
-    orange: 'text-orange-700 bg-orange-50/30 border-orange-100 dark:bg-orange-950/10 dark:border-orange-900/50',
-    blue: 'text-blue-700 bg-blue-50/30 border-blue-100 dark:bg-blue-950/10 dark:border-blue-900/50',
-    indigo: 'text-indigo-700 bg-indigo-50/30 border-indigo-100 dark:bg-indigo-950/10 dark:border-indigo-900/50'
+    red: 'border-red-500 dark:border-red-400',
+    orange: 'border-orange-500 dark:border-orange-400',
+    blue: 'border-blue-500 dark:border-blue-400',
+    indigo: 'border-indigo-500 dark:border-indigo-400'
   };
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-[2rem] shadow-sm border p-8 transition-all duration-300 ${colors[color]}`}>
-      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">{title}</div>
-      <div className="text-4xl font-black tracking-tighter italic">{value}</div>
+    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-6 transition-all hover:shadow-md ${colors[color]}`}>
+      <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{title}</div>
+      <div className="text-3xl font-bold text-gray-900 dark:text-white">{value}</div>
     </div>
   );
 }
@@ -327,7 +328,7 @@ function PaginationButton({ children, onClick, disabled }: any) {
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${disabled ? 'text-gray-300' : 'text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20'}`}
+      className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${disabled ? 'text-gray-300' : 'text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20'}`}
     >
       {children}
     </button>

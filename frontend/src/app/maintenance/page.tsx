@@ -184,30 +184,30 @@ export default function AdminMaintenancePage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-serif">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
             <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                 <div className="animate-in fade-in duration-300 space-y-6">
 
-                    {/* Executive Command Bar */}
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-8 rounded-3xl border-t-4 border-kmuGreen shadow-xl gap-4">
+                    {/* Maintenance Header */}
+                    <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
-                            <h1 className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white uppercase">Maintenance Authority</h1>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">Centralized Facility & Infrastructure Oversight</p>
+                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Maintenance Authority</h1>
+                            <p className="text-sm text-gray-500 font-semibold mt-1">Centralized Facility & Infrastructure Oversight</p>
                         </div>
                         <div className="flex gap-2">
-                            <div className="bg-emerald-50 dark:bg-emerald-950/20 px-4 py-2 rounded-2xl border border-emerald-100 dark:border-emerald-900/50">
-                                <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest block mb-0.5">Active Ledger</span>
-                                <span className="text-xl font-black text-emerald-700 dark:text-emerald-400">{reports.length} Reports</span>
+                            <div className="bg-emerald-50 dark:bg-emerald-950/20 px-4 py-2 rounded-lg border border-emerald-100 dark:border-emerald-900/50">
+                                <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest block mb-0.5">Active Ledger</span>
+                                <span className="text-lg font-bold text-emerald-700 dark:text-emerald-400">{reports.length} Reports</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+                    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
                         {/* Filters */}
-                        <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                            <div className="flex flex-wrap gap-3">
+                        <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div className="flex flex-wrap gap-2">
                                 <select
-                                    className="bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-2.5 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
+                                    className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-3 py-2 text-[10px] font-bold uppercase outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
                                     value={statusFilter}
                                     onChange={(e) => setStatusFilter(e.target.value)}
                                 >
@@ -215,7 +215,7 @@ export default function AdminMaintenancePage() {
                                     {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                                 </select>
                                 <select
-                                    className="bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-2.5 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
+                                    className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-3 py-2 text-[10px] font-bold uppercase outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
                                     value={priorityFilter}
                                     onChange={(e) => setPriorityFilter(e.target.value)}
                                 >
@@ -226,7 +226,7 @@ export default function AdminMaintenancePage() {
                             <div className="relative w-full md:w-96">
                                 <input
                                     placeholder="Query infrastructure ledger (hall, room, reporter)..."
-                                    className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-5 py-3.5 text-xs w-full focus:ring-2 focus:ring-kmuGreen transition-all shadow-inner"
+                                    className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-2 text-xs w-full focus:ring-2 focus:ring-kmuGreen transition-all shadow-sm"
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                 />
@@ -236,12 +236,12 @@ export default function AdminMaintenancePage() {
                         {/* Table */}
                         <div className="overflow-x-auto">
                             <table className="w-full text-xs">
-                                <thead className="bg-gray-50/50 dark:bg-gray-800/50 text-[10px] font-black uppercase text-gray-400 tracking-widest">
+                                <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-[10px] font-bold uppercase tracking-widest border-b border-gray-100 dark:border-gray-800">
                                     <tr>
-                                        <th className="px-8 py-5 text-left">Location / Deployment</th>
-                                        <th className="px-8 py-5 text-left">Incident Class</th>
-                                        <th className="px-8 py-5 text-center">Status Matrix</th>
-                                        <th className="px-8 py-5 text-right">Command Actions</th>
+                                        <th className="px-6 py-4 text-left">Location / Deployment</th>
+                                        <th className="px-6 py-4 text-left">Incident Class</th>
+                                        <th className="px-6 py-4 text-center">Status</th>
+                                        <th className="px-6 py-4 text-right">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -249,57 +249,57 @@ export default function AdminMaintenancePage() {
                                         const reportId = r._id || r.id;
                                         return (
                                             <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 group transition-colors">
-                                                <td className="px-8 py-5">
-                                                    <div className="font-bold text-gray-900 dark:text-gray-100">{r.location?.hall}</div>
-                                                    <div className="text-[10px] text-gray-400 font-mono italic">
+                                                <td className="px-6 py-4">
+                                                    <div className="font-bold text-gray-900 dark:text-gray-100 uppercase tracking-tight">{r.location?.hall}</div>
+                                                    <div className="text-[10px] text-gray-400 font-semibold uppercase mt-0.5">
                                                         Room {r.location?.room || 'N/A'} • {r.reported_by?.name}
                                                     </div>
                                                 </td>
-                                                <td className="px-8 py-5">
-                                                    <div className="font-medium uppercase tracking-tight text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                                <td className="px-6 py-4">
+                                                    <div className="font-bold uppercase tracking-tight text-gray-700 dark:text-gray-300 flex items-center gap-2">
                                                         {r.category}
-                                                        <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase ${r.priority === 'Urgent' ? 'bg-red-100 text-red-600' :
-                                                                r.priority === 'High' ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-400'
+                                                        <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase border ${r.priority === 'Urgent' ? 'bg-red-100 text-red-600 border-red-200' :
+                                                            r.priority === 'High' ? 'bg-orange-100 text-orange-600 border-orange-200' : 'bg-gray-100 text-gray-400 border-gray-200'
                                                             }`}>
                                                             {r.priority}
                                                         </span>
                                                     </div>
-                                                    <div className="mt-1.5 text-[11px] text-gray-500 dark:text-gray-400 italic line-clamp-1 leading-relaxed ring-1 ring-gray-100 dark:ring-gray-800 px-2 py-1 rounded inline-block bg-white dark:bg-gray-900 shadow-sm">
+                                                    <div className="mt-1 text-[11px] text-gray-500 dark:text-gray-400 italic line-clamp-1 leading-relaxed">
                                                         "{r.description}"
                                                     </div>
                                                 </td>
-                                                <td className="px-8 py-5 text-center">
+                                                <td className="px-6 py-4 text-center">
                                                     <select
                                                         value={r.status}
                                                         onChange={(e) => updateStatus(reportId!, e.target.value)}
-                                                        className={`text-[10px] font-black uppercase bg-transparent outline-none cursor-pointer border-b-2 border-dotted transition-all ${r.status === 'Completed' ? 'text-emerald-600 border-emerald-200' : 'text-blue-600 border-blue-200'
+                                                        className={`text-[10px] font-bold uppercase bg-transparent outline-none cursor-pointer border-b border-dotted transition-all ${r.status === 'Completed' ? 'text-emerald-600 border-emerald-400' : 'text-blue-600 border-blue-400'
                                                             }`}
                                                     >
                                                         {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                                                     </select>
                                                 </td>
-                                                <td className="px-8 py-5 text-right">
+                                                <td className="px-6 py-4 text-right">
                                                     <div className="flex flex-col items-end gap-2">
                                                         {isElectricalReport(r.category) && r.status === 'Reported' && (
                                                             <div className="flex flex-col items-end">
-                                                                <span className="text-[8px] font-black text-gray-400 uppercase tracking-tighter mb-1">Assign Technician</span>
+                                                                <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider mb-1">Assign Technician</span>
                                                                 <select
-                                                                    className="text-[9px] font-bold bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1.5 outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
+                                                                    className="text-[9px] font-bold bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded px-2 py-1 outline-none focus:ring-1 focus:ring-kmuGreen transition-all"
                                                                     onChange={(e) => {
                                                                         const elec = electricians.find(el => (el._id || el.id) === e.target.value);
                                                                         if (elec) assignToElectrician(reportId!, elec._id || elec.id, elec.name);
                                                                     }}
                                                                     defaultValue=""
                                                                 >
-                                                                    <option value="" disabled>Select Electrician...</option>
+                                                                    <option value="" disabled>Select...</option>
                                                                     {electricians.map(el => <option key={el._id || el.id} value={el._id || el.id}>{el.name}</option>)}
                                                                 </select>
                                                             </div>
                                                         )}
                                                         {r.assigned_to?.name ? (
                                                             <div className="flex flex-col items-end">
-                                                                <span className="text-[8px] font-black text-emerald-600 uppercase tracking-tighter">Technician Assigned</span>
-                                                                <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300">{r.assigned_to.name}</span>
+                                                                <span className="text-[8px] font-bold text-emerald-600 uppercase tracking-wider">Technician Assigned</span>
+                                                                <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 uppercase">{r.assigned_to.name}</span>
                                                             </div>
                                                         ) : !isElectricalReport(r.category) ? (
                                                             <span className="text-[9px] text-gray-300 italic uppercase tracking-widest">General Repair</span>
@@ -312,14 +312,14 @@ export default function AdminMaintenancePage() {
                                 </tbody>
                             </table>
                             {filteredReports.length === 0 && (
-                                <div className="text-center py-24 bg-gray-50/50 dark:bg-gray-800/20">
-                                    <div className="text-4xl mb-4">🔍</div>
-                                    <div className="text-gray-400 italic text-sm font-serif">No operational data matches your current criteria.</div>
+                                <div className="text-center py-20 bg-gray-50/50 dark:bg-gray-800/20">
+                                    <div className="text-3xl mb-3">🔍</div>
+                                    <div className="text-gray-400 italic text-sm">No operational data matches your criteria.</div>
                                 </div>
                             )}
                         </div>
-                        <div className="p-8 bg-gray-50/30 dark:bg-gray-800/20 text-center border-t border-gray-100 dark:border-gray-800">
-                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em]">Facility Management Authority Framework</span>
+                        <div className="p-6 bg-gray-50 dark:bg-gray-800/20 text-center border-t border-gray-100 dark:border-gray-800">
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em]">Facility Management Authority Framework</span>
                         </div>
                     </div>
                 </div>

@@ -122,13 +122,13 @@ export default function StudentRegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
-      <div className="w-full max-w-xl bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 md:p-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2 text-center">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4 font-sans">
+      <div className="w-full max-w-xl bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 md:p-10">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center uppercase tracking-tight">
           Student Registration
         </h1>
-        <p className="text-sm text-gray-600 dark:text-gray-300 mb-6 text-center">
-          For students only. Please provide your details to register.
+        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-8 text-center">
+          Institutional Enrollment Portal • Authorized Personnel Only
         </p>
 
         {error && (
@@ -151,16 +151,16 @@ export default function StudentRegisterPage() {
         )}
 
         {status === "success" && (
-          <div className="mb-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-6 text-sm text-green-700 dark:text-green-300 text-center animate-in fade-in scale-95 duration-300">
+          <div className="mb-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-8 text-sm text-green-700 dark:text-green-300 text-center animate-in fade-in scale-95 duration-300">
             <div className="text-4xl mb-4">🎉</div>
-            <p className="mb-6 font-bold text-lg">Registration successful!</p>
-            <p className="mb-6">Your account has been created. You can now login with your Student ID and password to access your dashboard.</p>
+            <p className="mb-4 font-bold text-lg uppercase tracking-tight">Registration successful!</p>
+            <p className="mb-8 font-medium opacity-80 uppercase text-[10px] tracking-widest">Your account has been created. Use your Student ID to access the dashboard.</p>
             <button
               type="button"
               onClick={() => router.push("/login")}
-              className="w-full bg-green-600 text-white rounded-full py-3 font-bold hover:bg-green-700 transition-all shadow-lg shadow-green-500/20"
+              className="w-full bg-green-600 text-white rounded-lg py-3.5 font-bold hover:bg-green-700 transition-all shadow-sm uppercase text-[10px] tracking-widest"
             >
-              Go to Login
+              Access Identity Matrix
             </button>
           </div>
         )}
@@ -168,32 +168,32 @@ export default function StudentRegisterPage() {
         {status !== "success" && (
           <>
             {/* Progress Indicator */}
-            <div className="mb-8">
-              <div className="flex justify-between items-center mb-2">
+            <div className="mb-10">
+              <div className="flex justify-between items-center mb-3">
                 {[1, 2, 3, 4].map((s) => (
                   <div
                     key={s}
-                    className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold transition-all duration-300 ${step >= s
-                      ? 'bg-kmuGreen text-white shadow-[0_0_10px_rgba(16,185,129,0.4)]'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-400'
+                    className={`flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold transition-all duration-300 border ${step >= s
+                      ? 'bg-kmuGreen text-white border-kmuGreen shadow-sm'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-400 border-gray-100 dark:border-gray-700'
                       }`}
                   >
                     {s}
                   </div>
                 ))}
               </div>
-              <div className="w-full h-1 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div className="w-full h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-kmuGreen transition-all duration-500 ease-out"
                   style={{ width: `${((step - 1) / 3) * 100}%` }}
                 ></div>
               </div>
-              <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-3 text-center">
-                Stage {step} of 4: {
+              <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-4 text-center">
+                Phase {step} of 4 • <span className="text-gray-900 dark:text-white">{
                   step === 1 ? "ACCOUNT SECURITY" :
                     step === 2 ? "ACADEMIC DETAILS" :
                       step === 3 ? "PERSONAL INFO" : "ADDRESS & ACCOMMODATION"
-                }
+                }</span>
               </p>
             </div>
 
@@ -232,10 +232,9 @@ export default function StudentRegisterPage() {
 
               {step === 2 && (
                 <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
-                  <FormField label="Program" value={program} onChange={setProgram} placeholder="BSc ICT Education" required />
-                  <FormField label="Program" value={program} onChange={setProgram} placeholder="BSc ICT Education" required />
+                  <FormField label="Program of Study" value={program} onChange={setProgram} placeholder="BSc ICT Education" required />
                   <div className="grid grid-cols-2 gap-4">
-                    <FormField label="Year" value={year} onChange={setYear} placeholder="2026" />
+                    <FormField label="Academic Year" value={year} onChange={setYear} placeholder="2026" />
                     <FormField label="Year of Study" value={yearOfStudy} onChange={setYearOfStudy} placeholder="4" />
                   </div>
                   <SelectField
@@ -295,7 +294,7 @@ export default function StudentRegisterPage() {
                   <button
                     type="button"
                     onClick={prevStep}
-                    className="flex-1 py-3 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-full font-bold hover:bg-gray-200 dark:hover:bg-gray-600 transition-all"
+                    className="flex-1 py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg font-bold hover:bg-gray-200 dark:hover:bg-gray-700 transition-all uppercase text-[10px] tracking-widest border border-gray-200 dark:border-gray-700"
                   >
                     Previous
                   </button>
@@ -303,22 +302,22 @@ export default function StudentRegisterPage() {
                 <button
                   type="submit"
                   disabled={status === "submitting"}
-                  className={`flex-[2] py-3 rounded-full font-bold text-white transition-all shadow-lg ${status === "submitting"
+                  className={`flex-[2] py-3 rounded-lg font-bold text-white transition-all shadow-sm uppercase text-[10px] tracking-widest ${status === "submitting"
                     ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-kmuGreen hover:bg-green-700 shadow-green-500/20 active:scale-95"
+                    : "bg-kmuGreen hover:bg-green-700 active:scale-95"
                     }`}
                 >
                   {status === "submitting" ? "Registering..." : step < 4 ? "Continue" : "Complete Registration"}
                 </button>
               </div>
 
-              <div className="mt-6 text-center">
-                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+              <div className="mt-8 text-center pt-6 border-t border-gray-100 dark:border-gray-800">
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest">
                   Already have an account?{" "}
                   <button
                     type="button"
                     onClick={() => router.push("/login")}
-                    className="text-kmuGreen font-bold hover:underline"
+                    className="text-kmuGreen font-bold hover:underline ml-1"
                   >
                     Login here
                   </button>

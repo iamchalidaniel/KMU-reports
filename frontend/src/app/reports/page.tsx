@@ -117,20 +117,20 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-serif">
-      <div className="max-w-7xl mx-auto py-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
+      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="animate-in fade-in duration-300 space-y-6">
 
-          {/* Executive Command Bar */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-8 rounded-[2rem] border-t-4 border-orange-500 shadow-xl gap-4">
+          {/* Reports Header */}
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <h1 className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white uppercase italic">Intelligence Command</h1>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Intelligence Command</h1>
+              <p className="text-sm text-gray-500 font-semibold mt-1">
                 KMU Unified Student Incident Reporting & Analytics
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <span className="bg-orange-100 dark:bg-orange-900/30 text-orange-600 px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2">
+              <span className="bg-orange-100 dark:bg-orange-900/30 text-orange-600 px-4 py-2 rounded-lg font-bold text-[10px] uppercase tracking-widest flex items-center gap-2 border border-orange-200">
                 📡 {total} Active Ingress
               </span>
             </div>
@@ -145,15 +145,15 @@ export default function ReportsPage() {
           </div>
 
           {/* Central Reports Ledger */}
-          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
-            <div className="p-10 border-b border-gray-100 dark:border-gray-800">
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+            <div className="p-6 border-b border-gray-100 dark:border-gray-800">
               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-                <h2 className="text-xl font-black uppercase tracking-tighter italic text-orange-600">Incident Ingress Ledger</h2>
-                <div className="flex flex-wrap gap-4 w-full lg:w-auto font-sans">
+                <h2 className="text-lg font-bold uppercase tracking-tight text-orange-600">Incident Ingress Ledger</h2>
+                <div className="flex flex-wrap gap-3 w-full lg:w-auto font-sans">
                   <div className="relative flex-1 lg:w-80">
                     <input
                       placeholder="Query ingress metadata..."
-                      className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-6 py-4 text-xs w-full focus:ring-2 focus:ring-orange-500 transition-all shadow-inner"
+                      className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-2 text-xs w-full focus:ring-2 focus:ring-orange-500 transition-all shadow-sm"
                       value={search}
                       onChange={e => { setSearch(e.target.value); setPage(1); }}
                     />
@@ -161,7 +161,7 @@ export default function ReportsPage() {
                   <select
                     value={statusFilter}
                     onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
-                    className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-4 py-3 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-orange-500 transition-all font-sans"
+                    className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase outline-none focus:ring-2 focus:ring-orange-500 transition-all font-sans"
                   >
                     <option value="">All Statuses</option>
                     <option value="Pending">Pending</option>
@@ -175,48 +175,48 @@ export default function ReportsPage() {
 
             <div className="overflow-x-auto font-sans">
               <table className="w-full text-xs">
-                <thead className="bg-gray-50/50 dark:bg-gray-800/50 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] italic">
+                <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-[10px] font-bold uppercase tracking-widest">
                   <tr>
-                    <th className="px-10 py-6 text-left">Subject designation</th>
-                    <th className="px-10 py-6 text-left">Classification</th>
-                    <th className="px-10 py-6 text-center">Severity Index</th>
-                    <th className="px-10 py-6 text-right">Operational Actions</th>
+                    <th className="px-6 py-4 text-left">Subject designation</th>
+                    <th className="px-6 py-4 text-left">Classification</th>
+                    <th className="px-6 py-4 text-center">Severity Index</th>
+                    <th className="px-6 py-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {studentReports.map((r, i) => (
-                    <tr key={r._id || i} className="hover:bg-orange-50/30 dark:hover:bg-orange-950/10 group transition-all duration-300">
-                      <td className="px-10 py-6">
+                    <tr key={r._id || i} className="hover:bg-orange-50/30 dark:hover:bg-orange-950/10 group transition-colors">
+                      <td className="px-6 py-4">
                         <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-2xl bg-orange-100 dark:bg-orange-900/50 flex items-center justify-center text-orange-600 font-black text-xs uppercase group-hover:rotate-12 transition-transform">
+                          <div className="w-9 h-9 rounded-lg bg-orange-100 dark:bg-orange-900/50 flex items-center justify-center text-orange-600 font-bold text-xs uppercase transition-transform">
                             {r.student_name?.charAt(0) || 'A'}
                           </div>
                           <div>
-                            <div className="font-extrabold text-gray-900 dark:text-gray-100 uppercase text-sm tracking-tighter">
+                            <div className="font-bold text-gray-900 dark:text-gray-100 uppercase text-sm tracking-tight">
                               {r.student_name || 'Anonymous Submission'}
                             </div>
-                            <div className="text-[10px] text-gray-400 font-mono tracking-tighter mt-0.5">{new Date(r.incident_date).toLocaleDateString()}</div>
+                            <div className="text-[10px] text-gray-400 font-semibold mt-0.5 uppercase">{new Date(r.incident_date).toLocaleDateString()}</div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-10 py-6">
+                      <td className="px-6 py-4">
                         <div className="font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tight truncate max-w-[200px]">{r.description}</div>
-                        <div className="text-[10px] text-gray-400 mt-1 uppercase font-black tracking-widest">{r.offense_type || 'Unclassified'}</div>
+                        <div className="text-[10px] text-gray-400 mt-1 uppercase font-bold tracking-wider">{r.offense_type || 'Unclassified'}</div>
                       </td>
-                      <td className="px-10 py-6 text-center">
-                        <span className={`px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest ${r.severity === 'High' ? 'bg-red-100 text-red-600 border border-red-200 shadow-sm' : 'bg-gray-100 text-gray-500 border border-gray-200'}`}>
+                      <td className="px-6 py-4 text-center">
+                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase border ${r.severity === 'High' ? 'bg-red-100 text-red-600 border-red-200' : 'bg-gray-100 text-gray-500 border-gray-200'}`}>
                           {r.severity} Priority
                         </span>
                       </td>
-                      <td className="px-10 py-6 text-right">
+                      <td className="px-6 py-4 text-right">
                         <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
                           {r.status === 'Pending' && (
-                            <button onClick={() => handleApproveReport(r._id)} className="bg-emerald-600 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest hover:scale-105 transition-transform">Authorize</button>
+                            <button onClick={() => handleApproveReport(r._id)} className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all">Authorize</button>
                           )}
                           {(r.status === 'Pending' || r.status === 'Approved') && (
-                            <button onClick={() => handleConvertToCase(r._id)} className="bg-orange-600 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest hover:scale-105 transition-transform">Convert</button>
+                            <button onClick={() => handleConvertToCase(r._id)} className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all">Convert</button>
                           )}
-                          <span className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest bg-gray-100 dark:bg-gray-800 text-gray-400 border border-gray-200 dark:border-gray-700`}>
+                          <span className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-gray-800 text-gray-400 border border-gray-200 dark:border-gray-700`}>
                             {r.status}
                           </span>
                         </div>
@@ -225,30 +225,30 @@ export default function ReportsPage() {
                   ))}
                   {studentReports.length === 0 && !loading && (
                     <tr>
-                      <td colSpan={4} className="py-24 text-center text-gray-400 italic text-sm">Ingress query returned zero entities.</td>
+                      <td colSpan={4} className="py-20 text-center text-gray-400 italic text-sm">Ingress query returned zero entities.</td>
                     </tr>
                   )}
                 </tbody>
               </table>
             </div>
 
-            {/* Premium Pagination */}
-            <div className="p-10 bg-gray-50/50 dark:bg-gray-800/20 border-t border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-center gap-6">
-              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Showing {studentReports.length} of {total} Ingress Clusters</span>
+            {/* Pagination */}
+            <div className="p-6 bg-gray-50 dark:bg-gray-800/20 border-t border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-center gap-6">
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Showing {studentReports.length} of {total} Ingress Clusters</span>
               <div className="flex items-center gap-1">
-                <PaginationButton onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Prev Cluster</PaginationButton>
+                <PaginationButton onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Prev</PaginationButton>
                 {Array.from({ length: Math.ceil(total / limit) }, (_, i) => i + 1).filter(p => p === 1 || p === Math.ceil(total / limit) || Math.abs(p - page) <= 1).map((p, idx, arr) => (
                   <div key={p} className="flex items-center">
                     {idx > 0 && arr[idx - 1] !== p - 1 && <span className="px-2 text-gray-400">...</span>}
                     <button
                       onClick={() => setPage(p)}
-                      className={`w-10 h-10 rounded-xl font-black text-[10px] transition-all ${p === page ? 'bg-orange-600 text-white shadow-lg shadow-orange-500/30' : 'bg-white dark:bg-gray-800 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+                      className={`w-9 h-9 rounded-lg font-bold text-xs transition-all ${p === page ? 'bg-orange-600 text-white shadow-sm' : 'bg-white dark:bg-gray-800 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
                     >
                       {p}
                     </button>
                   </div>
                 ))}
-                <PaginationButton onClick={() => setPage(p => Math.min(Math.ceil(total / limit), p + 1))} disabled={page === Math.ceil(total / limit) || total === 0}>Next Cluster</PaginationButton>
+                <PaginationButton onClick={() => setPage(p => Math.min(Math.ceil(total / limit), p + 1))} disabled={page === Math.ceil(total / limit) || total === 0}>Next</PaginationButton>
               </div>
             </div>
           </div>
@@ -262,15 +262,15 @@ export default function ReportsPage() {
 
 function StatCard({ title, value, color }: any) {
   const colors: any = {
-    orange: 'text-orange-700 bg-orange-50/30 border-orange-100 dark:bg-orange-950/10 dark:border-orange-900/50',
-    amber: 'text-amber-700 bg-amber-50/30 border-amber-100 dark:bg-amber-950/10 dark:border-amber-900/50',
-    blue: 'text-blue-700 bg-blue-50/30 border-blue-100 dark:bg-blue-950/10 dark:border-blue-900/50',
-    red: 'text-red-700 bg-red-50/30 border-red-100 dark:bg-red-950/10 dark:border-red-900/50'
+    orange: 'border-orange-500 dark:border-orange-400',
+    amber: 'border-amber-500 dark:border-amber-400',
+    blue: 'border-blue-500 dark:border-blue-400',
+    red: 'border-red-500 dark:border-red-400'
   };
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-[2rem] shadow-sm border p-8 transition-all duration-300 ${colors[color]}`}>
-      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">{title}</div>
-      <div className="text-4xl font-black tracking-tighter italic">{value}</div>
+    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-6 transition-all hover:shadow-md ${colors[color]}`}>
+      <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{title}</div>
+      <div className="text-3xl font-bold text-gray-900 dark:text-white">{value}</div>
     </div>
   );
 }
@@ -280,7 +280,7 @@ function PaginationButton({ children, onClick, disabled }: any) {
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${disabled ? 'text-gray-300' : 'text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-900/20'}`}
+      className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${disabled ? 'text-gray-300' : 'text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-900/20'}`}
     >
       {children}
     </button>

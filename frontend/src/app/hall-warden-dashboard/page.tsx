@@ -310,22 +310,22 @@ export default function HallWardenDashboard() {
   const halls = Array.from(new Set(reports.map(r => r.location.hall).filter(Boolean)));
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-serif">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="animate-in fade-in duration-300 space-y-6">
 
-          {/* Executive Command Bar */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-8 rounded-3xl border-t-4 border-kmuGreen shadow-xl gap-4">
+          {/* Hall Warden Header */}
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <h1 className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white uppercase italic text-kmuGreen">Hall Warden Command</h1>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">Operational Facility Management & Hostel Oversight</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Hall Warden Command</h1>
+              <p className="text-sm text-gray-500 font-semibold mt-1 text-kmuGreen uppercase tracking-wider">Operational Facility Management & Hostel Oversight</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => setShowForm(true)}
-                className="bg-kmuGreen text-white px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:shadow-lg hover:shadow-emerald-500/20 transition flex items-center gap-2 group border-none"
+                className="bg-kmuGreen hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition shadow-sm flex items-center gap-2"
               >
-                <span className="group-hover:animate-bounce">🛠️</span> Initiate Maintenance Protocol
+                🛠️ Initiate Maintenance Protocol
               </button>
             </div>
           </div>
@@ -340,11 +340,11 @@ export default function HallWardenDashboard() {
 
           {/* Analytics Matrix */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
-              <div className="flex justify-between items-center mb-8">
-                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 font-bold">Infrastructural Fault Variance</h3>
+            <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Infrastructural Fault Variance</h3>
                 <select
-                  className="bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-kmuGreen transition-all font-sans"
+                  className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs font-bold uppercase outline-none focus:ring-2 focus:ring-kmuGreen transition-all font-sans"
                   value={hallFilter}
                   onChange={(e) => setHallFilter(e.target.value)}
                 >
@@ -364,8 +364,8 @@ export default function HallWardenDashboard() {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
-              <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-8 font-bold">Operational Priority</h3>
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Operational Priority</h3>
               <div className="space-y-4 font-sans">
                 {['Urgent', 'High', 'Medium', 'Low'].map(p => {
                   const count = reports.filter(r => r.priority === p).length;
@@ -374,10 +374,10 @@ export default function HallWardenDashboard() {
                     <div key={p} className="space-y-2">
                       <div className="flex justify-between text-[10px] font-black uppercase tracking-tighter">
                         <span className={p === 'Urgent' ? 'text-red-500' : 'text-gray-500'}>{p} Escalation</span>
-                        <span>{count}</span>
+                        <span className="font-bold">{count}</span>
                       </div>
-                      <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                        <div className={`h-full rounded-full ${p === 'Urgent' ? 'bg-red-500' : p === 'High' ? 'bg-orange-500' : 'bg-emerald-500'}`} style={{ width: `${percentage}%` }} />
+                      <div className="h-2 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                        <div className={`h-full rounded-full transition-all duration-500 ${p === 'Urgent' ? 'bg-red-500' : p === 'High' ? 'bg-orange-500' : 'bg-kmuGreen'}`} style={{ width: `${percentage}%` }} />
                       </div>
                     </div>
                   );
@@ -387,13 +387,13 @@ export default function HallWardenDashboard() {
           </div>
 
           {/* Operational Dispatch Ledger */}
-          <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
-            <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <h2 className="text-lg font-black uppercase tracking-tighter italic text-kmuGreen">Operational Dispatch Ledger</h2>
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+            <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <h2 className="text-lg font-bold uppercase tracking-tight text-kmuGreen">Operational Dispatch Ledger</h2>
               <div className="relative w-full md:w-80 font-sans">
                 <input
                   placeholder="Query operational indices..."
-                  className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-5 py-3.5 text-xs w-full focus:ring-2 focus:ring-kmuGreen transition-all font-sans"
+                  className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-2 text-xs w-full focus:ring-2 focus:ring-kmuGreen transition-all"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
@@ -401,12 +401,12 @@ export default function HallWardenDashboard() {
             </div>
             <div className="overflow-x-auto font-sans">
               <table className="w-full text-xs">
-                <thead className="bg-gray-50/50 dark:bg-gray-800/50 text-[10px] font-black uppercase text-gray-400 tracking-widest">
+                <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-[10px] font-bold uppercase tracking-widest">
                   <tr>
-                    <th className="px-8 py-5 text-left">Location / Identity</th>
-                    <th className="px-8 py-5 text-left">Category / Description</th>
-                    <th className="px-8 py-5 text-center">Protocol Status</th>
-                    <th className="px-8 py-5 text-right">Technician Dispatch</th>
+                    <th className="px-6 py-4 text-left">Location / Identity</th>
+                    <th className="px-6 py-4 text-left">Category / Description</th>
+                    <th className="px-6 py-4 text-center">Protocol Status</th>
+                    <th className="px-6 py-4 text-right">Technician Dispatch</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -414,27 +414,27 @@ export default function HallWardenDashboard() {
                     const reportId = report._id || report.id;
                     return (
                       <tr key={reportId} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 group transition-colors">
-                        <td className="px-8 py-5">
+                        <td className="px-6 py-4">
                           <div className="font-bold text-gray-900 dark:text-gray-100 uppercase">{report.location.hall}</div>
-                          <div className="text-[10px] text-gray-400 font-mono italic">Unit {report.location.room || 'N/A'} • {getRelativeTime(report.created_at)}</div>
+                          <div className="text-[10px] text-gray-400 font-semibold italic mt-0.5">Unit {report.location.room || 'N/A'} • {getRelativeTime(report.created_at)}</div>
                         </td>
-                        <td className="px-8 py-5">
-                          <div className="font-bold text-gray-700 dark:text-gray-200 uppercase tracking-tighter">{report.category}</div>
-                          <div className="text-[10px] text-gray-400 mt-1 line-clamp-1">"{report.description}"</div>
+                        <td className="px-6 py-4">
+                          <div className="font-bold text-gray-700 dark:text-gray-200 uppercase tracking-tight">{report.category}</div>
+                          <div className="text-[10px] text-gray-400 mt-1 line-clamp-1 italic">"{report.description}"</div>
                         </td>
-                        <td className="px-8 py-5 text-center">
+                        <td className="px-6 py-4 text-center">
                           <select
                             value={report.status}
                             onChange={(e) => updateStatus(reportId!, e.target.value)}
-                            className={`text-[9px] font-black uppercase bg-transparent outline-none cursor-pointer border-b-2 border-transparent hover:border-kmuGreen transition-all ${report.status === 'Completed' ? 'text-emerald-600' : 'text-blue-600'}`}
+                            className={`text-[10px] font-bold uppercase bg-transparent outline-none cursor-pointer border-b border-transparent hover:border-kmuGreen transition-all ${report.status === 'Completed' ? 'text-emerald-600' : 'text-blue-600'}`}
                           >
                             {STATUSES.map(s => <option key={s.value} value={s.value} className="bg-white dark:bg-gray-900">{s.label}</option>)}
                           </select>
                         </td>
-                        <td className="px-8 py-5 text-right">
+                        <td className="px-6 py-4 text-right">
                           {['light', 'socket', 'ac', 'fan', 'fridge'].includes(report.category) && report.status === 'Reported' ? (
                             <select
-                              className="text-[9px] font-black uppercase bg-gray-50 dark:bg-gray-800 border-none rounded-lg px-2 py-1.5 outline-none focus:ring-1 focus:ring-kmuGreen transition-all"
+                              className="text-[10px] font-bold uppercase bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-2 py-1.5 outline-none focus:ring-1 focus:ring-kmuGreen transition-all"
                               onChange={(e) => {
                                 const elec = electricians.find(el => el._id === e.target.value);
                                 if (elec) assignToElectrician(reportId!, elec._id, elec.name);
@@ -446,11 +446,11 @@ export default function HallWardenDashboard() {
                             </select>
                           ) : report.assigned_to?.name ? (
                             <div className="flex flex-col items-end">
-                              <span className="text-[8px] font-black text-gray-400 uppercase tracking-tighter">Technician Assigned</span>
+                              <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tight">Technician Assigned</span>
                               <span className="text-[10px] font-bold text-emerald-600 uppercase">{report.assigned_to.name}</span>
                             </div>
                           ) : (
-                            <span className="text-[9px] text-gray-300 italic uppercase">Station Standby</span>
+                            <span className="text-[10px] text-gray-300 italic uppercase font-semibold">Station Standby</span>
                           )}
                         </td>
                       </tr>
@@ -459,11 +459,11 @@ export default function HallWardenDashboard() {
                 </tbody>
               </table>
               {filteredReports.length === 0 && (
-                <div className="text-center py-24 text-gray-400 italic text-sm font-serif">Empty operational registry.</div>
+                <div className="text-center py-20 text-gray-400 italic text-sm">Empty operational registry.</div>
               )}
             </div>
-            <div className="p-8 bg-gray-50/30 dark:bg-gray-800/20 text-center border-t border-gray-100 dark:border-gray-800">
-              <span className="text-[10px] font-black text-gray-300 uppercase tracking-[0.4em]">End of Operational Command Ledger</span>
+            <div className="p-6 bg-gray-50 dark:bg-gray-800/20 text-center border-t border-gray-100 dark:border-gray-800">
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">End of Operational Command Ledger</span>
             </div>
           </div>
         </div>
@@ -472,30 +472,33 @@ export default function HallWardenDashboard() {
       {/* Initiation Modal */}
       {showForm && (
         <div className="fixed inset-0 z-[1001] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-gray-950/80 backdrop-blur-md" onClick={() => setShowForm(false)} />
-          <div className="relative bg-white dark:bg-gray-900 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[3rem] shadow-2xl border-t-8 border-kmuGreen p-12">
-            <div className="flex justify-between items-center mb-10">
+          <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => setShowForm(false)} />
+          <div className="relative bg-white dark:bg-gray-900 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 p-8">
+            <div className="flex justify-between items-center mb-8 border-b border-gray-100 dark:border-gray-800 pb-6">
               <div>
-                <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase italic tracking-tighter">Log Facility Issue</h2>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Operational Protocol Initiation</p>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Log Facility Issue</h2>
+                <p className="text-xs text-kmuGreen font-bold uppercase tracking-wider mt-1">Operational Protocol Initiation</p>
               </div>
-              <button onClick={() => setShowForm(false)} className="bg-gray-100 dark:bg-gray-800 p-4 rounded-full text-gray-400 hover:text-emerald-600 transition-all">✕</button>
+              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600 transition-all font-bold text-xl">✕</button>
             </div>
-            <form onSubmit={handleSubmit} className="space-y-8 font-sans">
+            <form onSubmit={handleSubmit} className="space-y-6 font-sans">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField label="Problem Category" value={formData.category} onChange={(v: string) => setFormData({ ...formData, category: v })} type="select" options={CATEGORIES} />
                 <FormField label="Escalation Priority" value={formData.priority} onChange={(v: string) => setFormData({ ...formData, priority: v })} type="select" options={PRIORITIES} />
                 <FormField label="Target Hostel" value={formData.hall} onChange={(v: string) => setFormData({ ...formData, hall: v })} />
                 <FormField label="Unit/Room" value={formData.room} onChange={(v: string) => setFormData({ ...formData, room: v })} />
                 <div className="md:col-span-2">
-                  <FormField label="Technological Description" value={formData.description} onChange={(v: string) => setFormData({ ...formData, description: v })} type="textarea" />
+                  <FormField label="Technical Description" value={formData.description} onChange={(v: string) => setFormData({ ...formData, description: v })} type="textarea" />
                 </div>
                 <FormField label="Subject Entity" value={formData.reported_by_name} onChange={(v: string) => setFormData({ ...formData, reported_by_name: v })} />
                 <FormField label="Contact Index" value={formData.reported_by_contact} onChange={(v: string) => setFormData({ ...formData, reported_by_contact: v })} />
               </div>
-              <div className="mt-10 flex gap-4">
-                <button type="submit" disabled={loading} className="flex-1 bg-kmuGreen text-white font-black py-5 rounded-[2rem] hover:shadow-xl hover:shadow-emerald-500/30 transition-all active:scale-[0.98] text-[10px] uppercase tracking-widest">
+              <div className="mt-8 flex gap-4">
+                <button type="submit" disabled={loading} className="flex-1 bg-kmuGreen hover:bg-emerald-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all active:scale-[0.98] text-xs uppercase tracking-widest">
                   {loading ? 'Transmitting Index...' : 'Commit Operational Record'}
+                </button>
+                <button type="button" onClick={() => setShowForm(false)} className="px-8 py-4 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold uppercase tracking-widest hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+                  Cancel
                 </button>
               </div>
             </form>
@@ -512,15 +515,15 @@ export default function HallWardenDashboard() {
 
 function StatCard({ title, value, color }: any) {
   const colors: any = {
-    teal: 'text-emerald-700 bg-emerald-50/30 border-emerald-100 dark:bg-emerald-950/10 dark:border-emerald-900/50',
-    orange: 'text-orange-700 bg-orange-50/30 border-orange-100 dark:bg-orange-950/10 dark:border-orange-900/50',
-    blue: 'text-blue-700 bg-blue-50/30 border-blue-100 dark:bg-blue-950/10 dark:border-blue-900/50',
-    emerald: 'text-green-700 bg-green-50/30 border-green-100 dark:bg-green-950/10 dark:border-green-900/50'
+    teal: 'border-emerald-500 dark:border-emerald-400',
+    orange: 'border-orange-500 dark:border-orange-400',
+    blue: 'border-blue-500 dark:border-blue-400',
+    emerald: 'border-green-500 dark:border-green-400'
   };
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-3xl shadow-sm border p-8 transition-all duration-300 ${colors[color]}`}>
-      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">{title}</div>
-      <div className="text-4xl font-black tracking-tight italic">{value}</div>
+    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-6 transition-all hover:shadow-md ${colors[color]}`}>
+      <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{title}</div>
+      <div className="text-3xl font-bold text-gray-900 dark:text-white">{value}</div>
     </div>
   );
 }
@@ -528,16 +531,16 @@ function StatCard({ title, value, color }: any) {
 function FormField({ label, value, onChange, type = 'text', options = [] }: any) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">{label}</label>
+      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">{label}</label>
       {type === 'select' ? (
-        <select value={value} onChange={(e) => onChange(e.target.value)} className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-kmuGreen outline-none transition-all text-xs font-bold uppercase">
+        <select value={value} onChange={(e) => onChange(e.target.value)} className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-kmuGreen outline-none transition-all text-xs font-bold uppercase">
           <option value="">Select Index...</option>
           {options.map((o: any) => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
       ) : type === 'textarea' ? (
-        <textarea value={value} onChange={(e) => onChange(e.target.value)} className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-kmuGreen outline-none min-h-[140px] transition-all text-xs font-medium" />
+        <textarea value={value} onChange={(e) => onChange(e.target.value)} className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-kmuGreen outline-none min-h-[120px] transition-all text-xs font-medium" />
       ) : (
-        <input type={type} value={value} onChange={(e) => onChange(e.target.value)} className="bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-kmuGreen outline-none transition-all text-xs font-bold" />
+        <input type={type} value={value} onChange={(e) => onChange(e.target.value)} className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-kmuGreen outline-none transition-all text-xs font-bold" />
       )}
     </div>
   );
