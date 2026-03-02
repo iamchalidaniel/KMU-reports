@@ -56,7 +56,7 @@ export function useSyncManager() {
         const endpoint = `${API_BASE_URL}/${change.entity}`;
         let url = endpoint;
         let method = 'POST';
-        
+
         if (change.type === 'update' || change.type === 'delete') {
           url = `${endpoint}/${change.data.id}`;
           method = change.type === 'update' ? 'PUT' : 'DELETE';
@@ -81,12 +81,33 @@ export function useSyncManager() {
   }
 
   async function pullUpdates() {
-    const entities: Entity[] = ['students', 'cases', 'evidence', 'users', 'settings'];
+    // Determine which entities this user can actually pull
+    const allEntities: Entity[] = ['students', 'cases', 'evidence', 'users'];
+    const entities: Entity[] = [];
+
+    // Simple role-based filtering to avoid 403s
+    // Students can only see cases (their own filtered by backend)
+    // Staff can see more
+    const isStaff = user && ['admin', 'security_officer', 'chief_security_officer', 'dean_of_students', 'assistant_dean', 'secretary', 'hall_warden', 'electrician'].includes(user.role);
+
+    entities.push('cases');
+    if (isStaff) {
+      entities.push('students');
+      entities.push('evidence');
+      entities.push('users');
+    }
+
     const results: Record<Entity, any[]> = {} as any;
     for (const entity of entities) {
       try {
         const res = await authFetch(`${API_BASE_URL}/${entity}`, {}, token);
-        if (!res.ok) throw new Error(await res.text());
+        if (!res.ok) {
+          if (res.status === 403) {
+            console.warn(`Unauthorized to pull ${entity}, skipping.`);
+            continue;
+          }
+          throw new Error(await res.text());
+        }
         results[entity] = await res.json();
       } catch (err) {
         setSyncError(`Failed to fetch ${entity}: ${err instanceof Error ? err.message : String(err)}`);

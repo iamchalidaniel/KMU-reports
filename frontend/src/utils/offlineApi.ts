@@ -21,12 +21,12 @@ class OfflineApiService {
 
   async init(): Promise<void> {
     if (this.isInitialized) return;
-    
+
     // Check if we're in a browser environment
     if (typeof window === 'undefined') {
       throw new Error('Offline API service requires browser environment');
     }
-    
+
     try {
       await indexedDB.init();
       this.isInitialized = true;
@@ -40,7 +40,7 @@ class OfflineApiService {
   // Generic GET method with offline-first strategy
   async get<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
     await this.init();
-    
+
     try {
       // Try network first
       if (navigator.onLine) {
@@ -55,10 +55,10 @@ class OfflineApiService {
 
         if (response.ok) {
           const data = await response.json();
-          
+
           // Cache the response
           await this.cacheResponse(endpoint, data);
-          
+
           return {
             data,
             offline: false,
@@ -103,10 +103,10 @@ class OfflineApiService {
 
         if (response.ok) {
           const responseData = await response.json();
-          
+
           // Cache the response
           await this.cacheResponse(endpoint, responseData);
-          
+
           return {
             data: responseData,
             offline: false,
@@ -122,7 +122,7 @@ class OfflineApiService {
     // Queue for offline sync
     const entity = this.getEntityFromEndpoint(endpoint);
     await indexedDB.addToSyncQueue(entity, 'create', data);
-    
+
     // Store locally for immediate use
     const localId = `local_${Date.now()}`;
     const localData = { ...data, _id: localId, _local: true };
@@ -154,10 +154,10 @@ class OfflineApiService {
 
         if (response.ok) {
           const responseData = await response.json();
-          
+
           // Update local cache
           await this.updateLocalData(this.getEntityFromEndpoint(endpoint), responseData);
-          
+
           return {
             data: responseData,
             offline: false,
@@ -173,7 +173,7 @@ class OfflineApiService {
     // Queue for offline sync
     const entity = this.getEntityFromEndpoint(endpoint);
     await indexedDB.addToSyncQueue(entity, 'update', data);
-    
+
     // Update locally
     await this.updateLocalData(entity, data);
 
@@ -206,7 +206,7 @@ class OfflineApiService {
           if (id) {
             await this.removeLocalData(entity, id);
           }
-          
+
           return {
             data: { success: true } as T,
             offline: false,
@@ -224,7 +224,7 @@ class OfflineApiService {
     const id = this.getIdFromEndpoint(endpoint);
     if (id) {
       await indexedDB.addToSyncQueue(entity, 'delete', { id });
-      
+
       // Mark as deleted locally
       await this.markAsDeleted(entity, id);
     }
@@ -240,7 +240,7 @@ class OfflineApiService {
   // Sync all queued changes
   async syncAll(): Promise<void> {
     await this.init();
-    
+
     if (!navigator.onLine) {
       throw new Error('Cannot sync while offline');
     }
@@ -264,7 +264,7 @@ class OfflineApiService {
   // Sync a single item with conflict resolution
   private async syncItem(item: any): Promise<void> {
     const { entity, action, data } = item;
-    
+
     try {
       switch (action) {
         case 'create':
@@ -307,7 +307,7 @@ class OfflineApiService {
     // For now, use "last write wins" strategy
     // In a real app, you'd show a UI for user to choose
     const useLocal = localData._timestamp > error.remoteData._timestamp;
-    
+
     if (useLocal) {
       // Force update with local data
       await this.forceUpdate(entity, localData);
@@ -320,7 +320,7 @@ class OfflineApiService {
   // Cache management methods
   private async cacheResponse(endpoint: string, data: any): Promise<void> {
     const entity = this.getEntityFromEndpoint(endpoint);
-    
+
     if (Array.isArray(data)) {
       await indexedDB.putAll(entity, data);
     } else if (data.cases) {
@@ -339,7 +339,7 @@ class OfflineApiService {
   private async getCachedData(endpoint: string): Promise<any> {
     const entity = this.getEntityFromEndpoint(endpoint);
     const id = this.getIdFromEndpoint(endpoint);
-    
+
     if (id) {
       return await indexedDB.get(entity, id);
     } else {
@@ -462,7 +462,7 @@ class OfflineApiService {
     conflicts: number;
   }> {
     await this.init();
-    
+
     const syncQueue = await indexedDB.getSyncQueue();
     const pendingChanges = syncQueue.filter(item => !item.synced).length;
     const conflicts = syncQueue.filter(item => item.type === 'conflict').length;
@@ -478,44 +478,48 @@ class OfflineApiService {
   // Clear all cached data
   async clearCache(): Promise<void> {
     await this.init();
-    
-    const stores = ['students', 'cases', 'evidence', 'users', 'settings'];
+
+    const stores = ['students', 'cases', 'evidence', 'users'];
     for (const store of stores) {
       await indexedDB.clear(store);
     }
   }
 
   // Enhanced caching methods for better offline functionality
-  async preloadCriticalData(): Promise<void> {
+  async preloadCriticalData(userRole?: string): Promise<void> {
     await this.init();
-    
-    console.log('Preloading critical data for offline functionality...');
-    
+
+    console.log(`Preloading critical data for role: ${userRole || 'unknown'}...`);
+
     const preloadTasks = [
-      this.preloadStudents(),
       this.preloadCases(),
-      this.preloadUsers(),
     ];
-    
+
+    // Only preload students/users for staff roles
+    if (userRole && ['admin', 'security_officer', 'chief_security_officer', 'dean_of_students', 'assistant_dean', 'secretary', 'hall_warden'].includes(userRole)) {
+      preloadTasks.push(this.preloadStudents());
+      preloadTasks.push(this.preloadUsers());
+    }
+
     await Promise.allSettled(preloadTasks);
     console.log('Critical data preload completed');
   }
 
   async preloadRoleSpecificData(userRole: string): Promise<void> {
     await this.init();
-    
+
     console.log(`Preloading role-specific data for ${userRole}...`);
-    
+
     const roleTasks = [];
-    
+
     if (userRole === 'admin') {
       roleTasks.push(this.preloadAudit());
     }
-    
+
     if (userRole === 'security_officer' || userRole === 'admin') {
       roleTasks.push(this.preloadEvidence());
     }
-    
+
     if (roleTasks.length > 0) {
       await Promise.allSettled(roleTasks);
       console.log('Role-specific data preload completed');
@@ -570,7 +574,7 @@ class OfflineApiService {
   // Background sync enhancement
   async startBackgroundSync(): Promise<void> {
     if (!navigator.onLine) return;
-    
+
     try {
       console.log('Starting background sync...');
       await this.syncAll();
@@ -589,7 +593,7 @@ class OfflineApiService {
     settings: number;
   }> {
     await this.init();
-    
+
     const [students, cases, evidence, users, settings] = await Promise.all([
       indexedDB.count('students'),
       indexedDB.count('cases'),
@@ -597,13 +601,13 @@ class OfflineApiService {
       indexedDB.count('users'),
       indexedDB.count('settings'),
     ]);
-    
+
     return {
       students,
       cases,
       evidence,
       users,
-      settings,
+      settings: 0,
     };
   }
 }

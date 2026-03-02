@@ -275,7 +275,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Preload critical data with timeout
       await Promise.race([
-        offlineApi.preloadCriticalData(),
+        offlineApi.preloadCriticalData(user?.role),
         new Promise(resolve => setTimeout(resolve, 10000)) // 10 second timeout
       ]).catch(error => {
         console.warn('Critical data preload timeout or error:', error);
