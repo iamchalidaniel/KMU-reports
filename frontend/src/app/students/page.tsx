@@ -134,18 +134,18 @@ export default function StudentsPage() {
                 Manage student records and enrollment {offlineMode && <span className="text-orange-500 font-bold ml-2">• OFFLINE MODE ON</span>}
               </p>
             </div>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
               {(user?.role === 'admin' || user?.role === 'academic_office') && (
                 <button
                   onClick={() => setShowAddForm(true)}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition shadow-sm flex items-center gap-2"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition shadow-sm flex items-center justify-center gap-2 w-full sm:w-auto"
                 >
                   👤 Add New Student
                 </button>
               )}
               <Link
                 href="/students/import"
-                className="bg-gray-800 dark:bg-gray-700 text-white px-5 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition shadow-sm"
+                className="bg-gray-800 dark:bg-gray-700 text-white px-5 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition shadow-sm flex items-center justify-center w-full sm:w-auto text-center"
               >
                 Bulk Import
               </Link>
@@ -165,7 +165,7 @@ export default function StudentsPage() {
             <div className="p-6 border-b border-gray-100 dark:border-gray-800">
               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                 <h2 className="text-lg font-bold uppercase tracking-tight text-emerald-600">Students List</h2>
-                <div className="flex flex-wrap gap-3 w-full lg:w-auto font-sans">
+                <div className="flex flex-col sm:flex-row flex-wrap gap-3 w-full lg:w-auto font-sans">
                   <div className="relative flex-1 lg:w-80">
                     <input
                       placeholder="Search students..."
@@ -177,7 +177,7 @@ export default function StudentsPage() {
                   <select
                     value={programFilter}
                     onChange={e => { setProgramFilter(e.target.value); setPage(1); }}
-                    className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-sans"
+                    className="w-full sm:w-auto bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-sans"
                   >
                     <option value="">All Programs</option>
                     {PROGRAMS.map(p => <option key={p} value={p}>{p}</option>)}

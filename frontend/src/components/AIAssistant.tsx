@@ -80,9 +80,9 @@ export default function AIAssistant({ formType, onSuggestionReceived }: AIAssist
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 sm:bottom-4 sm:right-4 sm:right-auto sm:left-4">
+    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
       {isOpen ? (
-        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl w-11/12 max-w-md sm:max-w-sm h-[80vh] sm:h-[70vh] flex flex-col border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-[calc(100vw-2rem)] max-w-[340px] sm:max-w-md h-[55vh] sm:h-[70vh] flex flex-col border border-gray-200 dark:border-gray-700 overflow-hidden animate-in zoom-in-95 duration-200 origin-bottom-right">
           {/* Header */}
           <div className="bg-kmuGreen dark:bg-kmuGreen/90 text-white p-4 rounded-t-xl flex justify-between items-center">
             <h3 className="font-semibold">AI Assistant</h3>
@@ -120,8 +120,8 @@ export default function AIAssistant({ formType, onSuggestionReceived }: AIAssist
               <div
                 key={index}
                 className={`p-3 rounded-lg max-w-[85%] ${msg.role === 'user'
-                    ? 'bg-blue-100 dark:bg-blue-900/50 ml-auto'
-                    : 'bg-gray-100 dark:bg-gray-700 mr-auto'
+                  ? 'bg-blue-100 dark:bg-blue-900/50 ml-auto'
+                  : 'bg-gray-100 dark:bg-gray-700 mr-auto'
                   }`}
               >
                 <p className="text-sm">{msg.content}</p>
@@ -163,7 +163,7 @@ export default function AIAssistant({ formType, onSuggestionReceived }: AIAssist
       ) : (
         <button
           onClick={toggleAssistant}
-          className="bg-kmuGreen dark:bg-kmuGreen/90 text-white p-3 sm:p-4 rounded-full shadow-lg hover:bg-kmuGreen/80 transition-transform transform hover:scale-105 flex items-center justify-center"
+          className="bg-kmuGreen dark:bg-kmuGreen/90 text-white p-2.5 sm:p-4 rounded-full shadow-lg hover:bg-green-700 transition-all active:scale-95 flex items-center justify-center transform hover:scale-105"
           aria-label="Open AI Assistant"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

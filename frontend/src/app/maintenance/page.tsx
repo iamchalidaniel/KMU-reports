@@ -194,8 +194,8 @@ export default function AdminMaintenancePage() {
                             <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Maintenance Management</h1>
                             <p className="text-sm text-gray-500 font-semibold mt-1">Manage university facility maintenance and repairs</p>
                         </div>
-                        <div className="flex gap-2">
-                            <div className="bg-emerald-50 dark:bg-emerald-950/20 px-4 py-2 rounded-lg border border-emerald-100 dark:border-emerald-900/50">
+                        <div className="flex gap-2 w-full md:w-auto">
+                            <div className="bg-emerald-50 dark:bg-emerald-950/20 px-4 py-2 rounded-lg border border-emerald-100 dark:border-emerald-900/50 flex-1 md:flex-none text-center md:text-left">
                                 <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest block mb-0.5">Total Reports</span>
                                 <span className="text-lg font-bold text-emerald-700 dark:text-emerald-400">{reports.length} Reports</span>
                             </div>
@@ -205,9 +205,9 @@ export default function AdminMaintenancePage() {
                     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
                         {/* Filters */}
                         <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                            <div className="flex flex-wrap gap-2">
+                            <div className="flex gap-2 w-full md:w-auto">
                                 <select
-                                    className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-3 py-2 text-[10px] font-bold uppercase outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
+                                    className="flex-1 md:flex-none bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-3 py-2 text-[10px] font-bold uppercase outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
                                     value={statusFilter}
                                     onChange={(e) => setStatusFilter(e.target.value)}
                                 >
@@ -215,7 +215,7 @@ export default function AdminMaintenancePage() {
                                     {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                                 </select>
                                 <select
-                                    className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-3 py-2 text-[10px] font-bold uppercase outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
+                                    className="flex-1 md:flex-none bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-3 py-2 text-[10px] font-bold uppercase outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
                                     value={priorityFilter}
                                     onChange={(e) => setPriorityFilter(e.target.value)}
                                 >

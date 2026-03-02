@@ -155,22 +155,22 @@ export default function CasesPage() {
                 Manage university disciplinary cases and incident reports {offlineMode && <span className="text-orange-500 font-bold ml-2">• OFFLINE MODE</span>}
               </p>
             </div>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
               <Link
                 href="/cases/new"
-                className="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition shadow-sm flex items-center gap-2"
+                className="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition shadow-sm flex items-center justify-center gap-2 w-full sm:w-auto"
               >
                 ⚖️ Create New Case
               </Link>
-              <div className="relative" ref={exportRef}>
+              <div className="relative w-full sm:w-auto" ref={exportRef}>
                 <button
                   onClick={() => setShowExportDropdown(!showExportDropdown)}
-                  className="bg-gray-800 dark:bg-gray-700 text-white px-5 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition shadow-sm flex items-center gap-2"
+                  className="bg-gray-800 dark:bg-gray-700 text-white px-5 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition shadow-sm flex items-center justify-center gap-2 w-full sm:w-auto"
                 >
                   🚀 {exporting ? 'Exporting...' : 'Export Reports'}
                 </button>
                 {showExportDropdown && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-100 dark:border-gray-700 py-1 z-50 font-sans animate-in fade-in zoom-in-95 duration-100">
+                  <div className="absolute right-0 mt-2 w-full sm:w-56 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-100 dark:border-gray-700 py-1 z-50 font-sans animate-in fade-in zoom-in-95 duration-100">
                     <button onClick={handleExportList} className="w-full text-left px-4 py-2.5 text-xs font-bold uppercase hover:bg-gray-50 dark:hover:bg-gray-700 transition">Full Ledger (DOCX)</button>
                   </div>
                 )}
@@ -191,7 +191,7 @@ export default function CasesPage() {
             <div className="p-6 border-b border-gray-100 dark:border-gray-800">
               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                 <h2 className="text-lg font-bold uppercase tracking-tight text-red-600">Case Registry</h2>
-                <div className="flex flex-wrap gap-3 w-full lg:w-auto font-sans">
+                <div className="flex flex-col sm:flex-row flex-wrap gap-3 w-full lg:w-auto font-sans">
                   <div className="relative flex-1 lg:w-64">
                     <input
                       placeholder="Search cases..."
@@ -200,22 +200,24 @@ export default function CasesPage() {
                       onChange={e => { setSearch(e.target.value); setPage(1); }}
                     />
                   </div>
-                  <select
-                    value={statusFilter}
-                    onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
-                    className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase outline-none focus:ring-2 focus:ring-red-500 transition-all font-sans"
-                  >
-                    <option value="">All Statuses</option>
-                    {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                  <select
-                    value={severityFilter}
-                    onChange={e => { setSeverityFilter(e.target.value); setPage(1); }}
-                    className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase outline-none focus:ring-2 focus:ring-red-500 transition-all font-sans"
-                  >
-                    <option value="">All Severities</option>
-                    {SEVERITY_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
+                  <div className="flex gap-2 w-full sm:w-auto">
+                    <select
+                      value={statusFilter}
+                      onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
+                      className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase outline-none focus:ring-2 focus:ring-red-500 transition-all font-sans"
+                    >
+                      <option value="">All Statuses</option>
+                      {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                    <select
+                      value={severityFilter}
+                      onChange={e => { setSeverityFilter(e.target.value); setPage(1); }}
+                      className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase outline-none focus:ring-2 focus:ring-red-500 transition-all font-sans"
+                    >
+                      <option value="">All Severities</option>
+                      {SEVERITY_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>

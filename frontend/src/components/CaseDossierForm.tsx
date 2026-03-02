@@ -222,14 +222,15 @@ export default function CaseDossierForm({ onSuccess, onCancel, initialData }: Ca
                     ))}
                 </div>
                 <div className="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                    <span className={step === 1 ? 'text-red-600' : ''}>I. Incident Details</span>
-                    <span className={step === 2 ? 'text-red-600' : ''}>II. Witness Statements</span>
-                    <span className={step === 3 ? 'text-red-600' : ''}>III. Warning and Caution</span>
-                    <span className={step === 4 ? 'text-red-600' : ''}>IV. Review & Sign</span>
+                    <span className={`${step === 1 ? 'text-red-600' : 'hidden sm:block'}`}>I. Incident Details</span>
+                    <span className={`${step === 2 ? 'text-red-600' : 'hidden sm:block'}`}>II. Witness Statements</span>
+                    <span className={`${step === 3 ? 'text-red-600' : 'hidden sm:block'}`}>III. Warning and Caution</span>
+                    <span className={`${step === 4 ? 'text-red-600' : 'hidden sm:block'}`}>IV. Review & Sign</span>
+                    <span className="sm:hidden text-red-600">Step {step}/4</span>
                 </div>
             </div>
 
-            <div className="p-12 max-h-[65vh] overflow-y-auto custom-scrollbar">
+            <div className="p-4 sm:p-12 max-h-[65vh] overflow-y-auto custom-scrollbar">
                 {step === 1 && (
                     <div className="space-y-8 animate-in fade-in slide-in-from-right-8 duration-500">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -616,18 +617,20 @@ function WarnAndCautionComponent({ formData, updateNested }: { formData: FormDat
                 <Field label="Chief" value={wc.chief} onChange={(v) => updateNested('dossier.warnAndCaution.chief', v)} />
             </div>
 
-            <div className="p-8 bg-red-50/50 dark:bg-red-950/10 rounded-xl border border-red-100 dark:border-red-900/30 font-sans text-sm leading-relaxed text-gray-800 dark:text-gray-300 relative overflow-hidden">
+            <div className="p-4 sm:p-8 bg-red-50/50 dark:bg-red-950/10 rounded-xl border border-red-100 dark:border-red-900/30 font-sans text-sm leading-relaxed text-gray-800 dark:text-gray-300 relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-4 text-red-200/10 text-6xl font-bold uppercase -rotate-12 pointer-events-none">CAUTION</div>
                 <div className="space-y-6 relative z-10">
-                    <p className="font-semibold italic border-l-4 border-red-600 pl-4 py-2 bg-white/50 dark:bg-black/20 rounded-r-lg">
-                        I have been warned and cautioned that a case of
-                        <input className="inline-block mx-2 border-b-2 border-red-200 bg-transparent px-2 font-bold italic text-red-700 outline-none w-64 uppercase tracking-tighter" value={wc.offence || docket.offence} onChange={(e) => updateNested('dossier.warnAndCaution.offence', e.target.value)} />
-                        which was committed on
-                        <input type="date" className="inline-block mx-2 border-b-2 border-red-200 bg-transparent px-2 font-bold outline-none italic" value={wc.occurrenceDate || (docket.dateTimeReported ? docket.dateTimeReported.split('T')[0] : '')} onChange={(e) => updateNested('dossier.warnAndCaution.occurrenceDate', e.target.value)} />
-                        at place
-                        <input className="inline-block mx-2 border-b-2 border-red-200 bg-transparent px-2 font-bold outline-none italic w-40" value={wc.occurrencePlace || ''} onChange={(e) => updateNested('dossier.warnAndCaution.occurrencePlace', e.target.value)} />
-                        is being investigated against me.
-                    </p>
+                    <div className="font-semibold italic border-l-4 border-red-600 pl-4 py-2 bg-white/50 dark:bg-black/20 rounded-r-lg">
+                        <div className="flex flex-wrap items-center gap-y-2">
+                            I have been warned and cautioned that a case of
+                            <input className="mx-2 border-b-2 border-red-200 bg-transparent px-2 font-bold italic text-red-700 outline-none w-full sm:w-64 uppercase tracking-tighter" value={wc.offence || docket.offence} onChange={(e) => updateNested('dossier.warnAndCaution.offence', e.target.value)} />
+                            which was committed on
+                            <input type="date" className="mx-2 border-b-2 border-red-200 bg-transparent px-2 font-bold outline-none italic w-full sm:w-auto" value={wc.occurrenceDate || (docket.dateTimeReported ? docket.dateTimeReported.split('T')[0] : '')} onChange={(e) => updateNested('dossier.warnAndCaution.occurrenceDate', e.target.value)} />
+                            at place
+                            <input className="mx-2 border-b-2 border-red-200 bg-transparent px-2 font-bold outline-none italic w-full sm:w-40" value={wc.occurrencePlace || ''} onChange={(e) => updateNested('dossier.warnAndCaution.occurrencePlace', e.target.value)} />
+                            is being investigated against me.
+                        </div>
+                    </div>
                     <p className="font-medium">
                         I am further cautioned that I am not obliged to make any statement against myself. Any statement provided will be documented and may be utilized in formal KMU Disciplinary Proceedings.
                     </p>

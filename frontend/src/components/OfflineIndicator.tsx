@@ -29,13 +29,12 @@ export default function OfflineIndicator() {
   }
 
   return (
-    <div className="fixed top-0 left-0 right-0 bg-yellow-600 text-white p-3 text-center z-50">
-      <div className="flex items-center justify-center space-x-2">
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-        </svg>
-        <span className="font-medium">You're offline</span>
-        <span className="text-sm opacity-90">- CampusCare is working offline</span>
+    <div className="fixed bottom-4 left-4 z-50 animate-in fade-in slide-in-from-bottom-4 duration-500 pointer-events-none">
+      <div className="bg-gray-900/90 backdrop-blur-md text-white px-3 py-1.5 rounded-full shadow-lg flex items-center space-x-2 border border-blue-500/30">
+        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
+        <span className="text-[10px] font-bold uppercase tracking-wider">Offline</span>
+        <div className="h-3 w-[1px] bg-gray-700" />
+        <span className="text-[10px] opacity-70 font-medium">Local Sync Active</span>
       </div>
     </div>
   );
