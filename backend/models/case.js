@@ -69,7 +69,8 @@ const caseSchema = new mongoose.Schema({
             takenAt: String,
             time: String,
             content: String,
-            signature: String
+            signature: String,
+            audioUrl: String
         }],
         warnAndCaution: {
             fullName: String,

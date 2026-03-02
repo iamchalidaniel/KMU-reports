@@ -126,7 +126,10 @@ export default function CaseDossierPrintable({ data, documentType }: CaseDossier
                             <InfoRow label="Business Address" value={s.businessAddress} />
                         </div>
                         <div className="mt-8">
-                            <p className="text-sm italic mb-4 font-bold border-b border-gray-200 pb-2">Taken on {s.takenAt} at {s.time} hours.</p>
+                            <div className="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
+                                <p className="text-sm italic font-bold">Taken on {s.takenAt} at {s.time || '____'} hours.</p>
+                                {s.audioUrl && <span className="text-[10px] border border-black px-2 py-0.5 rounded font-black uppercase">Audio Statement Recorded</span>}
+                            </div>
                             <div className="text-lg leading-[2.5rem] underline decoration-dotted decoration-gray-300 underline-offset-8 whitespace-pre-wrap min-h-[40vh]">
                                 {s.content}
                             </div>

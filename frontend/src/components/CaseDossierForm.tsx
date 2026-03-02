@@ -137,33 +137,33 @@ export default function CaseDossierForm({ onSuccess, onCancel }: CaseDossierForm
                 {step === 1 && (
                     <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <Field label="Investigating Officer" value={formData.dossier.occurrenceDocket.investigatingOfficer} onChange={(v) => updateNested('dossier.occurrenceDocket.investigatingOfficer', v)} />
-                            <Field label="OB Number" value={formData.ob_number} onChange={(v) => { setFormData({ ...formData, ob_number: v }); updateNested('dossier.occurrenceDocket.occurrenceBookNumber', v); }} />
-                            <Field label="Date & Time Reported" type="datetime-local" value={formData.dossier.occurrenceDocket.dateTimeReported} onChange={(v) => updateNested('dossier.occurrenceDocket.dateTimeReported', v)} />
+                            <Field label="Investigating Officer" value={formData.dossier.occurrenceDocket.investigatingOfficer} onChange={(v: string) => updateNested('dossier.occurrenceDocket.investigatingOfficer', v)} />
+                            <Field label="OB Number" value={formData.ob_number} onChange={(v: string) => { setFormData({ ...formData, ob_number: v }); updateNested('dossier.occurrenceDocket.occurrenceBookNumber', v); }} />
+                            <Field label="Date & Time Reported" type="datetime-local" value={formData.dossier.occurrenceDocket.dateTimeReported} onChange={(v: string) => updateNested('dossier.occurrenceDocket.dateTimeReported', v)} />
                         </div>
 
                         <section className="space-y-4">
                             <h3 className="font-bold text-sm bg-gray-100 dark:bg-gray-800 p-2 rounded uppercase tracking-wider">Particulars of Complainant</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <Field label="Full Name" value={formData.dossier.occurrenceDocket.complainant.name} onChange={(v) => updateNested('dossier.occurrenceDocket.complainant.name', v)} />
-                                <Field label="SIN / Phone" value={formData.dossier.occurrenceDocket.complainant.phone} onChange={(v) => updateNested('dossier.occurrenceDocket.complainant.phone', v)} />
-                                <Field label="Residential Address" value={formData.dossier.occurrenceDocket.complainant.address} onChange={(v) => updateNested('dossier.occurrenceDocket.complainant.address', v)} />
-                                <Field label="Program / Year" value={formData.dossier.occurrenceDocket.complainant.programOfStudy} onChange={(v) => updateNested('dossier.occurrenceDocket.complainant.programOfStudy', v)} />
+                                <Field label="Full Name" value={formData.dossier.occurrenceDocket.complainant.name} onChange={(v: string) => updateNested('dossier.occurrenceDocket.complainant.name', v)} />
+                                <Field label="SIN / Phone" value={formData.dossier.occurrenceDocket.complainant.phone} onChange={(v: string) => updateNested('dossier.occurrenceDocket.complainant.phone', v)} />
+                                <Field label="Residential Address" value={formData.dossier.occurrenceDocket.complainant.address} onChange={(v: string) => updateNested('dossier.occurrenceDocket.complainant.address', v)} />
+                                <Field label="Program / Year" value={formData.dossier.occurrenceDocket.complainant.programOfStudy} onChange={(v: string) => updateNested('dossier.occurrenceDocket.complainant.programOfStudy', v)} />
                             </div>
                         </section>
 
                         <section className="space-y-4">
                             <h3 className="font-bold text-sm bg-red-50 dark:bg-red-900/10 text-red-700 dark:text-red-400 p-2 rounded uppercase tracking-wider">Particulars of Accused</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <Field label="Full Name" value={formData.dossier.occurrenceDocket.accused.name} onChange={(v) => updateNested('dossier.occurrenceDocket.accused.name', v)} />
-                                <Field label="SIN / Phone" value={formData.dossier.occurrenceDocket.accused.phone} onChange={(v) => updateNested('dossier.occurrenceDocket.accused.phone', v)} />
-                                <Field label="Residential Address" value={formData.dossier.occurrenceDocket.accused.address} onChange={(v) => updateNested('dossier.occurrenceDocket.accused.address', v)} />
-                                <Field label="Program / Year" value={formData.dossier.occurrenceDocket.accused.programOfStudy} onChange={(v) => updateNested('dossier.occurrenceDocket.accused.programOfStudy', v)} />
+                                <Field label="Full Name" value={formData.dossier.occurrenceDocket.accused.name} onChange={(v: string) => updateNested('dossier.occurrenceDocket.accused.name', v)} />
+                                <Field label="SIN / Phone" value={formData.dossier.occurrenceDocket.accused.phone} onChange={(v: string) => updateNested('dossier.occurrenceDocket.accused.phone', v)} />
+                                <Field label="Residential Address" value={formData.dossier.occurrenceDocket.accused.address} onChange={(v: string) => updateNested('dossier.occurrenceDocket.accused.address', v)} />
+                                <Field label="Program / Year" value={formData.dossier.occurrenceDocket.accused.programOfStudy} onChange={(v: string) => updateNested('dossier.occurrenceDocket.accused.programOfStudy', v)} />
                             </div>
                         </section>
 
                         <section className="space-y-4">
-                            <Field label="Offence" value={formData.dossier.occurrenceDocket.offence} onChange={(v) => updateNested('dossier.occurrenceDocket.offence', v)} placeholder="e.g. Theft of university property" />
+                            <Field label="Offence" value={formData.dossier.occurrenceDocket.offence} onChange={(v: string) => updateNested('dossier.occurrenceDocket.offence', v)} placeholder="e.g. Theft of university property" />
                             <div className="space-y-2">
                                 <label className="text-[10px] font-extrabold uppercase text-gray-400 ml-1">Details of Occurrence</label>
                                 <textarea rows={4} className="w-full bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm" value={formData.dossier.occurrenceDocket.occurrenceDetails} onChange={(e) => updateNested('dossier.occurrenceDocket.occurrenceDetails', e.target.value)} />
@@ -192,8 +192,8 @@ export default function CaseDossierForm({ onSuccess, onCancel }: CaseDossierForm
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <SignatureField label="Investigating Officer Signature" onEnd={(data) => updateNested('dossier.signatures.investigatingOfficer', data)} />
-                            <SignatureField label="Complainant Signature" onEnd={(data) => updateNested('dossier.signatures.complainant', data)} />
+                            <SignatureField label="Investigating Officer Signature" onEnd={(data: string | null) => updateNested('dossier.signatures.investigatingOfficer', data)} />
+                            <SignatureField label="Complainant Signature" onEnd={(data: string | null) => updateNested('dossier.signatures.complainant', data)} />
                         </div>
                     </div>
                 )}
@@ -229,7 +229,7 @@ export default function CaseDossierForm({ onSuccess, onCancel }: CaseDossierForm
     );
 }
 
-function Field({ label, value, onChange, type = "text", placeholder = "" }: any) {
+function Field({ label, value, onChange, type = "text", placeholder = "" }: { label: string, value: string, onChange: (v: string) => void, type?: string, placeholder?: string }) {
     return (
         <div className="space-y-1">
             <label className="text-[10px] font-extrabold uppercase text-gray-400 ml-1">{label}</label>
@@ -244,13 +244,107 @@ function Field({ label, value, onChange, type = "text", placeholder = "" }: any)
     );
 }
 
-function StatementList({ formData, setFormData }: any) {
+function StatementList({ formData, setFormData }: { formData: any, setFormData: (path: string, value: any) => void }) {
     const [activeStatement, setActiveStatement] = useState<any>(null);
+    const [isRecording, setIsRecording] = useState(false);
+    const [isTranscribing, setIsTranscribing] = useState(false);
+    const mediaRecorder = useRef<MediaRecorder | null>(null);
+    const recognition = useRef<any>(null);
+    const chunks = useRef<Blob[]>([]);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+            const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+            recognition.current = new SpeechRecognition();
+            recognition.current.continuous = true;
+            recognition.current.interimResults = true;
+
+            recognition.current.onresult = (event: any) => {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                if (activeStatement) {
+                    setActiveStatement((prev: any) => ({
+                        ...prev,
+                        content: (prev.content + ' ' + transcript).trim()
+                    }));
+                }
+            };
+
+            recognition.current.onerror = (event: any) => {
+                console.error('STT Error:', event.error);
+                setIsTranscribing(false);
+            };
+        }
+    }, [activeStatement]);
+
+    const startRecording = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder.current = new MediaRecorder(stream);
+            chunks.current = [];
+
+            mediaRecorder.current.ondataavailable = (e) => {
+                if (e.data.size > 0) chunks.current.push(e.data);
+            };
+
+            mediaRecorder.current.onstop = async () => {
+                const blob = new Blob(chunks.current, { type: 'audio/webm' });
+                await uploadAudio(blob);
+                stream.getTracks().forEach(track => track.stop());
+            };
+
+            mediaRecorder.current.start();
+            setIsRecording(true);
+
+            if (recognition.current) {
+                recognition.current.start();
+                setIsTranscribing(true);
+            }
+        } catch (err) {
+            console.error('Recording error:', err);
+            alert('Could not access microphone');
+        }
+    };
+
+    const stopRecording = () => {
+        if (mediaRecorder.current && mediaRecorder.current.state !== 'inactive') {
+            mediaRecorder.current.stop();
+        }
+        if (recognition.current) {
+            recognition.current.stop();
+        }
+        setIsRecording(false);
+        setIsTranscribing(false);
+    };
+
+    const uploadAudio = async (blob: Blob) => {
+        if (!activeStatement) return;
+        const file = new File([blob], `statement_${Date.now()}.webm`, { type: 'audio/webm' });
+        const formDataUpload = new FormData();
+        formDataUpload.append('file', file);
+        formDataUpload.append('caseId', 'temp_' + Date.now()); // Temporary ID until case is created
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/evidence`, {
+                method: 'POST',
+                headers: { ...authHeaders() },
+                body: formDataUpload
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setActiveStatement((prev: any) => ({ ...prev, audioUrl: data.filename }));
+            }
+        } catch (err) {
+            console.error('Audio upload failed:', err);
+        }
+    };
 
     const addStatement = () => {
         const newStatement = {
             id: Date.now(), fullName: '', content: '', takenAt: new Date().toISOString().slice(0, 10),
-            phone: '', residentialAddress: '', tribe: '', village: '', active: true
+            phone: '', residentialAddress: '', tribe: '', village: '', active: true, audioUrl: ''
         };
         setActiveStatement(newStatement);
     };
@@ -259,6 +353,7 @@ function StatementList({ formData, setFormData }: any) {
         const updated = [...formData.dossier.statements, activeStatement];
         setFormData('dossier.statements', updated);
         setActiveStatement(null);
+        stopRecording();
     };
 
     return (
@@ -270,10 +365,13 @@ function StatementList({ formData, setFormData }: any) {
 
             <div className="grid grid-cols-1 gap-4">
                 {formData.dossier.statements.map((s: any, i: number) => (
-                    <div key={i} className="p-4 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800/40">
+                    <div key={i} className="p-4 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800/40 relative group">
                         <div className="flex justify-between font-bold text-sm">
                             <span>{s.fullName}</span>
-                            <span className="text-gray-400">{s.takenAt}</span>
+                            <div className="flex items-center gap-3">
+                                {s.audioUrl && <span className="text-emerald-500 text-[10px] bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full uppercase tracking-tighter">Audio Attached</span>}
+                                <span className="text-gray-400">{s.takenAt}</span>
+                            </div>
                         </div>
                         <p className="text-xs text-gray-500 mt-1 line-clamp-2">{s.content}</p>
                     </div>
@@ -283,22 +381,57 @@ function StatementList({ formData, setFormData }: any) {
             {activeStatement && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
                     <div className="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-2xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto">
-                        <h4 className="text-xl font-bold mb-6">Record New Statement</h4>
+                        <div className="flex justify-between items-start mb-6">
+                            <h4 className="text-xl font-bold">Record New Statement</h4>
+                            <div className="flex gap-2">
+                                {!isRecording ? (
+                                    <button
+                                        onClick={startRecording}
+                                        className="flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 text-[10px] font-black uppercase rounded-lg border border-red-100 dark:border-red-900/30 hover:bg-red-100 transition"
+                                    >
+                                        <span className="h-2 w-2 rounded-full bg-red-600 animate-pulse"></span>
+                                        Start Audio & STT
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={stopRecording}
+                                        className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-[10px] font-black uppercase rounded-lg hover:bg-black transition"
+                                    >
+                                        <span className="h-2 w-2 bg-white"></span>
+                                        Stop Recording
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                             <Field label="Full Name" value={activeStatement.fullName} onChange={(v: any) => setActiveStatement({ ...activeStatement, fullName: v })} />
                             <Field label="Date" type="date" value={activeStatement.takenAt} onChange={(v: any) => setActiveStatement({ ...activeStatement, takenAt: v })} />
                             <Field label="Phone" value={activeStatement.phone} onChange={(v: any) => setActiveStatement({ ...activeStatement, phone: v })} />
                             <Field label="Residential Address" value={activeStatement.residentialAddress} onChange={(v: any) => setActiveStatement({ ...activeStatement, residentialAddress: v })} />
                         </div>
-                        <textarea
-                            placeholder="I do recall very well that..."
-                            rows={10}
-                            className="w-full bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm mb-6"
-                            value={activeStatement.content}
-                            onChange={(e) => setActiveStatement({ ...activeStatement, content: e.target.value })}
-                        />
+
+                        <div className="relative">
+                            {isTranscribing && (
+                                <div className="absolute top-4 right-4 flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 px-3 py-1 rounded-full border border-blue-100 dark:border-blue-800">
+                                    <span className="flex h-2 w-2 relative">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                                    </span>
+                                    <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase">Listening...</span>
+                                </div>
+                            )}
+                            <textarea
+                                placeholder="Start recording or type the statement here..."
+                                rows={10}
+                                className={`w-full bg-gray-50 dark:bg-gray-800 border-2 rounded-xl px-4 py-3 text-sm mb-6 transition-all ${isTranscribing ? 'border-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.1)]' : 'border-gray-100 dark:border-gray-800'}`}
+                                value={activeStatement.content}
+                                onChange={(e) => setActiveStatement({ ...activeStatement, content: e.target.value })}
+                            />
+                        </div>
+
                         <div className="flex justify-end gap-3">
-                            <button onClick={() => setActiveStatement(null)} className="px-6 py-2 text-gray-500 font-bold">CANCEL</button>
+                            <button onClick={() => { setActiveStatement(null); stopRecording(); }} className="px-6 py-2 text-gray-500 font-bold">CANCEL</button>
                             <button onClick={saveActive} className="px-8 py-2 bg-blue-600 text-white font-bold rounded-xl shadow-lg">SAVE STATEMENT</button>
                         </div>
                     </div>
