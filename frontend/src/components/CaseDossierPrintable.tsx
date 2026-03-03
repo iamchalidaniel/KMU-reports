@@ -231,7 +231,7 @@ export default function CaseDossierPrintable({ data, documentType }: CaseDossier
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <InfoRow label="Program of study" value={wc.program || docket.accused?.programOfStudy || student.program} />
+                        <InfoRow label="Program of study" value={wc.program || docket.accused?.programOfStudy || student.program || student.department} />
                         <InfoRow label="Year of study" value={wc.yearOfStudy || docket.accused?.yearOfStudy || student.year} />
                     </div>
 

@@ -10,7 +10,7 @@ const router = express.Router();
 
 router.use(authenticate, authorize(['admin', 'chief_security_officer', 'dean_of_students', 'assistant_dean', 'secretary', 'security_officer']));
 
-router.post('/docx', async(req, res) => {
+router.post('/docx', async (req, res) => {
     try {
         console.log('DOCX export requested');
         const { type, ids, entity, data, filters, studentId } = req.body;
@@ -206,7 +206,7 @@ router.post('/docx', async(req, res) => {
 });
 
 // Export students list as DOCX
-router.post('/students-docx', async(req, res) => {
+router.post('/students-docx', async (req, res) => {
     try {
         console.log('Students DOCX export requested');
         const { filters } = req.body;
@@ -215,8 +215,13 @@ router.post('/students-docx', async(req, res) => {
 
         // Get students based on filters
         if (filters && Object.keys(filters).length > 0) {
-            let query = {};
-            if (filters.department) query.department = { $regex: filters.department, $options: 'i' };
+            if (filters.program || filters.department) {
+                const prog = filters.program || filters.department;
+                query.$or = [
+                    { program: { $regex: prog, $options: 'i' } },
+                    { department: { $regex: prog, $options: 'i' } }
+                ];
+            }
             if (filters.year) query.year = filters.year;
             if (filters.gender) query.gender = filters.gender;
             if (filters.search) {
@@ -231,9 +236,10 @@ router.post('/students-docx', async(req, res) => {
             } else if (dbType === 'mysql') {
                 let sql = 'SELECT * FROM students WHERE 1=1';
                 const params = [];
-                if (filters.department) {
-                    sql += ' AND department LIKE ?';
-                    params.push(`%${filters.department}%`);
+                if (filters.program || filters.department) {
+                    const prog = filters.program || filters.department;
+                    sql += ' AND (program LIKE ? OR department LIKE ?)';
+                    params.push(`%${prog}%`, `%${prog}%`);
                 }
                 if (filters.year) {
                     sql += ' AND year = ?';
@@ -274,7 +280,7 @@ router.post('/students-docx', async(req, res) => {
                         width: { size: 30, type: WidthType.PERCENTAGE }
                     }),
                     new TableCell({
-                        children: [new Paragraph('Department')],
+                        children: [new Paragraph('Program/Department')],
                         width: { size: 25, type: WidthType.PERCENTAGE }
                     }),
                     new TableCell({
@@ -299,7 +305,7 @@ router.post('/students-docx', async(req, res) => {
                             width: { size: 30, type: WidthType.PERCENTAGE }
                         }),
                         new TableCell({
-                            children: [new Paragraph(s.department || '')],
+                            children: [new Paragraph(s.program || s.department || '')],
                             width: { size: 25, type: WidthType.PERCENTAGE }
                         }),
                         new TableCell({
@@ -348,7 +354,7 @@ router.post('/students-docx', async(req, res) => {
 });
 
 // Export cases list as DOCX
-router.post('/cases-docx', async(req, res) => {
+router.post('/cases-docx', async (req, res) => {
     try {
         console.log('Cases DOCX export requested');
         const { filters } = req.body;
@@ -523,7 +529,7 @@ router.post('/cases-docx', async(req, res) => {
     }
 });
 
-router.post('/export-excel', async(req, res) => {
+router.post('/export-excel', async (req, res) => {
     try {
         const { type, ids, entity, data, filters, studentId } = req.body;
 
@@ -648,7 +654,7 @@ router.post('/export-excel', async(req, res) => {
 });
 
 // Keep original GET endpoint for backward compatibility
-router.get('/export-excel', async(req, res) => {
+router.get('/export-excel', async (req, res) => {
     try {
         let allCases, allStudents;
         if (dbType === 'mongo') {
@@ -666,11 +672,11 @@ router.get('/export-excel', async(req, res) => {
             const offense = c.offense_type || '';
             if (offense) offenseTrends[offense] = (offenseTrends[offense] || 0) + 1;
         });
-        // Department Stats
+        // Program/Department Stats
         const studentDept = {};
         allStudents.forEach(s => {
             const sid = s.studentId || s.id || s._id;
-            const dept = s.department || '';
+            const dept = s.program || s.department || '';
             if (sid && dept) studentDept[sid] = dept;
         });
         const departmentStats = {};
@@ -686,8 +692,8 @@ router.get('/export-excel', async(req, res) => {
         Object.entries(offenseTrends).forEach(([offense, count]) => {
             offenseSheet.addRow([offense, count]);
         });
-        const deptSheet = workbook.addWorksheet('Department Stats');
-        deptSheet.addRow(['Department', 'Count']);
+        const deptSheet = workbook.addWorksheet('Program Stats');
+        deptSheet.addRow(['Program/Department', 'Count']);
         Object.entries(departmentStats).forEach(([dept, count]) => {
             deptSheet.addRow([dept, count]);
         });
@@ -700,7 +706,7 @@ router.get('/export-excel', async(req, res) => {
     }
 });
 
-router.get('/analytics', async(req, res) => {
+router.get('/analytics', async (req, res) => {
     try {
         let allCases, allStudents;
         if (dbType === 'mongo') {
@@ -719,11 +725,11 @@ router.get('/analytics', async(req, res) => {
             if (offense) offenseTrendsMap[offense] = (offenseTrendsMap[offense] || 0) + 1;
         });
         const offenseTrends = Object.entries(offenseTrendsMap).map(([k, v]) => ({ _id: k, count: v }));
-        // Department Stats
+        // Program/Department Stats
         const studentDept = {};
         allStudents.forEach(s => {
             const sid = s.studentId || s.id || s._id;
-            const dept = s.department || '';
+            const dept = s.program || s.department || '';
             if (sid && dept) studentDept[sid] = dept;
         });
         const departmentStatsMap = {};
@@ -740,7 +746,7 @@ router.get('/analytics', async(req, res) => {
 });
 
 // Export with charts
-router.post('/with-charts', async(req, res) => {
+router.post('/with-charts', async (req, res) => {
     try {
         console.log('DOCX export with charts requested');
         console.log('Request body:', JSON.stringify(req.body, null, 2));
@@ -1011,7 +1017,7 @@ router.post('/with-charts', async(req, res) => {
 });
 
 // Export all cases in document format with charts (dashboard export)
-router.post('/dashboard-cases', async(req, res) => {
+router.post('/dashboard-cases', async (req, res) => {
     try {
         console.log('Dashboard cases DOCX export requested');
         const { charts, pageInfo } = req.body;

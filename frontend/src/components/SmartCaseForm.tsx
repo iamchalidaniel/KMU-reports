@@ -11,6 +11,7 @@ interface Student {
   studentId: string;
   fullName: string;
   department: string;
+  program?: string;
   year?: string;
   gender?: string;
 }
@@ -81,7 +82,7 @@ export default function SmartCaseForm({ onSubmit, loading = false }: SmartCaseFo
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -105,7 +106,7 @@ export default function SmartCaseForm({ onSubmit, loading = false }: SmartCaseFo
       const response = await fetch(`${API_BASE_URL}/students/search?q=${studentId}`, {
         headers: { ...authHeaders() }
       });
-      
+
       if (response.ok) {
         const students = await response.json();
         const student = students.find((s: Student) => s.studentId === studentId);
@@ -142,7 +143,7 @@ export default function SmartCaseForm({ onSubmit, loading = false }: SmartCaseFo
         <h2 className="text-lg font-semibold text-kmuOrange">Create New Case</h2>
         <AIAssistant formType="case" />
       </div>
-      
+
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Smart Student Search */}
         <div>
@@ -162,7 +163,7 @@ export default function SmartCaseForm({ onSubmit, loading = false }: SmartCaseFo
                     {selectedStudent.fullName}
                   </div>
                   <div className="text-sm text-green-600 dark:text-green-300">
-                    ID: {selectedStudent.studentId} • {selectedStudent.department} • Year {selectedStudent.year}
+                    ID: {selectedStudent.studentId} • {selectedStudent.program || selectedStudent.department} • Year {selectedStudent.year}
                   </div>
                 </div>
                 <button

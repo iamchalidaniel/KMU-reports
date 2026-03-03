@@ -14,6 +14,7 @@ interface Student {
     studentId: string;
     fullName: string;
     program?: string;
+    department?: string;
 }
 
 interface Case {
@@ -211,7 +212,7 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
     const personType = 'Student';
     const personId = caseData.student?.studentId;
     const personName = caseData.student?.fullName;
-    const personDepartment = (caseData.student as any)?.program;
+    const personDepartment = (caseData.student as any)?.program || (caseData.student as any)?.department;
     const personYear = (caseData.student as any)?.year;
 
     return (

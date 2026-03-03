@@ -8,6 +8,7 @@ interface Student {
   studentId: string;
   fullName: string;
   department: string;
+  program?: string;
   year?: string;
   gender?: string;
   lastSelected?: string;
@@ -19,10 +20,10 @@ interface RecentStudentsProps {
   className?: string;
 }
 
-export default function RecentStudents({ 
-  onStudentSelect, 
-  maxItems = 5, 
-  className = "" 
+export default function RecentStudents({
+  onStudentSelect,
+  maxItems = 5,
+  className = ""
 }: RecentStudentsProps) {
   const [recentStudents, setRecentStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(false);
@@ -37,7 +38,7 @@ export default function RecentStudents({
       const response = await fetch(`${API_BASE_URL}/students/recent`, {
         headers: { ...authHeaders() }
       });
-      
+
       if (response.ok) {
         const students = await response.json();
         setRecentStudents(students.slice(0, maxItems));
@@ -96,7 +97,7 @@ export default function RecentStudents({
       <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
         Recent Students
       </h3>
-      
+
       <div className="space-y-2">
         {recentStudents.map((student) => (
           <button
@@ -110,12 +111,12 @@ export default function RecentStudents({
                   {student.fullName}
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                  {student.studentId} • {student.department}
+                  {student.studentId} • {student.program || student.department}
                 </div>
               </div>
               <div className="text-xs text-gray-400 dark:text-gray-500 ml-2">
-                {student.lastSelected ? 
-                  new Date(student.lastSelected).toLocaleDateString() : 
+                {student.lastSelected ?
+                  new Date(student.lastSelected).toLocaleDateString() :
                   'Recently'
                 }
               </div>

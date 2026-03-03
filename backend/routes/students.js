@@ -24,18 +24,19 @@ router.get('/export-excel', async (req, res) => {
         const students = await listStudentsRaw();
         const workbook = new ExcelJS.Workbook();
         const sheet = workbook.addWorksheet('Students');
-        sheet.addRow(['ID', 'Student ID', 'Full Name', 'Department', 'Year', 'Gender', 'Case ID', 'Offense', 'Date', 'Status']);
+        sheet.addRow(['ID', 'Student ID', 'Full Name', 'Program', 'Year', 'Gender', 'Case ID', 'Offense', 'Date', 'Status']);
         for (const s of students) {
             const cases = await getStudentCases(s.studentId || s.id || s._id);
+            const prog = s.program || s.department || '';
             if (cases.length === 0) {
-                sheet.addRow([s.id || s._id, s.studentId, s.fullName, s.department, s.year, s.gender, '', '', '', '']);
+                sheet.addRow([s.id || s._id, s.studentId, s.fullName, prog, s.year, s.gender, '', '', '', '']);
             } else {
                 for (const c of cases) {
                     sheet.addRow([
                         s.id || s._id,
                         s.studentId,
                         s.fullName,
-                        s.department,
+                        prog,
                         s.year,
                         s.gender,
                         c.id || c._id,
@@ -65,7 +66,7 @@ router.post('/export-docx', async (req, res) => {
             const caseSummaries = cases.map(c => `- [${c.incident_date}] ${c.offense_type}: ${c.description}`);
             docSections.push(
                 new Paragraph({ text: `${s.fullName} (${s.studentId})`, heading: 'Heading1' }),
-                new Paragraph(`Department: ${s.department}, Year: ${s.year}, Gender: ${s.gender}`),
+                new Paragraph(`Program: ${s.program || s.department || ''}, Year: ${s.year}, Gender: ${s.gender}`),
                 ...caseSummaries.length ? [new Paragraph('Case History:'), ...caseSummaries.map(summary => new Paragraph(summary))] : [new Paragraph('No case history.')],
                 new Paragraph('')
             );
