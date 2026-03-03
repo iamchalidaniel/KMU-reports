@@ -34,7 +34,7 @@ export function offSyncError(listener: (msg: string) => void) {
 
 export function useSyncManager() {
   const { isSyncing, setSyncing, syncError, setSyncError } = useSync();
-  const { token } = useAuth();
+  const { user, token } = useAuth();
 
   async function syncAll() {
     setSyncing(true);
