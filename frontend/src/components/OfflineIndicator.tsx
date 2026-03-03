@@ -29,12 +29,10 @@ export default function OfflineIndicator() {
   }
 
   return (
-    <div className="fixed bottom-4 left-4 z-50 animate-in fade-in slide-in-from-bottom-4 duration-500 pointer-events-none">
-      <div className="bg-gray-900/90 backdrop-blur-md text-white px-3 py-1.5 rounded-full shadow-lg flex items-center space-x-2 border border-blue-500/30">
-        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
-        <span className="text-[10px] font-bold uppercase tracking-wider">Offline</span>
-        <div className="h-3 w-[1px] bg-gray-700" />
-        <span className="text-[10px] opacity-70 font-medium">Local Sync Active</span>
+    <div className="fixed top-3 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-4 duration-500 pointer-events-none">
+      <div className="bg-gray-900/80 backdrop-blur-sm text-white px-2.5 py-1 rounded-full shadow-lg flex items-center space-x-1.5 border border-white/10">
+        <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+        <span className="text-[9px] font-bold uppercase tracking-wider">You are Offline</span>
       </div>
     </div>
   );

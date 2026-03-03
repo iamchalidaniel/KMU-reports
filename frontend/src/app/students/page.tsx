@@ -17,7 +17,6 @@ interface Student {
   gender?: string;
 }
 
-const PROGRAMS = ['BSc ICT Education', 'BSc Biology Education', 'BSc Mathematics Education'];
 const YEARS = ['1', '2', '3', '4'];
 const GENDERS = ['Male', 'Female', 'Other'];
 
@@ -28,6 +27,7 @@ export default function StudentsPage() {
 
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [students, setStudents] = useState<Student[]>([]);
+  const [programs, setPrograms] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [programFilter, setProgramFilter] = useState('');
@@ -47,6 +47,21 @@ export default function StudentsPage() {
     year: '',
     gender: '',
   });
+
+  useEffect(() => {
+    async function loadPrograms() {
+      try {
+        const response = await apiCall<string[]>('get', '/students/programs');
+        setPrograms(response.data);
+      } catch (err) {
+        console.error('Failed to load programs:', err);
+      }
+    }
+
+    if (token) {
+      loadPrograms();
+    }
+  }, [token]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -155,7 +170,7 @@ export default function StudentsPage() {
           {/* Metrics Shortcut */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard title="Total Students" value={total} color="emerald" />
-            <StatCard title="Active Programs" value={PROGRAMS.length} color="teal" />
+            <StatCard title="Active Programs" value={programs.length} color="teal" />
             <StatCard title="System Status" value={offlineMode ? "Cached" : "Live"} color="blue" />
             <StatCard title="Verification" value="Verified" color="indigo" />
           </div>
@@ -180,7 +195,7 @@ export default function StudentsPage() {
                     className="w-full sm:w-auto bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-sans"
                   >
                     <option value="">All Programs</option>
-                    {PROGRAMS.map(p => <option key={p} value={p}>{p}</option>)}
+                    {programs.map(p => <option key={p} value={p}>{p}</option>)}
                   </select>
                 </div>
               </div>

@@ -163,12 +163,12 @@ export default function SmartStudentSearch({
                   </div>
                   <div className={`text-sm ${index === selectedIndex ? 'text-white' : 'text-gray-500 dark:text-gray-400'
                     }`}>
-                    ID: {student.studentId} • {student.department} • Year {student.year}
+                    ID: {student.studentId} • {student.program || student.department} • Year {student.year}
                   </div>
                 </div>
                 <div className={`text-xs px-2 py-1 rounded ${index === selectedIndex
-                    ? 'bg-white text-kmuGreen'
-                    : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'
+                  ? 'bg-white text-kmuGreen'
+                  : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'
                   }`}>
                   {student.gender}
                 </div>

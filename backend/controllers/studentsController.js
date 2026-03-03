@@ -9,7 +9,7 @@ export async function listStudents(req, res) {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 20;
         const search = req.query.search;
-        const department = req.query.department;
+        const program = req.query.program || req.query.department;
         const year = req.query.year;
         const gender = req.query.gender;
         let students, total;
@@ -22,7 +22,7 @@ export async function listStudents(req, res) {
                     { studentId: { $regex: search, $options: 'i' } }
                 ];
             }
-            if (department) query.department = department;
+            if (program) query.program = program;
             if (year) query.year = year;
             if (gender) query.gender = gender;
 
@@ -42,9 +42,9 @@ export async function listStudents(req, res) {
                 const searchTerm = `%${search}%`;
                 queryParams.push(searchTerm, searchTerm);
             }
-            if (department) {
-                whereConditions.push('department = ?');
-                queryParams.push(department);
+            if (program) {
+                whereConditions.push('program = ?');
+                queryParams.push(program);
             }
             if (year) {
                 whereConditions.push('year = ?');
@@ -127,8 +127,8 @@ export async function createStudent(req, res) {
         if (dbType === 'mongo') {
             student = await StudentModel.create(req.body);
         } else if (dbType === 'mysql') {
-            const { studentId, fullName, department, year, gender } = req.body;
-            await db.execute('INSERT INTO students (studentId, fullName, department, year, gender) VALUES (?, ?, ?, ?, ?)', [studentId, fullName, department, year, gender]);
+            const { studentId, fullName, program, year, gender } = req.body;
+            await db.execute('INSERT INTO students (studentId, fullName, program, year, gender) VALUES (?, ?, ?, ?, ?)', [studentId, fullName, program || req.body.department, year, gender]);
             const [rows] = await db.execute('SELECT * FROM students WHERE studentId = ?', [studentId]);
             student = rows[0];
         }
@@ -141,7 +141,7 @@ export async function createStudent(req, res) {
                 studentData: {
                     studentId: student.studentId,
                     fullName: student.fullName,
-                    department: student.department,
+                    program: student.program || student.department,
                     year: student.year,
                     gender: student.gender
                 },
@@ -233,8 +233,9 @@ export async function importStudents(req, res) {
                 validationErrors.push(`Row ${rowNumber}: Invalid Full Name (minimum 2 characters)`);
             }
 
-            if (!student.department || typeof student.department !== 'string' || student.department.trim().length === 0) {
-                validationErrors.push(`Row ${rowNumber}: Missing Department`);
+            const prog = student.program || student.department;
+            if (!prog || typeof prog !== 'string' || prog.trim().length === 0) {
+                validationErrors.push(`Row ${rowNumber}: Missing Program/Department`);
             }
 
             if (student.year && !['1', '2', '3', '4'].includes(student.year.toString())) {
@@ -288,7 +289,7 @@ export async function importStudents(req, res) {
                     const cleanStudent = {
                         studentId: s.studentId.trim(),
                         fullName: s.fullName.trim(),
-                        department: s.department.trim(),
+                        program: (s.program || s.department).trim(), // Use program, fallback to department
                         year: s.year ? s.year.toString().trim() : undefined,
                         gender: s.gender ? s.gender.toString().trim() : undefined
                     };
@@ -310,13 +311,13 @@ export async function importStudents(req, res) {
                     const cleanStudent = {
                         studentId: s.studentId.trim(),
                         fullName: s.fullName.trim(),
-                        department: s.department.trim(),
+                        program: (s.program || s.department).trim(), // Use program, fallback to department
                         year: s.year ? s.year.toString().trim() : undefined,
                         gender: s.gender ? s.gender.toString().trim() : undefined
                     };
 
                     await db.execute(
-                        'INSERT INTO students (studentId, fullName, department, year, gender) VALUES (?, ?, ?, ?, ?)', [cleanStudent.studentId, cleanStudent.fullName, cleanStudent.department, cleanStudent.year, cleanStudent.gender]
+                        'INSERT INTO students (studentId, fullName, program, year, gender) VALUES (?, ?, ?, ?, ?)', [cleanStudent.studentId, cleanStudent.fullName, cleanStudent.program, cleanStudent.year, cleanStudent.gender]
                     );
                     inserted++;
                 } catch (err) {
@@ -378,15 +379,16 @@ export async function searchStudents(req, res) {
                 $or: [
                     { fullName: { $regex: q, $options: 'i' } },
                     { studentId: { $regex: q, $options: 'i' } },
-                    { department: { $regex: q, $options: 'i' } }
+                    { program: { $regex: q, $options: 'i' } }, // Changed from department to program
+                    { department: { $regex: q, $options: 'i' } } // Keep department for backward compatibility
                 ]
             }).limit(10);
         } else if (dbType === 'mysql') {
             const [rows] = await db.execute(`
                 SELECT * FROM students 
-                WHERE fullName LIKE ? OR studentId LIKE ? OR department LIKE ?
+                WHERE fullName LIKE ? OR studentId LIKE ? OR program LIKE ? OR department LIKE ?
                 LIMIT 10
-            `, [`%${q}%`, `%${q}%`, `%${q}%`]);
+            `, [`%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`]); // Added program
             students = rows;
         }
 
@@ -443,5 +445,25 @@ export async function updateLastSelected(req, res) {
     } catch (err) {
         console.error('Update last selected error:', err);
         res.status(500).json({ error: 'Failed to update last selected' });
+    }
+}
+
+export async function getUniquePrograms(req, res) {
+    try {
+        let programs = [];
+        if (dbType === 'mongo') {
+            programs = await StudentModel.distinct('program');
+            // Filter out empty and add fallback if 'department' was used
+            const depts = await StudentModel.distinct('department');
+            programs = [...new Set([...programs, ...depts])].filter(p => p && p.trim() !== '');
+        } else if (dbType === 'mysql') {
+            const [rows] = await db.execute('SELECT DISTINCT program FROM students WHERE program IS NOT NULL AND program != ""');
+            const [rows2] = await db.execute('SELECT DISTINCT department FROM students WHERE department IS NOT NULL AND department != ""');
+            programs = [...new Set([...rows.map(r => r.program), ...rows2.map(r => r.department)])];
+        }
+        res.json(programs.sort());
+    } catch (err) {
+        console.error('Get unique programs error:', err);
+        res.status(500).json({ error: 'Failed to fetch programs' });
     }
 }

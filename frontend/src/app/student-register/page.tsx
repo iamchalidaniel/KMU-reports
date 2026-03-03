@@ -41,8 +41,24 @@ export default function StudentRegisterPage() {
   const [address, setAddress] = useState("");
   const [roomNo, setRoomNo] = useState("");
 
+  const [programs, setPrograms] = useState<string[]>([]);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
+
+  useState(() => {
+    async function fetchPrograms() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/public/programs`);
+        if (res.ok) {
+          const data = await res.json();
+          setPrograms(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch programs:', err);
+      }
+    }
+    fetchPrograms();
+  });
 
   const nextStep = () => {
     if (step === 1) {
@@ -232,7 +248,17 @@ export default function StudentRegisterPage() {
 
               {step === 2 && (
                 <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
-                  <FormField label="Program of Study" value={program} onChange={setProgram} placeholder="BSc ICT Education" required />
+                  <FormField
+                    label="Program of Study"
+                    value={program}
+                    onChange={setProgram}
+                    placeholder="e.g. BSc ICT Education"
+                    required
+                    list="program-suggestions"
+                  />
+                  <datalist id="program-suggestions">
+                    {programs.map(p => <option key={p} value={p} />)}
+                  </datalist>
                   <div className="grid grid-cols-2 gap-4">
                     <FormField label="Academic Year" value={year} onChange={setYear} placeholder="2026" />
                     <FormField label="Year of Study" value={yearOfStudy} onChange={setYearOfStudy} placeholder="4" />
@@ -331,7 +357,7 @@ export default function StudentRegisterPage() {
   );
 }
 
-function FormField({ label, value, onChange, placeholder, type = "text", required = false }: any) {
+function FormField({ label, value, onChange, placeholder, type = "text", required = false, list }: any) {
   return (
     <div className="space-y-1">
       <label className="text-[10px] font-extrabold text-blue-800 dark:text-blue-400 uppercase tracking-tighter ml-1">
@@ -344,6 +370,7 @@ function FormField({ label, value, onChange, placeholder, type = "text", require
         className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-kmuGreen outline-none transition-all"
         placeholder={placeholder}
         required={required}
+        list={list}
       />
     </div>
   );

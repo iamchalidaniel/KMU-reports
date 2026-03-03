@@ -438,6 +438,8 @@ function StatementList({ formData, setFormData, showNotification }: { formData: 
     const mediaRecorder = useRef<MediaRecorder | null>(null);
     const recognition = useRef<any>(null);
     const chunks = useRef<Blob[]>([]);
+    const contentBeforeSpeech = useRef<string>('');
+    const [isUploading, setIsUploading] = useState(false);
 
     useEffect(() => {
         if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
@@ -447,22 +449,43 @@ function StatementList({ formData, setFormData, showNotification }: { formData: 
             recognition.current.interimResults = true;
 
             recognition.current.onresult = (event: any) => {
-                let transcript = '';
+                let interimTranscript = '';
+                let finalTranscript = '';
+
                 for (let i = event.resultIndex; i < event.results.length; i++) {
-                    transcript += event.results[i][0].transcript;
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript;
+                    } else {
+                        interimTranscript += transcript;
+                    }
                 }
+
                 if (activeStatement) {
-                    setActiveStatement((prev) => prev ? ({
-                        ...prev,
-                        content: (prev.content + ' ' + transcript).trim()
-                    }) : null);
+                    setActiveStatement((prev) => {
+                        if (!prev) return null;
+                        // Avoid duplication by using the base content captured at start
+                        const updatedContent = (contentBeforeSpeech.current + ' ' + finalTranscript + interimTranscript).trim();
+                        return { ...prev, content: updatedContent };
+                    });
                 }
             };
+
+            recognition.current.onend = () => {
+                setIsTranscribing(false);
+            };
         }
-    }, [activeStatement]);
+
+        return () => {
+            if (recognition.current) {
+                recognition.current.stop();
+            }
+        };
+    }, []); // Only initialize once
 
     const startRecording = async () => {
         try {
+            contentBeforeSpeech.current = activeStatement?.content || '';
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             mediaRecorder.current = new MediaRecorder(stream);
             chunks.current = [];
@@ -474,7 +497,10 @@ function StatementList({ formData, setFormData, showNotification }: { formData: 
             };
             mediaRecorder.current.start();
             setIsRecording(true);
-            if (recognition.current) { recognition.current.start(); setIsTranscribing(true); }
+            if (recognition.current) {
+                recognition.current.start();
+                setIsTranscribing(true);
+            }
         } catch (err) { showNotification('error', 'Microphone access denied'); }
     };
 
@@ -487,6 +513,7 @@ function StatementList({ formData, setFormData, showNotification }: { formData: 
 
     const uploadAudio = async (blob: Blob) => {
         if (!activeStatement) return;
+        setIsUploading(true);
         const file = new File([blob], `st_${Date.now()}.webm`, { type: 'audio/webm' });
         const fd = new FormData();
         fd.append('file', file);
@@ -501,7 +528,11 @@ function StatementList({ formData, setFormData, showNotification }: { formData: 
                 const data = await res.json();
                 setActiveStatement(prev => prev ? ({ ...prev, audioUrl: data.filename }) : null);
             }
-        } catch (err) { }
+        } catch (err) {
+            console.error('Audio upload failed:', err);
+        } finally {
+            setIsUploading(false);
+        }
     };
 
     const saveActive = () => {
@@ -574,11 +605,21 @@ function StatementList({ formData, setFormData, showNotification }: { formData: 
                             <textarea placeholder="Record or type the statement here..." rows={8} className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl px-6 py-4 text-sm focus:ring-2 focus:ring-red-500 shadow-sm font-sans outline-none leading-relaxed" value={activeStatement.content} onChange={(e: any) => setActiveStatement(prev => prev ? ({ ...prev, content: e.target.value }) : null)} />
                         </div>
 
-                        <SignatureField label="Signature" onEnd={(data) => setActiveStatement(prev => prev ? ({ ...prev, signature: data }) : null)} />
+                        <SignatureField
+                            label="Signature"
+                            initialSignature={activeStatement.signature}
+                            onEnd={(data) => setActiveStatement(prev => prev ? ({ ...prev, signature: data }) : null)}
+                        />
 
                         <div className="flex justify-end gap-3 mt-8">
                             <button onClick={() => { setActiveStatement(null); stopRecording(); }} className="px-6 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-red-500 transition">Cancel</button>
-                            <button onClick={saveActive} className="px-8 py-3 bg-red-600 text-white font-bold rounded-lg shadow-sm text-[10px] uppercase tracking-widest hover:bg-red-700 transition">Save Statement</button>
+                            <button
+                                onClick={saveActive}
+                                disabled={isUploading}
+                                className={`px-8 py-3 bg-red-600 text-white font-bold rounded-lg shadow-sm text-[10px] uppercase tracking-widest hover:bg-red-700 transition ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                {isUploading ? 'Uploading Audio...' : 'Save Statement'}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -647,16 +688,37 @@ function WarnAndCautionComponent({ formData, updateNested }: { formData: FormDat
     );
 }
 
-function SignatureField({ label, onEnd }: { label: string, onEnd: (data: string | null) => void }) {
+function SignatureField({ label, onEnd, initialSignature }: { label: string, onEnd: (data: string | null) => void, initialSignature?: string | null }) {
     const sigCanvas = useRef<any>(null);
-    const [hasSig, setHasSig] = useState(false);
+    const [hasSig, setHasSig] = useState(!!initialSignature);
+
+    useEffect(() => {
+        if (initialSignature && sigCanvas.current) {
+            // SignatureCanvas can load from data URL but it's easier to just show an overlay 
+            // until cleared if we want to preserve old signature vs new signing.
+            // Actually, we can use fromDataURL
+            sigCanvas.current.fromDataURL(initialSignature);
+        }
+    }, [initialSignature]);
+
+    useEffect(() => {
+        // Handle window resize which clears canvas
+        const handleResize = () => {
+            if (initialSignature && sigCanvas.current) {
+                sigCanvas.current.fromDataURL(initialSignature);
+            }
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, [initialSignature]);
+
     return (
         <div className="space-y-3">
             <div className="flex justify-between items-center px-1">
                 <label className="text-[10px] font-bold uppercase text-gray-400 tracking-widest">{label}</label>
-                <button onClick={() => { sigCanvas.current.clear(); onEnd(null); setHasSig(false); }} className="text-[9px] text-red-500 font-bold hover:underline uppercase tracking-widest">Clear Signature</button>
+                <button onClick={() => { sigCanvas.current.clear(); onEnd(null); setHasSig(false); }} className="text-[9px] text-red-500 font-bold hover:underline uppercase tracking-widest">Clear & Resign</button>
             </div>
-            <div className={`bg-gray-50 dark:bg-gray-800/80 border border-dashed rounded-xl overflow-hidden h-40 transition-all ${hasSig ? 'border-red-200 bg-white dark:bg-gray-900' : 'border-gray-100 dark:border-gray-800'}`}>
+            <div className={`bg-gray-50 dark:bg-gray-800/80 border border-dashed rounded-xl overflow-hidden h-40 transition-all ${hasSig ? 'border-red-200 bg-white dark:bg-gray-900 border-solid' : 'border-gray-100 dark:border-gray-800'}`}>
                 <SignatureCanvas
                     ref={sigCanvas}
                     penColor='#000'
@@ -664,6 +726,9 @@ function SignatureField({ label, onEnd }: { label: string, onEnd: (data: string 
                     onEnd={() => { if (sigCanvas.current) { onEnd(sigCanvas.current.toDataURL()); setHasSig(true); } }}
                 />
             </div>
+            {initialSignature && !hasSig && (
+                <p className="text-[8px] text-gray-400 uppercase italic">Original signature cleared. Please resign if required.</p>
+            )}
         </div>
     );
 }

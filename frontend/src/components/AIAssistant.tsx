@@ -82,13 +82,13 @@ export default function AIAssistant({ formType, onSuggestionReceived }: AIAssist
   return (
     <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
       {isOpen ? (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-[calc(100vw-2rem)] max-w-[340px] sm:max-w-md h-[55vh] sm:h-[70vh] flex flex-col border border-gray-200 dark:border-gray-700 overflow-hidden animate-in zoom-in-95 duration-200 origin-bottom-right">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-[280px] sm:w-[340px] md:w-md h-[50vh] sm:h-[60vh] flex flex-col border border-gray-200 dark:border-gray-700 overflow-hidden animate-in zoom-in-95 duration-200 origin-bottom-right">
           {/* Header */}
-          <div className="bg-kmuGreen dark:bg-kmuGreen/90 text-white p-4 rounded-t-xl flex justify-between items-center">
-            <h3 className="font-semibold">AI Assistant</h3>
+          <div className="bg-kmuGreen dark:bg-kmuGreen/90 text-white p-3 sm:p-4 rounded-t-xl flex justify-between items-center">
+            <h3 className="text-sm sm:text-base font-semibold">AI Assistant</h3>
             <button
               onClick={toggleAssistant}
-              className="text-white hover:text-gray-200 focus:outline-none"
+              className="text-white hover:text-gray-200 focus:outline-none p-1"
             >
               ✕
             </button>
@@ -96,12 +96,12 @@ export default function AIAssistant({ formType, onSuggestionReceived }: AIAssist
 
           {/* Disclaimer */}
           {showDisclaimer && (
-            <div className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 p-3 text-xs border-b border-yellow-200 dark:border-yellow-800">
+            <div className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 p-2 sm:p-3 text-[10px] sm:text-xs border-b border-yellow-200 dark:border-yellow-800">
               <p className="font-semibold mb-1">Privacy Notice:</p>
-              <p>Do not share sensitive personal information. This assistant helps with form completion only.</p>
+              <p>Do not share sensitive personal information.</p>
               <button
                 onClick={() => setShowDisclaimer(false)}
-                className="mt-1 text-xs underline hover:no-underline"
+                className="mt-1 text-[10px] underline hover:no-underline"
               >
                 Dismiss
               </button>
@@ -109,30 +109,29 @@ export default function AIAssistant({ formType, onSuggestionReceived }: AIAssist
           )}
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2 sm:space-y-3">
             {messages.length === 0 && (
-              <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-                <p className="mb-2">Ask me anything about filling out this form!</p>
-                <p className="text-sm">I can help with understanding fields, requirements, and best practices.</p>
+              <div className="text-center text-gray-500 dark:text-gray-400 py-6 sm:py-8">
+                <p className="text-xs sm:text-sm mb-1 sm:mb-2">Ask me anything about filling out this form!</p>
               </div>
             )}
             {messages.map((msg, index) => (
               <div
                 key={index}
-                className={`p-3 rounded-lg max-w-[85%] ${msg.role === 'user'
+                className={`p-2 sm:p-3 rounded-lg max-w-[90%] sm:max-w-[85%] ${msg.role === 'user'
                   ? 'bg-blue-100 dark:bg-blue-900/50 ml-auto'
                   : 'bg-gray-100 dark:bg-gray-700 mr-auto'
                   }`}
               >
-                <p className="text-sm">{msg.content}</p>
+                <p className="text-xs sm:text-sm">{msg.content}</p>
               </div>
             ))}
             {isLoading && (
-              <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg max-w-[85%] mr-auto">
-                <div className="flex space-x-2">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-75"></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-150"></div>
+              <div className="bg-gray-100 dark:bg-gray-700 p-2 sm:p-3 rounded-lg max-w-[85%] mr-auto">
+                <div className="flex space-x-1.5 sm:space-x-2">
+                  <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></div>
+                  <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce delay-75"></div>
+                  <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce delay-150"></div>
                 </div>
               </div>
             )}
@@ -140,20 +139,20 @@ export default function AIAssistant({ formType, onSuggestionReceived }: AIAssist
           </div>
 
           {/* Input Area */}
-          <div className="p-3 border-t border-gray-200 dark:border-gray-700">
+          <div className="p-2 sm:p-3 border-t border-gray-200 dark:border-gray-700">
             <div className="flex">
               <textarea
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask about form completion..."
-                className="flex-1 border border-gray-300 dark:border-gray-600 rounded-l-lg p-2 text-sm resize-none h-12 focus:outline-none focus:ring-2 focus:ring-kmuGreen dark:bg-gray-700 dark:text-white"
+                placeholder="Ask about form..."
+                className="flex-1 border border-gray-300 dark:border-gray-600 rounded-l-lg p-2 text-xs sm:text-sm resize-none h-10 sm:h-12 focus:outline-none focus:ring-2 focus:ring-kmuGreen dark:bg-gray-700 dark:text-white"
                 disabled={isLoading}
               />
               <button
                 onClick={handleSendMessage}
                 disabled={isLoading || !inputValue.trim()}
-                className="bg-kmuGreen text-white px-4 rounded-r-lg hover:bg-kmuOrange disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-kmuGreen text-white px-3 sm:px-4 rounded-r-lg hover:bg-kmuOrange disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm font-bold"
               >
                 Send
               </button>
@@ -163,10 +162,10 @@ export default function AIAssistant({ formType, onSuggestionReceived }: AIAssist
       ) : (
         <button
           onClick={toggleAssistant}
-          className="bg-kmuGreen dark:bg-kmuGreen/90 text-white p-2.5 sm:p-4 rounded-full shadow-lg hover:bg-green-700 transition-all active:scale-95 flex items-center justify-center transform hover:scale-105"
+          className="bg-kmuGreen dark:bg-kmuGreen/90 text-white p-2 sm:p-3.5 rounded-full shadow-lg hover:bg-green-700 transition-all active:scale-95 flex items-center justify-center transform hover:scale-105"
           aria-label="Open AI Assistant"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
           </svg>
         </button>

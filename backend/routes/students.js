@@ -1,5 +1,5 @@
 import express from 'express';
-import { listStudents, getStudent, createStudent, updateStudent, deleteStudent, importStudents, searchStudents, getRecentStudents, updateLastSelected } from '../controllers/studentsController.js';
+import { listStudents, getStudent, createStudent, updateStudent, deleteStudent, importStudents, searchStudents, getRecentStudents, updateLastSelected, getUniquePrograms } from '../controllers/studentsController.js';
 import { authenticate, authorize } from '../middleware/auth.js';
 import ExcelJS from 'exceljs';
 import { Document, Packer, Paragraph, Table, TableCell, TableRow, TextRun } from 'docx';
@@ -8,6 +8,7 @@ const router = express.Router();
 router.use(authenticate, authorize(['admin', 'academic_office', 'security_officer']));
 
 router.get('/', listStudents);
+router.get('/programs', getUniquePrograms);
 router.get('/search', searchStudents);
 router.get('/recent', getRecentStudents);
 router.get('/:id', getStudent);
@@ -18,7 +19,7 @@ router.delete('/:id', authorize(['admin', 'academic_office']), deleteStudent);
 router.post('/import', importStudents);
 
 // Excel export
-router.get('/export-excel', async(req, res) => {
+router.get('/export-excel', async (req, res) => {
     try {
         const students = await listStudentsRaw();
         const workbook = new ExcelJS.Workbook();
@@ -55,7 +56,7 @@ router.get('/export-excel', async(req, res) => {
 });
 
 // DOCX export
-router.post('/export-docx', async(req, res) => {
+router.post('/export-docx', async (req, res) => {
     try {
         const students = await listStudentsRaw();
         const docSections = [];
@@ -84,11 +85,11 @@ async function listStudentsRaw() {
     const dbType = process.env.DB_TYPE || 'mongo';
     if (dbType === 'mongo') {
         const StudentModel = (await
-            import ('../models/student.js')).default;
+            import('../models/student.js')).default;
         return StudentModel.find();
     } else {
         const db = (await
-            import ('../models/db.js')).default;
+            import('../models/db.js')).default;
         const [rows] = await db.execute('SELECT * FROM students');
         return rows;
     }
@@ -97,11 +98,11 @@ async function getStudentCases(studentId) {
     const dbType = process.env.DB_TYPE || 'mongo';
     if (dbType === 'mongo') {
         const CaseModel = (await
-            import ('../models/case.js')).default;
+            import('../models/case.js')).default;
         return CaseModel.find({ student_id: studentId });
     } else {
         const db = (await
-            import ('../models/db.js')).default;
+            import('../models/db.js')).default;
         const [rows] = await db.execute('SELECT * FROM cases WHERE student_id = ?', [studentId]);
         return rows;
     }
