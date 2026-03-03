@@ -240,53 +240,68 @@ export default function DeanOfStudentsDashboard() {
           {/* Page Header */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Dean of Students Dashboard</h1>
-              <p className="text-sm text-gray-500 font-medium mt-1 uppercase tracking-wider">Dean's Disciplinary Overview</p>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Dean of Students Dashboard</h1>
+              <p className="text-xs text-gray-500 font-medium mt-1">Dashboard Overview</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={handleGenerateSummary}
                 disabled={isSummarizing || cases.length === 0}
-                className="bg-emerald-600 text-white px-6 py-2.5 rounded-lg font-bold text-xs hover:bg-emerald-700 transition flex items-center gap-2 shadow-sm disabled:opacity-50 uppercase tracking-widest"
+                className="bg-emerald-600 text-white px-4 py-2 rounded-lg font-bold text-xs hover:bg-emerald-700 transition flex items-center gap-2 shadow-sm disabled:opacity-50"
               >
-                {isSummarizing ? "Analyzing..." : "✨ AI Behavioral Insight"}
+                {isSummarizing ? "Analyzing..." : "✨ AI Summary"}
               </button>
               <button
                 onClick={exportCasesToWord}
-                className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-6 py-2.5 rounded-lg font-bold text-xs shadow-sm hover:opacity-90 transition uppercase tracking-widest"
+                className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-4 py-2 rounded-lg font-bold text-xs shadow-sm hover:opacity-90 transition"
               >
-                Export Case Records
+                Export Records
               </button>
             </div>
           </div>
+
+          {/* AI behavioral Insight Panel */}
+          {aiSummary && (
+            <div className="p-6 bg-emerald-50 dark:bg-emerald-950/20 rounded-xl border border-emerald-100 dark:border-emerald-900/50 relative overflow-hidden animate-in slide-in-from-top-4 duration-500 shadow-sm">
+              <div className="relative z-10">
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">AI Case Analysis</span>
+                  <button onClick={() => setAiSummary(null)} className="text-gray-400 hover:text-gray-600 transition text-[10px] font-bold">DISMISS</button>
+                </div>
+                <div className="text-gray-900 dark:text-gray-100 leading-relaxed text-sm italic font-medium">
+                  "{aiSummary}"
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Quick Navigation Panel */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Link href="/dean-of-students-dashboard/cases" className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-red-500/50 transition-all group shadow-sm">
               <div className="flex justify-between items-center">
                 <div>
-                  <h3 className="text-lg font-bold uppercase tracking-tight group-hover:text-red-600 transition-colors">Disciplinary Records</h3>
-                  <p className="text-xs text-gray-500 font-medium mt-1">Review university-wide disciplinary records</p>
+                  <h3 className="text-base font-bold group-hover:text-red-600 transition-colors">Cases</h3>
+                  <p className="text-xs text-gray-500 mt-1">Review disciplinary records</p>
                 </div>
-                <span className="text-2xl group-hover:translate-x-1 transition-transform">⚖️</span>
+                <span className="text-xl group-hover:translate-x-1 transition-transform">⚖️</span>
               </div>
             </Link>
             <Link href="/dean-of-students-dashboard/students" className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-emerald-500/50 transition-all group shadow-sm">
               <div className="flex justify-between items-center">
                 <div>
-                  <h3 className="text-lg font-bold uppercase tracking-tight group-hover:text-emerald-600 transition-colors">Student Registry</h3>
-                  <p className="text-xs text-gray-500 font-medium mt-1">Explore complete student profiles and history</p>
+                  <h3 className="text-base font-bold group-hover:text-emerald-600 transition-colors">Students</h3>
+                  <p className="text-xs text-gray-500 mt-1">Student history and profiles</p>
                 </div>
-                <span className="text-2xl group-hover:translate-x-1 transition-transform">👤</span>
+                <span className="text-xl group-hover:translate-x-1 transition-transform">👤</span>
               </div>
             </Link>
             <Link href="/dean-of-students-dashboard/reports" className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-blue-500/50 transition-all group shadow-sm">
               <div className="flex justify-between items-center">
                 <div>
-                  <h3 className="text-lg font-bold uppercase tracking-tight group-hover:text-blue-600 transition-colors">reports & Data</h3>
-                  <p className="text-xs text-gray-500 font-medium mt-1">Access advanced analytics and export tools</p>
+                  <h3 className="text-base font-bold group-hover:text-blue-600 transition-colors">Reports</h3>
+                  <p className="text-xs text-gray-500 mt-1">View analytics and export tools</p>
                 </div>
-                <span className="text-2xl group-hover:translate-x-1 transition-transform">📊</span>
+                <span className="text-xl group-hover:translate-x-1 transition-transform">📊</span>
               </div>
             </Link>
           </div>
@@ -299,66 +314,6 @@ export default function DeanOfStudentsDashboard() {
             <StatCard title="High Risk" value={safeCases.filter(c => c.severity === 'High' || c.severity === 'Critical').length} color="red" />
           </div>
 
-          {/* AI behavioral Insight Panel */}
-          {aiSummary && (
-            <div className="p-8 bg-emerald-50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900/50 relative overflow-hidden group animate-in slide-in-from-top-4 duration-500 shadow-xl">
-              <div className="relative z-10">
-                <div className="flex justify-between items-center mb-6">
-                  <span className="text-xs font-black uppercase tracking-widest text-emerald-600">Strategic behavioral Analysis</span>
-                  <button onClick={() => setAiSummary(null)} className="text-gray-400 hover:text-gray-600 transition font-bold">DISMISS</button>
-                </div>
-                <div className="text-gray-900 dark:text-gray-100 leading-relaxed text-sm font-bold italic font-sans">
-                  "{aiSummary}"
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Case Analysis */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-              <div className="flex justify-between items-center mb-8">
-                <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest">Offense Type Distribution</h3>
-                <select
-                  className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-sans"
-                  value={programFilter}
-                  onChange={(e) => setProgramFilter(e.target.value)}
-                >
-                  <option value="">All Programs</option>
-                  {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
-                </select>
-              </div>
-              <div className="h-64">
-                <Bar
-                  data={offenseChartData}
-                  options={{
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                      y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
-                      x: { grid: { display: false } }
-                    }
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Top Offenders List snippet */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-              <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-8">Frequent Offenders</h3>
-              <div className="space-y-4">
-                {topOffenders.length > 0 ? topOffenders.map(([name, count], i) => (
-                  <div key={i} className="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700 group hover:border-red-500/30 transition-all">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-950/30 flex items-center justify-center text-red-600 font-bold text-sm uppercase">{name.charAt(0)}</div>
-                      <span className="font-bold text-xs text-gray-800 dark:text-gray-200 uppercase tracking-tight">{name}</span>
-                    </div>
-                    <span className="text-[10px] font-black text-red-600 bg-red-50 dark:bg-red-900/30 px-3 py-1 rounded-full uppercase tracking-tighter">{count} Incidents</span>
-                  </div>
-                )) : <p className="text-center text-gray-400 py-16 italic text-xs uppercase tracking-widest font-black">No high-frequency offenders found.</p>}
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -377,9 +332,9 @@ function StatCard({ title, value, color }: any) {
     red: 'border-red-500 dark:border-red-400'
   };
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-6 transition-all hover:shadow-md ${colors[color]}`}>
-      <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{title}</div>
-      <div className="text-3xl font-bold text-gray-900 dark:text-white">{value}</div>
+    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-5 transition-all hover:shadow-md ${colors[color]}`}>
+      <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">{title}</div>
+      <div className="text-2xl font-bold text-gray-900 dark:text-white">{value}</div>
     </div>
   );
 }

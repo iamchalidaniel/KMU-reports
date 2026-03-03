@@ -217,116 +217,91 @@ export default function AssistantDeanDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-sans text-sm">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="animate-in fade-in duration-300 space-y-6">
 
           {/* Page Header */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 gap-4">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Assistant Dean Dashboard</h1>
-              <p className="text-sm text-gray-500 font-medium mt-1 uppercase tracking-wider">Academic & Disciplinary Overview</p>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Academic Overview</h1>
+              <p className="text-xs text-blue-600 font-semibold mt-1 uppercase tracking-wider">Assistant Dean Dashboard</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={exportCasesToWord}
-                className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-6 py-2.5 rounded-lg font-bold text-xs hover:opacity-90 transition flex items-center gap-2 shadow-sm uppercase tracking-wider"
+                className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-5 py-2 rounded-lg font-bold text-xs transition shadow-sm"
               >
-                📊 Export Registry
+                Export Registry
               </button>
               <Link
-                href="/reports"
-                className="bg-blue-600 text-white px-6 py-2.5 rounded-lg font-bold text-xs hover:bg-blue-700 transition flex items-center gap-2 shadow-sm uppercase tracking-wider"
+                href="/assistant-dean-dashboard/reports"
+                className="bg-blue-600 text-white px-5 py-2 rounded-lg font-bold text-xs hover:bg-blue-700 transition shadow-sm"
               >
-                📂 View All Reports
+                Reports
               </Link>
             </div>
           </div>
 
           {/* Quick Navigation Panel */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Link href="/assistant-dean-dashboard/cases" className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-red-500/50 transition-all group shadow-sm">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="text-lg font-bold uppercase tracking-tight group-hover:text-red-600 transition-colors">Manage Cases</h3>
-                  <p className="text-xs text-gray-500 font-medium mt-1">Review, update, and export disciplinary records</p>
-                </div>
-                <span className="text-2xl group-hover:translate-x-1 transition-transform">➡️</span>
+            <Link href="/assistant-dean-dashboard/cases" className="bg-white dark:bg-gray-900 p-5 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-blue-500/30 transition-all group shadow-sm flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold group-hover:text-blue-600 transition-colors">Cases</h3>
+                <p className="text-[10px] text-gray-500 font-medium">Review and update records</p>
               </div>
+              <span className="text-lg group-hover:translate-x-1 transition-transform">➡️</span>
             </Link>
-            <Link href="/assistant-dean-dashboard/students" className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-kmuGreen/50 transition-all group shadow-sm">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="text-lg font-bold uppercase tracking-tight group-hover:text-kmuGreen transition-colors">Student Registry</h3>
-                  <p className="text-xs text-gray-500 font-medium mt-1">View student profiles, programs, and academic status</p>
-                </div>
-                <span className="text-2xl group-hover:translate-x-1 transition-transform">➡️</span>
+            <Link href="/assistant-dean-dashboard/students" className="bg-white dark:bg-gray-900 p-5 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-kmuGreen/30 transition-all group shadow-sm flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold group-hover:text-kmuGreen transition-colors">Students</h3>
+                <p className="text-[10px] text-gray-500 font-medium">Academic status & profiles</p>
               </div>
+              <span className="text-lg group-hover:translate-x-1 transition-transform">➡️</span>
             </Link>
           </div>
 
           {/* System Overview Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard title="Total Students" value={totalStudentsCount} color="indigo" />
+            <StatCard title="Students" value={totalStudentsCount} color="indigo" />
             <StatCard title="Total Cases" value={totalCasesCount} color="purple" />
-            <StatCard title="Open Cases" value={pendingCases} color="orange" />
+            <StatCard title="Open" value={pendingCases} color="orange" />
             <StatCard title="Resolved" value={resolvedCases} color="green" />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Case Status Distribution */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Case Status Summary</h3>
-              <div className="h-64">
-                <Doughnut
-                  data={statusChartData}
-                  options={{
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10, weight: 'bold' } } } }
-                  }}
-                />
-              </div>
+          {/* Case Registry Snippet */}
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+             <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/30 dark:bg-gray-800/20">
+              <h2 className="text-base font-bold">Recent Cases</h2>
+              <Link href="/assistant-dean-dashboard/cases" className="text-xs font-bold text-blue-600 hover:underline">Full Registry →</Link>
             </div>
-
-            {/* Offense Frequency */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Offense Frequency</h3>
-                <select
-                  className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs font-semibold outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
-                  value={programFilter}
-                  onChange={(e) => setProgramFilter(e.target.value)}
-                >
-                  <option value="">All Programs</option>
-                  {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
-                </select>
-              </div>
-              <div className="h-64">
-                <Bar
-                  data={offenseChartData}
-                  options={{
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                      y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
-                      x: { grid: { display: false } }
-                    }
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Frequent Offenders Snippet */}
-          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-            <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Frequent Offenders</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {topOffenders.length > 0 ? topOffenders.map(([name, count], i) => (
-                <div key={i} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-100 dark:border-gray-700">
-                  <span className="font-bold text-xs text-gray-700 dark:text-gray-300 uppercase">{name}</span>
-                  <span className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-2.5 py-1 rounded-full text-[9px] font-black uppercase">{count} Incidents</span>
-                </div>
-              )) : <p className="text-center text-gray-500 py-12 italic text-sm col-span-full uppercase tracking-widest">No frequent offenders found.</p>}
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-400 font-bold uppercase tracking-widest">
+                  <tr>
+                    <th className="px-6 py-4 text-left">Student</th>
+                    <th className="px-6 py-4 text-left">Offense</th>
+                    <th className="px-6 py-4 text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {filteredCases.slice(0, 8).map((c, i) => (
+                    <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
+                      <td className="px-6 py-4">
+                        <div className="font-bold text-gray-800 dark:text-gray-200">{c.student?.fullName || 'Anonymous'}</div>
+                        <div className="text-[10px] text-gray-500">{c.student?.studentId}</div>
+                      </td>
+                      <td className="px-6 py-4 text-gray-600 dark:text-gray-400 font-medium">{c.offenseType}</td>
+                      <td className="px-6 py-4 text-center">
+                        <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase ${c.status === 'Open' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>{c.status}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {filteredCases.length === 0 && (
+                <div className="text-center py-12 text-gray-400 italic">No records found.</div>
+              )}
             </div>
           </div>
 
@@ -348,9 +323,9 @@ function StatCard({ title, value, color }: any) {
     green: 'border-green-500 dark:border-green-400'
   };
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-6 transition-all hover:shadow-md ${colors[color]}`}>
-      <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{title}</div>
-      <div className="text-3xl font-bold text-gray-900 dark:text-white">{value}</div>
+    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-5 transition-all hover:scale-[1.01] ${colors[color]}`}>
+      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{title}</div>
+      <div className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">{value}</div>
     </div>
   );
 }

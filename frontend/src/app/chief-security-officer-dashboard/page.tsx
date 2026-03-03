@@ -168,132 +168,91 @@ export default function ChiefSecurityOfficerDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-sans text-sm">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="animate-in fade-in duration-300 space-y-6">
 
           {/* Page Header */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 gap-4">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Chief Security Officer Dashboard</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Security Operations Overview</p>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Security Command</h1>
+              <p className="text-xs text-red-600 font-semibold mt-1 uppercase tracking-wider">CSO Strategy & Oversight</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={exportCasesToWord}
-                className="bg-red-600 text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-red-700 transition flex items-center gap-2 shadow-sm"
+                className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-5 py-2 rounded-lg font-bold text-xs transition shadow-sm"
               >
-                📊 Export Security Report
+                Export Strategy Report
               </button>
+              <Link
+                href="/chief-security-officer-dashboard/reports"
+                className="bg-red-600 text-white px-5 py-2 rounded-lg font-bold text-xs hover:bg-red-700 transition shadow-sm"
+              >
+                Security Analytics
+              </Link>
             </div>
           </div>
 
           {/* Security Overview */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard title="Total Cases" value={safeCases.length} color="red" />
-            <StatCard title="Open Cases" value={safeCases.filter(c => c.status === 'Open').length} color="blue" />
-            <StatCard title="High Priority Cases" value={safeCases.filter(c => c.severity === 'High' || c.severity === 'Critical').length} color="orange" />
-            <StatCard title="Total Students" value={safeStudents.length} color="indigo" />
+            <StatCard title="All Cases" value={safeCases.length} color="red" />
+            <StatCard title="Open" value={safeCases.filter(c => c.status === 'Open').length} color="blue" />
+            <StatCard title="Priority" value={safeCases.filter(c => c.severity === 'High' || c.severity === 'Critical').length} color="orange" />
+            <StatCard title="Students" value={safeStudents.length} color="indigo" />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Case Analytics */}
-            <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Offense Type Analysis</h3>
-                <select
-                  className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs font-semibold outline-none focus:ring-2 focus:ring-red-500 transition-all font-sans"
-                  value={programFilter}
-                  onChange={(e) => setProgramFilter(e.target.value)}
-                >
-                  <option value="">All Programs</option>
-                  {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
-                </select>
+          <div className="grid grid-cols-1 gap-6">
+            {/* Recent Cases */}
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
+              <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <h2 className="text-base font-bold text-gray-900 dark:text-white">Recent Incidents</h2>
+                <div className="relative w-full md:w-64">
+                  <input
+                    placeholder="Quick search..."
+                    className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs w-full focus:ring-2 focus:ring-red-500 transition-all font-sans"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </div>
               </div>
-              <div className="h-64">
-                <Bar
-                  data={offenceChartData}
-                  options={{
-                    maintainAspectRatio: false,
-                    indexAxis: 'y',
-                    plugins: { legend: { display: false } },
-                    scales: {
-                      x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
-                      y: { grid: { display: false } }
-                    }
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Top Offenders */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Frequent Offenders</h3>
-              <div className="space-y-3">
-                {topOffenders.map(([name, count], i) => (
-                  <div key={i} className="flex justify-between items-center p-3 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-all border border-gray-100 dark:border-gray-700 group">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center text-red-600 font-bold text-xs">{name.charAt(0)}</div>
-                      <span className="font-bold text-sm text-gray-700 dark:text-gray-300 group-hover:text-red-600 transition-colors uppercase">{name}</span>
-                    </div>
-                    <span className="text-[10px] font-bold text-red-600 bg-red-50 dark:bg-red-900/30 px-2 py-1 rounded-lg uppercase">{count} Incidents</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Recent Cases */}
-          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
-            <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Recent Incidents</h2>
-              <div className="relative w-full md:w-80">
-                <input
-                  placeholder="Search cases..."
-                  className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-sm w-full focus:ring-2 focus:ring-red-500 transition-all font-sans"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-xs font-bold uppercase tracking-wider">
-                  <tr>
-                    <th className="px-6 py-4 text-left">Student</th>
-                    <th className="px-6 py-4 text-left">Offense Category</th>
-                    <th className="px-6 py-4 text-center">Status</th>
-                    <th className="px-6 py-4 text-right">Severity</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {filteredCases.slice(0, 15).map((c, i) => (
-                    <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 group transition-colors cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
-                      <td className="px-6 py-4">
-                        <div className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-red-600 transition-colors uppercase">{c.student?.fullName || 'Anonymous'}</div>
-                        <div className="text-xs text-gray-500 mt-0.5">{c.student?.studentId || 'EXTERNAL'}</div>
-                      </td>
-                      <td className="px-6 py-4 text-gray-600 dark:text-gray-400 font-bold uppercase">{c.offenseType}</td>
-                      <td className="px-6 py-4 text-center">
-                        <span className={`px-2.5 py-1 rounded-full font-bold text-[10px] uppercase border ${c.status === 'Open' ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`}>{c.status}</span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <span className={`text-[10px] font-bold uppercase ${c.severity === 'Critical' ? 'text-red-600 animate-pulse' :
-                          c.severity === 'High' ? 'text-red-500' : 'text-gray-400'
-                          }`}>
-                          {c.severity}
-                        </span>
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-400 font-bold uppercase tracking-widest">
+                    <tr>
+                      <th className="px-6 py-4 text-left">Student</th>
+                      <th className="px-6 py-4 text-left">Category</th>
+                      <th className="px-6 py-4 text-center">Status</th>
+                      <th className="px-6 py-4 text-right">Severity</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-              {filteredCases.length === 0 && (
-                <div className="text-center py-20 text-gray-400 italic text-sm">No incidents recorded.</div>
-              )}
-            </div>
-            <div className="p-4 bg-gray-50 dark:bg-gray-800/50 text-center border-t border-gray-100 dark:border-gray-800">
-              <Link href="/cases" className="text-xs font-bold text-red-600 hover:text-red-700 uppercase tracking-wider transition-all">View All Cases →</Link>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                    {filteredCases.slice(0, 10).map((c, i) => (
+                      <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
+                        <td className="px-6 py-4">
+                          <div className="font-bold text-gray-800 dark:text-gray-200">{c.student?.fullName || 'Anonymous'}</div>
+                          <div className="text-[10px] text-gray-500">{c.student?.studentId || 'EXTERNAL'}</div>
+                        </td>
+                        <td className="px-6 py-4 text-gray-600 dark:text-gray-400 font-medium">{c.offenseType}</td>
+                        <td className="px-6 py-4 text-center">
+                          <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase ${c.status === 'Open' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>{c.status}</span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <span className={`text-[10px] font-bold ${c.severity === 'Critical' ? 'text-red-600 underline' : 'text-gray-400'}`}>
+                            {c.severity}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {filteredCases.length === 0 && (
+                  <div className="text-center py-12 text-gray-400 italic">No incidents recorded.</div>
+                )}
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800/50 text-center border-t border-gray-100 dark:border-gray-800">
+                <Link href="/cases" className="text-[10px] font-bold text-red-600 hover:underline uppercase tracking-wider transition-all">Full Case Ledger →</Link>
+              </div>
             </div>
           </div>
         </div>
@@ -314,9 +273,9 @@ function StatCard({ title, value, color }: any) {
     indigo: 'border-indigo-500 dark:border-indigo-400'
   };
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-6 transition-all hover:shadow-md ${colors[color]}`}>
-      <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{title}</div>
-      <div className="text-3xl font-bold text-gray-900 dark:text-white">{value}</div>
+    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-5 transition-all hover:scale-[1.01] ${colors[color]}`}>
+      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{title}</div>
+      <div className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">{value}</div>
     </div>
   );
 }

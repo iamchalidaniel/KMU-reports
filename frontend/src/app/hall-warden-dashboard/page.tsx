@@ -310,133 +310,102 @@ export default function HallWardenDashboard() {
   const halls = Array.from(new Set(reports.map(r => r.location.hall).filter(Boolean)));
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-sans text-sm">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="animate-in fade-in duration-300 space-y-6">
 
           {/* Hall Warden Header */}
-          <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
-              <h1 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Command Center</h1>
-              <p className="text-sm text-emerald-600 font-black uppercase tracking-widest mt-1">Hostel Infrastructure & behavioral Oversight</p>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Hostel Operations</h1>
+              <p className="text-xs text-emerald-600 font-semibold mt-1 uppercase tracking-wider">Hall Warden Command</p>
             </div>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-3">
               <Link
-                href="/hall-warden-dashboard/maintenance"
-                className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition shadow-xl hover:scale-[1.02] active:scale-95 flex items-center gap-2"
+                href="/hall-warden-dashboard/reports"
+                className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-5 py-2 rounded-lg font-bold text-xs transition shadow-sm"
               >
-                📊 Full Maintenance Logs
+                Maintenance Reports
               </Link>
               <button
                 onClick={() => setShowForm(true)}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition shadow-xl hover:scale-[1.02] active:scale-95 flex items-center gap-2"
+                className="bg-emerald-600 text-white px-5 py-2 rounded-lg font-bold text-xs hover:bg-emerald-700 transition shadow-sm"
               >
-                🛠️ Dispatch New Report
+                New Dispatch
               </button>
             </div>
           </div>
 
           {/* System Overview */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard title="Active Reports" value={reports.length} color="teal" />
+            <StatCard title="Active" value={reports.length} color="teal" />
             <StatCard title="Unassigned" value={reports.filter(r => r.status === 'Reported').length} color="orange" />
             <StatCard title="In Progress" value={reports.filter(r => r.status === 'In Progress' || r.status === 'Assigned').length} color="blue" />
-            <StatCard title="Resolved (24h)" value={reports.filter(r => r.status === 'Completed').length} color="emerald" />
+            <StatCard title="Resolved" value={reports.filter(r => r.status === 'Completed').length} color="emerald" />
           </div>
 
-          {/* Analytics Matrix */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-              <div className="flex justify-between items-center mb-12">
-                <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Infrastructural Fault Variance</h3>
-                <select
-                  className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-sans"
-                  value={hallFilter}
-                  onChange={(e) => setHallFilter(e.target.value)}
-                >
-                  <option value="">All University Halls</option>
-                  {halls.map((h: any) => <option key={h} value={h}>{h}</option>)}
-                </select>
+             <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+              <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/30 dark:bg-gray-800/20">
+                <h2 className="text-base font-bold">Active Dispatches</h2>
+                <Link href="/hall-warden-dashboard/maintenance" className="text-xs font-bold text-emerald-600 hover:underline">Full Registry →</Link>
               </div>
-              <div className="h-64 flex items-center justify-center">
-                <Doughnut
-                  data={categoryChartData}
-                  options={{
-                    maintainAspectRatio: false,
-                    cutout: '75%',
-                    plugins: { legend: { position: 'right', labels: { boxWidth: 10, padding: 20, font: { family: 'sans-serif', size: 10, weight: 'bold' } } } }
-                  }}
-                />
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-400 font-bold uppercase tracking-widest">
+                    <tr>
+                      <th className="px-6 py-4 text-left">Location</th>
+                      <th className="px-6 py-4 text-left">Category</th>
+                      <th className="px-6 py-4 text-center">Status</th>
+                      <th className="px-6 py-4 text-right">Technician</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                    {filteredReports.slice(0, 8).map((report, i) => (
+                      <tr key={report._id || i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group">
+                        <td className="px-6 py-4">
+                          <div className="font-bold text-gray-800 dark:text-gray-200">{report.location.hall}</div>
+                          <div className="text-[10px] text-gray-500">Room {report.location.room} • {getRelativeTime(report.created_at)}</div>
+                        </td>
+                        <td className="px-6 py-4 text-gray-600 dark:text-gray-400 font-medium">{report.category}</td>
+                        <td className="px-6 py-4 text-center">
+                          <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase ${report.status === 'Completed' ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'}`}>{report.status}</span>
+                        </td>
+                        <td className="px-6 py-4 text-right text-gray-500 font-medium">
+                          {report.assigned_to?.name || 'Unassigned'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {filteredReports.length === 0 && (
+                  <div className="text-center py-12 text-gray-400 italic">No active dispatches.</div>
+                )}
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 flex flex-col justify-between">
-              <div>
-                <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-12">Hostel Severity Metrics</h3>
-                <div className="space-y-6 font-sans">
-                  {['Urgent', 'High', 'Medium', 'Low'].map(p => {
-                    const count = reports.filter(r => r.priority === p).length;
-                    const percentage = reports.length ? (count / reports.length) * 100 : 0;
-                    return (
-                      <div key={p} className="space-y-2">
-                        <div className="flex justify-between text-[10px] font-black uppercase tracking-widest mb-1">
-                          <span className={p === 'Urgent' ? 'text-red-500 underline underline-offset-4' : 'text-gray-400'}>{p} Severity</span>
-                          <span className="text-gray-900 dark:text-gray-100">{count}</span>
-                        </div>
-                        <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                          <div className={`h-full rounded-full transition-all duration-1000 ${p === 'Urgent' ? 'bg-red-500' : p === 'High' ? 'bg-orange-500' : 'bg-emerald-500'}`} style={{ width: `${percentage}%` }} />
-                        </div>
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-8">Severity Variance</h3>
+              <div className="space-y-6">
+                {['Urgent', 'High', 'Medium', 'Low'].map(p => {
+                  const count = reports.filter(r => r.priority === p).length;
+                  const percentage = reports.length ? (count / reports.length) * 100 : 0;
+                  return (
+                    <div key={p} className="space-y-2">
+                      <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest mb-1">
+                        <span className={p === 'Urgent' ? 'text-red-500' : 'text-gray-400'}>{p}</span>
+                        <span className="text-gray-900 dark:text-gray-100">{count}</span>
                       </div>
-                    );
-                  })}
-                </div>
+                      <div className="h-1 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                        <div className={`h-full rounded-full transition-all duration-1000 ${p === 'Urgent' ? 'bg-red-500' : p === 'High' ? 'bg-orange-500' : 'bg-emerald-500'}`} style={{ width: `${percentage}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
               <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 text-center">
-                <Link href="/hall-warden-dashboard/maintenance" className="text-[10px] font-black text-emerald-600 uppercase tracking-widest hover:underline transition-all">Export Detailed Audit →</Link>
+                <Link href="/hall-warden-dashboard/maintenance" className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest hover:underline">Full Audit Logs →</Link>
               </div>
-            </div>
-          </div>
-
-          {/* Quick List (Snippet of Recent Reports) */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
-            <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/20">
-              <h2 className="text-xl font-black uppercase tracking-tight">Active Dispatches</h2>
-              <Link href="/hall-warden-dashboard/maintenance" className="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-emerald-600 transition-colors">Manage Full Registry</Link>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs font-sans">
-                <thead className="text-gray-400 text-[9px] font-black uppercase tracking-[0.2em]">
-                  <tr>
-                    <th className="px-8 py-6 text-left">Location</th>
-                    <th className="px-8 py-6 text-left">Categorization</th>
-                    <th className="px-8 py-6 text-center">Status</th>
-                    <th className="px-8 py-6 text-right">Dispatch</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50 dark:divide-gray-800/50">
-                  {filteredReports.slice(0, 5).map((report, i) => (
-                    <tr key={report._id || i} className="hover:bg-emerald-50/5 transition-colors group">
-                      <td className="px-8 py-6">
-                        <div className="font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight group-hover:text-emerald-600 transition-colors">{report.location.hall}</div>
-                        <div className="text-[9px] font-black text-gray-400 mt-1 uppercase tracking-tighter">Room {report.location.room} • {getRelativeTime(report.created_at)}</div>
-                      </td>
-                      <td className="px-8 py-6">
-                        <span className="font-black text-gray-700 dark:text-gray-300 uppercase text-[10px] tracking-tight">{report.category}</span>
-                      </td>
-                      <td className="px-8 py-6 text-center">
-                        <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${report.status === 'Completed' ? 'bg-green-100 text-green-700 border-green-200' : 'bg-blue-100 text-blue-700 border-blue-200 whitespace-nowrap'
-                          }`}>{report.status}</span>
-                      </td>
-                      <td className="px-8 py-6 text-right font-black text-[10px] text-gray-400 uppercase tracking-widest">
-                        {report.assigned_to?.name || 'Unassigned'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {filteredReports.length === 0 && (
-                <div className="text-center py-20 text-gray-400 italic font-black uppercase tracking-widest">No active dispatches.</div>
-              )}
             </div>
           </div>
         </div>
@@ -445,33 +414,33 @@ export default function HallWardenDashboard() {
       {/* Initiation Modal */}
       {showForm && (
         <div className="fixed inset-0 z-[1001] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-md" onClick={() => setShowForm(false)} />
-          <div className="relative bg-white dark:bg-gray-900 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-800 p-10 animate-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-center mb-10 pb-6 border-b border-gray-100 dark:border-gray-800">
+          <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => setShowForm(false)} />
+          <div className="relative bg-white dark:bg-gray-900 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 p-8">
+            <div className="flex justify-between items-center mb-8">
               <div>
-                <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Initiate Repair Dispatch</h2>
-                <p className="text-[10px] text-emerald-600 font-black uppercase tracking-[0.2em] mt-2">Enter infrastructure failure telemetry</p>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Dispatch Repair</h2>
+                <p className="text-xs text-gray-500 mt-1">Submit infrastructure failure details</p>
               </div>
-              <button onClick={() => setShowForm(false)} className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 hover:text-black dark:hover:text-white transition-all font-black">✕</button>
+              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-red-500">✕</button>
             </div>
-            <form onSubmit={handleSubmit} className="space-y-8 font-sans">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <FormField label="Failure Category" value={formData.category} onChange={(v: string) => setFormData({ ...formData, category: v })} type="select" options={CATEGORIES} />
-                <FormField label="Priority Level" value={formData.priority} onChange={(v: string) => setFormData({ ...formData, priority: v })} type="select" options={PRIORITIES} />
-                <FormField label="Hall / Location" value={formData.hall} onChange={(v: string) => setFormData({ ...formData, hall: v })} />
-                <FormField label="Specific Unit / Room" value={formData.room} onChange={(v: string) => setFormData({ ...formData, room: v })} />
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField label="Category" value={formData.category} onChange={(v: string) => setFormData({ ...formData, category: v })} type="select" options={CATEGORIES} />
+                <FormField label="Priority" value={formData.priority} onChange={(v: string) => setFormData({ ...formData, priority: v })} type="select" options={PRIORITIES} />
+                <FormField label="Hall" value={formData.hall} onChange={(v: string) => setFormData({ ...formData, hall: v })} />
+                <FormField label="Room" value={formData.room} onChange={(v: string) => setFormData({ ...formData, room: v })} />
                 <div className="md:col-span-2">
-                  <FormField label="Telemetric Description of Failure" value={formData.description} onChange={(v: string) => setFormData({ ...formData, description: v })} type="textarea" />
+                  <FormField label="Description" value={formData.description} onChange={(v: string) => setFormData({ ...formData, description: v })} type="textarea" />
                 </div>
-                <FormField label="Source of Truth (Name)" value={formData.reported_by_name} onChange={(v: string) => setFormData({ ...formData, reported_by_name: v })} />
-                <FormField label="Direct Contact Uplink" value={formData.reported_by_contact} onChange={(v: string) => setFormData({ ...formData, reported_by_contact: v })} />
+                <FormField label="Reported By" value={formData.reported_by_name} onChange={(v: string) => setFormData({ ...formData, reported_by_name: v })} />
+                <FormField label="Contact" value={formData.reported_by_contact} onChange={(v: string) => setFormData({ ...formData, reported_by_contact: v })} />
               </div>
-              <div className="mt-12 flex gap-4">
-                <button type="submit" disabled={loading} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-5 rounded-2xl shadow-xl transition-all active:scale-[0.98] text-[10px] uppercase tracking-[0.2em]">
-                  {loading ? 'PROCESSING...' : 'AUTHORIZE DISPATCH'}
+              <div className="mt-8 flex gap-3">
+                <button type="submit" disabled={loading} className="flex-1 bg-emerald-600 text-white font-bold py-3 rounded-xl shadow-sm hover:bg-emerald-700 transition">
+                  {loading ? 'Processing...' : 'Authorize Dispatch'}
                 </button>
-                <button type="button" onClick={() => setShowForm(false)} className="px-10 py-5 rounded-2xl border border-gray-200 dark:border-gray-700 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-gray-50 dark:hover:bg-gray-800 transition-all text-gray-500">
-                  ABORT
+                <button type="button" onClick={() => setShowForm(false)} className="px-6 py-3 rounded-xl border border-gray-200 dark:border-gray-700 font-bold text-gray-500">
+                  Cancel
                 </button>
               </div>
             </form>
@@ -494,26 +463,26 @@ function StatCard({ title, value, color }: any) {
     emerald: 'border-green-500 dark:border-green-400'
   };
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-6 transition-all hover:shadow-md ${colors[color]}`}>
-      <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{title}</div>
-      <div className="text-3xl font-bold text-gray-900 dark:text-white">{value}</div>
+    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-5 transition-all hover:scale-[1.01] ${colors[color]}`}>
+      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{title}</div>
+      <div className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">{value}</div>
     </div>
   );
 }
 
 function FormField({ label, value, onChange, type = 'text', options = [] }: any) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">{label}</label>
+    <div className="flex flex-col gap-1">
+      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">{label}</label>
       {type === 'select' ? (
-        <select value={value} onChange={(e) => onChange(e.target.value)} className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-kmuGreen outline-none transition-all text-xs font-bold uppercase">
-          <option value="">Select Category/Priority...</option>
+        <select value={value} onChange={(e) => onChange(e.target.value)} className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 outline-none transition-all text-xs font-bold">
+          <option value="">Select...</option>
           {options.map((o: any) => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
       ) : type === 'textarea' ? (
-        <textarea value={value} onChange={(e) => onChange(e.target.value)} className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-kmuGreen outline-none min-h-[120px] transition-all text-xs font-medium" />
+        <textarea value={value} onChange={(e) => onChange(e.target.value)} className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 outline-none min-h-[100px] transition-all text-xs" />
       ) : (
-        <input type={type} value={value} onChange={(e) => onChange(e.target.value)} className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-kmuGreen outline-none transition-all text-xs font-bold" />
+        <input type={type} value={value} onChange={(e) => onChange(e.target.value)} className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 outline-none transition-all text-xs font-bold" />
       )}
     </div>
   );

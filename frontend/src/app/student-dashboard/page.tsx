@@ -140,25 +140,27 @@ export default function StudentDashboardPage() {
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="animate-in fade-in duration-300 space-y-8">
 
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 text-sm">
+      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div className="animate-in fade-in duration-300 space-y-6">
+
           {/* Student Welcome Header */}
-          <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-              <span className="text-9xl font-black">KMU</span>
-            </div>
-            <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
-              <div className="w-24 h-24 rounded-2xl bg-kmuGreen flex items-center justify-center text-white font-bold text-4xl shadow-xl ring-4 ring-kmuGreen/10">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 relative overflow-hidden">
+            <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
+              <div className="w-16 h-16 rounded-xl bg-kmuGreen flex items-center justify-center text-white font-bold text-2xl shadow-md">
                 {studentData.name ? studentData.name.charAt(0).toUpperCase() : studentData.username.charAt(0).toUpperCase()}
               </div>
               <div className="text-center md:text-left flex-1">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Welcome, {studentData.fullName || studentData.name || 'Student'}</h1>
-                <p className="text-base text-gray-500 font-semibold mt-1 uppercase tracking-wider">{studentData.program} • Year {studentData.yearOfStudy}</p>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Welcome, {studentData.fullName || studentData.name || 'Student'}</h1>
+                <p className="text-xs text-gray-500 font-medium mt-1 uppercase tracking-wide">{studentData.program} • Year {studentData.yearOfStudy}</p>
 
-                <div className="flex flex-wrap gap-3 mt-6 justify-center md:justify-start">
-                  <Link href="/student-dashboard/profile" className="bg-kmuGreen hover:bg-kmuGreen-dark text-white px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition shadow-sm">
-                    👤 My Official Record
+                <div className="flex flex-wrap gap-2 mt-4 justify-center md:justify-start">
+                  <Link href="/student-dashboard/profile" className="bg-kmuGreen hover:bg-kmuGreen-dark text-white px-4 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition shadow-sm">
+                    Profile
                   </Link>
-                  <Link href="/student-dashboard/statements" className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
-                    📜 View Statements
+                  <Link href="/student-dashboard/statements" className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-4 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-gray-200 dark:hover:bg-gray-700 transition-all border border-gray-200 dark:border-gray-700">
+                    My Statements
                   </Link>
                 </div>
               </div>
@@ -166,28 +168,28 @@ export default function StudentDashboardPage() {
           </div>
 
           {/* Overview Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatCard title="Total Cases" value={cases.length} color="red" path="/student-dashboard/cases" />
-            <StatCard title="My Statements" value={reports.length} color="green" path="/student-dashboard/statements" />
-            <StatCard title="Pending Appeals" value={appeals.filter(a => a.status === 'Pending').length} color="orange" path="/student-dashboard/appeals" />
-            <StatCard title="Disciplinary Status" value={studentData.status || 'ACTIVE'} color="emerald" isStatus />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard title="Cases" value={cases.length} color="red" path="/student-dashboard/cases" />
+            <StatCard title="Statements" value={reports.length} color="green" path="/student-dashboard/statements" />
+            <StatCard title="Appeals" value={appeals.filter(a => a.status === 'Pending').length} color="orange" path="/student-dashboard/appeals" />
+            <StatCard title="Status" value={studentData.status || 'ACTIVE'} color="emerald" isStatus />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Incident Reporting */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between px-2">
-                <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Quick Reporting</h3>
-                <p className="text-[10px] text-gray-500 font-bold uppercase">Incident Statement</p>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between px-1">
+                <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Report Incident</h3>
+                <p className="text-[9px] text-gray-500 font-semibold uppercase">New Incident</p>
               </div>
               <IncidentReportForm onSuccess={() => fetchStats()} />
             </div>
 
             {/* Maintenance Reporting */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between px-2">
-                <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Facility Support</h3>
-                <p className="text-[10px] text-gray-500 font-bold uppercase">Maintenance Request</p>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between px-1">
+                <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Request Repair</h3>
+                <p className="text-[9px] text-gray-500 font-semibold uppercase">New Repair Request</p>
               </div>
               <MaintenanceRequestForm onSuccess={() => fetchStats()} />
             </div>
@@ -212,9 +214,9 @@ function StatCard({ title, value, color, path, isStatus }: any) {
   };
 
   const CardContent = (
-    <div className={`bg-white dark:bg-gray-900 rounded-2xl shadow-sm border-l-4 p-6 transition-all h-full ${path ? 'hover:shadow-md hover:scale-[1.02] cursor-pointer' : ''} ${colors[color]}`}>
-      <div className="text-xs font-black text-gray-400 uppercase tracking-wider mb-2">{title}</div>
-      <div className={`text-3xl font-black tracking-tight ${isStatus ? 'truncate' : ''}`}>
+    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-5 transition-all h-full ${path ? 'hover:shadow-md hover:scale-[1.01] cursor-pointer' : ''} ${colors[color]}`}>
+      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">{title}</div>
+      <div className={`text-xl font-bold tracking-tight ${isStatus ? 'truncate' : ''}`}>
         {value}
       </div>
     </div>

@@ -245,44 +245,50 @@ export default function SecretaryDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-sans text-sm">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="animate-in fade-in duration-300 space-y-6">
 
           {/* Page Header */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 gap-4">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Administrative Dashboard</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Student Records & Case Management</p>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Administrative Suite</h1>
+              <p className="text-xs text-kmuGreen font-semibold mt-1 uppercase tracking-wider">Secretary Dashboard</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={handleGenerateSummary}
                 disabled={isSummarizing || cases.length === 0}
-                className="bg-kmuGreen text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-green-700 transition flex items-center gap-2 shadow-sm disabled:opacity-50"
+                className="bg-kmuGreen text-white px-5 py-2 rounded-lg font-bold text-xs transition shadow-sm disabled:opacity-50"
               >
-                {isSummarizing ? "Analyzing..." : "✨ Generate AI Insight"}
+                {isSummarizing ? "Analyzing..." : "AI Insight"}
               </button>
               <button
                 onClick={exportCasesToWord}
-                className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-6 py-2.5 rounded-lg font-bold text-sm shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-5 py-2 rounded-lg font-bold text-xs transition shadow-sm"
               >
-                📄 Export Case Records
+                Export Records
               </button>
+              <Link
+                href="/secretary-dashboard/reports"
+                className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-5 py-2 rounded-lg font-bold text-xs shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 transition"
+              >
+                Analytics
+              </Link>
             </div>
           </div>
 
           {/* AI Insight banner */}
           {aiSummary && (
-            <div className="p-6 bg-emerald-50 dark:bg-emerald-900/10 border-l-4 border-emerald-500 rounded-xl animate-in slide-in-from-left duration-500 shadow-sm relative overflow-hidden">
+            <div className="p-5 bg-emerald-50 dark:bg-emerald-900/10 border-l-4 border-emerald-500 rounded-xl shadow-sm relative overflow-hidden">
               <div className="absolute top-2 right-2">
                 <button onClick={() => setAiSummary(null)} className="text-emerald-400 hover:text-emerald-600 transition">✕</button>
               </div>
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-xl">🧠</span>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">AI-Generated Trends</h3>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-lg">✨</span>
+                <h3 className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">AI Trends</h3>
               </div>
-              <div className="text-sm text-emerald-900 dark:text-emerald-100 leading-relaxed p-4 bg-white/60 dark:bg-black/20 rounded-lg border border-emerald-100/50 dark:border-emerald-800/50">
+              <div className="text-xs text-emerald-900 dark:text-emerald-100 leading-relaxed bg-white/40 dark:bg-black/20 p-3 rounded-lg border border-emerald-100/50">
                 {aiSummary}
               </div>
             </div>
@@ -290,97 +296,70 @@ export default function SecretaryDashboard() {
 
           {/* System Overview */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard title="Total Students" value={safeStudents.length} color="teal" />
-            <StatCard title="Total Cases" value={filteredCases.length} color="emerald" />
-            <StatCard title="New Cases (24h)" value={todayCount} color="blue" />
-            <StatCard title="Cases this Week" value={recentCount} color="orange" />
+            <StatCard title="Students" value={safeStudents.length} color="teal" />
+            <StatCard title="All Cases" value={filteredCases.length} color="emerald" />
+            <StatCard title="New Today" value={todayCount} color="blue" />
+            <StatCard title="This Week" value={recentCount} color="orange" />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Activity Trend */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Case Activity Trend</h3>
-                <select
-                  className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs font-semibold outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
-                  value={programFilter}
-                  onChange={(e) => setProgramFilter(e.target.value)}
-                >
-                  <option value="">All Programs</option>
-                  {programs.map((p: any) => <option key={p} value={p}>{p}</option>)}
-                </select>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Case Registry Ledger */}
+            <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
+              <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <h2 className="text-base font-bold text-gray-900 dark:text-white">Recent Registry</h2>
+                <div className="relative w-full md:w-64">
+                  <input
+                    placeholder="Search ledger..."
+                    className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs w-full focus:ring-2 focus:ring-kmuGreen transition-all"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </div>
               </div>
-              <div className="h-64">
-                <Line
-                  data={trendData}
-                  options={{
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                      y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
-                      x: { grid: { display: false } }
-                    }
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Top Offenders List */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Frequent Offenders</h3>
-              <div className="space-y-3">
-                {topOffenders.slice(0, 5).length > 0 ? topOffenders.map(([name, count], i) => (
-                  <div key={i} className="flex justify-between items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg transition-colors border border-gray-100 dark:border-gray-700 group">
-                    <span className="font-bold text-sm text-gray-700 dark:text-gray-300 group-hover:text-kmuGreen transition-colors">{name}</span>
-                    <span className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase">{count} Cases</span>
-                  </div>
-                )) : <p className="text-center text-gray-500 py-12 italic text-sm">No offenders found.</p>}
-              </div>
-            </div>
-          </div>
-
-          {/* Central Registry Ledger */}
-          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
-            <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Case Registry</h2>
-              <div className="relative w-full md:w-80">
-                <input
-                  placeholder="Search cases..."
-                  className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2.5 text-sm w-full focus:ring-2 focus:ring-kmuGreen transition-all shadow-inner"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="overflow-x-auto flex-1">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-xs font-bold uppercase tracking-wider">
-                  <tr>
-                    <th className="px-6 py-4 text-left">Student</th>
-                    <th className="px-6 py-4 text-left">Offense Category</th>
-                    <th className="px-6 py-4 text-center">Date</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {filteredCases.slice(0, 12).map((c, i) => (
-                    <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 group transition-colors cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
-                      <td className="px-6 py-4">
-                        <div className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-kmuGreen transition-colors">{c.student?.fullName}</div>
-                        <div className="text-xs text-gray-500 mt-0.5">{c.student?.studentId}</div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-gray-600 dark:text-gray-400 font-medium uppercase tracking-tight">{c.offenseType}</div>
-                      </td>
-                      <td className="px-6 py-4 text-center text-gray-400 text-xs font-mono">
-                        {new Date(c.createdAt || 0).toLocaleDateString()}
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-400 font-bold uppercase tracking-widest">
+                    <tr>
+                      <th className="px-6 py-4 text-left">Student</th>
+                      <th className="px-6 py-4 text-left">Offense</th>
+                      <th className="px-6 py-4 text-center">Date</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-              {filteredCases.length === 0 && (
-                <div className="text-center py-24 text-gray-400 italic text-sm">Registry query returned zero results.</div>
-              )}
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                    {filteredCases.slice(0, 10).map((c, i) => (
+                      <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
+                        <td className="px-6 py-4">
+                          <div className="font-bold text-gray-800 dark:text-gray-200">{c.student?.fullName}</div>
+                          <div className="text-[10px] text-gray-500">{c.student?.studentId}</div>
+                        </td>
+                        <td className="px-6 py-4 text-gray-600 dark:text-gray-400 font-medium">{c.offenseType}</td>
+                        <td className="px-6 py-4 text-center text-gray-400 font-mono text-[10px]">
+                          {new Date(c.createdAt || 0).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {filteredCases.length === 0 && (
+                  <div className="text-center py-12 text-gray-400 italic font-medium">Record registry empty.</div>
+                )}
+              </div>
+            </div>
+
+             {/* Top Offenders List */}
+             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 flex flex-col">
+              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6">Frequent Offenders</h3>
+              <div className="space-y-3 flex-1">
+                {topOffenders.slice(0, 7).length > 0 ? topOffenders.slice(0, 7).map(([name, count], i) => (
+                  <div key={i} className="flex justify-between items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg transition-colors border border-gray-100 dark:border-gray-700 group">
+                    <span className="font-bold text-xs text-gray-700 dark:text-gray-300 group-hover:text-kmuGreen">{name}</span>
+                    <span className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2.5 py-1 rounded-full text-[9px] font-bold uppercase">{count} Cases</span>
+                  </div>
+                )) : <p className="text-center text-gray-500 py-12 italic text-xs font-medium">No offenders found.</p>}
+              </div>
+              <div className="mt-8 text-center pt-6 border-t border-gray-100 dark:border-gray-800">
+                <Link href="/secretary-dashboard/students" className="text-[10px] font-bold text-kmuGreen uppercase tracking-widest hover:underline">Student Registry →</Link>
+              </div>
             </div>
           </div>
 
@@ -390,6 +369,21 @@ export default function SecretaryDashboard() {
       {notification?.isVisible && (
         <Notification type={notification.type} message={notification.message} isVisible={notification.isVisible} onClose={hideNotification} />
       )}
+    </div>
+  );
+}
+
+function StatCard({ title, value, color }: any) {
+  const colors: any = {
+    teal: 'border-teal-500 dark:border-teal-400',
+    emerald: 'border-emerald-500 dark:border-emerald-400',
+    blue: 'border-blue-500 dark:border-blue-400',
+    orange: 'border-orange-500 dark:border-orange-400'
+  };
+  return (
+    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-5 transition-all hover:scale-[1.01] ${colors[color]}`}>
+      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{title}</div>
+      <div className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">{value}</div>
     </div>
   );
 }
