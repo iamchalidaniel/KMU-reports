@@ -67,7 +67,7 @@ export default function HomePage() {
       <section className="relative py-20 md:py-32 overflow-hidden bg-white dark:bg-gray-950">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl">
           <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-kmuGreen/5 rounded-full blur-[120px]"></div>
-          <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-500/5 rounded-full blur-[120px]"></div>
+          <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-kmuGreen/5 rounded-full blur-[120px]"></div>
         </div>
 
         <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
@@ -119,8 +119,8 @@ export default function HomePage() {
 
             {/* Card 2: Maintenance */}
             <div className="bg-white dark:bg-gray-800 p-8 rounded-3xl border border-gray-100 dark:border-gray-700 hover:shadow-2xl transition-all group">
-              <div className="w-14 h-14 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
-                <span className="text-3xl">🔧</span>
+              <div className="w-14 h-14 bg-kmuGreen/10 dark:bg-kmuGreen/20 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+                <span className="text-3xl text-kmuGreen">🔧</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Maintenance</h3>
               <p className="text-gray-600 dark:text-gray-400 leading-relaxed font-medium">

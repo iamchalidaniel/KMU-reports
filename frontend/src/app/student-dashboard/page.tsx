@@ -146,7 +146,7 @@ export default function StudentDashboardPage() {
               <span className="text-9xl font-black">KMU</span>
             </div>
             <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
-              <div className="w-24 h-24 rounded-2xl bg-indigo-600 flex items-center justify-center text-white font-bold text-4xl shadow-xl ring-4 ring-indigo-50 dark:ring-indigo-900/20">
+              <div className="w-24 h-24 rounded-2xl bg-kmuGreen flex items-center justify-center text-white font-bold text-4xl shadow-xl ring-4 ring-kmuGreen/10">
                 {studentData.name ? studentData.name.charAt(0).toUpperCase() : studentData.username.charAt(0).toUpperCase()}
               </div>
               <div className="text-center md:text-left flex-1">
@@ -154,7 +154,7 @@ export default function StudentDashboardPage() {
                 <p className="text-base text-gray-500 font-semibold mt-1 uppercase tracking-wider">{studentData.program} • Year {studentData.yearOfStudy}</p>
 
                 <div className="flex flex-wrap gap-3 mt-6 justify-center md:justify-start">
-                  <Link href="/student-dashboard/profile" className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition shadow-sm">
+                  <Link href="/student-dashboard/profile" className="bg-kmuGreen hover:bg-kmuGreen-dark text-white px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition shadow-sm">
                     👤 My Official Record
                   </Link>
                   <Link href="/student-dashboard/statements" className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
@@ -168,7 +168,7 @@ export default function StudentDashboardPage() {
           {/* Overview Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatCard title="Total Cases" value={cases.length} color="red" path="/student-dashboard/cases" />
-            <StatCard title="My Statements" value={reports.length} color="indigo" path="/student-dashboard/statements" />
+            <StatCard title="My Statements" value={reports.length} color="green" path="/student-dashboard/statements" />
             <StatCard title="Pending Appeals" value={appeals.filter(a => a.status === 'Pending').length} color="orange" path="/student-dashboard/appeals" />
             <StatCard title="Disciplinary Status" value={studentData.status || 'ACTIVE'} color="emerald" isStatus />
           </div>
@@ -205,7 +205,7 @@ export default function StudentDashboardPage() {
 
 function StatCard({ title, value, color, path, isStatus }: any) {
   const colors: any = {
-    indigo: 'border-indigo-500 dark:border-indigo-400 text-indigo-600',
+    green: 'border-kmuGreen dark:border-kmuGreen-light text-kmuGreen',
     red: 'border-red-500 dark:border-red-400 text-red-600',
     orange: 'border-orange-500 dark:border-orange-400 text-orange-600',
     emerald: 'border-emerald-500 dark:border-emerald-400 text-emerald-600'

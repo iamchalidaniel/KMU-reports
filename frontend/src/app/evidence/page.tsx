@@ -155,7 +155,7 @@ export default function EvidencePage() {
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 px-4 py-2 rounded-lg font-bold text-[10px] uppercase tracking-widest flex items-center gap-2 border border-blue-200">
+              <span className="bg-kmuGreen/10 dark:bg-kmuGreen/20 text-kmuGreen px-4 py-2 rounded-lg font-bold text-[10px] uppercase tracking-widest flex items-center gap-2 border border-kmuGreen/20">
                 🔒 {evidence.length} Files
               </span>
             </div>
@@ -164,12 +164,12 @@ export default function EvidencePage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Upload Terminal */}
             <div className="lg:col-span-1 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
-              <h2 className="text-lg font-bold uppercase tracking-tight text-blue-600 mb-6">Upload Evidence</h2>
+              <h2 className="text-lg font-bold uppercase tracking-tight text-kmuGreen mb-6">Upload Evidence</h2>
               <form onSubmit={handleUpload} className="space-y-5 font-sans">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Link to Case</label>
                   <select
-                    className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-2.5 text-xs font-bold uppercase focus:ring-2 focus:ring-blue-500 transition-all outline-none"
+                    className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-2.5 text-xs font-bold uppercase focus:ring-2 focus:ring-kmuGreen transition-all outline-none"
                     value={caseId}
                     onChange={e => setCaseId(e.target.value)}
                     required
@@ -182,7 +182,7 @@ export default function EvidencePage() {
                   <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Select File</label>
                   <input
                     type="file"
-                    className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-2.5 text-xs font-bold focus:ring-2 focus:ring-blue-500 transition-all"
+                    className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-2.5 text-xs font-bold focus:ring-2 focus:ring-kmuGreen transition-all"
                     onChange={e => setFile(e.target.files?.[0] || null)}
                     required
                   />
@@ -190,7 +190,7 @@ export default function EvidencePage() {
                 <button
                   type="submit"
                   disabled={uploading}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all text-xs uppercase tracking-widest"
+                  className="w-full bg-kmuGreen hover:bg-kmuGreen-dark text-white font-bold py-4 rounded-xl shadow-lg transition-all text-xs uppercase tracking-widest"
                 >
                   {uploading ? 'Uploading...' : 'Upload Evidence'}
                 </button>
@@ -230,7 +230,7 @@ export default function EvidencePage() {
                           <h3 className="font-bold text-gray-900 dark:text-white uppercase text-xs truncate tracking-tight" title={filename}>{filename}</h3>
                           <p className="text-[10px] text-gray-400 font-semibold mt-1 uppercase tracking-tight">Case Description</p>
                           <div className="mt-3 flex flex-col gap-1">
-                            <div className="text-[9px] font-bold text-blue-600 uppercase tracking-widest">File ID</div>
+                            <div className="text-[9px] font-bold text-kmuGreen uppercase tracking-widest">File ID</div>
                             <div className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 truncate uppercase">{id}</div>
                           </div>
                         </div>

@@ -15,11 +15,13 @@ const CATEGORIES = [
 ];
 
 const HALLS = [
+    'V Hostel',
+    'W Hostel',
+    'X Hostel',
+    'Y Hostel',
+    'Z Hostel',
     'October Hall',
-    'Tiyende Pamodzi',
     'Africa Hall',
-    'Chila Hall',
-    'Lwitikila Hall',
     'Non-Resident'
 ];
 
@@ -131,7 +133,7 @@ export default function MaintenanceRequestForm({ onSuccess }: MaintenanceRequest
                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Room / Unit</label>
                         <input
                             type="text"
-                            placeholder="e.g. Room 402, Block B"
+                            placeholder="e.g. Z101B or Y402A"
                             className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-2.5 text-xs font-bold uppercase focus:ring-2 focus:ring-emerald-500 outline-none transition"
                             value={form.location.room}
                             onChange={e => setForm({ ...form, location: { ...form.location, room: e.target.value } })}
