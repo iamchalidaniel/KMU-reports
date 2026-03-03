@@ -439,6 +439,7 @@ function StatementList({ formData, setFormData, showNotification }: { formData: 
     const recognition = useRef<any>(null);
     const chunks = useRef<Blob[]>([]);
     const contentBeforeSpeech = useRef<string>('');
+    const finalSessionTranscript = useRef<string>('');
     const [isUploading, setIsUploading] = useState(false);
 
     useEffect(() => {
@@ -450,25 +451,20 @@ function StatementList({ formData, setFormData, showNotification }: { formData: 
 
             recognition.current.onresult = (event: any) => {
                 let interimTranscript = '';
-                let finalTranscript = '';
-
                 for (let i = event.resultIndex; i < event.results.length; i++) {
                     const transcript = event.results[i][0].transcript;
                     if (event.results[i].isFinal) {
-                        finalTranscript += transcript;
+                        finalSessionTranscript.current += transcript;
                     } else {
                         interimTranscript += transcript;
                     }
                 }
 
-                if (activeStatement) {
-                    setActiveStatement((prev) => {
-                        if (!prev) return null;
-                        // Avoid duplication by using the base content captured at start
-                        const updatedContent = (contentBeforeSpeech.current + ' ' + finalTranscript + interimTranscript).trim();
-                        return { ...prev, content: updatedContent };
-                    });
-                }
+                setActiveStatement((prev) => {
+                    if (!prev) return null;
+                    const updatedContent = (contentBeforeSpeech.current + ' ' + finalSessionTranscript.current + interimTranscript).trim();
+                    return { ...prev, content: updatedContent };
+                });
             };
 
             recognition.current.onend = () => {
@@ -486,6 +482,7 @@ function StatementList({ formData, setFormData, showNotification }: { formData: 
     const startRecording = async () => {
         try {
             contentBeforeSpeech.current = activeStatement?.content || '';
+            finalSessionTranscript.current = '';
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             mediaRecorder.current = new MediaRecorder(stream);
             chunks.current = [];
