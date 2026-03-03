@@ -253,28 +253,54 @@ export default function SecretaryDashboard() {
           <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
               <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Administrative Suite</h1>
-              <p className="text-xs text-kmuGreen font-semibold mt-1 uppercase tracking-wider">Secretary Dashboard</p>
+              <p className="text-xs text-kmuGreen font-semibold mt-1 uppercase tracking-wider">Registry Operations</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={handleGenerateSummary}
                 disabled={isSummarizing || cases.length === 0}
-                className="bg-kmuGreen text-white px-5 py-2 rounded-lg font-bold text-xs transition shadow-sm disabled:opacity-50"
+                className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-5 py-2 rounded-lg font-bold text-xs transition shadow-sm flex items-center gap-2"
               >
-                {isSummarizing ? "Analyzing..." : "AI Insight"}
+                {isSummarizing ? "Analyzing..." : "✨ AI Trends"}
               </button>
-              <button
-                onClick={exportCasesToWord}
-                className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-5 py-2 rounded-lg font-bold text-xs transition shadow-sm"
-              >
-                Export Records
-              </button>
-              <Link
-                href="/secretary-dashboard/reports"
-                className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-5 py-2 rounded-lg font-bold text-xs shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 transition"
-              >
-                Analytics
-              </Link>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Quick Actions */}
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800">
+              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6">Registry Management</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Link href="/secretary-dashboard/students" className="flex items-center gap-4 p-4 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all group">
+                  <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600">👤</div>
+                  <div>
+                    <div className="font-bold text-xs uppercase tracking-tight group-hover:text-kmuGreen transition-colors">Student Registry</div>
+                    <div className="text-[10px] text-gray-500">Manage profiles</div>
+                  </div>
+                </Link>
+                <Link href="/secretary-dashboard/reports" className="flex items-center gap-4 p-4 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all group">
+                  <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600">🏛️</div>
+                  <div>
+                    <div className="font-bold text-xs uppercase tracking-tight group-hover:text-kmuGreen transition-colors">Case Reports</div>
+                    <div className="text-[10px] text-gray-500">Disciplinary analytics</div>
+                  </div>
+                </Link>
+              </div>
+            </div>
+
+            {/* Secretary Status Card */}
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex items-center justify-between">
+              <div>
+                <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Administrative Unit</h3>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                  <div className="text-xl font-black text-gray-900 dark:text-white tracking-widest uppercase">{profile?.department || 'OFFICE OF THE DEAN'}</div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Staff Access</div>
+                <div className="font-mono text-xs font-bold text-gray-600 dark:text-gray-400">{user?.id?.slice(-8).toUpperCase()}</div>
+              </div>
             </div>
           </div>
 

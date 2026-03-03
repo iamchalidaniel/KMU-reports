@@ -236,28 +236,46 @@ export default function ElectricianDashboard() {
           {/* Electrician Header */}
           <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Maintenance Dashboard</h1>
-              <p className="text-xs text-blue-600 font-semibold mt-1">Repair Tasks</p>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Technical Operations</h1>
+              <p className="text-xs text-blue-600 font-semibold mt-1 uppercase tracking-wider">Electrician Command</p>
             </div>
-            <div className="flex flex-wrap gap-3">
-              <Link
-                href="/electrician-dashboard/tasks"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-bold text-xs transition shadow-sm"
-              >
-                View Tasks
-              </Link>
-              <Link
-                href="/electrician-dashboard/reports"
-                className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-5 py-2 rounded-lg font-bold text-xs transition border border-gray-200 dark:border-gray-700"
-              >
-                Reports
-              </Link>
-              <Link
-                href="/maintenance"
-                className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-5 py-2 rounded-lg font-bold text-xs transition shadow-sm"
-              >
-                History
-              </Link>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Quick Actions */}
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800">
+              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6">Task Management</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Link href="/electrician-dashboard/tasks" className="flex items-center gap-4 p-4 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all group">
+                  <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600">⚡</div>
+                  <div>
+                    <div className="font-bold text-xs uppercase tracking-tight group-hover:text-blue-600 transition-colors">View Tasks</div>
+                    <div className="text-[10px] text-gray-500">Active assignments</div>
+                  </div>
+                </Link>
+                <Link href="/electrician-dashboard/reports" className="flex items-center gap-4 p-4 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all group">
+                  <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600">📊</div>
+                  <div>
+                    <div className="font-bold text-xs uppercase tracking-tight group-hover:text-emerald-600 transition-colors">Analytics</div>
+                    <div className="text-[10px] text-gray-500">Repair performance</div>
+                  </div>
+                </Link>
+              </div>
+            </div>
+
+            {/* Field Status */}
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex items-center justify-between">
+              <div>
+                <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Assigned Zone</h3>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                  <div className="text-xl font-black text-gray-900 dark:text-white tracking-widest uppercase">{profile?.hall || 'CAMPUS WIDE'}</div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Staff ID</div>
+                <div className="font-mono text-xs font-bold text-gray-600 dark:text-gray-400">{user?.id?.slice(-8).toUpperCase()}</div>
+              </div>
             </div>
           </div>
 

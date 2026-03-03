@@ -190,16 +190,55 @@ export default function SecurityDashboard() {
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/security-dashboard/reports"
-                className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-5 py-2 rounded-lg font-bold text-xs transition shadow-sm"
+                className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-5 py-2 rounded-lg font-bold text-xs transition border border-gray-200 dark:border-gray-700"
               >
                 Incident Analytics
               </Link>
               <button
-                onClick={() => setShowAddCase(true)}
-                className="bg-kmuGreen text-white px-5 py-2 rounded-lg font-bold text-xs hover:bg-green-700 transition shadow-sm flex items-center gap-2"
+                onClick={handleGenerateSummary}
+                disabled={isSummarizing || cases.length === 0}
+                className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-5 py-2 rounded-lg font-bold text-xs transition shadow-sm flex items-center gap-2"
               >
-                Log Incident
+                {isSummarizing ? "Analyzing..." : "✨ AI Insight"}
               </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Quick Actions */}
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800">
+              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-6">Global Operations</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Link href="/security-dashboard/log-incident" className="flex items-center gap-4 p-4 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all group">
+                  <div className="w-10 h-10 rounded-lg bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center text-orange-600">📜</div>
+                  <div>
+                    <div className="font-bold text-xs uppercase tracking-tight group-hover:text-kmuGreen">Log Incident</div>
+                    <div className="text-[10px] text-gray-500">Record field case</div>
+                  </div>
+                </Link>
+                <Link href="/security-dashboard/reports" className="flex items-center gap-4 p-4 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all group">
+                  <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600">📊</div>
+                  <div>
+                    <div className="font-bold text-xs uppercase tracking-tight group-hover:text-kmuGreen">Analytics</div>
+                    <div className="text-[10px] text-gray-500">View frequency trends</div>
+                  </div>
+                </Link>
+              </div>
+            </div>
+
+            {/* Field Status */}
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex items-center justify-between">
+              <div>
+                <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Operational Area</h3>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                  <div className="text-xl font-black text-gray-900 dark:text-white tracking-widest uppercase">{profile?.department || 'MAIN CAMPUS'}</div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Badge ID</div>
+                <div className="font-mono text-xs font-bold text-gray-600 dark:text-gray-400">{user?.id?.slice(-8).toUpperCase()}</div>
+              </div>
             </div>
           </div>
 

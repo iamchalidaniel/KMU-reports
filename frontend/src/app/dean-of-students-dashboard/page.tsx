@@ -238,25 +238,57 @@ export default function DeanOfStudentsDashboard() {
         <div className="animate-in fade-in duration-300 space-y-6">
 
           {/* Page Header */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 gap-4">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Dean of Students Dashboard</h1>
-              <p className="text-xs text-gray-500 font-medium mt-1">Dashboard Overview</p>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Executive Suite</h1>
+              <p className="text-xs text-kmuGreen font-semibold mt-1 uppercase tracking-wider">Dean of Students Oversight</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={handleGenerateSummary}
                 disabled={isSummarizing || cases.length === 0}
-                className="bg-emerald-600 text-white px-4 py-2 rounded-lg font-bold text-xs hover:bg-emerald-700 transition flex items-center gap-2 shadow-sm disabled:opacity-50"
+                className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-5 py-2 rounded-lg font-bold text-xs transition shadow-sm flex items-center gap-2"
               >
-                {isSummarizing ? "Analyzing..." : "✨ AI Summary"}
+                {isSummarizing ? "Analyzing..." : "✨ AI Insight"}
               </button>
-              <button
-                onClick={exportCasesToWord}
-                className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-4 py-2 rounded-lg font-bold text-xs shadow-sm hover:opacity-90 transition"
-              >
-                Export Records
-              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Quick Actions */}
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800">
+              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6">Executive Controls</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Link href="/dean-of-students-dashboard/reports" className="flex items-center gap-4 p-4 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all group">
+                  <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600">📊</div>
+                  <div>
+                    <div className="font-bold text-xs uppercase tracking-tight group-hover:text-blue-600 transition-colors">Global Analytics</div>
+                    <div className="text-[10px] text-gray-500">University trends</div>
+                  </div>
+                </Link>
+                <Link href="/dean-of-students-dashboard" className="flex items-center gap-4 p-4 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all group opacity-50 cursor-not-allowed">
+                  <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600">📋</div>
+                  <div>
+                    <div className="font-bold text-xs uppercase tracking-tight">Strategic Planning</div>
+                    <div className="text-[10px] text-gray-500">Resource allocation</div>
+                  </div>
+                </Link>
+              </div>
+            </div>
+
+            {/* Dean Status Card */}
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex items-center justify-between">
+              <div>
+                <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Office Authority</h3>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                  <div className="text-xl font-black text-gray-900 dark:text-white tracking-widest uppercase">OFFICE OF THE DEAN</div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Command Code</div>
+                <div className="font-mono text-xs font-bold text-gray-600 dark:text-gray-400">EXEC-DEAN-001</div>
+              </div>
             </div>
           </div>
 

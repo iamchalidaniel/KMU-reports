@@ -104,6 +104,8 @@ export default function HallWardenDashboard() {
   const [hallFilter, setHallFilter] = useState('');
   const [electricians, setElectricians] = useState<any[]>([]);
   const [assigningReportId, setAssigningReportId] = useState<string | null>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [profileLoading, setProfileLoading] = useState(true);
 
   // Form state
   const [showForm, setShowForm] = useState(false);
@@ -139,6 +141,19 @@ export default function HallWardenDashboard() {
   }, [authLoading, token, user, router]);
 
   useEffect(() => {
+    async function fetchStaffProfile() {
+      try {
+        setProfileLoading(true);
+        const data = await getProfile();
+        setProfile(data);
+      } catch (err) {
+        console.error('Failed to fetch profile:', err);
+      } finally {
+        setProfileLoading(false);
+      }
+    }
+
+    fetchStaffProfile();
     fetchReports();
     fetchAnalytics();
     fetchElectricians();
@@ -323,16 +338,48 @@ export default function HallWardenDashboard() {
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/hall-warden-dashboard/reports"
-                className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-5 py-2 rounded-lg font-bold text-xs transition shadow-sm"
+                className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-5 py-2 rounded-lg font-bold text-xs shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 transition"
               >
-                Maintenance Reports
+                Analytics Registry
               </Link>
-              <button
-                onClick={() => setShowForm(true)}
-                className="bg-emerald-600 text-white px-5 py-2 rounded-lg font-bold text-xs hover:bg-emerald-700 transition shadow-sm"
-              >
-                New Dispatch
-              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Quick Actions */}
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800">
+              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6">Hostel Management</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Link href="/hall-warden-dashboard/dispatch-repair" className="flex items-center gap-4 p-4 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all group">
+                  <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600">🛠️</div>
+                  <div>
+                    <div className="font-bold text-xs uppercase tracking-tight group-hover:text-kmuGreen">Dispatch Repair</div>
+                    <div className="text-[10px] text-gray-500">Log facility issue</div>
+                  </div>
+                </Link>
+                <Link href="/hall-warden-dashboard/reports" className="flex items-center gap-4 p-4 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all group">
+                  <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600">📑</div>
+                  <div>
+                    <div className="font-bold text-xs uppercase tracking-tight group-hover:text-kmuGreen">View Reports</div>
+                    <div className="text-[10px] text-gray-500">Maintenance history</div>
+                  </div>
+                </Link>
+              </div>
+            </div>
+
+            {/* Warden Status Card */}
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex items-center justify-between">
+              <div>
+                <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Assigned Hall</h3>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                  <div className="text-xl font-black text-gray-900 dark:text-white tracking-widest uppercase">{profile?.hall || 'MAIN COMPLEX'}</div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Command Code</div>
+                <div className="font-mono text-xs font-bold text-gray-600 dark:text-gray-400">{user?.id?.slice(-6).toUpperCase()}</div>
+              </div>
             </div>
           </div>
 
@@ -345,7 +392,7 @@ export default function HallWardenDashboard() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-             <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+            <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
               <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/30 dark:bg-gray-800/20">
                 <h2 className="text-base font-bold">Active Dispatches</h2>
                 <Link href="/hall-warden-dashboard/maintenance" className="text-xs font-bold text-emerald-600 hover:underline">Full Registry →</Link>

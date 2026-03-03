@@ -2,16 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { saveAs } from 'file-saver';
-import { Bar } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
+import { Bar, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, Chart as ChartJS } from 'chart.js';
 import { useAuth } from '../../context/AuthContext';
 import { API_BASE_URL } from '../../config/constants';
 import { authHeaders, getProfile } from '../../utils/api';
@@ -35,23 +26,11 @@ export default function ChiefSecurityOfficerDashboard() {
   const [cases, setCases] = useState<Case[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [filteredCases, setFilteredCases] = useState<Case[]>([]);
-  const [programFilter, setProgramFilter] = useState('');
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      if (!authLoading && !token) {
-        router.replace('/login');
-        setIsCheckingAuth(false);
-        return;
-      }
-      if (authLoading) {
-        setIsCheckingAuth(true);
-        return;
-      }
-      if (!user || user.role !== 'chief_security_officer') {
-        setIsCheckingAuth(false);
-        return;
-      }
+    if (!authLoading && (!token || user?.role !== 'chief_security_officer')) {
+      router.replace('/login');
+    } else if (!authLoading) {
       setIsCheckingAuth(false);
     }
   }, [authLoading, token, user, router]);
@@ -95,24 +74,17 @@ export default function ChiefSecurityOfficerDashboard() {
     }
   }, [token]);
 
-  const safeStudents = Array.isArray(students) ? students : [];
-  const safeCases = Array.isArray(cases) ? cases : [];
-
   useEffect(() => {
-    let casesResult = safeCases;
+    let result = cases;
     if (search) {
-      casesResult = casesResult.filter((c: any) =>
+      result = result.filter((c: any) =>
         c.student?.fullName?.toLowerCase().includes(search.toLowerCase()) ||
         c.student?.studentId?.toLowerCase().includes(search.toLowerCase()) ||
-        c.offenseType?.toLowerCase().includes(search.toLowerCase()) ||
-        c.status?.toLowerCase().includes(search.toLowerCase())
+        c.offenseType?.toLowerCase().includes(search.toLowerCase())
       );
     }
-    if (programFilter) {
-      casesResult = casesResult.filter((c: any) => c.student?.program === programFilter);
-    }
-    setFilteredCases(casesResult);
-  }, [search, cases, programFilter]);
+    setFilteredCases(result);
+  }, [search, cases]);
 
   async function exportCasesToWord() {
     try {
@@ -138,34 +110,9 @@ export default function ChiefSecurityOfficerDashboard() {
     }
   }
 
-  if (isCheckingAuth) {
+  if (isCheckingAuth || authLoading) {
     return <div className="text-center text-kmuGreen p-12">Loading...</div>;
   }
-
-  if (!user || user.role !== 'chief_security_officer') {
-    return <div className="text-red-600 p-12 text-center">Access denied.</div>;
-  }
-
-  // Visualization data
-  const offenceCounts: Record<string, number> = {};
-  const offenderCounts: Record<string, number> = {};
-  (programFilter ? safeCases.filter((c: any) => c.student?.program === programFilter) : safeCases).forEach((c: Case) => {
-    if (c.offenseType) offenceCounts[c.offenseType] = (offenceCounts[c.offenseType] || 0) + 1;
-    if (c.student?.fullName) offenderCounts[c.student.fullName] = (offenderCounts[c.student.fullName] || 0) + 1;
-  });
-  const topOffences = Object.entries(offenceCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
-  const topOffenders = Object.entries(offenderCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
-  const programs = Array.from(new Set(safeStudents.map((s: any) => s.program).filter(Boolean)));
-
-  const offenceChartData = {
-    labels: topOffences.map(([offence]) => offence),
-    datasets: [{
-      label: 'Frequency',
-      data: topOffences.map(([, count]) => count),
-      backgroundColor: 'rgba(220, 38, 38, 0.7)',
-      borderRadius: 12,
-    }],
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-sans text-sm">
@@ -175,86 +122,104 @@ export default function ChiefSecurityOfficerDashboard() {
           {/* Page Header */}
           <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Security Command</h1>
-              <p className="text-xs text-red-600 font-semibold mt-1 uppercase tracking-wider">CSO Strategy & Oversight</p>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Security Intelligence</h1>
+              <p className="text-xs text-blue-600 font-semibold mt-1 uppercase tracking-wider">CSO Command Center</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={exportCasesToWord}
-                className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-5 py-2 rounded-lg font-bold text-xs transition shadow-sm"
+                className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-5 py-2 rounded-lg font-bold text-xs transition shadow-sm flex items-center gap-2"
               >
-                Export Strategy Report
+                📊 Export Insight
               </button>
-              <Link
-                href="/chief-security-officer-dashboard/reports"
-                className="bg-red-600 text-white px-5 py-2 rounded-lg font-bold text-xs hover:bg-red-700 transition shadow-sm"
-              >
-                Security Analytics
-              </Link>
             </div>
           </div>
 
-          {/* Security Overview */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard title="All Cases" value={safeCases.length} color="red" />
-            <StatCard title="Open" value={safeCases.filter(c => c.status === 'Open').length} color="blue" />
-            <StatCard title="Priority" value={safeCases.filter(c => c.severity === 'High' || c.severity === 'Critical').length} color="orange" />
-            <StatCard title="Students" value={safeStudents.length} color="indigo" />
-          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Quick Actions */}
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800">
+              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6">Strategic Controls</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Link href="/chief-security-officer-dashboard/cases" className="flex items-center gap-4 p-4 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all group">
+                  <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600">🛡️</div>
+                  <div>
+                    <div className="font-bold text-xs uppercase tracking-tight group-hover:text-blue-600 transition-colors">Unified Registry</div>
+                    <div className="text-[10px] text-gray-500">All university incidents</div>
+                  </div>
+                </Link>
+                <Link href="/chief-security-officer-dashboard/reports" className="flex items-center gap-4 p-4 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all group">
+                  <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600">📉</div>
+                  <div>
+                    <div className="font-bold text-xs uppercase tracking-tight group-hover:text-emerald-600 transition-colors">Strategic Reports</div>
+                    <div className="text-[10px] text-gray-500">Security performance</div>
+                  </div>
+                </Link>
+              </div>
+            </div>
 
-          <div className="grid grid-cols-1 gap-6">
-            {/* Recent Cases */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
-              <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <h2 className="text-base font-bold text-gray-900 dark:text-white">Recent Incidents</h2>
-                <div className="relative w-full md:w-64">
-                  <input
-                    placeholder="Quick search..."
-                    className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs w-full focus:ring-2 focus:ring-red-500 transition-all font-sans"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
+            {/* CSO Status Card */}
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex items-center justify-between">
+              <div>
+                <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Operational Scope</h3>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                  <div className="text-xl font-black text-gray-900 dark:text-white tracking-widest uppercase">UNIVERSITY-WIDE</div>
                 </div>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs">
-                  <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-400 font-bold uppercase tracking-widest">
-                    <tr>
-                      <th className="px-6 py-4 text-left">Student</th>
-                      <th className="px-6 py-4 text-left">Category</th>
-                      <th className="px-6 py-4 text-center">Status</th>
-                      <th className="px-6 py-4 text-right">Severity</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                    {filteredCases.slice(0, 10).map((c, i) => (
-                      <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
-                        <td className="px-6 py-4">
-                          <div className="font-bold text-gray-800 dark:text-gray-200">{c.student?.fullName || 'Anonymous'}</div>
-                          <div className="text-[10px] text-gray-500">{c.student?.studentId || 'EXTERNAL'}</div>
-                        </td>
-                        <td className="px-6 py-4 text-gray-600 dark:text-gray-400 font-medium">{c.offenseType}</td>
-                        <td className="px-6 py-4 text-center">
-                          <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase ${c.status === 'Open' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>{c.status}</span>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <span className={`text-[10px] font-bold ${c.severity === 'Critical' ? 'text-red-600 underline' : 'text-gray-400'}`}>
-                            {c.severity}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {filteredCases.length === 0 && (
-                  <div className="text-center py-12 text-gray-400 italic">No incidents recorded.</div>
-                )}
-              </div>
-              <div className="p-4 bg-gray-50 dark:bg-gray-800/50 text-center border-t border-gray-100 dark:border-gray-800">
-                <Link href="/cases" className="text-[10px] font-bold text-red-600 hover:underline uppercase tracking-wider transition-all">Full Case Ledger →</Link>
+              <div className="text-right">
+                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Command ID</div>
+                <div className="font-mono text-xs font-bold text-gray-600 dark:text-gray-400">{user?.id?.slice(-8).toUpperCase()}</div>
               </div>
             </div>
           </div>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard title="Global Cases" value={cases.length} color="red" />
+            <StatCard title="Active Inquiries" value={cases.filter(c => c.status === 'Open').length} color="blue" />
+            <StatCard title="Critical Incidents" value={cases.filter(c => c.severity === 'Critical').length} color="orange" />
+            <StatCard title="Student Population" value={students.length} color="indigo" />
+          </div>
+
+          {/* Incident Snippet */}
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+            <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/20">
+              <h2 className="text-base font-bold text-gray-900 dark:text-white">Strategic Case Ledger</h2>
+              <Link href="/chief-security-officer-dashboard/cases" className="text-xs font-bold text-blue-600 hover:underline">Full Registry →</Link>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-400 font-bold uppercase tracking-widest">
+                  <tr>
+                    <th className="px-6 py-4 text-left">Student</th>
+                    <th className="px-6 py-4 text-left">Category</th>
+                    <th className="px-6 py-4 text-center">Status</th>
+                    <th className="px-6 py-4 text-right">Severity</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {filteredCases.slice(0, 5).map((c, i) => (
+                    <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
+                      <td className="px-6 py-4">
+                        <div className="font-bold text-gray-800 dark:text-gray-200">{c.student?.fullName || 'Anonymous'}</div>
+                        <div className="text-[10px] text-gray-500">{c.student?.studentId || 'EXT'}</div>
+                      </td>
+                      <td className="px-6 py-4 text-gray-600 dark:text-gray-400 font-medium">{c.offenseType}</td>
+                      <td className="px-6 py-4 text-center">
+                        <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase ${c.status === 'Open' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>{c.status}</span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <span className={`text-[10px] font-bold ${c.severity === 'Critical' ? 'text-red-600 underline' : 'text-gray-400'}`}>
+                          {c.severity}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
       </div>
 

@@ -2,17 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { saveAs } from 'file-saver';
-import { Bar, Doughnut } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
+import { Bar, ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, Chart as ChartJS } from 'chart.js';
 import { useAuth } from '../../context/AuthContext';
 import { API_BASE_URL } from '../../config/constants';
 import { fetchWithAuth, authHeaders, getProfile } from '../../utils/api';
@@ -30,33 +20,19 @@ export default function AssistantDeanDashboard() {
   const { notification, showNotification, hideNotification } = useNotification();
 
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [activeTab, setActiveTab] = useState('dashboard');
   const [profile, setProfile] = useState<any>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [cases, setCases] = useState<Case[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [filteredCases, setFilteredCases] = useState<Case[]>([]);
-  const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [programFilter, setProgramFilter] = useState('');
+  const [isSummarizing, setIsSummarizing] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      if (!authLoading && !token) {
-        router.replace('/login');
-        setIsCheckingAuth(false);
-        return;
-      }
-      if (authLoading) {
-        setIsCheckingAuth(true);
-        return;
-      }
-      if (!user || user.role !== 'assistant_dean') {
-        setIsCheckingAuth(false);
-        return;
-      }
+    if (!authLoading && (!token || user?.role !== 'assistant_dean')) {
+      router.replace('/login');
+    } else if (!authLoading) {
       setIsCheckingAuth(false);
     }
   }, [authLoading, token, user, router]);
@@ -76,16 +52,15 @@ export default function AssistantDeanDashboard() {
 
     async function fetchData() {
       setLoading(true);
-      setError(null);
       try {
-        const casesData = await fetchWithAuth(`${API_BASE_URL}/cases`);
-        setCases(Array.isArray(casesData) ? casesData : (casesData.cases || casesData || []));
-
-        const studentsData = await fetchWithAuth(`${API_BASE_URL}/students`);
-        setStudents(Array.isArray(studentsData) ? studentsData : (studentsData.students || studentsData || []));
+        const [casesData, studentsData] = await Promise.all([
+          fetchWithAuth(`${API_BASE_URL}/cases`),
+          fetchWithAuth(`${API_BASE_URL}/students`)
+        ]);
+        setCases(Array.isArray(casesData) ? casesData : (casesData.cases || []));
+        setStudents(Array.isArray(studentsData) ? studentsData : (studentsData.students || []));
       } catch (error: any) {
         console.error('Error fetching data:', error);
-        setError(error.message || 'Failed to fetch data');
         setCases([]);
         setStudents([]);
       } finally {
@@ -99,122 +74,42 @@ export default function AssistantDeanDashboard() {
     }
   }, [token]);
 
-  const safeStudents = Array.isArray(students) ? students : [];
-  const safeCases = Array.isArray(cases) ? cases : [];
-
   useEffect(() => {
-    let casesResult = safeCases;
+    let result = cases;
     if (search) {
-      casesResult = casesResult.filter((c: any) =>
+      result = result.filter((c: any) =>
         c.student?.fullName?.toLowerCase().includes(search.toLowerCase()) ||
         c.student?.studentId?.toLowerCase().includes(search.toLowerCase()) ||
-        c.offenseType?.toLowerCase().includes(search.toLowerCase()) ||
-        c.status?.toLowerCase().includes(search.toLowerCase())
+        c.offenseType?.toLowerCase().includes(search.toLowerCase())
       );
     }
-    if (programFilter) {
-      casesResult = casesResult.filter((c: any) => c.student?.program === programFilter);
-    }
-    setFilteredCases(casesResult);
+    setFilteredCases(result);
+  }, [search, cases]);
 
-    let studentsResult = safeStudents;
-    if (search) {
-      studentsResult = studentsResult.filter((s: any) =>
-        s.fullName?.toLowerCase().includes(search.toLowerCase()) ||
-        s.studentId?.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-    setFilteredStudents(studentsResult);
-  }, [search, cases, students, programFilter]);
-
-  async function exportCasesToWord() {
+  const handleGenerateSummary = async () => {
     try {
-      const chartExportData = await prepareChartExport();
-      const res = await fetch(`${API_BASE_URL}/reports/dashboard-cases`, {
+      setIsSummarizing(true);
+      const res = await fetch(`${API_BASE_URL}/ai-summarize/dashboard`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...authHeaders()
-        },
-        body: JSON.stringify({
-          charts: chartExportData.charts,
-          pageInfo: {
-            title: 'Assistant Dean Dashboard - All Cases Report',
-            url: typeof window !== 'undefined' ? window.location.href : ''
-          }
-        }),
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: 'assistant_dean' }),
       });
-
-      if (!res.ok) throw new Error(await res.text());
-      const blob = await res.blob();
-      saveAs(blob, 'assistant_dean_all_cases_report.docx');
-      showNotification('success', 'Report exported successfully!');
+      if (res.ok) {
+        const data = await res.json();
+        showNotification('success', data.summary || 'Summary generated');
+      } else {
+        throw new Error('Summary failed');
+      }
     } catch (err) {
-      console.error('Export cases error:', err);
-      showNotification('error', 'Failed to export cases');
+      showNotification('error', 'AI analysis unavailable');
+    } finally {
+      setIsSummarizing(false);
     }
-  }
+  };
 
-  if (isCheckingAuth) {
+  if (isCheckingAuth || authLoading) {
     return <div className="text-center text-kmuGreen p-12">Loading...</div>;
   }
-
-  if (!user || user.role !== 'assistant_dean') {
-    return <div className="text-red-600 p-12">Access denied.</div>;
-  }
-
-  const staffData = profile || user;
-
-  // Visualization data
-  const totalCasesCount = filteredCases.length;
-  const totalStudentsCount = safeStudents.length;
-  const pendingCases = filteredCases.filter(c => c.status === 'Open' || c.status === 'Under Investigation').length;
-  const resolvedCases = filteredCases.filter(c => c.status === 'Closed').length;
-
-  const analyticsCases = programFilter
-    ? safeCases.filter((c: any) => c.student?.program === programFilter)
-    : safeCases;
-
-  const statusCounts: Record<string, number> = {};
-  const offenseCounts: Record<string, number> = {};
-  const offenderCounts: Record<string, number> = {};
-
-  analyticsCases.forEach((c: Case) => {
-    if (c.status) statusCounts[c.status] = (statusCounts[c.status] || 0) + 1;
-    if (c.offenseType) offenseCounts[c.offenseType] = (offenseCounts[c.offenseType] || 0) + 1;
-    if (c.student?.fullName) offenderCounts[c.student.fullName] = (offenderCounts[c.student.fullName] || 0) + 1;
-  });
-
-  const statusChartData = {
-    labels: Object.keys(statusCounts),
-    datasets: [
-      {
-        label: 'Cases by Status',
-        data: Object.values(statusCounts),
-        backgroundColor: [
-          'rgba(59, 130, 246, 0.7)',
-          'rgba(251, 191, 36, 0.7)',
-          'rgba(34, 197, 94, 0.7)',
-          'rgba(168, 85, 247, 0.7)',
-        ],
-      },
-    ],
-  };
-
-  const topOffences = Object.entries(offenseCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
-  const topOffenders = Object.entries(offenderCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
-  const programs = Array.from(new Set(safeStudents.map((s: any) => s.program).filter(Boolean)));
-
-  const offenseChartData = {
-    labels: topOffences.map(([offence]) => offence),
-    datasets: [
-      {
-        label: 'Most Common Offences',
-        data: topOffences.map(([, count]) => count),
-        backgroundColor: 'rgba(16, 185, 129, 0.7)',
-      },
-    ],
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-sans text-sm">
@@ -224,56 +119,71 @@ export default function AssistantDeanDashboard() {
           {/* Page Header */}
           <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Academic Overview</h1>
-              <p className="text-xs text-blue-600 font-semibold mt-1 uppercase tracking-wider">Assistant Dean Dashboard</p>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Dean's Suite</h1>
+              <p className="text-xs text-kmuGreen font-semibold mt-1 uppercase tracking-wider">Academic Oversight</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
-                onClick={exportCasesToWord}
-                className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-5 py-2 rounded-lg font-bold text-xs transition shadow-sm"
+                onClick={handleGenerateSummary}
+                disabled={isSummarizing || cases.length === 0}
+                className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-5 py-2 rounded-lg font-bold text-xs transition shadow-sm flex items-center gap-2"
               >
-                Export Registry
+                {isSummarizing ? "Analyzing..." : "✨ AI Insight"}
               </button>
-              <Link
-                href="/assistant-dean-dashboard/reports"
-                className="bg-blue-600 text-white px-5 py-2 rounded-lg font-bold text-xs hover:bg-blue-700 transition shadow-sm"
-              >
-                Reports
-              </Link>
             </div>
           </div>
 
-          {/* Quick Navigation Panel */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Link href="/assistant-dean-dashboard/cases" className="bg-white dark:bg-gray-900 p-5 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-blue-500/30 transition-all group shadow-sm flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-bold group-hover:text-blue-600 transition-colors">Cases</h3>
-                <p className="text-[10px] text-gray-500 font-medium">Review and update records</p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Quick Actions */}
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800">
+              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6">Administrative Controls</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Link href="/assistant-dean-dashboard/cases" className="flex items-center gap-4 p-4 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all group">
+                  <div className="w-10 h-10 rounded-lg bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center text-orange-600">⚖️</div>
+                  <div>
+                    <div className="font-bold text-xs uppercase tracking-tight group-hover:text-kmuGreen transition-colors">Case Registry</div>
+                    <div className="text-[10px] text-gray-500">Student disciplinary list</div>
+                  </div>
+                </Link>
+                <Link href="/assistant-dean-dashboard/reports" className="flex items-center gap-4 p-4 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all group">
+                  <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600">📈</div>
+                  <div>
+                    <div className="font-bold text-xs uppercase tracking-tight group-hover:text-emerald-600 transition-colors">Analytics</div>
+                    <div className="text-[10px] text-gray-500">Departmental metrics</div>
+                  </div>
+                </Link>
               </div>
-              <span className="text-lg group-hover:translate-x-1 transition-transform">➡️</span>
-            </Link>
-            <Link href="/assistant-dean-dashboard/students" className="bg-white dark:bg-gray-900 p-5 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-kmuGreen/30 transition-all group shadow-sm flex items-center justify-between">
+            </div>
+
+            {/* Admin Status Card */}
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-bold group-hover:text-kmuGreen transition-colors">Students</h3>
-                <p className="text-[10px] text-gray-500 font-medium">Academic status & profiles</p>
+                <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Assigned Department</h3>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                  <div className="text-xl font-black text-gray-900 dark:text-white tracking-widest uppercase">{profile?.department || 'OFFICE OF THE DEAN'}</div>
+                </div>
               </div>
-              <span className="text-lg group-hover:translate-x-1 transition-transform">➡️</span>
-            </Link>
+              <div className="text-right">
+                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Access Level</div>
+                <div className="font-mono text-xs font-bold text-gray-600 dark:text-gray-400">ADMIN-LEVEL-2</div>
+              </div>
+            </div>
           </div>
 
-          {/* System Overview Stats */}
+          {/* Stats Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard title="Students" value={totalStudentsCount} color="indigo" />
-            <StatCard title="Total Cases" value={totalCasesCount} color="purple" />
-            <StatCard title="Open" value={pendingCases} color="orange" />
-            <StatCard title="Resolved" value={resolvedCases} color="green" />
+            <StatCard title="Total Students" value={students.length} color="indigo" />
+            <StatCard title="Active Cases" value={cases.filter(c => c.status === 'Open').length} color="purple" />
+            <StatCard title="Pending Review" value={cases.filter(c => c.status === 'Under Investigation').length} color="orange" />
+            <StatCard title="Resolved" value={cases.filter(c => c.status === 'Closed').length} color="green" />
           </div>
 
-          {/* Case Registry Snippet */}
+          {/* Case Snippet */}
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
-             <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/30 dark:bg-gray-800/20">
-              <h2 className="text-base font-bold">Recent Cases</h2>
-              <Link href="/assistant-dean-dashboard/cases" className="text-xs font-bold text-blue-600 hover:underline">Full Registry →</Link>
+            <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
+              <h2 className="text-base font-bold text-gray-900 dark:text-white">Recent Case Activity</h2>
+              <Link href="/assistant-dean-dashboard/cases" className="text-xs font-bold text-kmuGreen hover:underline">Full Audit →</Link>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
@@ -285,13 +195,13 @@ export default function AssistantDeanDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {filteredCases.slice(0, 8).map((c, i) => (
+                  {filteredCases.slice(0, 5).map((c, i) => (
                     <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
                       <td className="px-6 py-4">
                         <div className="font-bold text-gray-800 dark:text-gray-200">{c.student?.fullName || 'Anonymous'}</div>
                         <div className="text-[10px] text-gray-500">{c.student?.studentId}</div>
                       </td>
-                      <td className="px-6 py-4 text-gray-600 dark:text-gray-400 font-medium">{c.offenseType}</td>
+                      <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{c.offenseType}</td>
                       <td className="px-6 py-4 text-center">
                         <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase ${c.status === 'Open' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>{c.status}</span>
                       </td>
@@ -299,9 +209,6 @@ export default function AssistantDeanDashboard() {
                   ))}
                 </tbody>
               </table>
-              {filteredCases.length === 0 && (
-                <div className="text-center py-12 text-gray-400 italic">No records found.</div>
-              )}
             </div>
           </div>
 
@@ -326,32 +233,6 @@ function StatCard({ title, value, color }: any) {
     <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-5 transition-all hover:scale-[1.01] ${colors[color]}`}>
       <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{title}</div>
       <div className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">{value}</div>
-    </div>
-  );
-}
-
-function NavButton({ label, icon, active, onClick }: any) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex items-center gap-4 px-6 py-4 transition-all border-l-4 text-left ${active
-        ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/10 text-purple-600'
-        : 'border-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
-        }`}
-    >
-      <span className="text-xl">{icon}</span>
-      <span className="font-semibold">{label}</span>
-    </button>
-  );
-}
-
-function InfoField({ label, value }: any) {
-  return (
-    <div className="flex flex-col gap-1">
-      <label className="text-[10px] font-extrabold text-purple-700 dark:text-purple-400 uppercase tracking-tighter ml-1">{label}</label>
-      <div className="bg-gray-100 dark:bg-gray-800/80 rounded border border-gray-200 dark:border-gray-700 px-3 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 min-h-[38px]">
-        {value || '-'}
-      </div>
     </div>
   );
 }
