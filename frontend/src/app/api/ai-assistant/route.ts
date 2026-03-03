@@ -20,60 +20,67 @@ function getSystemPrompt(formType: string): string {
 
 export async function POST(request: NextRequest) {
   try {
-    // Dynamically import the Google Generative AI library
     const { GoogleGenerativeAI } = await import('@google/generative-ai');
 
-    // Validate API key
-    if (!process.env.GEMINI_API_KEY && !process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
+    const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+
+    if (!apiKey || apiKey === 'your_gemini_api_key_here' || apiKey === '') {
       return new Response(
-        JSON.stringify({ error: 'Gemini API key not configured' }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
+        JSON.stringify({
+          response: "Assistant: The Gemini API key is not configured. Please add GEMINI_API_KEY to your environment variables to enable AI features.",
+          error: 'Gemini API key not configured'
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     const { messages, formType } = await request.json();
 
-    // Map the messages to the format expected by the Gemini SDK
-    // Gemini 1.0+ expects { role: 'user' | 'model', parts: [{ text: string }] }
-    let transformedMessages: any[] = [];
+    if (!messages || !Array.isArray(messages)) {
+      return new Response(JSON.stringify({ error: 'Invalid messages format' }), { status: 400 });
+    }
+
+    const systemPrompt = getSystemPrompt(formType || 'other');
+
+    // Transform and alternate roles correctly
+    let transformedHistory: any[] = [];
+
+    // Start with system prompt as the first user message parts prefix or separate message
+    transformedHistory.push({
+      role: 'user',
+      parts: [{ text: systemPrompt }]
+    });
+    transformedHistory.push({
+      role: 'model',
+      parts: [{ text: "Understood. I am ready to assist you according to those instructions. How can I help you today?" }]
+    });
+
     messages.forEach((msg: any) => {
       const role = msg.role === 'assistant' || msg.role === 'model' ? 'model' : 'user';
       const text = msg.content || msg.text || '';
 
-      if (transformedMessages.length === 0 || transformedMessages[transformedMessages.length - 1].role !== role) {
-        transformedMessages.push({
+      if (transformedHistory.length > 0 && transformedHistory[transformedHistory.length - 1].role === role) {
+        transformedHistory[transformedHistory.length - 1].parts[0].text += `\n${text}`;
+      } else {
+        transformedHistory.push({
           role,
           parts: [{ text }]
         });
-      } else {
-        transformedMessages[transformedMessages.length - 1].parts[0].text += `\n${text}`;
       }
     });
 
-    const systemPrompt = getSystemPrompt(formType || 'other');
+    // Gemini sendMessage expects the LAST message to be the prompt, and history should not contain it
+    const lastMsg = transformedHistory[transformedHistory.length - 1];
+    let history = transformedHistory.slice(0, -1);
+    let prompt = lastMsg.parts[0].text;
 
-    // Prefix the system prompt to the first user message or add it
-    if (transformedMessages.length > 0 && transformedMessages[0].role === 'user') {
-      transformedMessages[0].parts[0].text = `${systemPrompt}\n\n${transformedMessages[0].parts[0].text}`;
-    } else {
-      transformedMessages.unshift({ role: 'user', parts: [{ text: systemPrompt }] });
-    }
-
-    // Ensure we send a USER message last
-    const lastMsg = transformedMessages[transformedMessages.length - 1];
-    let history = [];
-    let prompt = "";
-
-    if (lastMsg.role === 'user') {
-      history = transformedMessages.slice(0, -1);
-      prompt = lastMsg.parts[0].text;
-    } else {
-      history = transformedMessages;
-      prompt = "Please continue.";
+    // Ensure alternating roles in history
+    if (history.length > 0 && history[history.length - 1].role === 'user') {
+      // If history ends with user, and prompt is also user, we need to insert a model filler or merge
+      // But based on our logic, it should already be alternating.
     }
 
     const chat = model.startChat({
@@ -90,9 +97,15 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error('Error in AI assistant API:', error);
+
+    // Handle safety filter blocks vs actual crashes
+    const errorMessage = error.message?.includes('SAFETY')
+      ? "I'm sorry, I can't answer that due to safety policies."
+      : "I'm sorry, I encountered an error. Please check your API configuration.";
+
     return new Response(
-      JSON.stringify({ error: 'Failed to get response from AI assistant', details: error.message }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      JSON.stringify({ response: errorMessage, error: error.message }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   }
 }

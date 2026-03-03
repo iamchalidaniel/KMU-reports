@@ -4,10 +4,15 @@ export async function POST(request: NextRequest) {
     try {
         const { GoogleGenerativeAI } = await import('@google/generative-ai');
 
-        if (!process.env.GEMINI_API_KEY && !process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
+        const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+
+        if (!apiKey || apiKey === 'your_gemini_api_key_here' || apiKey === '') {
             return new Response(
-                JSON.stringify({ error: 'Gemini API key not configured' }),
-                { status: 500, headers: { 'Content-Type': 'application/json' } }
+                JSON.stringify({
+                    summary: "AI Summarization is currently unavailable because the Gemini API key is not configured. Please add GEMINI_API_KEY to your environment variables.",
+                    error: 'Gemini API key not configured'
+                }),
+                { status: 200, headers: { 'Content-Type': 'application/json' } }
             );
         }
 
@@ -21,15 +26,13 @@ export async function POST(request: NextRequest) {
         }
 
         // Anonymize data: remove potential SIN patterns or common names
-        // This is a basic safeguard
         const anonymized = descriptions.map(desc =>
             desc.replace(/\d{4}-\d{6}/g, "[ID]") // Mask SIN-like patterns
                 .replace(/[A-Z]{2,}\s[A-Z]{2,}/g, "[NAME]") // Mask full names in uppercase
         ).join("\n\n---\n\n");
 
-        const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
         const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
         const prompt = `You are a data analyst for Kapasa Makasa University. Below is a list of anonymized incident descriptions reported this week. 
 Summarize the key trends, common issues, and any recurring patterns you see. Focus on actionable insights for campus security and maintenance. 
@@ -49,8 +52,11 @@ ${anonymized}`;
     } catch (error: any) {
         console.error('Error in AI summarize API:', error);
         return new Response(
-            JSON.stringify({ error: 'Failed to generate summary', details: error.message }),
-            { status: 500, headers: { 'Content-Type': 'application/json' } }
+            JSON.stringify({
+                summary: "Sorry, I encountered an error while analyzing the reports. Please check your AI service configuration.",
+                error: error.message
+            }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
         );
     }
 }
