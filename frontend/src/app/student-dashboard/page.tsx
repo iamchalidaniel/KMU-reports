@@ -7,8 +7,6 @@ import { API_BASE_URL } from '../../config/constants';
 import { authHeaders, getProfile } from '../../utils/api';
 import Notification, { useNotification } from '../../components/Notification';
 import Link from 'next/link';
-import MaintenanceRequestForm from '../../components/MaintenanceRequestForm';
-import IncidentReportForm from '../../components/IncidentReportForm';
 
 interface Report {
   _id: string;
@@ -163,30 +161,47 @@ export default function StudentDashboardPage() {
           </div>
 
           {/* Overview Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <StatCard title="Cases" value={cases.length} color="red" path="/student-dashboard/cases" />
             <StatCard title="Statements" value={reports.length} color="green" path="/student-dashboard/statements" />
             <StatCard title="Appeals" value={appeals.filter(a => a.status === 'Pending').length} color="orange" path="/student-dashboard/appeals" />
-            <StatCard title="Status" value={studentData.status || 'ACTIVE'} color="emerald" isStatus />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Incident Reporting */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between px-1">
-                <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Report Incident</h3>
-                <p className="text-[9px] text-gray-500 font-semibold uppercase">New Incident</p>
+            {/* Quick Actions */}
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800">
+              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-6">Quick Actions</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Link href="/student-dashboard/report-incident" className="flex items-center gap-4 p-4 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all group">
+                  <div className="w-10 h-10 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-600">🚨</div>
+                  <div>
+                    <div className="font-bold text-xs uppercase tracking-tight group-hover:text-kmuGreen">Report Incident</div>
+                    <div className="text-[10px] text-gray-500">Log a security matter</div>
+                  </div>
+                </Link>
+                <Link href="/student-dashboard/request-repair" className="flex items-center gap-4 p-4 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all group">
+                  <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600">🛠️</div>
+                  <div>
+                    <div className="font-bold text-xs uppercase tracking-tight group-hover:text-kmuGreen">Request Repair</div>
+                    <div className="text-[10px] text-gray-500">Maintenance & Facilities</div>
+                  </div>
+                </Link>
               </div>
-              <IncidentReportForm onSuccess={() => fetchStats()} />
             </div>
 
-            {/* Maintenance Reporting */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between px-1">
-                <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Request Repair</h3>
-                <p className="text-[9px] text-gray-500 font-semibold uppercase">New Repair Request</p>
+            {/* Account Status Card */}
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex items-center justify-between">
+              <div>
+                <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Student Status</h3>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                  <div className="text-xl font-black text-gray-900 dark:text-white tracking-widest uppercase">{studentData.status || 'ACTIVE'}</div>
+                </div>
               </div>
-              <MaintenanceRequestForm onSuccess={() => fetchStats()} />
+              <div className="text-right">
+                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Registration</div>
+                <div className="font-mono text-xs font-bold text-gray-600 dark:text-gray-400">{studentData.studentId}</div>
+              </div>
             </div>
           </div>
 
