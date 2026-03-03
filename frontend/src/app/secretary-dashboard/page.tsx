@@ -346,8 +346,8 @@ export default function SecretaryDashboard() {
               </div>
             </div>
 
-             {/* Top Offenders List */}
-             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 flex flex-col">
+            {/* Top Offenders List */}
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 flex flex-col">
               <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6">Frequent Offenders</h3>
               <div className="space-y-3 flex-1">
                 {topOffenders.slice(0, 7).length > 0 ? topOffenders.slice(0, 7).map(([name, count], i) => (
@@ -384,21 +384,6 @@ function StatCard({ title, value, color }: any) {
     <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-5 transition-all hover:scale-[1.01] ${colors[color]}`}>
       <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{title}</div>
       <div className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">{value}</div>
-    </div>
-  );
-}
-
-function StatCard({ title, value, color }: any) {
-  const colors: any = {
-    teal: 'border-teal-500 dark:border-teal-400',
-    emerald: 'border-emerald-500 dark:border-emerald-400',
-    blue: 'border-blue-500 dark:border-blue-400',
-    orange: 'border-orange-500 dark:border-orange-400'
-  };
-  return (
-    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-6 transition-all hover:shadow-md ${colors[color]}`}>
-      <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{title}</div>
-      <div className="text-3xl font-bold text-gray-900 dark:text-white">{value}</div>
     </div>
   );
 }

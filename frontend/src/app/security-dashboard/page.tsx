@@ -216,7 +216,7 @@ export default function SecurityDashboard() {
               <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <h2 className="text-base font-bold text-gray-900 dark:text-white">Active Logs</h2>
                 <div className="relative w-full md:w-64">
-                   <input
+                  <input
                     placeholder="Search incidents..."
                     className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs w-full focus:ring-2 focus:ring-kmuGreen transition-all"
                     value={search}
@@ -277,7 +277,7 @@ export default function SecurityDashboard() {
                 )}
               </div>
               <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 text-center">
-                 <Link href="/cases" className="text-[10px] font-bold text-kmuGreen uppercase tracking-widest hover:underline">Full Command Registry →</Link>
+                <Link href="/cases" className="text-[10px] font-bold text-kmuGreen uppercase tracking-widest hover:underline">Full Command Registry →</Link>
               </div>
             </div>
           </div>
@@ -298,7 +298,7 @@ export default function SecurityDashboard() {
             </div>
             <CaseDossierForm
               onSuccess={() => {
-                showNotification('success', 'Incident logged');
+                showNotification('success', 'Case created successfully');
                 setShowAddCase(false);
                 fetch(`${API_BASE_URL}/cases`, { headers: { ...authHeaders() } })
                   .then(res => res.json())
@@ -336,63 +336,6 @@ function StatCard({ title, value, color }: any) {
     <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-5 transition-all hover:scale-[1.01] ${colors[color]}`}>
       <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{title}</div>
       <div className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">{value}</div>
-    </div>
-  );
-}
-        </div>
-      </div>
-
-      {/* Add Case Modal */}
-      {showAddCase && (
-        <div className="fixed inset-0 z-[1001] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => setShowAddCase(false)} />
-          <div className="relative bg-white dark:bg-gray-900 w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl border-t-4 border-kmuGreen p-8">
-            <div className="flex justify-between items-center mb-8">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Create New Case</h2>
-                <p className="text-sm text-gray-500 mt-1">Enter incident details for the university record</p>
-              </div>
-              <button onClick={() => setShowAddCase(false)} className="bg-gray-100 dark:bg-gray-800 p-2 rounded-full text-gray-400 hover:text-red-500 transition-all">✕</button>
-            </div>
-            <CaseDossierForm
-              onSuccess={() => {
-                showNotification('success', 'Case created successfully');
-                setShowAddCase(false);
-                fetch(`${API_BASE_URL}/cases`, { headers: { ...authHeaders() } })
-                  .then(res => res.json())
-                  .then(data => setCases(Array.isArray(data) ? data : (data.cases || data || [])));
-              }}
-              onCancel={() => setShowAddCase(false)}
-            />
-          </div>
-        </div>
-      )}
-
-      {notification?.isVisible && (
-        <Notification type={notification.type} message={notification.message} isVisible={notification.isVisible} onClose={hideNotification} />
-      )}
-
-      {/* Hidden Printable Area */}
-      {printCase && (
-        <div className="hidden print:block fixed inset-0 z-[9999] bg-white">
-          <CaseDossierPrintable data={printCase} documentType={printType} />
-        </div>
-      )}
-    </div>
-  );
-}
-
-function StatCard({ title, value, color }: any) {
-  const colors: any = {
-    emerald: 'border-emerald-500 dark:border-emerald-400',
-    blue: 'border-blue-500 dark:border-blue-400',
-    orange: 'border-orange-500 dark:border-orange-400',
-    red: 'border-red-500 dark:border-red-400'
-  };
-  return (
-    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-6 transition-all hover:shadow-md ${colors[color]}`}>
-      <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{title}</div>
-      <div className="text-3xl font-bold text-gray-900 dark:text-white">{value}</div>
     </div>
   );
 }
