@@ -225,7 +225,7 @@ export default function AssistantDeanDashboard() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 gap-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Assistant Dean Dashboard</h1>
-              <p className="text-sm text-gray-500 font-medium mt-1 uppercase tracking-wider">Academic oversight and disciplinary control center</p>
+              <p className="text-sm text-gray-500 font-medium mt-1 uppercase tracking-wider">Academic & Disciplinary Overview</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
@@ -238,7 +238,7 @@ export default function AssistantDeanDashboard() {
                 href="/reports"
                 className="bg-blue-600 text-white px-6 py-2.5 rounded-lg font-bold text-xs hover:bg-blue-700 transition flex items-center gap-2 shadow-sm uppercase tracking-wider"
               >
-                📂 Full Reports
+                📂 View All Reports
               </Link>
             </div>
           </div>
@@ -276,7 +276,7 @@ export default function AssistantDeanDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Case Status Distribution */}
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Case Status Metrics</h3>
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Case Status Summary</h3>
               <div className="h-64">
                 <Doughnut
                   data={statusChartData}
@@ -291,7 +291,7 @@ export default function AssistantDeanDashboard() {
             {/* Offense Frequency */}
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Offense Intensity</h3>
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Offense Frequency</h3>
                 <select
                   className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs font-semibold outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
                   value={programFilter}
@@ -319,14 +319,14 @@ export default function AssistantDeanDashboard() {
 
           {/* Frequent Offenders Snippet */}
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-            <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Frequent Offenders (Critical Watchlist)</h3>
+            <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Frequent Offenders</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {topOffenders.length > 0 ? topOffenders.map(([name, count], i) => (
                 <div key={i} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-100 dark:border-gray-700">
                   <span className="font-bold text-xs text-gray-700 dark:text-gray-300 uppercase">{name}</span>
                   <span className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-2.5 py-1 rounded-full text-[9px] font-black uppercase">{count} Incidents</span>
                 </div>
-              )) : <p className="text-center text-gray-500 py-12 italic text-sm col-span-full uppercase tracking-widest">No critical watchlist items.</p>}
+              )) : <p className="text-center text-gray-500 py-12 italic text-sm col-span-full uppercase tracking-widest">No frequent offenders found.</p>}
             </div>
           </div>
 

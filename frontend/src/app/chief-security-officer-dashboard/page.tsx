@@ -176,14 +176,14 @@ export default function ChiefSecurityOfficerDashboard() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 gap-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Chief Security Officer Dashboard</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Overview of university security and disciplinary status</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Security Operations Overview</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={exportCasesToWord}
                 className="bg-red-600 text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-red-700 transition flex items-center gap-2 shadow-sm"
               >
-                📊 Generate Full Security Report
+                📊 Export Security Report
               </button>
             </div>
           </div>
@@ -192,7 +192,7 @@ export default function ChiefSecurityOfficerDashboard() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard title="Total Cases" value={safeCases.length} color="red" />
             <StatCard title="Open Cases" value={safeCases.filter(c => c.status === 'Open').length} color="blue" />
-            <StatCard title="High/Critical Priority" value={safeCases.filter(c => c.severity === 'High' || c.severity === 'Critical').length} color="orange" />
+            <StatCard title="High Priority Cases" value={safeCases.filter(c => c.severity === 'High' || c.severity === 'Critical').length} color="orange" />
             <StatCard title="Total Students" value={safeStudents.length} color="indigo" />
           </div>
 
@@ -200,7 +200,7 @@ export default function ChiefSecurityOfficerDashboard() {
             {/* Case Analytics */}
             <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Offense Types by Category</h3>
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Offense Type Analysis</h3>
                 <select
                   className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs font-semibold outline-none focus:ring-2 focus:ring-red-500 transition-all font-sans"
                   value={programFilter}
@@ -246,7 +246,7 @@ export default function ChiefSecurityOfficerDashboard() {
           {/* Recent Cases */}
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
             <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Recent Security Cases</h2>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Recent Incidents</h2>
               <div className="relative w-full md:w-80">
                 <input
                   placeholder="Search cases..."
@@ -289,7 +289,7 @@ export default function ChiefSecurityOfficerDashboard() {
                 </tbody>
               </table>
               {filteredCases.length === 0 && (
-                <div className="text-center py-20 text-gray-400 italic text-sm">Empty dispatch registry.</div>
+                <div className="text-center py-20 text-gray-400 italic text-sm">No incidents recorded.</div>
               )}
             </div>
             <div className="p-4 bg-gray-50 dark:bg-gray-800/50 text-center border-t border-gray-100 dark:border-gray-800">

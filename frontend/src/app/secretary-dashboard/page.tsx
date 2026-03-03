@@ -252,8 +252,8 @@ export default function SecretaryDashboard() {
           {/* Page Header */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Secretariat Dashboard</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Overview of university student records and cases</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Administrative Dashboard</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Student Records & Case Management</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
@@ -261,13 +261,13 @@ export default function SecretaryDashboard() {
                 disabled={isSummarizing || cases.length === 0}
                 className="bg-kmuGreen text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-green-700 transition flex items-center gap-2 shadow-sm disabled:opacity-50"
               >
-                {isSummarizing ? "Analyzing..." : "✨ AI Summary"}
+                {isSummarizing ? "Analyzing..." : "✨ Generate AI Insight"}
               </button>
               <button
                 onClick={exportCasesToWord}
                 className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-6 py-2.5 rounded-lg font-bold text-sm shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
               >
-                📄 Export Case List
+                📄 Export Case Records
               </button>
             </div>
           </div>
@@ -280,7 +280,7 @@ export default function SecretaryDashboard() {
               </div>
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-xl">🧠</span>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">AI Case Analysis</h3>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">AI-Generated Trends</h3>
               </div>
               <div className="text-sm text-emerald-900 dark:text-emerald-100 leading-relaxed p-4 bg-white/60 dark:bg-black/20 rounded-lg border border-emerald-100/50 dark:border-emerald-800/50">
                 {aiSummary}
@@ -342,7 +342,7 @@ export default function SecretaryDashboard() {
           {/* Central Registry Ledger */}
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
             <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Case Records</h2>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Case Registry</h2>
               <div className="relative w-full md:w-80">
                 <input
                   placeholder="Search cases..."

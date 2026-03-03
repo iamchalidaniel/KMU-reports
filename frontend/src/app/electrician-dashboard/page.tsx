@@ -236,38 +236,38 @@ export default function ElectricianDashboard() {
           {/* Electrician Header */}
           <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
-              <h1 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Technical Hub</h1>
-              <p className="text-sm text-blue-600 font-black uppercase tracking-widest mt-1">KMU Power Grid & Electrical Asset Management</p>
+              <h1 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Maintenance Dashboard</h1>
+              <p className="text-sm text-blue-600 font-black uppercase tracking-widest mt-1">System Maintenance & Equipment Logistics</p>
             </div>
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/electrician-dashboard/tasks"
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition shadow-xl hover:scale-[1.02] active:scale-95 flex items-center gap-2"
               >
-                🛠️ Access Task Ledger
+                🛠️ View Tasks
               </Link>
               <Link
                 href="/maintenance"
                 className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-8 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition shadow-xl hover:scale-[1.02] active:scale-95 flex items-center gap-2"
               >
-                📜 Audit History
+                📜 Maintenance History
               </Link>
             </div>
           </div>
 
           {/* System Overview */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard title="Assigned Load" value={reports.length} color="blue" />
-            <StatCard title="Awaiting Dispatch" value={reports.filter(r => r.status === 'Assigned').length} color="indigo" />
-            <StatCard title="Active Maintenance" value={reports.filter(r => r.status === 'In Progress').length} color="orange" />
-            <StatCard title="Resolved Units" value={reports.filter(r => r.status === 'Completed').length} color="emerald" />
+            <StatCard title="Assigned Tasks" value={reports.length} color="blue" />
+            <StatCard title="Pending Tasks" value={reports.filter(r => r.status === 'Assigned').length} color="indigo" />
+            <StatCard title="Tasks In Progress" value={reports.filter(r => r.status === 'In Progress').length} color="orange" />
+            <StatCard title="Completed Tasks" value={reports.filter(r => r.status === 'Completed').length} color="emerald" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Asset Distribution */}
             <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
               <div className="flex justify-between items-center mb-12">
-                <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Failure Distribution by Category</h3>
+                <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Faults by Category</h3>
                 <select
                   className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                   value={hallFilter}
@@ -291,7 +291,7 @@ export default function ElectricianDashboard() {
 
             {/* Operational Status */}
             <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
-              <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-12">Current Grid Operational Load</h3>
+              <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-12">Maintenance Status Summary</h3>
               <div className="h-64 flex items-center justify-center">
                 <Doughnut
                   data={statusChartData}
@@ -308,7 +308,7 @@ export default function ElectricianDashboard() {
           {/* Quick Tasks Snippet */}
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
             <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/30 dark:bg-gray-800/20">
-              <h2 className="text-xl font-black uppercase tracking-tight">Priority Dispatches</h2>
+              <h2 className="text-xl font-black uppercase tracking-tight">Priority Maintenance Tasks</h2>
               <Link href="/electrician-dashboard/tasks" className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline transition-all">Full Registry →</Link>
             </div>
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

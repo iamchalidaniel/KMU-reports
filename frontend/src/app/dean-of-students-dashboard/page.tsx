@@ -241,7 +241,7 @@ export default function DeanOfStudentsDashboard() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 gap-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Dean of Students Dashboard</h1>
-              <p className="text-sm text-gray-500 font-medium mt-1 uppercase tracking-wider">University Strategic Behavioral Oversight</p>
+              <p className="text-sm text-gray-500 font-medium mt-1 uppercase tracking-wider">Dean's Disciplinary Overview</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
@@ -249,13 +249,13 @@ export default function DeanOfStudentsDashboard() {
                 disabled={isSummarizing || cases.length === 0}
                 className="bg-emerald-600 text-white px-6 py-2.5 rounded-lg font-bold text-xs hover:bg-emerald-700 transition flex items-center gap-2 shadow-sm disabled:opacity-50 uppercase tracking-widest"
               >
-                {isSummarizing ? "Analyzing..." : "✨ AI Insight Summary"}
+                {isSummarizing ? "Analyzing..." : "✨ AI Behavioral Insight"}
               </button>
               <button
                 onClick={exportCasesToWord}
                 className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-6 py-2.5 rounded-lg font-bold text-xs shadow-sm hover:opacity-90 transition uppercase tracking-widest"
               >
-                Export Dossier
+                Export Case Records
               </button>
             </div>
           </div>
@@ -265,7 +265,7 @@ export default function DeanOfStudentsDashboard() {
             <Link href="/dean-of-students-dashboard/cases" className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-red-500/50 transition-all group shadow-sm">
               <div className="flex justify-between items-center">
                 <div>
-                  <h3 className="text-lg font-bold uppercase tracking-tight group-hover:text-red-600 transition-colors">Behavioral Ledger</h3>
+                  <h3 className="text-lg font-bold uppercase tracking-tight group-hover:text-red-600 transition-colors">Disciplinary Records</h3>
                   <p className="text-xs text-gray-500 font-medium mt-1">Review university-wide disciplinary records</p>
                 </div>
                 <span className="text-2xl group-hover:translate-x-1 transition-transform">⚖️</span>
@@ -318,7 +318,7 @@ export default function DeanOfStudentsDashboard() {
             {/* Case Analysis */}
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
               <div className="flex justify-between items-center mb-8">
-                <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest">Offense Intensity Matrix</h3>
+                <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest">Offense Type Distribution</h3>
                 <select
                   className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-sans"
                   value={programFilter}
@@ -345,7 +345,7 @@ export default function DeanOfStudentsDashboard() {
 
             {/* Top Offenders List snippet */}
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-              <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-8">Critical Watchlist (Top Incident Rates)</h3>
+              <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-8">Frequent Offenders</h3>
               <div className="space-y-4">
                 {topOffenders.length > 0 ? topOffenders.map(([name, count], i) => (
                   <div key={i} className="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700 group hover:border-red-500/30 transition-all">
@@ -355,7 +355,7 @@ export default function DeanOfStudentsDashboard() {
                     </div>
                     <span className="text-[10px] font-black text-red-600 bg-red-50 dark:bg-red-900/30 px-3 py-1 rounded-full uppercase tracking-tighter">{count} Incidents</span>
                   </div>
-                )) : <p className="text-center text-gray-400 py-16 italic text-xs uppercase tracking-widest font-black">Strategic compliance maintained.</p>}
+                )) : <p className="text-center text-gray-400 py-16 italic text-xs uppercase tracking-widest font-black">No high-frequency offenders found.</p>}
               </div>
             </div>
           </div>
