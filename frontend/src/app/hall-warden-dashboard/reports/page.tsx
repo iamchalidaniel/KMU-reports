@@ -8,11 +8,11 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { useAuth } from '../../context/AuthContext';
-import { API_BASE_URL } from '../../config/constants';
-import { authHeaders } from '../../utils/api';
+import { useAuth } from '../../../context/AuthContext';
+import { API_BASE_URL } from '../../../config/constants';
+import { authHeaders } from '../../../utils/api';
 import { useRouter } from 'next/navigation';
-import Notification, { useNotification } from '../../components/Notification';
+import Notification, { useNotification } from '../../../components/Notification';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -101,18 +101,18 @@ export default function HallWardenReports() {
             </div>
 
             <div className="mt-12">
-                <h3 className="text-sm font-semibold mb-6">Severity Breakdown</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {['Urgent', 'High', 'Medium', 'Low'].map(p => {
-                        const count = reports.filter(r => r.priority === p).length;
-                        return (
-                            <div key={p} className="bg-gray-50 dark:bg-gray-800/20 p-4 rounded-xl border border-gray-100 dark:border-gray-800">
-                                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{p} Priority</div>
-                                <div className="text-xl font-bold">{count} dispatches</div>
-                            </div>
-                        );
-                    })}
-                </div>
+              <h3 className="text-sm font-semibold mb-6">Severity Breakdown</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {['Urgent', 'High', 'Medium', 'Low'].map(p => {
+                  const count = reports.filter(r => r.priority === p).length;
+                  return (
+                    <div key={p} className="bg-gray-50 dark:bg-gray-800/20 p-4 rounded-xl border border-gray-100 dark:border-gray-800">
+                      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{p} Priority</div>
+                      <div className="text-xl font-bold">{count} dispatches</div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>

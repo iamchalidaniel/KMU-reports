@@ -12,11 +12,11 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { useAuth } from '../../context/AuthContext';
-import { API_BASE_URL } from '../../config/constants';
-import { fetchWithAuth, authHeaders } from '../../utils/api';
+import { useAuth } from '../../../context/AuthContext';
+import { API_BASE_URL } from '../../../config/constants';
+import { fetchWithAuth, authHeaders } from '../../../utils/api';
 import { useRouter } from 'next/navigation';
-import Notification, { useNotification } from '../../components/Notification';
+import Notification, { useNotification } from '../../../components/Notification';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 

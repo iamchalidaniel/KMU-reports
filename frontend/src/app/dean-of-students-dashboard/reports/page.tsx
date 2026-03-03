@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { API_BASE_URL } from '../../../config/constants';
@@ -105,7 +107,7 @@ export default function DeanOfStudentsReports() {
     const analyticsCases = programFilter ? cases.filter((c: any) => c.student?.program === programFilter) : cases;
     const offenseCounts: Record<string, number> = {};
     const offenderCounts: Record<string, number> = {};
-    
+
     analyticsCases.forEach((c: Case) => {
         if (c.offenseType) offenseCounts[c.offenseType] = (offenseCounts[c.offenseType] || 0) + 1;
         if (c.student?.fullName) offenderCounts[c.student.fullName] = (offenderCounts[c.student.fullName] || 0) + 1;

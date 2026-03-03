@@ -12,11 +12,11 @@ import {
   PointElement,
   LineElement,
 } from 'chart.js';
-import { useAuth } from '../../context/AuthContext';
-import { API_BASE_URL } from '../../config/constants';
-import { authHeaders } from '../../utils/api';
+import { useAuth } from '../../../context/AuthContext';
+import { API_BASE_URL } from '../../../config/constants';
+import { authHeaders } from '../../../utils/api';
 import { useRouter } from 'next/navigation';
-import Notification, { useNotification } from '../../components/Notification';
+import Notification, { useNotification } from '../../../components/Notification';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement);
 
@@ -110,7 +110,7 @@ export default function SecurityReports() {
               <div className="bg-gray-50 dark:bg-gray-800/20 rounded-xl border border-gray-100 dark:border-gray-800 p-8">
                 <h3 className="text-sm font-semibold mb-8 text-center">7-Day Incident Trend</h3>
                 <div className="h-64">
-                   <Line
+                  <Line
                     data={trendData}
                     options={{
                       maintainAspectRatio: false,
