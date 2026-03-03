@@ -177,148 +177,168 @@ export default function SecurityDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 font-sans text-sm">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="animate-in fade-in duration-300 space-y-6">
 
-          {/* Page Header */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 gap-4">
+          {/* Header Area */}
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Security Dashboard</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Incident reporting and case management</p>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Security Command</h1>
+              <p className="text-xs text-kmuGreen font-semibold mt-1 uppercase tracking-wider">Officer Field Operations</p>
             </div>
             <div className="flex flex-wrap gap-3">
+              <Link
+                href="/security-dashboard/reports"
+                className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-5 py-2 rounded-lg font-bold text-xs transition shadow-sm"
+              >
+                Incident Analytics
+              </Link>
               <button
                 onClick={() => setShowAddCase(true)}
-                className="bg-kmuGreen text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-green-700 transition flex items-center gap-2 shadow-sm"
+                className="bg-kmuGreen text-white px-5 py-2 rounded-lg font-bold text-xs hover:bg-green-700 transition shadow-sm flex items-center gap-2"
               >
-                🛡️ Create New Case
+                Log Incident
               </button>
             </div>
           </div>
 
-          {/* System Overview */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard title="Total Cases" value={cases.length} color="emerald" />
-            <StatCard title="My Reports" value={cases.filter(c => c.createdBy === user?.id).length} color="blue" />
-            <StatCard title="Open Cases" value={cases.filter(c => c.status === 'Open').length} color="orange" />
-            <StatCard title="High Severity Cases" value={cases.filter(c => c.severity === 'High' || c.severity === 'Critical').length} color="red" />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <StatCard title="Total" value={cases.length} color="teal" />
+            <StatCard title="My Logs" value={cases.filter(c => c.createdBy === user?.id).length} color="blue" />
+            <StatCard title="Open" value={cases.filter(c => c.status === 'Open').length} color="orange" />
+            <StatCard title="Critical" value={cases.filter(c => c.severity === 'High' || c.severity === 'Critical').length} color="red" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Case Analytics */}
-            <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Incidents by Offense Type</h3>
-                <select
-                  className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs font-semibold outline-none focus:ring-2 focus:ring-kmuGreen transition-all"
-                  value={programFilter}
-                  onChange={(e) => setProgramFilter(e.target.value)}
-                >
-                  <option value="">All Programs</option>
-                  {Array.from(new Set(students.map((s: any) => s.program).filter(Boolean))).map((p: any) => <option key={p} value={p}>{p}</option>)}
-                </select>
+            {/* Case Ledger */}
+            <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
+              <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <h2 className="text-base font-bold text-gray-900 dark:text-white">Active Logs</h2>
+                <div className="relative w-full md:w-64">
+                   <input
+                    placeholder="Search incidents..."
+                    className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs w-full focus:ring-2 focus:ring-kmuGreen transition-all"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </div>
               </div>
-              <div className="h-64">
-                <Bar
-                  data={chartData}
-                  options={{
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                      y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
-                      x: { grid: { display: false } }
-                    }
-                  }}
-                />
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-400 font-bold uppercase tracking-widest">
+                    <tr>
+                      <th className="px-6 py-4 text-left">Student</th>
+                      <th className="px-6 py-4 text-left">Incident</th>
+                      <th className="px-6 py-4 text-center">Date</th>
+                      <th className="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                    {filteredCases.slice(0, 10).map((c, i) => (
+                      <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
+                        <td className="px-6 py-4">
+                          <div className="font-bold text-gray-800 dark:text-gray-200">{c.student?.fullName || 'Anonymous'}</div>
+                          <div className="text-[10px] text-gray-500">{c.student?.studentId}</div>
+                        </td>
+                        <td className="px-6 py-4 text-gray-600 dark:text-gray-400 font-medium uppercase">{c.offenseType}</td>
+                        <td className="px-6 py-4 text-center text-gray-400 font-mono text-[10px]">
+                          {new Date(c.incidentDate).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex justify-end gap-1">
+                            <button onClick={(e) => { e.stopPropagation(); setPrintCase(c); setPrintType('docket'); setTimeout(() => window.print(), 500); }} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-gray-400 hover:text-gray-600 transition">🖨️</button>
+                            <button onClick={(e) => { e.stopPropagation(); setPrintCase(c); setPrintType('statement'); setTimeout(() => window.print(), 500); }} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-gray-400 hover:text-gray-600 transition">📜</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
 
-            {/* AI Analysis */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">AI Case Summary</h3>
-              <div className="space-y-4">
+            {/* AI Summary Sidebar */}
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 flex flex-col">
+              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6">AI Behavioral Insight</h3>
+              <div className="space-y-4 flex-1">
                 <button
                   onClick={handleGenerateSummary}
                   disabled={isSummarizing || cases.length === 0}
-                  className="w-full flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-xl hover:border-emerald-500/50 hover:bg-emerald-50/10 transition group"
+                  className="w-full flex flex-col items-center justify-center p-6 border border-dashed border-gray-200 dark:border-gray-700 rounded-xl hover:border-kmuGreen hover:bg-emerald-50/10 transition group"
                 >
-                  <span className="text-2xl mb-2 group-hover:scale-110 transition-transform">🧠</span>
-                  <span className="text-xs font-bold text-gray-500">{isSummarizing ? "Processing..." : "Generate AI Summary"}</span>
+                  <span className="text-xl mb-2 group-hover:scale-110 transition-transform">✨</span>
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{isSummarizing ? "Analyzing..." : "Analyze Cases"}</span>
                 </button>
                 {aiSummary && (
-                  <div className="p-4 bg-emerald-50 dark:bg-emerald-900/10 rounded-lg border border-emerald-100 dark:border-emerald-800/50 text-xs font-medium text-gray-700 dark:text-emerald-100 leading-relaxed">
+                  <div className="p-4 bg-emerald-50 dark:bg-emerald-900/10 rounded-lg border border-emerald-100/50 text-[11px] font-medium text-gray-700 dark:text-emerald-100 leading-relaxed max-h-64 overflow-y-auto">
                     {aiSummary}
                   </div>
                 )}
               </div>
-            </div>
-          </div>
-
-          {/* Recent Cases */}
-          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
-            <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Recent Cases</h2>
-              <div className="relative w-full md:w-80">
-                <input
-                  placeholder="Search cases..."
-                  className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2.5 text-sm w-full focus:ring-2 focus:ring-kmuGreen transition-all shadow-inner"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
+              <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 text-center">
+                 <Link href="/cases" className="text-[10px] font-bold text-kmuGreen uppercase tracking-widest hover:underline">Full Command Registry →</Link>
               </div>
             </div>
-            <div className="overflow-x-auto flex-1">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-xs font-bold uppercase tracking-wider">
-                  <tr>
-                    <th className="px-6 py-4 text-left">Student</th>
-                    <th className="px-6 py-4 text-left">Offense Type</th>
-                    <th className="px-6 py-4 text-center">Date</th>
-                    <th className="px-6 py-4 text-center">Status</th>
-                    <th className="px-6 py-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {filteredCases.slice(0, 12).map((c, i) => (
-                    <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 group transition-colors cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
-                      <td className="px-6 py-4">
-                        <div className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-kmuGreen transition-colors uppercase">{c.student?.fullName || 'Anonymous Student'}</div>
-                        <div className="text-xs text-gray-500 mt-0.5">{c.student?.studentId || 'UNKNOWN_ID'}</div>
-                      </td>
-                      <td className="px-6 py-4 text-gray-600 dark:text-gray-400 font-bold uppercase">{c.offenseType}</td>
-                      <td className="px-6 py-4 text-center text-gray-400 text-xs font-mono">{new Date(c.incidentDate).toLocaleDateString()}</td>
-                      <td className="px-6 py-4 text-center">
-                        <span className={`px-2.5 py-1 rounded-full font-bold text-[10px] uppercase border ${c.status === 'Open' ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`}>{c.status}</span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex justify-end gap-1.5">
-                          <button
-                            onClick={(e) => { e.stopPropagation(); setPrintCase(c); setPrintType('docket'); setTimeout(() => window.print(), 500); }}
-                            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-2 rounded-lg hover:shadow-sm transition-all active:scale-95" title="Print Docket"
-                          >🖨️</button>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); setPrintCase(c); setPrintType('statement'); setTimeout(() => window.print(), 500); }}
-                            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-2 rounded-lg hover:shadow-sm transition-all active:scale-95" title="Print Statements"
-                          >📜</button>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); setPrintCase(c); setPrintType('callout'); setTimeout(() => window.print(), 500); }}
-                            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-2 rounded-lg hover:shadow-sm transition-all active:scale-95" title="Print Call Out"
-                          >📢</button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {filteredCases.length === 0 && (
-                <div className="text-center py-20 text-gray-400 italic text-sm">No cases found matching your search.</div>
-              )}
-            </div>
-            <div className="p-4 bg-gray-50 dark:bg-gray-800/50 text-center border-t border-gray-100 dark:border-gray-800">
-              <Link href="/cases" className="text-xs font-bold text-kmuGreen hover:text-green-700 uppercase tracking-wider transition-all">View All Cases →</Link>
-            </div>
           </div>
+        </div>
+      </div>
+
+      {/* Add Case Modal */}
+      {showAddCase && (
+        <div className="fixed inset-0 z-[1001] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => setShowAddCase(false)} />
+          <div className="relative bg-white dark:bg-gray-900 w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 p-8">
+            <div className="flex justify-between items-center mb-8">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Record Incident</h2>
+                <p className="text-xs text-gray-500 mt-1">Submit case details for review</p>
+              </div>
+              <button onClick={() => setShowAddCase(false)} className="text-gray-400 hover:text-red-500 transition-all font-bold">✕</button>
+            </div>
+            <CaseDossierForm
+              onSuccess={() => {
+                showNotification('success', 'Incident logged');
+                setShowAddCase(false);
+                fetch(`${API_BASE_URL}/cases`, { headers: { ...authHeaders() } })
+                  .then(res => res.json())
+                  .then(data => setCases(Array.isArray(data) ? data : (data.cases || data || [])));
+              }}
+              onCancel={() => setShowAddCase(false)}
+            />
+          </div>
+        </div>
+      )}
+
+      {notification?.isVisible && (
+        <Notification type={notification.type} message={notification.message} isVisible={notification.isVisible} onClose={hideNotification} />
+      )}
+
+      {/* Hidden Printable Area */}
+      {printCase && (
+        <div className="hidden print:block fixed inset-0 z-[9999] bg-white">
+          <CaseDossierPrintable data={printCase} documentType={printType} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StatCard({ title, value, color }: any) {
+  const colors: any = {
+    teal: 'border-teal-500 dark:border-teal-400',
+    emerald: 'border-emerald-500 dark:border-emerald-400',
+    blue: 'border-blue-500 dark:border-blue-400',
+    orange: 'border-orange-500 dark:border-orange-400',
+    red: 'border-red-500 dark:border-red-400'
+  };
+  return (
+    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-5 transition-all hover:scale-[1.01] ${colors[color]}`}>
+      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{title}</div>
+      <div className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">{value}</div>
+    </div>
+  );
+}
         </div>
       </div>
 
