@@ -4,7 +4,12 @@ import UserModel from '../models/user.js';
 import StudentModel from '../models/student.js';
 import { logAudit } from './auditController.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'changeme';
+// Security: JWT_SECRET must be set in environment - no fallback for production
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+    console.error('FATAL ERROR: JWT_SECRET is not defined in environment variables');
+    process.exit(1);
+}
 
 export async function login(req, res) {
     const { username, password } = req.body;

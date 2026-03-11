@@ -96,15 +96,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loadStoredAuth();
   }, []);
 
-  // Simple encryption/decryption for offline data (for demo purposes)
-  const encryptData = (data: string): string => {
-    // In production, use a proper encryption library
+  // Security: Use SHA-256 hash for offline credential verification
+  // This stores only a hash, never the actual password
+  const hashPassword = async (password: string): Promise<string> => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  };
+
+  // Simple encryption/decryption for offline data using base64 (for non-sensitive data only)
+  const encodeData = (data: string): string => {
     return btoa(data);
   };
 
-  const decryptData = (encryptedData: string): string => {
+  const decodeData = (encodedData: string): string => {
     try {
-      return atob(encryptedData);
+      return atob(encodedData);
     } catch {
       return '';
     }
@@ -128,10 +137,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('auth_token', data.token);
       localStorage.setItem('auth_user', JSON.stringify(data.user));
 
-      // Store encrypted offline data for offline login
-      const offlineData = encryptData(JSON.stringify({
+      // Security: Store only a HASH of the password for offline verification
+      // Never store the actual password in localStorage
+      const passwordHash = await hashPassword(password);
+      const offlineData = encodeData(JSON.stringify({
         username,
-        password,
+        passwordHash, // SHA-256 hash, not the actual password
         user: data.user,
         timestamp: Date.now()
       }));
@@ -173,14 +184,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error('No offline data available');
       }
 
-      const decryptedData = decryptData(storedOfflineData);
-      const offlineData = JSON.parse(decryptedData);
+      const decodedData = decodeData(storedOfflineData);
+      const offlineData = JSON.parse(decodedData);
 
+      // Security: Compare password hash instead of plain text
+      const inputPasswordHash = await hashPassword(password);
+      
       // Check if stored credentials match
-      if (offlineData.username === username && offlineData.password === password) {
-        // Check if data is not too old (e.g., 30 days)
-        const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
-        if (offlineData.timestamp < thirtyDaysAgo) {
+      if (offlineData.username === username && offlineData.passwordHash === inputPasswordHash) {
+        // Check if data is not too old (e.g., 7 days for security)
+        const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+        if (offlineData.timestamp < sevenDaysAgo) {
           throw new Error('Offline data expired');
         }
 
@@ -228,26 +242,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error('Password change failed');
       }
 
-      // Update local storage for offline functionality
-      const storedOfflineData = localStorage.getItem('offline_auth_data');
-      if (storedOfflineData) {
-        try {
-          const decryptedData = decryptData(storedOfflineData);
-          const offlineData = JSON.parse(decryptedData);
-
-          // Update the password in offline data
-          const updatedOfflineData = encryptData(JSON.stringify({
-            ...offlineData,
-            password: newPassword,
-            timestamp: Date.now() // Update timestamp
-          }));
-
-          localStorage.setItem('offline_auth_data', updatedOfflineData);
-        } catch (error) {
-          console.error('Error updating offline data:', error);
-          // Continue even if offline update fails
-        }
-      }
+      // Security: Clear offline data on password change
+      // User must re-login to enable offline access with new password
+      localStorage.removeItem('offline_auth_data');
+      console.log('Offline credentials cleared - please re-login to enable offline access');
 
       return true;
     } catch (error) {

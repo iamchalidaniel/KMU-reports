@@ -1,5 +1,11 @@
 import jwt from 'jsonwebtoken';
+
+// Security: JWT_SECRET must be set in environment
 const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+    console.error('FATAL ERROR: JWT_SECRET is not defined in environment variables');
+    process.exit(1);
+}
 
 export function authenticate(req, res, next) {
     console.log('authenticate middleware called');
