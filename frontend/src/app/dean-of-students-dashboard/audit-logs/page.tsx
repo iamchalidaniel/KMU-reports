@@ -127,7 +127,9 @@ export default function AuditLogsPage() {
           ) : (
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full">
+                
+                {/* Desktop Table View */}
+                <table className="w-full hidden md:table">
                   <thead className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">Admin</th>
@@ -153,6 +155,36 @@ export default function AuditLogsPage() {
                     ))}
                   </tbody>
                 </table>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden divide-y divide-gray-100 dark:divide-gray-800 font-sans p-2">
+                  {filteredLogs.map((log) => (
+                    <div key={log._id} className="p-4 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors rounded-lg mb-2 shadow-sm border border-gray-100 dark:border-gray-800">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 font-bold uppercase text-xs">
+                            {log.admin.charAt(0)}
+                          </div>
+                          <div>
+                            <div className="text-sm font-bold text-gray-900 dark:text-gray-100 tracking-tight">{log.admin}</div>
+                            <div className="text-[10px] text-gray-500 uppercase tracking-wider">{new Date(log.timestamp).toLocaleString()}</div>
+                          </div>
+                        </div>
+                        <StatusBadge status={log.action.toLowerCase()} />
+                      </div>
+                      
+                      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3">
+                        <div className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-1 opacity-70">Entity / Resource</div>
+                        <div className="text-sm text-gray-800 dark:text-gray-200 font-medium mb-3">{log.entity}</div>
+                        
+                        <div className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-1 opacity-70">Changes</div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400 font-mono bg-white dark:bg-gray-900 p-2 rounded border border-gray-100 dark:border-gray-700 break-words line-clamp-3">
+                          {log.changes}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}

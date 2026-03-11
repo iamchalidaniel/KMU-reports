@@ -248,7 +248,9 @@ export default function AdminMaintenancePage() {
 
                         {/* Table */}
                         <div className="overflow-x-auto">
-                            <table className="w-full text-xs">
+                            
+                            {/* Desktop Table View */}
+                            <table className="w-full text-xs hidden md:table">
                                 <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-[10px] font-bold uppercase tracking-widest border-b border-gray-100 dark:border-gray-800">
                                     <tr>
                                         <th className="px-6 py-4 text-left">Location</th>
@@ -324,6 +326,75 @@ export default function AdminMaintenancePage() {
                                     })}
                                 </tbody>
                             </table>
+
+                            {/* Mobile Card View */}
+                            <div className="md:hidden divide-y divide-gray-100 dark:divide-gray-800 font-sans">
+                                {filteredReports.map((r, i) => {
+                                    const reportId = r._id || r.id;
+                                    return (
+                                        <div key={i} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 group transition-colors">
+                                            <div className="flex justify-between items-start mb-3">
+                                                <div>
+                                                    <div className="font-bold text-gray-900 dark:text-gray-100 uppercase tracking-tight">{r.location?.hall}</div>
+                                                    <div className="text-[10px] text-gray-400 font-semibold uppercase mt-0.5">
+                                                        Room {r.location?.room || 'N/A'} • {r.reported_by?.name}
+                                                    </div>
+                                                </div>
+                                                <select
+                                                    value={r.status}
+                                                    onChange={(e) => updateStatus(reportId!, e.target.value)}
+                                                    className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase outline-none cursor-pointer border transition-all ${r.status === 'Completed' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-blue-50 text-blue-600 border-blue-200'}`}
+                                                >
+                                                    {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                                                </select>
+                                            </div>
+                                            
+                                            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 mb-3 border-l-2 border-kmuGreen">
+                                                <div className="font-bold uppercase tracking-tight text-gray-700 dark:text-gray-300 flex items-center gap-2 mb-1 text-xs">
+                                                    {r.category}
+                                                    <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase border ${r.priority === 'Urgent' ? 'bg-red-100 text-red-600 border-red-200' :
+                                                        r.priority === 'High' ? 'bg-orange-100 text-orange-600 border-orange-200' : 'bg-gray-100 text-gray-400 border-gray-200'
+                                                        }`}>
+                                                        {r.priority}
+                                                    </span>
+                                                </div>
+                                                <div className="text-[11px] text-gray-500 dark:text-gray-400 italic">
+                                                    "{r.description}"
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex justify-between items-center border-t border-gray-100 dark:border-gray-800 pt-3">
+                                                {isElectricalReport(r.category) && r.status === 'Reported' ? (
+                                                    <div className="flex items-center gap-2 w-full">
+                                                        <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">Assign To:</span>
+                                                        <select
+                                                            className="flex-1 text-[10px] font-bold bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded px-2 py-1.5 outline-none focus:ring-1 focus:ring-kmuGreen transition-all uppercase"
+                                                            onChange={(e) => {
+                                                                const elec = electricians.find(el => (el._id || el.id) === e.target.value);
+                                                                if (elec) assignToElectrician(reportId!, elec._id || elec.id, elec.name);
+                                                            }}
+                                                            defaultValue=""
+                                                        >
+                                                            <option value="" disabled>Select Tech...</option>
+                                                            {electricians.map(el => <option key={el._id || el.id} value={el._id || el.id}>{el.name}</option>)}
+                                                        </select>
+                                                    </div>
+                                                ) : r.assigned_to?.name ? (
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-wider">Tech:</span>
+                                                        <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 uppercase bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded">{r.assigned_to.name}</span>
+                                                    </div>
+                                                ) : !isElectricalReport(r.category) ? (
+                                                    <span className="text-[9px] text-gray-300 italic uppercase tracking-widest bg-gray-50 dark:bg-gray-800 px-2 py-0.5 rounded">General Repair</span>
+                                                ) : (
+                                                    <span className="text-[9px] text-gray-400 italic uppercase tracking-widest">Unassigned</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
                             {filteredReports.length === 0 && (
                                 <div className="text-center py-20 bg-gray-50/50 dark:bg-gray-800/20">
                                     <div className="text-3xl mb-3">🔍</div>

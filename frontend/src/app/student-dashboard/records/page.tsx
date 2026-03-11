@@ -193,7 +193,7 @@ function RecordsContent() {
           ) : activeTab === 'statements' ? (
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-sm hidden md:table">
                   <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-xs font-bold uppercase tracking-wider">
                     <tr>
                       <th className="px-6 py-4 text-left">Incident Date</th>
@@ -213,6 +213,19 @@ function RecordsContent() {
                     ))}
                   </tbody>
                 </table>
+                
+                {/* Mobile Card View for Statements */}
+                <div className="md:hidden divide-y divide-gray-100 dark:divide-gray-800 p-2">
+                  {reports.map((r) => (
+                    <div key={r._id} className="p-4 bg-white dark:bg-gray-900 rounded-lg mb-2 shadow-sm border border-gray-100 dark:border-gray-800">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="font-medium text-gray-900 dark:text-gray-100">{r.offenseType}</span>
+                        <StatusBadge status={r.status} />
+                      </div>
+                      <div className="font-mono text-gray-500 text-xs">{formatDate(r.incidentDate)}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
               {reports.length === 0 && (
                 <EmptyState
@@ -225,7 +238,7 @@ function RecordsContent() {
           ) : activeTab === 'cases' ? (
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-sm hidden md:table">
                   <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-xs font-bold uppercase tracking-wider">
                     <tr>
                       <th className="px-6 py-4 text-left">Date</th>
@@ -258,6 +271,29 @@ function RecordsContent() {
                     ))}
                   </tbody>
                 </table>
+                
+                {/* Mobile Card View for Cases */}
+                <div className="md:hidden divide-y divide-gray-100 dark:divide-gray-800 p-2">
+                  {cases.map((c) => (
+                    <div key={c._id} className="p-4 bg-white dark:bg-gray-900 rounded-lg mb-2 shadow-sm border border-gray-100 dark:border-gray-800">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="font-medium text-gray-900 dark:text-gray-100">{c.offenseType}</span>
+                        <StatusBadge status={c.status} />
+                      </div>
+                      <div className="text-xs text-gray-500 line-clamp-2 mb-3">{c.description}</div>
+                      <div className="flex justify-between items-center border-t border-gray-100 dark:border-gray-800 pt-3">
+                        <span className="font-mono text-gray-500 text-xs">{formatDate(c.incidentDate)}</span>
+                        <Link
+                          href={`/cases/${c._id}`}
+                          className="inline-flex items-center gap-1 text-xs font-medium text-kmuGreen hover:underline"
+                        >
+                          View details
+                          <ChevronRight className="w-3 h-3" />
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
               {cases.length === 0 && (
                 <EmptyState

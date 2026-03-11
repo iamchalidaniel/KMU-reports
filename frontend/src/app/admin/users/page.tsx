@@ -224,7 +224,9 @@ export default function UserManagementPage() {
             </div>
 
             <div className="overflow-x-auto font-sans">
-              <table className="w-full text-xs">
+              
+              {/* Desktop Table View */}
+              <table className="w-full text-xs hidden md:table">
                 <thead className="bg-gray-50 dark:bg-gray-800 text-[10px] font-bold uppercase text-gray-400 tracking-widest">
                   <tr>
                     <th className="px-8 py-4 text-left">User Details</th>
@@ -294,6 +296,66 @@ export default function UserManagementPage() {
                   })}
                 </tbody>
               </table>
+
+              {/* Mobile Card View */}
+              <div className="md:hidden divide-y divide-gray-100 dark:divide-gray-800">
+                {loading && users.length === 0 ? (
+                  [...Array(5)].map((_, i) => (
+                    <div key={i} className="p-4 animate-pulse">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+                        <div className="flex-1">
+                          <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded mb-2" />
+                          <div className="h-3 w-20 bg-gray-200 dark:bg-gray-700 rounded" />
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : filteredUsers.map((u, i) => {
+                  const userId = u.id || u._id;
+                  return (
+                    <div key={userId} className="p-4 hover:bg-indigo-50/30 dark:hover:bg-indigo-950/10 transition-colors">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 font-bold text-sm uppercase">
+                            {u.username?.charAt(0)}
+                          </div>
+                          <div>
+                            <div className="font-bold text-gray-900 dark:text-gray-100 uppercase text-sm tracking-tight block">
+                              {u.name || u.username}
+                            </div>
+                            <div className="text-[10px] text-gray-400 font-mono tracking-tighter mt-0.5 truncate max-w-[180px]">@{u.username}</div>
+                          </div>
+                        </div>
+                        <span className="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 text-[9px] font-bold uppercase tracking-widest rounded">Active</span>
+                      </div>
+                      
+                      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 mb-3 border-l-2 border-indigo-400">
+                        <span className="px-2.5 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 text-[10px] font-bold uppercase tracking-widest rounded border border-indigo-100 dark:border-indigo-900/50">
+                          {u.role.replace('_', ' ')}
+                        </span>
+                      </div>
+                      
+                      <div className="flex justify-end gap-2 border-t border-gray-100 dark:border-gray-800 pt-3">
+                        <button
+                          onClick={() => { setEditingUserId(userId); setEditUser({ ...u }); }}
+                          className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 hover:text-kmuGreen hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex items-center gap-1 text-xs font-bold uppercase"
+                          aria-label="Edit user"
+                        >
+                          <Settings className="w-3 h-3" /> Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(userId)}
+                          className="px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors flex items-center gap-1 text-xs font-bold uppercase"
+                          aria-label="Delete user"
+                        >
+                          <Trash2 className="w-3 h-3" /> Delete
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
             {filteredUsers.length === 0 && !loading && (
               <div className="flex flex-col items-center justify-center py-16 px-6 text-center">

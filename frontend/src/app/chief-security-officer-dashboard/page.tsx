@@ -198,7 +198,9 @@ export default function ChiefSecurityOfficerDashboard() {
               <Link href="/chief-security-officer-dashboard/cases" className="text-xs font-bold text-blue-600 hover:underline">Full Registry →</Link>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-xs">
+              
+              {/* Desktop Table View */}
+              <table className="w-full text-xs hidden md:table">
                 <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-400 font-bold uppercase tracking-widest">
                   <tr>
                     <th className="px-6 py-4 text-left">Student</th>
@@ -227,6 +229,28 @@ export default function ChiefSecurityOfficerDashboard() {
                   ))}
                 </tbody>
               </table>
+
+              {/* Mobile Card View */}
+              <div className="md:hidden divide-y divide-gray-100 dark:divide-gray-800 p-2">
+                {filteredCases.slice(0, 5).map((c, i) => (
+                  <div key={i} className="p-4 bg-white dark:bg-gray-900 rounded-lg mb-2 shadow-sm border border-gray-100 dark:border-gray-800 cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <div className="font-bold text-gray-800 dark:text-gray-200">{c.student?.fullName || 'Anonymous'}</div>
+                        <div className="text-[10px] text-gray-500">{c.student?.studentId || 'EXT'}</div>
+                      </div>
+                      <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase ${c.status === 'Open' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>{c.status}</span>
+                    </div>
+                    <div className="flex justify-between items-center mt-3">
+                      <div className="text-gray-600 dark:text-gray-400 font-medium text-xs">{c.offenseType}</div>
+                      <span className={`text-[10px] font-bold ${c.severity === 'Critical' ? 'text-red-600 underline' : 'text-gray-400'}`}>
+                        {c.severity}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
             </div>
           </div>
 

@@ -222,7 +222,9 @@ export default function CasesPage() {
             </div>
 
             <div className="overflow-x-auto font-sans">
-              <table className="w-full text-xs">
+              
+              {/* Desktop Table View */}
+              <table className="w-full text-xs hidden md:table">
                 <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-[10px] font-bold uppercase tracking-widest">
                   <tr>
                     <th className="px-6 py-4 text-left">Student Details</th>
@@ -279,6 +281,57 @@ export default function CasesPage() {
                   )}
                 </tbody>
               </table>
+
+              {/* Mobile Card View */}
+              <div className="md:hidden divide-y divide-gray-100 dark:divide-gray-800">
+                {cases.map((c, i) => (
+                  <div key={c._id || i} className="p-4 hover:bg-red-50/30 dark:hover:bg-red-950/10 transition-colors">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/50 flex items-center justify-center text-red-600 font-bold text-sm uppercase">
+                          {c.student?.fullName?.charAt(0) || '?'}
+                        </div>
+                        <div>
+                          <Link href={`/cases/${c._id}`} className="font-bold text-gray-900 dark:text-gray-100 hover:text-red-600 transition-colors uppercase text-sm tracking-tight block">
+                            {c.student?.fullName || 'Anonymous'}
+                          </Link>
+                          <div className="text-[10px] text-gray-400 font-semibold mt-0.5 uppercase">{c.student?.studentId || 'EXTERNAL'} • {c.student?.program || 'N/A'}</div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 mb-3 border-l-2 border-red-500">
+                      <div className="flex justify-between items-start mb-1">
+                        <div className="font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tight text-xs">{c.offenseType}</div>
+                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase border ${c.status === 'Open' ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`}>
+                          {c.status}
+                        </span>
+                      </div>
+                      <div className="text-[10px] text-gray-400 mt-1 uppercase font-bold flex items-center gap-2">
+                        <span className={`${c.severity === 'Critical' ? 'text-red-600 animate-pulse' : c.severity === 'High' ? 'text-red-500' : 'text-gray-500'}`}>
+                          {c.severity} Priority
+                        </span>
+                        <span className="text-gray-300 dark:text-gray-700">•</span>
+                        <span className="italic font-normal">{new Date(c.incidentDate).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-end gap-2 pt-1 border-t border-gray-100 dark:border-gray-800">
+                      <Link href={`/cases/${c._id}`} className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 hover:bg-gray-200 text-xs font-bold uppercase transition-colors flex items-center gap-1">
+                        <span>📄</span> View
+                      </Link>
+                      {(user?.role === 'admin' || user?.role === 'security_officer') && (
+                        <button onClick={() => handleDelete(c._id)} className="px-3 py-1.5 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 text-xs font-bold uppercase hover:bg-red-200 transition-colors flex items-center gap-1">
+                          <span>🗑️</span> Delete
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {cases.length === 0 && !loading && (
+                  <div className="py-20 text-center text-gray-400 italic text-sm">No cases found matching your search.</div>
+                )}
+              </div>
             </div>
 
             {/* Pagination */}

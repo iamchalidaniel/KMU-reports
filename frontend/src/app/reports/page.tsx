@@ -173,7 +173,9 @@ export default function ReportsPage() {
             </div>
 
             <div className="overflow-x-auto font-sans">
-              <table className="w-full text-xs">
+              
+              {/* Desktop Table View */}
+              <table className="w-full text-xs hidden md:table">
                 <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-[10px] font-bold uppercase tracking-widest">
                   <tr>
                     <th className="px-6 py-4 text-left">Student Name</th>
@@ -229,6 +231,52 @@ export default function ReportsPage() {
                   )}
                 </tbody>
               </table>
+
+              {/* Mobile Card View */}
+              <div className="md:hidden divide-y divide-gray-100 dark:divide-gray-800">
+                {studentReports.map((r, i) => (
+                  <div key={r._id || i} className="p-4 hover:bg-orange-50/30 dark:hover:bg-orange-950/10 transition-colors">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/50 flex items-center justify-center text-orange-600 font-bold text-sm uppercase">
+                          {r.student_name?.charAt(0) || 'A'}
+                        </div>
+                        <div>
+                          <div className="font-bold text-gray-900 dark:text-gray-100 uppercase text-sm tracking-tight">
+                            {r.student_name || 'Anonymous Submission'}
+                          </div>
+                          <div className="text-[10px] text-gray-400 font-semibold mt-0.5 uppercase">{new Date(r.incident_date).toLocaleDateString()}</div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 mb-3 border-l-2 border-orange-400">
+                      <div className="flex justify-between items-start mb-2 gap-2">
+                        <div className="font-bold text-gray-700 dark:text-gray-300 text-xs line-clamp-2">{r.description}</div>
+                        <span className={`shrink-0 px-2 py-0.5 rounded text-[9px] font-bold uppercase border ${r.severity === 'High' ? 'bg-red-100 text-red-600 border-red-200' : 'bg-gray-100 text-gray-500 border-gray-200'}`}>
+                          {r.severity}
+                        </span>
+                      </div>
+                      <div className="text-[10px] text-orange-500 uppercase font-bold tracking-wider">{r.offense_type || 'Unclassified'}</div>
+                    </div>
+                    
+                    <div className="flex justify-end gap-2 pt-2 border-t border-gray-100 dark:border-gray-800 items-center">
+                      <span className={`mr-auto px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-gray-800 text-gray-500 border border-gray-200 dark:border-gray-700`}>
+                        {r.status}
+                      </span>
+                      {r.status === 'Pending' && (
+                        <button onClick={() => handleApproveReport(r._id)} className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all">Approve</button>
+                      )}
+                      {(r.status === 'Pending' || r.status === 'Approved') && (
+                        <button onClick={() => handleConvertToCase(r._id)} className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all">Convert</button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {studentReports.length === 0 && !loading && (
+                  <div className="py-20 text-center text-gray-400 italic text-sm">No reports found matching your search.</div>
+                )}
+              </div>
             </div>
 
             {/* Pagination */}

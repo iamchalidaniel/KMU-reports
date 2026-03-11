@@ -403,7 +403,7 @@ export default function HallWardenDashboard() {
                 <Link href="/hall-warden-dashboard/maintenance" className="text-xs font-bold text-emerald-600 hover:underline">Full Registry →</Link>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-xs">
+                <table className="w-full text-xs hidden md:table">
                   <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-400 font-bold uppercase tracking-widest">
                     <tr>
                       <th className="px-6 py-4 text-left">Location</th>
@@ -430,6 +430,27 @@ export default function HallWardenDashboard() {
                     ))}
                   </tbody>
                 </table>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden divide-y divide-gray-100 dark:divide-gray-800 p-2">
+                  {filteredReports.slice(0, 8).map((report, i) => (
+                    <div key={report._id || i} className="p-4 bg-white dark:bg-gray-900 rounded-lg mb-2 shadow-sm border border-gray-100 dark:border-gray-800">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <div className="font-bold text-gray-800 dark:text-gray-200">{report.location.hall}</div>
+                          <div className="text-[10px] text-gray-500">Room {report.location.room}</div>
+                        </div>
+                        <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase ${report.status === 'Completed' ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'}`}>{report.status}</span>
+                      </div>
+                      <div className="text-gray-600 dark:text-gray-400 font-medium text-xs mb-2">{report.category}</div>
+                      <div className="flex justify-between items-center text-[10px]">
+                        <span className="text-gray-500">{getRelativeTime(report.created_at)}</span>
+                        <span className="text-gray-500 font-medium">Tech: {report.assigned_to?.name || 'Unassigned'}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
                 {filteredReports.length === 0 && (
                   <div className="text-center py-12 text-gray-400 italic">No active dispatches.</div>
                 )}

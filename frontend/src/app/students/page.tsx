@@ -200,7 +200,9 @@ export default function StudentsPage() {
             </div>
 
             <div className="overflow-x-auto font-sans">
-              <table className="w-full text-xs">
+              
+              {/* Desktop Table View */}
+              <table className="w-full text-xs hidden md:table">
                 <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-[10px] font-bold uppercase tracking-widest">
                   <tr>
                     <th className="px-6 py-4 text-left">Student Details</th>
@@ -249,6 +251,47 @@ export default function StudentsPage() {
                   )}
                 </tbody>
               </table>
+
+              {/* Mobile Card View */}
+              <div className="md:hidden divide-y divide-gray-100 dark:divide-gray-800">
+                {students.map((s, i) => (
+                  <div key={s._id || i} className="p-4 hover:bg-emerald-50/30 dark:hover:bg-emerald-950/10 transition-colors">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center text-emerald-600 font-bold text-sm uppercase">
+                          {s.fullName?.charAt(0)}
+                        </div>
+                        <div>
+                          <Link href={`/students/${s._id}`} className="font-bold text-gray-900 dark:text-gray-100 hover:text-emerald-600 transition-colors uppercase text-sm tracking-tight block">
+                            {s.fullName}
+                          </Link>
+                          <div className="text-[10px] text-gray-400 font-semibold mt-0.5 uppercase tracking-tighter">{s.studentId}</div>
+                        </div>
+                      </div>
+                      <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-[9px] font-bold uppercase tracking-widest text-gray-500 rounded">Verified</span>
+                    </div>
+                    
+                    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 mb-3">
+                      <div className="font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tight text-xs">{s.program}</div>
+                      <div className="text-[10px] text-gray-400 mt-1 uppercase font-bold tracking-wider">Year {s.year || 'N/A'} • {s.gender || 'N/A'}</div>
+                    </div>
+                    
+                    <div className="flex justify-end gap-2 border-t border-gray-100 dark:border-gray-800 pt-3">
+                      <button onClick={() => router.push(`/students/${s._id}?tab=add-case`)} className="px-3 py-1.5 rounded-lg bg-orange-100 dark:bg-orange-900/30 text-orange-600 text-xs font-bold uppercase hover:bg-orange-200 transition-colors flex items-center gap-1">
+                        <span>⚖️</span> Add Case
+                      </button>
+                      {(user?.role === 'admin' || user?.role === 'academic_office') && (
+                        <button onClick={() => handleDelete(s._id!)} className="px-3 py-1.5 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 text-xs font-bold uppercase hover:bg-red-200 transition-colors flex items-center gap-1">
+                          <span>🗑️</span> Delete
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {students.length === 0 && !loading && (
+                  <div className="py-20 text-center text-gray-400 italic text-sm">No students found matching your search.</div>
+                )}
+              </div>
             </div>
 
             {/* Pagination */}

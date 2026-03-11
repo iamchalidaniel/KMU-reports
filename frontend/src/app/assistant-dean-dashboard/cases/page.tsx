@@ -154,7 +154,9 @@ export default function AssistantDeanCases() {
                         </div>
 
                         <div className="overflow-x-auto">
-                            <table className="w-full text-sm font-sans">
+                            
+                            {/* Desktop Table View */}
+                            <table className="w-full text-sm font-sans hidden md:table">
                                 <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-[10px] font-bold uppercase tracking-widest">
                                     <tr>
                                         <th className="px-6 py-4 text-left">Student Details</th>
@@ -195,6 +197,43 @@ export default function AssistantDeanCases() {
                                     ))}
                                 </tbody>
                             </table>
+
+                            {/* Mobile Card View */}
+                            <div className="md:hidden divide-y divide-gray-100 dark:divide-gray-800 font-sans">
+                                {filteredCases.map((c, i) => (
+                                    <div 
+                                        key={c._id || i} 
+                                        className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 group transition-colors cursor-pointer"
+                                        onClick={() => router.push(`/cases/${c._id}`)}
+                                    >
+                                        <div className="flex justify-between items-start mb-3">
+                                            <div>
+                                                <div className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-red-600 transition-colors uppercase tracking-tight">
+                                                    {c.student?.fullName || 'N/A'}
+                                                </div>
+                                                <div className="text-[10px] text-gray-400 font-bold mt-0.5">{c.student?.studentId} • {c.student?.program}</div>
+                                            </div>
+                                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase border ${c.status === 'Open' ? 'bg-orange-100 text-orange-700 border-orange-200' :
+                                                c.status === 'Closed' ? 'bg-green-100 text-green-700 border-green-200' :
+                                                    'bg-blue-100 text-blue-700 border-blue-200'
+                                                }`}>
+                                                {c.status}
+                                            </span>
+                                        </div>
+                                        
+                                        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 mb-3 border-l-2 border-red-400">
+                                            <div className="text-gray-700 dark:text-gray-300 font-bold uppercase text-xs">{c.offenseType}</div>
+                                            <div className={`text-[9px] font-bold uppercase mt-1 ${c.severity === 'Critical' ? 'text-red-600' : 'text-gray-400'}`}>{c.severity} Severity</div>
+                                        </div>
+                                        
+                                        <div className="flex justify-between items-center border-t border-gray-100 dark:border-gray-800 pt-3">
+                                            <span className="text-xs font-bold text-gray-500 uppercase">Registered: {new Date(c.createdAt).toLocaleDateString()}</span>
+                                            <span className="text-red-600 text-xs font-bold uppercase">View →</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            
                             {filteredCases.length === 0 && (
                                 <div className="text-center py-24 text-gray-400 italic text-sm font-sans uppercase tracking-widest">No matching case records found.</div>
                             )}

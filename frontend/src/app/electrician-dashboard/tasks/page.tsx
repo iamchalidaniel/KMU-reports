@@ -163,7 +163,9 @@ export default function ElectricianTasks() {
                         </div>
 
                         <div className="overflow-x-auto">
-                            <table className="w-full text-xs">
+                            
+                            {/* Desktop Table View */}
+                            <table className="w-full text-xs hidden md:table">
                                 <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-400 text-[9px] font-black uppercase tracking-[0.2em] border-b border-gray-100 dark:border-gray-800">
                                     <tr>
                                         <th className="px-8 py-6 text-left">Location Telemetry</th>
@@ -205,6 +207,48 @@ export default function ElectricianTasks() {
                                     })}
                                 </tbody>
                             </table>
+
+                            {/* Mobile Card View */}
+                            <div className="md:hidden divide-y divide-gray-100 dark:divide-gray-800 font-sans">
+                                {filteredReports.map((report, i) => {
+                                    const reportId = report._id || report.id;
+                                    return (
+                                        <div key={reportId} className="p-4 hover:bg-blue-50/5 transition-colors group">
+                                            <div className="flex justify-between items-start mb-3">
+                                                <div>
+                                                    <div className="font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight group-hover:text-blue-600 transition-colors">
+                                                        {report.location.hall}
+                                                    </div>
+                                                    <div className="text-[9px] font-black text-gray-400 mt-1 uppercase">Unit {report.location.room || 'N/A'}</div>
+                                                </div>
+                                                <div className="px-8 py-6 text-right font-black text-[9px] text-gray-300 uppercase tracking-widest hidden">
+                                                    {reportId?.slice(-8).toUpperCase()}
+                                                </div>
+                                                <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest border ${report.status === 'Completed' ? 'bg-green-50 text-green-600 border-green-200' : 'bg-blue-50 text-blue-600 border-blue-200'}`}>
+                                                    {report.status}
+                                                </span>
+                                            </div>
+                                            
+                                            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 mb-3 border-l-2 border-blue-400">
+                                                <div className="font-black text-gray-700 dark:text-gray-300 uppercase text-[10px] mb-1">{report.category}</div>
+                                                <div className="text-[10px] text-gray-500 italic">"{report.description}"</div>
+                                            </div>
+                                            
+                                            <div className="flex justify-between items-center border-t border-gray-100 dark:border-gray-800 pt-3">
+                                                <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Update Status:</span>
+                                                <select
+                                                    value={report.status}
+                                                    onChange={(e) => updateStatus(reportId!, e.target.value)}
+                                                    className={`text-[10px] font-black uppercase tracking-widest bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-blue-500 transition-all ${report.status === 'Completed' ? 'text-green-600' : 'text-blue-600'}`}
+                                                >
+                                                    {STATUSES.map(s => <option key={s.value} value={s.value} className="bg-white dark:bg-gray-900 font-sans">{s.label}</option>)}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            
                             {filteredReports.length === 0 && (
                                 <div className="text-center py-32 text-gray-400 italic font-black uppercase tracking-widest">No technical tasks recorded.</div>
                             )}
