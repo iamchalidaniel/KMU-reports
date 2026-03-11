@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { saveAs } from 'file-saver';
-import { Bar, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, Chart as ChartJS } from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+import { CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, Chart as ChartJS } from 'chart.js';
 import { useAuth } from '../../context/AuthContext';
 import { API_BASE_URL } from '../../config/constants';
 import { authHeaders, getProfile } from '../../utils/api';
