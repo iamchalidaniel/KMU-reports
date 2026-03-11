@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import UserModel from '../models/user.js';
 import StudentModel from '../models/student.js';
 import { logAudit } from './auditController.js';
+import { blacklistToken } from '../utils/cache.js';
 
 // Security: JWT_SECRET must be set in environment - no fallback for production
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -265,4 +266,32 @@ export async function changePassword(req, res) {
         console.error('Change password error:', err);
         res.status(500).json({ error: 'Server error' });
     }
+}
+
+export async function logout(req, res) {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.split(' ')[1];
+        try {
+            // Decode without verifying to read exp claim
+            const decoded = jwt.decode(token);
+            if (decoded && decoded.exp) {
+                await blacklistToken(token, decoded.exp);
+            }
+        } catch (err) {
+            // Non-fatal — just proceed with logout
+            console.error('Logout blacklist error:', err);
+        }
+
+        await logAudit({
+            action: 'user_logout',
+            entity: 'user',
+            entityId: req.user?.id || null,
+            user: req.user?.username || 'unknown',
+            details: { timestamp: new Date().toISOString() },
+            ipAddress: req.ip,
+            userAgent: req.get('User-Agent')
+        }).catch(() => {}); // non-fatal
+    }
+    res.json({ success: true, message: 'Logged out successfully' });
 }

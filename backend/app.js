@@ -56,6 +56,18 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
+// Security: Stricter rate limit for auth endpoints - 5 attempts per 15 minutes
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5,
+    message: { error: 'Too many login attempts. Please try again in 15 minutes.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+    skipSuccessfulRequests: true, // Only count failed attempts
+});
+app.use('/api/login', authLimiter);
+app.use('/api/student-register', authLimiter);
+
 // Security: Data sanitization against NoSQL query injection
 app.use(mongoSanitize());
 

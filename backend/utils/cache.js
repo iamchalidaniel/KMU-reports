@@ -150,5 +150,42 @@ export default {
   cacheMiddleware,
   clearCache,
   setCache,
-  getCache
+  getCache,
+  blacklistToken,
+  isTokenBlacklisted
 };
+
+/**
+ * Blacklist a JWT token until it naturally expires.
+ * @param {string} token - The raw JWT string
+ * @param {number} expiresAt - Unix timestamp (seconds) when the token expires
+ */
+export async function blacklistToken(token, expiresAt) {
+  if (!redisClient || !redisClient.isOpen) return;
+  const ttl = expiresAt - Math.floor(Date.now() / 1000);
+  if (ttl <= 0) return; // already expired, no need to blacklist
+  try {
+    // Store a short hash of the token as the key to avoid storing full JWTs
+    const key = `bl:${Buffer.from(token).toString('base64').slice(0, 40)}`;
+    await redisClient.setEx(key, ttl, '1');
+  } catch (err) {
+    console.error('blacklistToken error:', err);
+  }
+}
+
+/**
+ * Check if a JWT token has been blacklisted.
+ * @param {string} token - The raw JWT string
+ * @returns {boolean}
+ */
+export async function isTokenBlacklisted(token) {
+  if (!redisClient || !redisClient.isOpen) return false;
+  try {
+    const key = `bl:${Buffer.from(token).toString('base64').slice(0, 40)}`;
+    const exists = await redisClient.exists(key);
+    return exists === 1;
+  } catch (err) {
+    console.error('isTokenBlacklisted error:', err);
+    return false;
+  }
+}

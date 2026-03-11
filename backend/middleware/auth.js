@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { isTokenBlacklisted } from '../utils/cache.js';
 
 // Security: JWT_SECRET must be set in environment
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -7,21 +8,23 @@ if (!JWT_SECRET) {
     process.exit(1);
 }
 
-export function authenticate(req, res, next) {
-    console.log('authenticate middleware called');
+export async function authenticate(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        console.log('Missing or invalid token');
         return res.status(401).json({ error: 'Missing or invalid token' });
     }
     const token = authHeader.split(' ')[1];
     try {
+        // Check if token has been blacklisted (logged out)
+        const blacklisted = await isTokenBlacklisted(token);
+        if (blacklisted) {
+            return res.status(401).json({ error: 'Token has been invalidated. Please log in again.' });
+        }
         const payload = jwt.verify(token, JWT_SECRET);
         req.user = payload;
         next();
     } catch (err) {
-        console.error('JWT verify error:', err);
-        return res.status(401).json({ error: 'Invalid token' });
+        return res.status(401).json({ error: 'Invalid or expired token' });
     }
 }
 

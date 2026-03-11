@@ -18,6 +18,7 @@ const PreloadProgress = lazy(() => import('../components/PreloadProgress'));
 const CacheStatus = lazy(() => import('../components/CacheStatus'));
 const OfflineIndicator = lazy(() => import('../components/OfflineIndicator'));
 const Navbar = lazy(() => import('../components/Navbar'));
+const SessionExpiryWarning = lazy(() => import('../components/SessionExpiryWarning'));
 
 import clsx from 'clsx';
 import { API_BASE_URL } from '../config/constants';
@@ -163,6 +164,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
                 <Suspense fallback={null}>
                   <SyncManagerClient />
+                </Suspense>
+
+                {/* Session expiry warning modal */}
+                <Suspense fallback={null}>
+                  <SessionExpiryWarning />
                 </Suspense>
               </SidebarProvider>
             </ThemeProvider>

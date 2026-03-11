@@ -15,6 +15,11 @@ interface User {
   department?: string;
 }
 
+// Inactivity timeout: 30 minutes of no user interaction
+const INACTIVITY_TIMEOUT_MS = 30 * 60 * 1000;
+// Warning shown 2 minutes before auto-logout
+const INACTIVITY_WARNING_MS = 2 * 60 * 1000;
+
 interface AuthContextType {
   user: User | null;
   token: string | null;
@@ -26,6 +31,8 @@ interface AuthContextType {
   isOnline: boolean;
   preloadData: () => Promise<void>;
   isPreloading: boolean;
+  sessionExpiring: boolean;
+  extendSession: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -36,6 +43,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [isOnline, setIsOnline] = useState(true);
   const [isPreloading, setIsPreloading] = useState(false);
+  const [sessionExpiring, setSessionExpiring] = useState(false);
+
+  const inactivityTimer = { warning: null as ReturnType<typeof setTimeout> | null, logout: null as ReturnType<typeof setTimeout> | null };
 
   // Check online status
   useEffect(() => {
@@ -210,7 +220,67 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const clearInactivityTimers = () => {
+    if (inactivityTimer.warning) clearTimeout(inactivityTimer.warning);
+    if (inactivityTimer.logout) clearTimeout(inactivityTimer.logout);
+    inactivityTimer.warning = null;
+    inactivityTimer.logout = null;
+  };
+
+  const resetInactivityTimer = () => {
+    if (!localStorage.getItem('auth_token')) return;
+    setSessionExpiring(false);
+    clearInactivityTimers();
+
+    // Show warning 2 minutes before logout
+    inactivityTimer.warning = setTimeout(() => {
+      setSessionExpiring(true);
+    }, INACTIVITY_TIMEOUT_MS - INACTIVITY_WARNING_MS);
+
+    // Auto-logout after full inactivity period
+    inactivityTimer.logout = setTimeout(() => {
+      setSessionExpiring(false);
+      logout();
+    }, INACTIVITY_TIMEOUT_MS);
+  };
+
+  const extendSession = () => {
+    resetInactivityTimer();
+  };
+
+  // Start/stop inactivity tracking based on auth state
+  useEffect(() => {
+    if (!token || token === 'offline_token') {
+      clearInactivityTimers();
+      return;
+    }
+
+    const activityEvents = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart', 'click'];
+    const handleActivity = () => resetInactivityTimer();
+
+    activityEvents.forEach(e => window.addEventListener(e, handleActivity, { passive: true }));
+    resetInactivityTimer();
+
+    return () => {
+      activityEvents.forEach(e => window.removeEventListener(e, handleActivity));
+      clearInactivityTimers();
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
+
   const logout = () => {
+    clearInactivityTimers();
+    setSessionExpiring(false);
+
+    // Notify server to blacklist the token (best-effort, don't await)
+    const currentToken = localStorage.getItem('auth_token');
+    if (currentToken && currentToken !== 'offline_token') {
+      fetch(`${API_BASE_URL}/logout`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${currentToken}` }
+      }).catch(() => {}); // fire-and-forget
+    }
+
     // Stop background sync
     backgroundSync.stop();
 
@@ -318,7 +388,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       loading,
       isOnline,
       preloadData,
-      isPreloading
+      isPreloading,
+      sessionExpiring,
+      extendSession
     }}>
       {children}
     </AuthContext.Provider>
