@@ -90,16 +90,21 @@ export default function AssistantDeanDashboard() {
   const handleGenerateSummary = async () => {
     try {
       setIsSummarizing(true);
-      const res = await fetch(`${API_BASE_URL}/ai-summarize/dashboard`, {
+      const descriptions = cases
+        .map((c: any) => c.description || c.offenseType || '')
+        .filter(Boolean);
+      const res = await fetch('/api/ai-summarize', {
         method: 'POST',
-        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role: 'assistant_dean' }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          descriptions: descriptions.length > 0 ? descriptions : ['No case data available for summary.'],
+        }),
       });
-      if (res.ok) {
-        const data = await res.json();
-        showNotification('success', data.summary || 'Summary generated');
+      const data = await res.json();
+      if (res.ok && data.summary) {
+        showNotification('success', 'AI summary generated');
       } else {
-        throw new Error('Summary failed');
+        throw new Error(data.error || 'Summary failed');
       }
     } catch (err) {
       showNotification('error', 'AI analysis unavailable');
