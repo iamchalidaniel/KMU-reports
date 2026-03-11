@@ -21,6 +21,7 @@ import {
   Home,
   Zap,
   User,
+  History,
 } from 'lucide-react';
 
 type NavItem = { icon: React.ComponentType<{ className?: string }>; label: string; path: string };
@@ -104,6 +105,7 @@ export default function Sidebar() {
       { icon: FileText, label: 'Reports', path: '/reports' },
       { icon: Users, label: 'Students', path: '/students' },
       { icon: ClipboardList, label: 'Evidence', path: '/evidence' },
+      { icon: History, label: 'Audit Logs', path: '/chief-security-officer-dashboard/audit-logs' },
       { icon: PlusCircle, label: 'New Case', path: '/cases/new' },
       { icon: HelpCircle, label: 'Help', path: '/help' },
     ];
@@ -113,6 +115,7 @@ export default function Sidebar() {
       { icon: Users, label: 'Students', path: '/dean-of-students-dashboard/students' },
       { icon: FolderOpen, label: 'Cases', path: '/dean-of-students-dashboard/cases' },
       { icon: FileText, label: 'Reports', path: '/dean-of-students-dashboard/reports' },
+      { icon: History, label: 'Audit Logs', path: '/dean-of-students-dashboard/audit-logs' },
       { icon: HelpCircle, label: 'Help', path: '/help' },
     ];
   } else if (user?.role === 'assistant_dean') {
@@ -121,6 +124,7 @@ export default function Sidebar() {
       { icon: Users, label: 'Students', path: '/assistant-dean-dashboard/students' },
       { icon: FolderOpen, label: 'Cases', path: '/assistant-dean-dashboard/cases' },
       { icon: FileText, label: 'Reports', path: '/reports' },
+      { icon: History, label: 'Audit Logs', path: '/assistant-dean-dashboard/audit-logs' },
       { icon: HelpCircle, label: 'Help', path: '/help' },
     ];
   } else if (user?.role === 'secretary') {
@@ -129,6 +133,7 @@ export default function Sidebar() {
       { icon: Users, label: 'Students', path: '/students' },
       { icon: FolderOpen, label: 'Cases', path: '/cases' },
       { icon: FileText, label: 'Reports', path: '/reports' },
+      { icon: History, label: 'Audit Logs', path: '/secretary-dashboard/audit-logs' },
       { icon: HelpCircle, label: 'Help', path: '/help' },
     ];
   } else if (user?.role === 'hall_warden') {
