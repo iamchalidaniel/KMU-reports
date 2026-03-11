@@ -20,6 +20,9 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { SkeletonDashboard } from '../../components/SkeletonLoader';
+import MetricsCard from '../../components/MetricsCard';
+import ActivityTimeline, { Activity } from '../../components/ActivityTimeline';
+import Tooltip from '../../components/Tooltip';
 
 interface Report {
   _id: string;
@@ -300,6 +303,34 @@ export default function StudentDashboardPage() {
               </div>
             </div>
           </div>
+
+          {/* Activity Timeline */}
+          {!loadingStats && (reports.length > 0 || cases.length > 0) && (
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800">
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-6">Recent Activity</h3>
+              <ActivityTimeline
+                activities={[
+                  ...(reports.slice(0, 2).map((r) => ({
+                    id: r._id,
+                    type: 'created' as const,
+                    title: `Report filed: ${r.offenseType}`,
+                    description: r.description?.substring(0, 60) + '...',
+                    user: 'You',
+                    timestamp: new Date(r.createdAt),
+                  }))),
+                  ...(cases.slice(0, 2).map((c) => ({
+                    id: c._id,
+                    type: 'changed' as const,
+                    title: `Case status: ${c.status}`,
+                    description: `Offense: ${c.offenseType}`,
+                    user: 'System',
+                    timestamp: new Date(c.createdAt),
+                  }))),
+                ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())}
+                isLoading={loadingStats}
+              />
+            </div>
+          )}
 
           {/* Empty state hint when no activity */}
           {!loadingStats && reports.length === 0 && cases.length === 0 && appeals.length === 0 && (
