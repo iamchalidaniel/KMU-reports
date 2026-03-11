@@ -307,7 +307,7 @@ export default function StaffDetailsPage({ params }: { params: { id: string } })
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 hidden md:table">
                             <thead className="bg-gray-50 dark:bg-gray-700">
                                 <tr>
                                     <th className="py-2 px-2 text-left">Case ID</th>
@@ -362,6 +362,45 @@ export default function StaffDetailsPage({ params }: { params: { id: string } })
                                 ))}
                             </tbody>
                         </table>
+
+                        {/* Mobile Card View */}
+                        <div className="md:hidden divide-y divide-gray-200 dark:divide-gray-700">
+                            {cases.map((c) => (
+                                <div key={c._id} className="p-4 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <Link href={`/cases/${c._id}`} className="font-mono text-xs text-kmuGreen hover:underline font-bold">
+                                            {c._id.substring(0, 8)}...
+                                        </Link>
+                                        <div className="text-xs text-gray-500 font-mono">
+                                            {c.incidentDate ? new Date(c.incidentDate).toLocaleDateString() : 'N/A'}
+                                        </div>
+                                    </div>
+                                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+                                        {c.offenseType || 'N/A'}
+                                    </div>
+                                    <div className="flex gap-2 mb-3">
+                                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${c.severity === 'Critical' ? 'bg-red-100 text-red-800' :
+                                            c.severity === 'High' ? 'bg-orange-100 text-orange-800' :
+                                                c.severity === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                                                    'bg-green-100 text-green-800'
+                                            }`}>
+                                            {c.severity || 'N/A'}
+                                        </span>
+                                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${c.status === 'Open' ? 'bg-blue-100 text-blue-800' :
+                                            c.status === 'Closed' ? 'bg-green-100 text-green-800' :
+                                                'bg-gray-100 text-gray-800'
+                                            }`}>
+                                            {c.status || 'N/A'}
+                                        </span>
+                                    </div>
+                                    <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
+                                        <Link href={`/cases/${c._id}`} className="text-kmuGreen hover:underline text-xs font-bold uppercase tracking-widest flex items-center justify-end">
+                                            View Details →
+                                        </Link>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 )}
             </div>

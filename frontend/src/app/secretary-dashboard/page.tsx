@@ -350,7 +350,8 @@ export default function SecretaryDashboard() {
                 </div>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-xs">
+                {/* Desktop Table */}
+                <table className="w-full text-xs hidden md:table">
                   <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-400 font-bold uppercase tracking-widest">
                     <tr>
                       <th className="px-6 py-4 text-left">Student</th>
@@ -373,6 +374,23 @@ export default function SecretaryDashboard() {
                     ))}
                   </tbody>
                 </table>
+                
+                {/* Mobile Card View */}
+                <div className="md:hidden divide-y divide-gray-100 dark:divide-gray-800 p-2">
+                  {filteredCases.slice(0, 10).map((c, i) => (
+                    <div key={i} className="p-4 bg-white dark:bg-gray-900 rounded-lg mb-2 shadow-sm border border-gray-100 dark:border-gray-800 cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <div className="font-bold text-gray-800 dark:text-gray-200">{c.student?.fullName}</div>
+                          <div className="text-[10px] text-gray-500">{c.student?.studentId}</div>
+                        </div>
+                        <div className="text-gray-400 font-mono text-[10px]">{new Date(c.createdAt || 0).toLocaleDateString()}</div>
+                      </div>
+                      <div className="text-gray-600 dark:text-gray-400 font-medium text-xs mt-2">{c.offenseType}</div>
+                    </div>
+                  ))}
+                </div>
+
                 {filteredCases.length === 0 && (
                   <div className="text-center py-12 text-gray-400 italic font-medium">Record registry empty.</div>
                 )}

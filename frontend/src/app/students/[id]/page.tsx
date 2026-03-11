@@ -406,7 +406,8 @@ export default function StudentDetailsPage({ params }: { params: { id: string } 
                                     </div>
                                 ) : (
                                     <div className="overflow-x-auto -mx-3 md:mx-0">
-                                        <table className="min-w-full bg-white dark:bg-gray-800 rounded-lg shadow text-sm md:text-base">
+                                        {/* Desktop Table */}
+                                        <table className="min-w-full bg-white dark:bg-gray-800 rounded-lg shadow text-sm md:text-base hidden md:table">
                                             <thead className="bg-kmuGreen text-white">
                                                 <tr>
                                                     <th className="py-2 px-2 md:px-4 text-left">Case ID</th>
@@ -460,6 +461,34 @@ export default function StudentDetailsPage({ params }: { params: { id: string } 
                                                 ))}
                                             </tbody>
                                         </table>
+
+                                        {/* Mobile Card View */}
+                                        <div className="md:hidden divide-y divide-gray-100 dark:gray-800 px-3">
+                                            {cases.map((caseItem) => (
+                                                <div key={caseItem._id} className="p-4 bg-white dark:bg-gray-800 rounded-lg mb-3 shadow-sm border border-gray-100 dark:border-gray-700">
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <div className="font-mono text-xs text-gray-500">{caseItem._id.substring(0,8)}...</div>
+                                                        <div className="flex gap-1.5">
+                                                            <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${getSeverityColor(caseItem.severity)}`}>{caseItem.severity}</span>
+                                                            <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${getStatusColor(caseItem.status)}`}>{caseItem.status}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-gray-800 dark:text-gray-200 text-sm font-medium mt-1">
+                                                        {caseItem.description ? (caseItem.description.length > 100 ? caseItem.description.substring(0, 100) + '...' : caseItem.description) : 'No description'}
+                                                    </div>
+                                                    {caseItem.sanctions && (
+                                                        <div className="mt-2 text-xs text-gray-500 bg-gray-50 dark:bg-gray-700/50 p-2 rounded">
+                                                            <span className="font-semibold text-gray-700 dark:text-gray-300">Sanctions:</span> {caseItem.sanctions}
+                                                        </div>
+                                                    )}
+                                                    <div className="mt-3 pt-3 border-t border-gray-50 dark:border-gray-700 flex justify-end">
+                                                        <Link href={`/cases/${caseItem._id}`} className="text-kmuGreen hover:text-kmuOrange transition text-xs font-bold uppercase tracking-wider flex items-center gap-1">
+                                                            View Full Case →
+                                                        </Link>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 )}
                             </div>

@@ -201,7 +201,8 @@ export default function AssistantDeanDashboard() {
               <Link href="/assistant-dean-dashboard/cases" className="text-xs font-bold text-kmuGreen hover:underline">Full Audit →</Link>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-xs">
+              {/* Desktop Table */}
+              <table className="w-full text-xs hidden md:table">
                 <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-400 font-bold uppercase tracking-widest">
                   <tr>
                     <th className="px-6 py-4 text-left">Student</th>
@@ -224,6 +225,22 @@ export default function AssistantDeanDashboard() {
                   ))}
                 </tbody>
               </table>
+
+              {/* Mobile Card View */}
+              <div className="md:hidden divide-y divide-gray-100 dark:divide-gray-800 p-2">
+                {filteredCases.slice(0, 5).map((c, i) => (
+                  <div key={i} className="p-4 bg-white dark:bg-gray-900 rounded-lg mb-2 shadow-sm border border-gray-100 dark:border-gray-800 cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <div className="font-bold text-gray-800 dark:text-gray-200">{c.student?.fullName || 'Anonymous'}</div>
+                        <div className="text-[10px] text-gray-500">{c.student?.studentId}</div>
+                      </div>
+                      <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase ${c.status === 'Open' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>{c.status}</span>
+                    </div>
+                    <div className="text-gray-600 dark:text-gray-400 font-medium text-xs mt-2">{c.offenseType}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 

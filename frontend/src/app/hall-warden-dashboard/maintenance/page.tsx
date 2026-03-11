@@ -199,7 +199,7 @@ export default function HallWardenMaintenance() {
                         </div>
 
                         <div className="overflow-x-auto">
-                            <table className="w-full text-xs">
+                            <table className="w-full text-xs hidden md:table">
                                 <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-[10px] font-black uppercase tracking-widest border-b border-gray-100 dark:border-gray-800">
                                     <tr>
                                         <th className="px-6 py-5 text-left">Location / Unit</th>
@@ -262,6 +262,62 @@ export default function HallWardenMaintenance() {
                                     })}
                                 </tbody>
                             </table>
+
+                            {/* Mobile Card View */}
+                            <div className="md:hidden divide-y divide-gray-100 dark:divide-gray-800 p-2">
+                                {filteredReports.map((report, i) => {
+                                    const reportId = report._id || report.id;
+                                    return (
+                                        <div key={reportId} className="p-4 bg-white dark:bg-gray-900 rounded-lg mb-2 shadow-sm border border-gray-100 dark:border-gray-800">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <div>
+                                                    <div className="font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight">{report.location.hall}</div>
+                                                    <div className="text-[10px] text-emerald-600 font-bold mt-1">Room {report.location.room || 'N/A'}</div>
+                                                </div>
+                                                <select
+                                                    value={report.status}
+                                                    onChange={(e) => updateStatus(reportId!, e.target.value)}
+                                                    className={`text-[10px] font-black uppercase bg-transparent outline-none cursor-pointer hover:text-emerald-500 transition-all ${report.status === 'Completed' ? 'text-green-600 underline' : 'text-blue-600'
+                                                        }`}
+                                                >
+                                                    {STATUSES.map(s => <option key={s.value} value={s.value} className="bg-white dark:bg-gray-900">{s.label}</option>)}
+                                                </select>
+                                            </div>
+                                            
+                                            <div className="mb-3">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <span className="font-bold uppercase text-gray-700 dark:text-gray-300 text-xs">{report.category}</span>
+                                                    <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter ${report.priority === 'Urgent' ? 'bg-red-100 text-red-700' :
+                                                            report.priority === 'High' ? 'bg-orange-100 text-orange-700' :
+                                                                'bg-gray-100 text-gray-600'
+                                                        }`}>{report.priority}</span>
+                                                </div>
+                                                <div className="text-[10px] text-gray-400 italic line-clamp-2">"{report.description}"</div>
+                                            </div>
+
+                                            <div className="pt-2 border-t border-gray-50 dark:border-gray-800/50 flex justify-between items-center">
+                                                <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Tech</span>
+                                                {report.assigned_to?.name ? (
+                                                    <span className="text-[10px] font-black text-emerald-600 uppercase">{report.assigned_to.name}</span>
+                                                ) : (
+                                                    <select
+                                                        className="text-[10px] font-black uppercase bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded px-2 py-1 outline-none focus:ring-1 focus:ring-emerald-500 transition-all w-24 truncate"
+                                                        onChange={(e) => {
+                                                            const elec = electricians.find(el => el._id === e.target.value);
+                                                            if (elec) assignToElectrician(reportId!, elec._id, elec.name);
+                                                        }}
+                                                        defaultValue=""
+                                                    >
+                                                        <option value="" disabled>Dispatch</option>
+                                                        {electricians.map(el => <option key={el._id} value={el._id}>{el.name}</option>)}
+                                                    </select>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
                             {filteredReports.length === 0 && (
                                 <div className="text-center py-32 text-gray-400 italic text-sm font-sans uppercase tracking-widest">No matching infrastructure reports found.</div>
                             )}

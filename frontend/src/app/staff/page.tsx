@@ -587,7 +587,7 @@ export default function StaffPage() {
 
             {/* Staff Table */}
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 hidden md:table">
                 <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
                     <th className="py-2 px-2 md:px-4">
@@ -656,6 +656,35 @@ export default function StaffPage() {
                   )}
                 </tbody>
               </table>
+
+              {/* Mobile Card View */}
+              <div className="md:hidden divide-y divide-gray-200 dark:divide-gray-700">
+                {filteredStaff.length === 0 ? (
+                  <div className="p-4 text-center text-gray-500 dark:text-gray-400 text-sm">No staff members found</div>
+                ) : (
+                  filteredStaff.map((s) => (
+                    <div key={s.staffId} className="p-4 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-start gap-3">
+                      <div className="pt-1">
+                        <input type="checkbox" checked={selected.includes(s.staffId)} onChange={() => toggleSelect(s.staffId)} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start">
+                          <Link href={`/staff/${s.staffId}`} className="font-bold text-gray-900 dark:text-gray-100 truncate hover:text-kmuGreen transition">{s.fullName}</Link>
+                          <Link href={`/staff/${s.staffId}`} className="text-xs font-mono text-kmuGreen hover:underline whitespace-nowrap ml-2">{s.staffId}</Link>
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 space-y-0.5">
+                          <div><span className="font-medium">Dept:</span> {s.department}</div>
+                          <div><span className="font-medium">Pos:</span> {s.position || 'N/A'}</div>
+                        </div>
+                        <div className="mt-3 flex gap-3 text-sm border-t border-gray-100 dark:border-gray-700 pt-2">
+                          <Link href={`/staff/${s.staffId}`} className="text-kmuGreen hover:underline font-medium">View</Link>
+                          <button onClick={() => handleDelete(s.staffId)} disabled={loading} className="text-red-600 hover:text-red-800 font-medium disabled:opacity-50">Delete</button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
 
             {/* Pagination */}

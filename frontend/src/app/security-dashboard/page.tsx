@@ -269,7 +269,7 @@ export default function SecurityDashboard() {
                 </div>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-xs">
+                <table className="w-full text-xs hidden md:table">
                   <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-400 font-bold uppercase tracking-widest">
                     <tr>
                       <th className="px-6 py-4 text-left">Student</th>
@@ -299,6 +299,28 @@ export default function SecurityDashboard() {
                     ))}
                   </tbody>
                 </table>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden divide-y divide-gray-100 dark:divide-gray-800 p-2">
+                  {filteredCases.slice(0, 10).map((c, i) => (
+                    <div key={i} className="p-4 bg-white dark:bg-gray-900 rounded-lg mb-2 shadow-sm border border-gray-100 dark:border-gray-800 cursor-pointer" onClick={() => router.push(`/cases/${c._id}`)}>
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <div className="font-bold text-gray-800 dark:text-gray-200">{c.student?.fullName || 'Anonymous'}</div>
+                          <div className="text-[10px] text-gray-500">{c.student?.studentId}</div>
+                        </div>
+                        <div className="text-gray-400 font-mono text-[10px]">{new Date(c.incidentDate).toLocaleDateString()}</div>
+                      </div>
+                      <div className="text-gray-600 dark:text-gray-400 font-medium uppercase text-xs mt-2">{c.offenseType}</div>
+                      
+                      <div className="mt-4 flex justify-end gap-2 border-t border-gray-50 dark:border-gray-800/50 pt-3">
+                        <button onClick={(e) => { e.stopPropagation(); setPrintCase(c); setPrintType('docket'); setTimeout(() => window.print(), 500); }} className="p-1.5 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700/80 rounded text-gray-500 transition shadow-sm text-[10px] font-bold uppercase flex items-center gap-1">🖨️ Docket</button>
+                        <button onClick={(e) => { e.stopPropagation(); setPrintCase(c); setPrintType('statement'); setTimeout(() => window.print(), 500); }} className="p-1.5 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700/80 rounded text-gray-500 transition shadow-sm text-[10px] font-bold uppercase flex items-center gap-1">📜 Statement</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
               </div>
             </div>
 
