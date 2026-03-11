@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { getProfile, updateProfile } from '../../../utils/api';
 import Notification, { useNotification } from '../../../components/Notification';
 import Link from 'next/link';
+import { Lock } from 'lucide-react';
 
 export default function StudentProfilePage() {
     const { user, token, loading: authLoading, changePassword } = useAuth();
@@ -59,7 +60,7 @@ export default function StudentProfilePage() {
             const data = await getProfile();
             setProfile(data);
         } catch (err: any) {
-            showNotification(err.message || 'Synchronization failure', 'error');
+            showNotification('error', err.message || 'Synchronization failure');
         }
     }
 
@@ -75,7 +76,7 @@ export default function StudentProfilePage() {
                 showNotification('error', 'Credential update failed');
             }
         } catch (err: any) {
-            showNotification(err.message || 'Credential update failed', 'error');
+            showNotification('error', err.message || 'Credential update failed');
         }
     }
 
@@ -90,7 +91,7 @@ export default function StudentProfilePage() {
     const studentData = profile || user;
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-24 md:pb-12">
             <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                 <div className="animate-in fade-in duration-300 space-y-6">
 
@@ -170,7 +171,8 @@ export default function StudentProfilePage() {
                                     <input type="password" placeholder="••••••••" className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg px-4 py-2.5 text-xs font-bold focus:ring-2 focus:ring-red-500 outline-none transition" value={newPassword} onChange={e => setNewPassword(e.target.value)} required />
                                 </div>
                                 <button type="submit" className="px-8 py-3 bg-red-600 text-white font-bold text-[10px] rounded-lg hover:bg-red-700 transition-all uppercase tracking-widest shadow-sm flex items-center gap-2">
-                                    🔒 Update Password
+                                    <Lock className="w-4 h-4" />
+                                    Update Password
                                 </button>
                             </form>
 

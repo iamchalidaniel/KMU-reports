@@ -7,30 +7,23 @@ import { useTheme } from '../context/ThemeContext';
 import { usePathname } from 'next/navigation';
 import { useSidebar } from '../context/SidebarContext';
 import { API_BASE_URL } from '../config/constants';
+import {
+  LayoutDashboard,
+  FileText,
+  FolderOpen,
+  Users,
+  PlusCircle,
+  HelpCircle,
+  Shield,
+  UserCog,
+  ClipboardList,
+  Wrench,
+  Home,
+  Zap,
+  User,
+} from 'lucide-react';
 
-// Optimized nav icons - using simple emojis for faster loading
-const navIcons = {
-  dashboard: '🏠',
-  cases: '📄',
-  reports: '🧾',
-  evidence: '📎',
-  students: '👤',
-  newcase: '➕',
-  logout: '🚪',
-  admin: '🛡️',
-  academic: '🎓',
-  dean: '👨‍🎓',
-  audit: '🔍',
-  users: '👥',
-  profile: '👤',
-  help: '❓',
-  security: '🔒',
-  assistant: '👨‍💼',
-  secretary: '📋',
-  maintenance: '🔧',
-  hall: '🏠',
-  electrician: '⚡',
-};
+type NavItem = { icon: React.ComponentType<{ className?: string }>; label: string; path: string };
 
 export default function Sidebar() {
   const [isResizing, setIsResizing] = useState(false);
@@ -82,85 +75,83 @@ export default function Sidebar() {
   const linkActive =
     'bg-kmuGreen text-white shadow dark:bg-kmuGreen dark:text-white';
 
-  // Role-based navs - Removed duplicates (Profile, Settings, Logout)
-  let navLinks = [];
+  // Role-based navs
+  let navLinks: NavItem[] = [];
   if (user?.role === 'admin') {
     navLinks = [
-      { icon: navIcons.admin, label: 'Administrator Dashboard', path: '/admin' },
-      { icon: navIcons.cases, label: 'Cases', path: '/cases' },
-      { icon: navIcons.reports, label: 'Student Reports', path: '/reports' },
-      { icon: navIcons.students, label: 'Students', path: '/students' },
-      { icon: navIcons.maintenance, label: 'Maintenance', path: '/maintenance' },
-      { icon: navIcons.evidence, label: 'Evidence', path: '/evidence' },
-      { icon: navIcons.newcase, label: 'New Case', path: '/cases/new' },
-      { icon: navIcons.help, label: 'Help', path: '/help' },
+      { icon: Shield, label: 'Administrator Dashboard', path: '/admin' },
+      { icon: FolderOpen, label: 'Cases', path: '/cases' },
+      { icon: FileText, label: 'Student Reports', path: '/reports' },
+      { icon: Users, label: 'Students', path: '/students' },
+      { icon: Wrench, label: 'Maintenance', path: '/maintenance' },
+      { icon: ClipboardList, label: 'Evidence', path: '/evidence' },
+      { icon: PlusCircle, label: 'New Case', path: '/cases/new' },
+      { icon: HelpCircle, label: 'Help', path: '/help' },
     ];
   } else if (user?.role === 'security_officer') {
     navLinks = [
-      { icon: navIcons.dashboard, label: 'Home', path: '/security-dashboard' },
-      { icon: navIcons.cases, label: 'Cases', path: '/cases' },
-      { icon: navIcons.evidence, label: 'Evidence', path: '/evidence' },
-      { icon: navIcons.students, label: 'Students', path: '/students' },
-      { icon: navIcons.newcase, label: 'New Case', path: '/cases/new' },
-      { icon: navIcons.help, label: 'Help', path: '/help' },
+      { icon: Home, label: 'Home', path: '/security-dashboard' },
+      { icon: FolderOpen, label: 'Cases', path: '/cases' },
+      { icon: ClipboardList, label: 'Evidence', path: '/evidence' },
+      { icon: Users, label: 'Students', path: '/students' },
+      { icon: PlusCircle, label: 'New Case', path: '/cases/new' },
+      { icon: HelpCircle, label: 'Help', path: '/help' },
     ];
   } else if (user?.role === 'chief_security_officer') {
     navLinks = [
-      { icon: navIcons.security, label: 'Home', path: '/chief-security-officer-dashboard' },
-      { icon: navIcons.cases, label: 'Cases', path: '/cases' },
-      { icon: navIcons.reports, label: 'Student Reports', path: '/reports' },
-      { icon: navIcons.students, label: 'Students', path: '/students' },
-      { icon: navIcons.evidence, label: 'Evidence', path: '/evidence' },
-      { icon: navIcons.newcase, label: 'New Case', path: '/cases/new' },
-      { icon: navIcons.help, label: 'Help', path: '/help' },
+      { icon: Shield, label: 'Home', path: '/chief-security-officer-dashboard' },
+      { icon: FolderOpen, label: 'Cases', path: '/cases' },
+      { icon: FileText, label: 'Student Reports', path: '/reports' },
+      { icon: Users, label: 'Students', path: '/students' },
+      { icon: ClipboardList, label: 'Evidence', path: '/evidence' },
+      { icon: PlusCircle, label: 'New Case', path: '/cases/new' },
+      { icon: HelpCircle, label: 'Help', path: '/help' },
     ];
   } else if (user?.role === 'dean_of_students') {
     navLinks = [
-      { icon: navIcons.dean, label: 'Home', path: '/dean-of-students-dashboard' },
-      { icon: navIcons.students, label: 'Student Registry', path: '/dean-of-students-dashboard/students' },
-      { icon: navIcons.cases, label: 'Behavioral Ledger', path: '/dean-of-students-dashboard/cases' },
-      { icon: navIcons.reports, label: 'Reports & Analytics', path: '/dean-of-students-dashboard/reports' },
-      { icon: navIcons.help, label: 'Help', path: '/help' },
+      { icon: LayoutDashboard, label: 'Home', path: '/dean-of-students-dashboard' },
+      { icon: Users, label: 'Student Registry', path: '/dean-of-students-dashboard/students' },
+      { icon: FolderOpen, label: 'Behavioral Ledger', path: '/dean-of-students-dashboard/cases' },
+      { icon: FileText, label: 'Reports & Analytics', path: '/dean-of-students-dashboard/reports' },
+      { icon: HelpCircle, label: 'Help', path: '/help' },
     ];
   } else if (user?.role === 'assistant_dean') {
     navLinks = [
-      { icon: navIcons.assistant, label: 'Home', path: '/assistant-dean-dashboard' },
-      { icon: navIcons.students, label: 'Student Registry', path: '/assistant-dean-dashboard/students' },
-      { icon: navIcons.cases, label: 'Behavioral Ledger', path: '/assistant-dean-dashboard/cases' },
-      { icon: navIcons.reports, label: 'Reports', path: '/reports' },
-      { icon: navIcons.help, label: 'Help', path: '/help' },
+      { icon: UserCog, label: 'Home', path: '/assistant-dean-dashboard' },
+      { icon: Users, label: 'Student Registry', path: '/assistant-dean-dashboard/students' },
+      { icon: FolderOpen, label: 'Behavioral Ledger', path: '/assistant-dean-dashboard/cases' },
+      { icon: FileText, label: 'Reports', path: '/reports' },
+      { icon: HelpCircle, label: 'Help', path: '/help' },
     ];
   } else if (user?.role === 'secretary') {
     navLinks = [
-      { icon: navIcons.secretary, label: 'Home', path: '/secretary-dashboard' },
-      { icon: navIcons.students, label: 'Students', path: '/students' },
-      { icon: navIcons.cases, label: 'Cases', path: '/cases' },
-      { icon: navIcons.reports, label: 'Reports', path: '/reports' },
-      { icon: navIcons.help, label: 'Help', path: '/help' },
+      { icon: ClipboardList, label: 'Home', path: '/secretary-dashboard' },
+      { icon: Users, label: 'Students', path: '/students' },
+      { icon: FolderOpen, label: 'Cases', path: '/cases' },
+      { icon: FileText, label: 'Reports', path: '/reports' },
+      { icon: HelpCircle, label: 'Help', path: '/help' },
     ];
   } else if (user?.role === 'hall_warden') {
     navLinks = [
-      { icon: navIcons.hall, label: 'Command Center', path: '/hall-warden-dashboard' },
-      { icon: navIcons.maintenance, label: 'Maintenance Ledger', path: '/hall-warden-dashboard/maintenance' },
-      { icon: navIcons.help, label: 'Help', path: '/help' },
+      { icon: Home, label: 'Command Center', path: '/hall-warden-dashboard' },
+      { icon: Wrench, label: 'Maintenance Ledger', path: '/hall-warden-dashboard/maintenance' },
+      { icon: HelpCircle, label: 'Help', path: '/help' },
     ];
   } else if (user?.role === 'electrician') {
     navLinks = [
-      { icon: navIcons.electrician, label: 'Technical Hub', path: '/electrician-dashboard' },
-      { icon: navIcons.maintenance, label: 'Task Ledger', path: '/electrician-dashboard/tasks' },
-      { icon: navIcons.help, label: 'Help', path: '/help' },
+      { icon: Zap, label: 'Technical Hub', path: '/electrician-dashboard' },
+      { icon: Wrench, label: 'Task Ledger', path: '/electrician-dashboard/tasks' },
+      { icon: HelpCircle, label: 'Help', path: '/help' },
     ];
   } else if (user?.role === 'student') {
     navLinks = [
-      { icon: navIcons.dashboard, label: 'Dashboard', path: '/student-dashboard' },
-      { icon: navIcons.reports, label: 'My Statements', path: '/student-dashboard/statements' },
-      { icon: navIcons.cases, label: 'My Cases', path: '/student-dashboard/cases' },
-      { icon: navIcons.secretary, label: 'Appeals', path: '/student-dashboard/appeals' },
-      { icon: navIcons.profile, label: 'Profile & Records', path: '/student-dashboard/profile' },
-      { icon: navIcons.help, label: 'Help', path: '/help' },
+      { icon: LayoutDashboard, label: 'Dashboard', path: '/student-dashboard' },
+      { icon: FolderOpen, label: 'My Records', path: '/student-dashboard/records' },
+      { icon: User, label: 'Profile', path: '/student-dashboard/profile' },
+      { icon: HelpCircle, label: 'Help', path: '/help' },
     ];
   } else {
-    navLinks = [{ icon: navIcons.help, label: 'Help', path: '/help' }];
+    navLinks = [{ icon: HelpCircle, label: 'Help', path: '/help' }];
   }
 
   // Resize functionality
@@ -232,23 +223,25 @@ export default function Sidebar() {
           />
         </div>
         <nav className="flex flex-col gap-0.5 mt-6 px-4 pb-6 flex-1 justify-start overflow-y-auto">
-          {navLinks.map(link => (
-            <Link
-              key={link.path + link.label}
-              href={link.path}
-              className={
-                `${linkBase} ${pathname === link.path ? linkActive : ''} text-gray-900 dark:text-white relative`}
-              onClick={() => setOpen(false)} // Close sidebar on mobile when clicking a link
-            >
-              <span className="text-xl">{link.icon}</span>
-              <span>{link.label}</span>
-              {link.label === 'Student Reports' && reportCount > 0 && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 bg-red-600 text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full animate-pulse shadow-sm">
-                  {reportCount > 9 ? '9+' : reportCount}
-                </span>
-              )}
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const Icon = link.icon;
+            return (
+              <Link
+                key={link.path + link.label}
+                href={link.path}
+                className={`${linkBase} ${pathname === link.path ? linkActive : ''} text-gray-900 dark:text-white relative`}
+                onClick={() => setOpen(false)}
+              >
+                <Icon className="w-5 h-5 shrink-0" />
+                <span>{link.label}</span>
+                {link.label === 'Student Reports' && reportCount > 0 && (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 bg-red-600 text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full animate-pulse shadow-sm">
+                    {reportCount > 9 ? '9+' : reportCount}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Resize handle - only visible on desktop */}

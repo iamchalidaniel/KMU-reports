@@ -7,6 +7,18 @@ import { API_BASE_URL } from '../../config/constants';
 import { authHeaders, getProfile } from '../../utils/api';
 import Notification, { useNotification } from '../../components/Notification';
 import Link from 'next/link';
+import {
+  Home,
+  FileText,
+  FolderOpen,
+  Scale,
+  AlertTriangle,
+  Wrench,
+  User,
+  Loader2,
+  ChevronRight,
+  CheckCircle2,
+} from 'lucide-react';
 
 interface Report {
   _id: string;
@@ -38,6 +50,13 @@ interface Appeal {
   adminResponse?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+function getTimeBasedGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
 }
 
 export default function StudentDashboardPage() {
@@ -97,7 +116,7 @@ export default function StudentDashboardPage() {
       const [reportsRes, casesRes, appealsRes] = await Promise.all([
         fetch(`${API_BASE_URL}/student-reports`, { headers: { ...authHeaders() } }),
         fetch(`${API_BASE_URL}/cases?studentId=${user?.studentId}`, { headers: { ...authHeaders() } }),
-        fetch(`${API_BASE_URL}/api/appeals?studentId=${user?.studentId}`, { headers: { ...authHeaders() } })
+        fetch(`${API_BASE_URL}/api/appeals?studentId=${user?.studentId}`, { headers: { ...authHeaders() } }),
       ]);
 
       if (reportsRes.ok) {
@@ -122,7 +141,7 @@ export default function StudentDashboardPage() {
   if (isCheckingAuth || (authLoading && !user)) {
     return (
       <div className="flex items-center justify-center min-h-screen text-kmuGreen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-kmuGreen"></div>
+        <Loader2 className="w-12 h-12 animate-spin" />
       </div>
     );
   }
@@ -132,105 +151,227 @@ export default function StudentDashboardPage() {
   }
 
   const studentData = profile || user;
+  const pendingAppeals = appeals.filter((a) => a.status === 'Pending');
+  const openCases = cases.filter((c) => c.status === 'Open' || c.status === 'In Progress');
+  const needsAttention = pendingAppeals.length > 0 || openCases.length > 0;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 text-sm">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-24 md:pb-12 text-sm">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="animate-in fade-in duration-300 space-y-6">
+          {/* Needs attention strip */}
+          {needsAttention && (
+            <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
+                <AlertTriangle className="w-5 h-5 shrink-0" />
+                <span className="text-sm font-medium">
+                  {pendingAppeals.length > 0 && openCases.length > 0
+                    ? `${pendingAppeals.length} appeal(s) pending · ${openCases.length} case(s) open`
+                    : pendingAppeals.length > 0
+                      ? `${pendingAppeals.length} appeal(s) pending review`
+                      : `${openCases.length} case(s) in progress`}
+                </span>
+              </div>
+              <Link
+                href="/student-dashboard/records"
+                className="inline-flex items-center gap-1 text-sm font-semibold text-amber-700 dark:text-amber-300 hover:underline"
+              >
+                View records
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
+          )}
 
-          {/* Student Welcome Header */}
+          {/* Welcome header */}
           <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 relative overflow-hidden">
             <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
-              <div className="w-16 h-16 rounded-xl bg-kmuGreen flex items-center justify-center text-white font-bold text-2xl shadow-md">
-                {studentData.name ? studentData.name.charAt(0).toUpperCase() : studentData.username.charAt(0).toUpperCase()}
+              <div className="w-16 h-16 rounded-xl bg-kmuGreen flex items-center justify-center text-white font-bold text-2xl shadow-md shrink-0">
+                {(studentData.name || studentData.username || 'S').charAt(0).toUpperCase()}
               </div>
               <div className="text-center md:text-left flex-1">
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Welcome, {studentData.fullName || studentData.name || 'Student'}</h1>
-                <p className="text-xs text-gray-500 font-medium mt-1 uppercase tracking-wide">{studentData.program} • Year {studentData.yearOfStudy}</p>
-
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
+                  {getTimeBasedGreeting()}, {studentData.fullName || studentData.name || 'Student'}
+                </h1>
+                <p className="text-xs text-gray-500 font-medium mt-1 uppercase tracking-wide">
+                  {studentData.program || '—'} · Year {studentData.yearOfStudy ?? '—'}
+                </p>
                 <div className="flex flex-wrap gap-2 mt-4 justify-center md:justify-start">
-                  <Link href="/student-dashboard/profile" className="bg-kmuGreen hover:bg-kmuGreen-dark text-white px-4 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition shadow-sm">
+                  <Link
+                    href="/student-dashboard/profile"
+                    className="inline-flex items-center gap-2 bg-kmuGreen hover:bg-kmuGreen-dark text-white px-4 py-2 rounded-lg font-medium text-xs uppercase tracking-wider transition shadow-sm"
+                  >
+                    <User className="w-4 h-4" />
                     Profile
                   </Link>
-                  <Link href="/student-dashboard/statements" className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-4 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-gray-200 dark:hover:bg-gray-700 transition-all border border-gray-200 dark:border-gray-700">
-                    My Statements
+                  <Link
+                    href="/student-dashboard/records"
+                    className="inline-flex items-center gap-2 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-4 py-2 rounded-lg font-medium text-xs uppercase tracking-wider hover:bg-gray-200 dark:hover:bg-gray-700 transition-all border border-gray-200 dark:border-gray-700"
+                  >
+                    <FolderOpen className="w-4 h-4" />
+                    My Records
                   </Link>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Overview Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <StatCard title="Cases" value={cases.length} color="red" path="/student-dashboard/cases" />
-            <StatCard title="Statements" value={reports.length} color="green" path="/student-dashboard/statements" />
-            <StatCard title="Appeals" value={appeals.filter(a => a.status === 'Pending').length} color="orange" path="/student-dashboard/appeals" />
-          </div>
+          {/* Overview stats */}
+          {loadingStats ? (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-5 animate-pulse"
+                >
+                  <div className="h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded mb-3" />
+                  <div className="h-8 w-12 bg-gray-200 dark:bg-gray-700 rounded" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <StatCard
+                title="Cases"
+                value={cases.length}
+                color="red"
+                path="/student-dashboard/records?tab=cases"
+                icon={FolderOpen}
+              />
+              <StatCard
+                title="Statements"
+                value={reports.length}
+                color="green"
+                path="/student-dashboard/records?tab=statements"
+                icon={FileText}
+              />
+              <StatCard
+                title="Appeals"
+                value={pendingAppeals.length}
+                color="orange"
+                path="/student-dashboard/records?tab=appeals"
+                icon={Scale}
+              />
+            </div>
+          )}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Quick Actions */}
+            {/* Quick actions */}
             <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800">
-              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-6">Quick Actions</h3>
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-6">Quick Actions</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Link href="/student-dashboard/report-incident" className="flex items-center gap-4 p-4 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all group">
-                  <div className="w-10 h-10 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-600">🚨</div>
-                  <div>
-                    <div className="font-bold text-xs uppercase tracking-tight group-hover:text-kmuGreen">Report Incident</div>
-                    <div className="text-[10px] text-gray-500">Log a security matter</div>
+                <Link
+                  href="/student-dashboard/report-incident"
+                  className="flex items-center gap-4 p-4 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:border-kmuGreen/30 transition-all group"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-600 shrink-0">
+                    <AlertTriangle className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-semibold text-sm text-gray-900 dark:text-white group-hover:text-kmuGreen transition-colors">
+                      Report Incident
+                    </div>
+                    <div className="text-xs text-gray-500">Log a security matter</div>
                   </div>
                 </Link>
-                <Link href="/student-dashboard/request-repair" className="flex items-center gap-4 p-4 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all group">
-                  <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600">🛠️</div>
-                  <div>
-                    <div className="font-bold text-xs uppercase tracking-tight group-hover:text-kmuGreen">Request Repair</div>
-                    <div className="text-[10px] text-gray-500">Maintenance & Facilities</div>
+                <Link
+                  href="/student-dashboard/request-repair"
+                  className="flex items-center gap-4 p-4 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:border-kmuGreen/30 transition-all group"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600 shrink-0">
+                    <Wrench className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-semibold text-sm text-gray-900 dark:text-white group-hover:text-kmuGreen transition-colors">
+                      Request Repair
+                    </div>
+                    <div className="text-xs text-gray-500">Maintenance & facilities</div>
                   </div>
                 </Link>
               </div>
             </div>
 
-            {/* Account Status Card */}
-            <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex items-center justify-between">
+            {/* Status card */}
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex items-center justify-between flex-wrap gap-4">
               <div>
-                <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Student Status</h3>
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Student Status</h3>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                  <div className="text-xl font-black text-gray-900 dark:text-white tracking-widest uppercase">{studentData.status || 'ACTIVE'}</div>
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-xl font-bold text-gray-900 dark:text-white uppercase tracking-wide">
+                    {studentData.status || 'ACTIVE'}
+                  </span>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Registration</div>
-                <div className="font-mono text-xs font-bold text-gray-600 dark:text-gray-400">{studentData.studentId}</div>
+                <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Registration</div>
+                <div className="font-mono text-sm font-semibold text-gray-600 dark:text-gray-400">
+                  {studentData.studentId || '—'}
+                </div>
               </div>
             </div>
           </div>
 
+          {/* Empty state hint when no activity */}
+          {!loadingStats && reports.length === 0 && cases.length === 0 && appeals.length === 0 && (
+            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-8 text-center">
+              <CheckCircle2 className="w-12 h-12 text-kmuGreen mx-auto mb-3" />
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1">You&apos;re all set</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                No statements, cases, or appeals on record. Use the actions above to report an incident or request a repair.
+              </p>
+              <Link
+                href="/student-dashboard/report-incident"
+                className="inline-flex items-center gap-2 bg-kmuGreen text-white px-5 py-2.5 rounded-lg font-medium text-sm hover:bg-kmuGreen-dark transition"
+              >
+                <AlertTriangle className="w-4 h-4" />
+                Report incident
+              </Link>
+            </div>
+          )}
         </div>
       </div>
 
       {notification?.isVisible && (
-        <Notification type={notification.type} message={notification.message} isVisible={notification.isVisible} onClose={hideNotification} />
+        <Notification
+          type={notification.type}
+          message={notification.message}
+          isVisible={notification.isVisible}
+          onClose={hideNotification}
+        />
       )}
     </div>
   );
 }
 
-function StatCard({ title, value, color, path, isStatus }: any) {
-  const colors: any = {
-    green: 'border-kmuGreen dark:border-kmuGreen-light text-kmuGreen',
-    red: 'border-red-500 dark:border-red-400 text-red-600',
-    orange: 'border-orange-500 dark:border-orange-400 text-orange-600',
-    emerald: 'border-emerald-500 dark:border-emerald-400 text-emerald-600'
+function StatCard({
+  title,
+  value,
+  color,
+  path,
+  icon: Icon,
+}: {
+  title: string;
+  value: number;
+  color: string;
+  path: string;
+  icon: typeof FileText;
+}) {
+  const colors: Record<string, string> = {
+    green: 'border-l-kmuGreen text-kmuGreen',
+    red: 'border-l-red-500 dark:border-l-red-400 text-red-600 dark:text-red-400',
+    orange: 'border-l-orange-500 dark:border-l-orange-400 text-orange-600 dark:text-orange-400',
   };
 
-  const CardContent = (
-    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-5 transition-all h-full ${path ? 'hover:shadow-md hover:scale-[1.01] cursor-pointer' : ''} ${colors[color]}`}>
-      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">{title}</div>
-      <div className={`text-xl font-bold tracking-tight ${isStatus ? 'truncate' : ''}`}>
-        {value}
+  return (
+    <Link href={path} className="block h-full">
+      <div
+        className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border-l-4 p-5 transition-all h-full hover:shadow-md hover:scale-[1.01] cursor-pointer ${colors[color] || ''}`}
+      >
+        <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+          {Icon && <Icon className="w-3.5 h-3.5" />}
+          {title}
+        </div>
+        <div className="text-xl font-bold tracking-tight tabular-nums">{value}</div>
       </div>
-    </div>
+    </Link>
   );
-
-  return path ? <Link href={path}>{CardContent}</Link> : CardContent;
 }

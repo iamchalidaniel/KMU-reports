@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Notification, { useNotification } from '../../../components/Notification';
 import IncidentReportForm from '../../../components/IncidentReportForm';
 import Link from 'next/link';
+import { X } from 'lucide-react';
 
 export default function ReportIncidentPage() {
     const { user, token, loading: authLoading } = useAuth();
@@ -23,15 +24,15 @@ export default function ReportIncidentPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-12 text-sm">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-24 md:pb-12 text-sm">
             <div className="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
                 <div className="mb-8 flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Report Incident</h1>
                         <p className="text-gray-500 mt-1">Submit a formal incident report to university security.</p>
                     </div>
-                    <Link href="/student-dashboard" className="text-gray-400 hover:text-gray-600 transition-colors">
-                        <span className="text-xl">✕</span>
+                    <Link href="/student-dashboard" className="p-1 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Close">
+                        <X className="w-5 h-5" />
                     </Link>
                 </div>
 

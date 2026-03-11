@@ -23,24 +23,6 @@ import clsx from 'clsx';
 import { API_BASE_URL } from '../config/constants';
 import { onSyncError, offSyncError } from '../hooks/useSyncManager';
 
-// Optimized nav icons - using simple emojis for faster loading
-const navIcons = {
-  dashboard: '🏠',
-  cases: '📄',
-  reports: '🧾',
-  evidence: '📎',
-  students: '👤',
-  newcase: '➕',
-  logout: '🚪',
-  admin: '🛡️',
-  academic: '🎓',
-  dean: '👨‍🎓',
-  audit: '🔍',
-  users: '👥',
-  profile: '👤',
-  help: '❓',
-};
-
 // Loading fallback component
 const LoadingFallback = () => (
   <div className="flex items-center justify-center p-4">
@@ -48,8 +30,9 @@ const LoadingFallback = () => (
   </div>
 );
 
-// Lazy load Sidebar component
+// Lazy load Sidebar and StudentBottomNav
 const Sidebar = lazy(() => import('../components/Sidebar'));
+const StudentBottomNavWrapper = lazy(() => import('../components/StudentBottomNavWrapper'));
 
 // Old TopNavbar removed in favor of lazy loaded Navbar component
 
@@ -98,6 +81,11 @@ function AppContent({ isLogin, isPublic, children }: { isLogin: boolean; isPubli
             {children}
           </Suspense>
         </main>
+        {shouldShowNav && (
+          <Suspense fallback={null}>
+            <StudentBottomNavWrapper />
+          </Suspense>
+        )}
       </div>
     </div>
   );
