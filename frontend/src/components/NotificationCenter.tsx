@@ -10,6 +10,7 @@ import {
   Archive,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export interface Notification {
   id: string;
@@ -80,9 +81,16 @@ export default function NotificationCenter({
         )}
       </button>
 
-      {isOpen && (
-        <div className="absolute right-0 mt-2 w-96 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 z-50 max-h-96 overflow-hidden flex flex-col animate-in slide-in-from-top duration-200">
-          {/* Header */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ type: "spring", duration: 0.3, bounce: 0.2 }}
+            className="absolute right-0 mt-2 w-96 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 z-50 max-h-96 overflow-hidden flex flex-col"
+          >
+            {/* Header */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between sticky top-0 bg-white dark:bg-gray-900">
             <h3 className="font-bold text-gray-900 dark:text-white">Notifications</h3>
             <div className="flex items-center gap-2">
@@ -112,7 +120,8 @@ export default function NotificationCenter({
               </div>
             ) : (
               <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                {notifications.map((notification) => {
+                <AnimatePresence initial={false}>
+                  {notifications.map((notification) => {
                   const Icon = getIcon(notification.type);
                   const timestamp =
                     typeof notification.timestamp === 'string'
@@ -120,8 +129,20 @@ export default function NotificationCenter({
                       : notification.timestamp;
 
                   return (
-                    <div
+                    <motion.div
+                      layout
                       key={notification.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 100, transition: { duration: 0.2 } }}
+                      drag={onDismiss ? "x" : false}
+                      dragConstraints={{ left: 0, right: 0 }}
+                      dragElastic={0.4}
+                      onDragEnd={(e: any, { offset, velocity }: any) => {
+                        if (offset.x > 80 || velocity.x > 400) {
+                          onDismiss?.(notification.id);
+                        }
+                      }}
                       className={`p-4 border-l-4 ${getColor(notification.type)} ${
                         !notification.read ? 'bg-opacity-80' : 'bg-opacity-30'
                       } cursor-pointer hover:bg-opacity-100 transition`}
@@ -159,9 +180,10 @@ export default function NotificationCenter({
                           </button>
                         )}
                       </div>
-                    </div>
+                    </motion.div>
                   );
                 })}
+                </AnimatePresence>
               </div>
             )}
           </div>
@@ -175,15 +197,21 @@ export default function NotificationCenter({
               </button>
             </div>
           )}
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
 
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40"
+            onClick={() => setIsOpen(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

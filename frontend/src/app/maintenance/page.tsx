@@ -134,6 +134,10 @@ export default function AdminMaintenancePage() {
     }
 
     async function updateStatus(reportId: string, newStatus: string) {
+        // Optimistic UI Update
+        const previousReports = [...reports];
+        setReports(reports.map(r => (r._id === reportId || r.id === reportId) ? { ...r, status: newStatus as any } : r));
+
         try {
             const res = await fetch(`${API_BASE_URL}/api/maintenance/${reportId}`, {
                 method: 'PUT',
@@ -147,11 +151,19 @@ export default function AdminMaintenancePage() {
             showNotification('success', 'Status updated successfully');
             fetchReports();
         } catch (err: any) {
+            setReports(previousReports);
             showNotification('error', err.message || 'Failed to update status');
         }
     }
 
     async function assignToElectrician(reportId: string, electricianId: string, electricianName: string) {
+        const previousReports = [...reports];
+        setReports(reports.map(r => (r._id === reportId || r.id === reportId) ? {
+            ...r,
+            status: 'Assigned',
+            assigned_to: { staff_id: electricianId, name: electricianName, role: 'electrician' }
+        } : r));
+
         try {
             const res = await fetch(`${API_BASE_URL}/api/maintenance/${reportId}`, {
                 method: 'PUT',
@@ -172,6 +184,7 @@ export default function AdminMaintenancePage() {
             showNotification('success', `Assigned to ${electricianName}`);
             fetchReports();
         } catch (err: any) {
+            setReports(previousReports);
             showNotification('error', err.message || 'Failed to assign report');
         }
     }

@@ -109,6 +109,9 @@ export default function ElectricianTasks() {
     }, [search, statusFilter, reports]);
 
     async function updateStatus(reportId: string, newStatus: string) {
+        const previousReports = [...reports];
+        setReports(reports.map(r => (r._id === reportId || r.id === reportId) ? { ...r, status: newStatus as any } : r));
+
         try {
             const res = await fetch(`${API_BASE_URL}/api/maintenance/${reportId}`, {
                 method: 'PUT',
@@ -118,8 +121,8 @@ export default function ElectricianTasks() {
             if (!res.ok) throw new Error('Failed to update status');
 
             showNotification('success', 'Status updated successfully');
-            setReports(reports.map(r => (r._id === reportId || r.id === reportId) ? { ...r, status: newStatus as any } : r));
         } catch (err: any) {
+            setReports(previousReports);
             showNotification('error', 'Update failed');
         }
     }

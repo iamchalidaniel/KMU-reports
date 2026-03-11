@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { usePathname } from 'next/navigation';
-import { useSidebar } from '../context/SidebarContext';
+import { useUIStore } from '../store/uiStore';
 import { API_BASE_URL } from '../config/constants';
 import {
   LayoutDashboard,
@@ -29,7 +29,12 @@ type NavItem = { icon: React.ComponentType<{ className?: string }>; label: strin
 export default function Sidebar() {
   const [isResizing, setIsResizing] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const { sidebarWidth, setSidebarWidth, isSidebarOpen: open, setIsSidebarOpen: setOpen } = useSidebar();
+  
+  const sidebarWidth = useUIStore((state) => state.sidebarWidth);
+  const setSidebarWidth = useUIStore((state) => state.setSidebarWidth);
+  const open = useUIStore((state) => state.isSidebarOpen);
+  const setOpen = useUIStore((state) => state.setIsSidebarOpen);
+
   const { user, token, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();

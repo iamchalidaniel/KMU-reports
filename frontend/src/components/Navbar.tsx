@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useSidebar } from '../context/SidebarContext';
+import { useUIStore } from '../store/uiStore';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import DarkModeToggle from './DarkModeToggle';
@@ -12,7 +12,8 @@ import { Menu, ChevronDown, Settings, LogOut, AlertTriangle, Wrench } from 'luci
 
 export default function Navbar() {
     const { user, logout } = useAuth();
-    const { isSidebarOpen, setIsSidebarOpen } = useSidebar();
+    const isSidebarOpen = useUIStore((state) => state.isSidebarOpen);
+    const setIsSidebarOpen = useUIStore((state) => state.setIsSidebarOpen);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [notifications, setNotifications] = useState<any[]>([]);
     const dropdownRef = useRef<HTMLDivElement>(null);

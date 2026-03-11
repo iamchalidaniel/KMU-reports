@@ -1,6 +1,7 @@
 "use client";
 
 import { TrendingDown, TrendingUp, Minus } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface MetricsCardProps {
   label: string;
@@ -44,7 +45,10 @@ export default function MetricsCard({
   };
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
       onClick={onClick}
       className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-5 ${
         onClick ? 'cursor-pointer hover:shadow-md transition' : ''
@@ -72,6 +76,6 @@ export default function MetricsCard({
           </span>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

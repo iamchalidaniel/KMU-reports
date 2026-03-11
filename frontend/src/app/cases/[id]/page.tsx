@@ -106,6 +106,12 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
         setActionLoading(true);
         setActionMessage(null);
 
+        // Optimistic UI Update
+        const previousData = caseData ? { ...caseData } : null;
+        if (caseData) {
+            setCaseData({ ...caseData, status: newStatus });
+        }
+
         try {
             const res = await fetch(`${API_BASE_URL}/cases/${params.id}`, {
                 method: 'PUT',
@@ -122,6 +128,10 @@ export default function CaseDetailsPage({ params }: { params: { id: string } }) 
             setCaseData(updatedCase);
             setActionMessage({ type: 'success', text: `Case updated successfully!` });
         } catch (err: any) {
+            // Revert on error
+            if (previousData) {
+                setCaseData(previousData);
+            }
             setActionMessage({ type: 'error', text: err.message || 'Failed to update case status' });
         } finally {
             setActionLoading(false);

@@ -4,7 +4,8 @@ import { useAuth } from '../../context/AuthContext';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { API_BASE_URL } from '../../config/constants';
-import { authHeaders, getProfile } from '../../utils/api';
+import { getProfile } from '../../utils/api';
+import { useStudentStats } from '../../hooks/useStudentStats';
 import Notification, { useNotification } from '../../components/Notification';
 import Link from 'next/link';
 import {
@@ -70,10 +71,11 @@ export default function StudentDashboardPage() {
 
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [profile, setProfile] = useState<any>(null);
-  const [reports, setReports] = useState<Report[]>([]);
-  const [cases, setCases] = useState<Case[]>([]);
-  const [appeals, setAppeals] = useState<Appeal[]>([]);
-  const [loadingStats, setLoadingStats] = useState(true);
+
+  const { data: statsData, isLoading: loadingStats } = useStudentStats(user?.studentId);
+  const reports = statsData?.reports || [];
+  const cases = statsData?.cases || [];
+  const appeals = statsData?.appeals || [];
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -108,40 +110,6 @@ export default function StudentDashboardPage() {
     }
   }, [token, user]);
 
-  useEffect(() => {
-    if (user?.studentId) {
-      fetchStats();
-    }
-  }, [user?.studentId]);
-
-  const fetchStats = async () => {
-    setLoadingStats(true);
-    try {
-      const [reportsRes, casesRes, appealsRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/student-reports`, { headers: { ...authHeaders() } }),
-        fetch(`${API_BASE_URL}/cases?studentId=${user?.studentId}`, { headers: { ...authHeaders() } }),
-        fetch(`${API_BASE_URL}/api/appeals?studentId=${user?.studentId}`, { headers: { ...authHeaders() } }),
-      ]);
-
-      if (reportsRes.ok) {
-        const data = await reportsRes.json();
-        setReports(data.reports || []);
-      }
-      if (casesRes.ok) {
-        const data = await casesRes.json();
-        setCases(Array.isArray(data) ? data : (data.cases || []));
-      }
-      if (appealsRes.ok) {
-        const data = await appealsRes.json();
-        setAppeals(data.appeals || []);
-      }
-    } catch (err: any) {
-      console.error('Failed to fetch stats:', err);
-    } finally {
-      setLoadingStats(false);
-    }
-  };
-
   if (isCheckingAuth || (authLoading && !user)) {
     return (
       <div className="flex items-center justify-center min-h-screen text-kmuGreen">
@@ -155,8 +123,8 @@ export default function StudentDashboardPage() {
   }
 
   const studentData = profile || user;
-  const pendingAppeals = appeals.filter((a) => a.status === 'Pending');
-  const openCases = cases.filter((c) => c.status === 'Open' || c.status === 'In Progress');
+  const pendingAppeals = appeals.filter((a: Appeal) => a.status === 'Pending');
+  const openCases = cases.filter((c: Case) => c.status === 'Open' || c.status === 'In Progress');
   const needsAttention = pendingAppeals.length > 0 || openCases.length > 0;
 
   return (
@@ -310,7 +278,7 @@ export default function StudentDashboardPage() {
               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-6">Recent Activity</h3>
               <ActivityTimeline
                 activities={[
-                  ...(reports.slice(0, 2).map((r) => ({
+                  ...(reports.slice(0, 2).map((r: Report) => ({
                     id: r._id,
                     type: 'created' as const,
                     title: `Report filed: ${r.offenseType}`,
@@ -318,7 +286,7 @@ export default function StudentDashboardPage() {
                     user: 'You',
                     timestamp: new Date(r.createdAt),
                   }))),
-                  ...(cases.slice(0, 2).map((c) => ({
+                  ...(cases.slice(0, 2).map((c: Case) => ({
                     id: c._id,
                     type: 'changed' as const,
                     title: `Case status: ${c.status}`,

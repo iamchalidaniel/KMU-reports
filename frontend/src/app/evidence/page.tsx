@@ -1,12 +1,14 @@
 "use client";
 import { useAuth } from '../../context/AuthContext';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { API_BASE_URL } from '../../config/constants';
 import { authHeaders } from '../../utils/api';
 import { useOfflineApi } from '../../hooks/useOfflineSync';
 import Notification, { useNotification } from '../../components/Notification';
 import Link from 'next/link';
+import { FolderOpen, ArrowLeft, Search, Filter, Loader2, Download, Eye, FileText, Image as ImageIcon, Video, FileAudio } from 'lucide-react';
+import ImageLoader from '../../components/ImageLoader';
 
 interface Evidence {
   _id?: string;
@@ -217,7 +219,13 @@ export default function EvidencePage() {
                       <div key={id} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-5 hover:shadow-md transition-all group overflow-hidden">
                         <div className="h-40 bg-gray-50 dark:bg-gray-800 rounded-lg mb-4 overflow-hidden border border-gray-100 dark:border-gray-800 flex items-center justify-center relative">
                           {isImg ? (
-                            <img src={fileUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={filename} />
+                            <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden group relative">
+                              <ImageLoader src={fileUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={filename} fill />
+                              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 backdrop-blur-sm">
+                                <button onClick={() => handleDownload(id, filename)} className="bg-white text-black font-bold px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider hover:bg-gray-50 transition">Download</button>
+                                <button onClick={() => handleDelete(id)} className="bg-red-600 text-white font-bold px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider hover:bg-red-700 transition">Purge</button>
+                              </div>
+                            </div>
                           ) : (
                             <span className="text-4xl text-gray-400">📎</span>
                           )}

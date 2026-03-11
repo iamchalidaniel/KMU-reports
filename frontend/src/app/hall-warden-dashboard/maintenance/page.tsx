@@ -108,6 +108,9 @@ export default function HallWardenMaintenance() {
     }, [search, statusFilter, priorityFilter, reports]);
 
     async function updateStatus(reportId: string, newStatus: string) {
+        const previousReports = [...reports];
+        setReports(reports.map(r => (r._id === reportId || r.id === reportId) ? { ...r, status: newStatus as any } : r));
+
         try {
             const res = await fetch(`${API_BASE_URL}/api/maintenance/${reportId}`, {
                 method: 'PUT',
@@ -116,15 +119,19 @@ export default function HallWardenMaintenance() {
             });
             if (res.ok) {
                 showNotification('success', 'Status updated successfully');
-                const updated = reports.map(r => (r._id === reportId || r.id === reportId) ? { ...r, status: newStatus as any } : r);
-                setReports(updated);
+            } else {
+                throw new Error("Failed");
             }
         } catch (err) {
+            setReports(previousReports);
             showNotification('error', 'Update failed');
         }
     }
 
     async function assignToElectrician(reportId: string, electricianId: string, electricianName: string) {
+        const previousReports = [...reports];
+        setReports(reports.map(r => (r._id === reportId || r.id === reportId) ? { ...r, status: 'Assigned' as any, assigned_to: { staff_id: electricianId, name: electricianName, role: 'electrician' } } : r));
+
         try {
             const res = await fetch(`${API_BASE_URL}/api/maintenance/${reportId}`, {
                 method: 'PUT',
@@ -136,10 +143,11 @@ export default function HallWardenMaintenance() {
             });
             if (res.ok) {
                 showNotification('success', 'Assigned to technician');
-                const updated = reports.map(r => (r._id === reportId || r.id === reportId) ? { ...r, status: 'Assigned' as any, assigned_to: { staff_id: electricianId, name: electricianName, role: 'electrician' } } : r);
-                setReports(updated);
+            } else {
+                throw new Error("Failed");
             }
         } catch (err) {
+            setReports(previousReports);
             showNotification('error', 'Assignment failed');
         }
     }

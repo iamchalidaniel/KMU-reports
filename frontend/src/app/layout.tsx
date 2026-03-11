@@ -1,117 +1,11 @@
-"use client";
-
+import React from 'react';
 import '../globals.css';
-import { AuthProvider, useAuth } from '../context/AuthContext';
-import { useState, useEffect, createContext, useContext, Suspense, lazy } from 'react';
-import { usePathname } from 'next/navigation';
-import { ThemeProvider, useTheme } from '../context/ThemeContext';
-import { useRouter } from 'next/navigation';
-import { SyncProvider, useSync } from '../context/SyncContext';
-import { useSyncManager } from '../hooks/useSyncManager';
-import { useOfflineSync } from '../hooks/useOfflineSync';
-import { SidebarProvider, useSidebar } from '../context/SidebarContext';
-
-// Lazy load heavy components
-const SyncManagerClient = lazy(() => import('../components/SyncManagerClient'));
-const ServiceWorkerRegistration = lazy(() => import('../components/ServiceWorkerRegistration'));
-const PreloadProgress = lazy(() => import('../components/PreloadProgress'));
-const CacheStatus = lazy(() => import('../components/CacheStatus'));
-const OfflineIndicator = lazy(() => import('../components/OfflineIndicator'));
-const Navbar = lazy(() => import('../components/Navbar'));
-const SessionExpiryWarning = lazy(() => import('../components/SessionExpiryWarning'));
-
-import clsx from 'clsx';
-import { API_BASE_URL } from '../config/constants';
-import { onSyncError, offSyncError } from '../hooks/useSyncManager';
-
-// Loading fallback component
-const LoadingFallback = () => (
-  <div className="flex items-center justify-center p-4">
-    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-kmuGreen"></div>
-  </div>
-);
-
-// Lazy load Sidebar and StudentBottomNav
-const Sidebar = lazy(() => import('../components/Sidebar'));
-const StudentBottomNavWrapper = lazy(() => import('../components/StudentBottomNavWrapper'));
-
-// Old TopNavbar removed in favor of lazy loaded Navbar component
-
-function AppContent({ isLogin, isPublic, children }: { isLogin: boolean; isPublic: boolean; children: React.ReactNode }) {
-  const { user } = useAuth();
-  const { sidebarWidth } = useSidebar();
-  const [isMobile, setIsMobile] = useState(false);
-  const shouldShowNav = !isLogin && !isPublic && user;
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  return (
-    <div className="flex min-h-screen">
-      {/* Lazy load Sidebar */}
-      {shouldShowNav && (
-        <Suspense fallback={<LoadingFallback />}>
-          <Sidebar />
-        </Suspense>
-      )}
-
-      {/* Main content */}
-      <div
-        className="flex-1 flex flex-col relative"
-        style={{
-          marginLeft: shouldShowNav && !isMobile ? `${sidebarWidth}px` : '0px'
-        }}
-      >
-        {/* Main Navbar */}
-        {shouldShowNav && (
-          <Suspense fallback={<div className="h-14 border-b border-gray-200 dark:border-gray-700" />}>
-            <Navbar />
-          </Suspense>
-        )}
-        <main className={clsx(
-          "flex-1 overflow-x-hidden",
-          shouldShowNav ? "px-2 py-2 md:px-6 md:py-8" : "px-0 py-0"
-        )}>
-          <Suspense fallback={<LoadingFallback />}>
-            {children}
-          </Suspense>
-        </main>
-        {shouldShowNav && (
-          <Suspense fallback={null}>
-            <StudentBottomNavWrapper />
-          </Suspense>
-        )}
-      </div>
-    </div>
-  );
-}
+import ClientProviders from '../components/ClientProviders';
+import AppLayoutWrapper from '../components/AppLayoutWrapper';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const { theme } = useTheme();
-  const isLogin = pathname === "/login";
-  const isSplash = pathname === "/" || pathname === "/splash";
-  const isPublic = isSplash || pathname.startsWith("/home") || pathname.startsWith("/public");
-  const [syncError, setSyncError] = useState<string | null>(null);
-
-  useEffect(() => {
-    onSyncError(handleSyncError);
-    return () => offSyncError(handleSyncError);
-  }, []);
-
-  function handleSyncError(msg: string) {
-    setSyncError(msg);
-    setTimeout(() => setSyncError(null), 5000);
-  }
-
   return (
-    <html lang="en" suppressHydrationWarning className={theme === 'dark' ? 'dark' : ''}>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -131,49 +25,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <title>KMU Reports</title>
       </head>
       <body className="min-h-screen">
-        {syncError && (
-          <div className="fixed top-0 left-0 right-0 bg-red-600 text-white p-3 text-center z-50">
-            {syncError}
-          </div>
-        )}
-
-        <AuthProvider>
-          <SyncProvider>
-            <ThemeProvider>
-              <SidebarProvider>
-                <AppContent isLogin={isLogin} isPublic={isPublic}>
-                  {children}
-                </AppContent>
-
-                {/* Lazy load PWA components */}
-                <Suspense fallback={null}>
-                  <ServiceWorkerRegistration />
-                </Suspense>
-
-                <Suspense fallback={null}>
-                  <PreloadProgress />
-                </Suspense>
-
-                <Suspense fallback={null}>
-                  <CacheStatus />
-                </Suspense>
-
-                <Suspense fallback={null}>
-                  <OfflineIndicator />
-                </Suspense>
-
-                <Suspense fallback={null}>
-                  <SyncManagerClient />
-                </Suspense>
-
-                {/* Session expiry warning modal */}
-                <Suspense fallback={null}>
-                  <SessionExpiryWarning />
-                </Suspense>
-              </SidebarProvider>
-            </ThemeProvider>
-          </SyncProvider>
-        </AuthProvider>
+        <ClientProviders>
+          <AppLayoutWrapper>
+            {children}
+          </AppLayoutWrapper>
+        </ClientProviders>
       </body>
     </html>
   );
