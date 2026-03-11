@@ -168,11 +168,9 @@ export default function StudentsPage() {
           </div>
 
           {/* Metrics Shortcut */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <StatCard title="Total Students" value={total} color="emerald" />
             <StatCard title="Active Programs" value={programs.length} color="teal" />
-            <StatCard title="System Status" value={offlineMode ? "Cached" : "Live"} color="blue" />
-            <StatCard title="Verification" value="Verified" color="indigo" />
           </div>
 
           {/* Central Registry Ledger */}

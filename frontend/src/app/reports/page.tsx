@@ -137,11 +137,10 @@ export default function ReportsPage() {
           </div>
 
           {/* Strategic Metrics Shortcut */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <StatCard title="Total Reports" value={total} color="orange" />
             <StatCard title="Pending Review" value={studentReports.filter(r => r.status === 'Pending').length} color="amber" />
             <StatCard title="High Priority" value={studentReports.filter(r => r.severity === 'High').length} color="red" />
-            <StatCard title="System Status" value="Live" color="blue" />
           </div>
 
           {/* Central Reports Ledger */}

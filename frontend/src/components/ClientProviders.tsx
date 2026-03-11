@@ -28,27 +28,27 @@ export default function ClientProviders({ children }: { children: React.ReactNod
         <SyncProvider>
           <ThemeProvider>
             {children}
+            <Suspense fallback={null}>
+              <ServiceWorkerRegistration />
+            </Suspense>
+            <Suspense fallback={null}>
+              <PreloadProgress />
+            </Suspense>
+            <Suspense fallback={null}>
+              <CacheStatus />
+            </Suspense>
+            <Suspense fallback={null}>
+              <OfflineIndicator />
+            </Suspense>
+            <Suspense fallback={null}>
+              <SyncManagerClient />
+            </Suspense>
+            <Suspense fallback={null}>
+              <SessionExpiryWarning />
+            </Suspense>
           </ThemeProvider>
         </SyncProvider>
       </AuthProvider>
-      <Suspense fallback={null}>
-        <ServiceWorkerRegistration />
-      </Suspense>
-      <Suspense fallback={null}>
-        <PreloadProgress />
-      </Suspense>
-      <Suspense fallback={null}>
-        <CacheStatus />
-      </Suspense>
-      <Suspense fallback={null}>
-        <OfflineIndicator />
-      </Suspense>
-      <Suspense fallback={null}>
-        <SyncManagerClient />
-      </Suspense>
-      <Suspense fallback={null}>
-        <SessionExpiryWarning />
-      </Suspense>
     </QueryClientProvider>
   );
 }

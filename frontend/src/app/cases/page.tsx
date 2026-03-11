@@ -179,11 +179,10 @@ export default function CasesPage() {
           </div>
 
           {/* Metrics Shortcut */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <StatCard title="Total Cases" value={total} color="red" />
             <StatCard title="Open Cases" value={cases.filter(c => c.status === 'Open').length} color="orange" />
             <StatCard title="High Priority" value={cases.filter(c => c.severity === 'High' || c.severity === 'Critical').length} color="indigo" />
-            <StatCard title="System Status" value={offlineMode ? "Cached" : "Live"} color="blue" />
           </div>
 
           {/* Central Case Ledger */}

@@ -181,8 +181,8 @@ export default function UserManagementPage() {
 
           {/* System Overview */}
           {loading && users.length === 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {[1, 2, 3, 4].map((i) => (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {[1, 2, 3].map((i) => (
                 <div key={i} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 animate-pulse">
                   <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded mb-3" />
                   <div className="h-9 w-16 bg-gray-200 dark:bg-gray-700 rounded" />
@@ -190,11 +190,10 @@ export default function UserManagementPage() {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <StatCard title="Total Users" value={users.length} color="indigo" icon={Users} />
               <StatCard title="Administrators" value={users.filter(u => u.role === 'admin').length} color="purple" icon={Shield} />
               <StatCard title="Security Staff" value={users.filter(u => u.role?.includes('security')).length} color="blue" icon={UserCheck} />
-              <StatCard title="System Status" value="Online" color="emerald" icon={Activity} />
             </div>
           )}
 
