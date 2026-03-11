@@ -79,9 +79,9 @@ export default function Sidebar() {
   let navLinks: NavItem[] = [];
   if (user?.role === 'admin') {
     navLinks = [
-      { icon: Shield, label: 'Administrator Dashboard', path: '/admin' },
-      { icon: FolderOpen, label: 'Cases', path: '/cases' },
-      { icon: FileText, label: 'Student Reports', path: '/reports' },
+      { icon: Shield, label: 'Dashboard', path: '/admin' },
+      { icon: FolderOpen, label: 'All Cases', path: '/cases' },
+      { icon: FileText, label: 'Reports', path: '/reports' },
       { icon: Users, label: 'Students', path: '/students' },
       { icon: Wrench, label: 'Maintenance', path: '/maintenance' },
       { icon: ClipboardList, label: 'Evidence', path: '/evidence' },
@@ -90,7 +90,7 @@ export default function Sidebar() {
     ];
   } else if (user?.role === 'security_officer') {
     navLinks = [
-      { icon: Home, label: 'Home', path: '/security-dashboard' },
+      { icon: Home, label: 'Dashboard', path: '/security-dashboard' },
       { icon: FolderOpen, label: 'Cases', path: '/cases' },
       { icon: ClipboardList, label: 'Evidence', path: '/evidence' },
       { icon: Users, label: 'Students', path: '/students' },
@@ -99,9 +99,9 @@ export default function Sidebar() {
     ];
   } else if (user?.role === 'chief_security_officer') {
     navLinks = [
-      { icon: Shield, label: 'Home', path: '/chief-security-officer-dashboard' },
-      { icon: FolderOpen, label: 'Cases', path: '/cases' },
-      { icon: FileText, label: 'Student Reports', path: '/reports' },
+      { icon: Shield, label: 'Dashboard', path: '/chief-security-officer-dashboard' },
+      { icon: FolderOpen, label: 'All Cases', path: '/cases' },
+      { icon: FileText, label: 'Reports', path: '/reports' },
       { icon: Users, label: 'Students', path: '/students' },
       { icon: ClipboardList, label: 'Evidence', path: '/evidence' },
       { icon: PlusCircle, label: 'New Case', path: '/cases/new' },
@@ -109,23 +109,23 @@ export default function Sidebar() {
     ];
   } else if (user?.role === 'dean_of_students') {
     navLinks = [
-      { icon: LayoutDashboard, label: 'Home', path: '/dean-of-students-dashboard' },
-      { icon: Users, label: 'Student Registry', path: '/dean-of-students-dashboard/students' },
-      { icon: FolderOpen, label: 'Behavioral Ledger', path: '/dean-of-students-dashboard/cases' },
-      { icon: FileText, label: 'Reports & Analytics', path: '/dean-of-students-dashboard/reports' },
+      { icon: LayoutDashboard, label: 'Dashboard', path: '/dean-of-students-dashboard' },
+      { icon: Users, label: 'Students', path: '/dean-of-students-dashboard/students' },
+      { icon: FolderOpen, label: 'Cases', path: '/dean-of-students-dashboard/cases' },
+      { icon: FileText, label: 'Reports', path: '/dean-of-students-dashboard/reports' },
       { icon: HelpCircle, label: 'Help', path: '/help' },
     ];
   } else if (user?.role === 'assistant_dean') {
     navLinks = [
-      { icon: UserCog, label: 'Home', path: '/assistant-dean-dashboard' },
-      { icon: Users, label: 'Student Registry', path: '/assistant-dean-dashboard/students' },
-      { icon: FolderOpen, label: 'Behavioral Ledger', path: '/assistant-dean-dashboard/cases' },
+      { icon: UserCog, label: 'Dashboard', path: '/assistant-dean-dashboard' },
+      { icon: Users, label: 'Students', path: '/assistant-dean-dashboard/students' },
+      { icon: FolderOpen, label: 'Cases', path: '/assistant-dean-dashboard/cases' },
       { icon: FileText, label: 'Reports', path: '/reports' },
       { icon: HelpCircle, label: 'Help', path: '/help' },
     ];
   } else if (user?.role === 'secretary') {
     navLinks = [
-      { icon: ClipboardList, label: 'Home', path: '/secretary-dashboard' },
+      { icon: ClipboardList, label: 'Dashboard', path: '/secretary-dashboard' },
       { icon: Users, label: 'Students', path: '/students' },
       { icon: FolderOpen, label: 'Cases', path: '/cases' },
       { icon: FileText, label: 'Reports', path: '/reports' },
@@ -133,14 +133,14 @@ export default function Sidebar() {
     ];
   } else if (user?.role === 'hall_warden') {
     navLinks = [
-      { icon: Home, label: 'Command Center', path: '/hall-warden-dashboard' },
-      { icon: Wrench, label: 'Maintenance Ledger', path: '/hall-warden-dashboard/maintenance' },
+      { icon: Home, label: 'Dashboard', path: '/hall-warden-dashboard' },
+      { icon: Wrench, label: 'Maintenance', path: '/hall-warden-dashboard/maintenance' },
       { icon: HelpCircle, label: 'Help', path: '/help' },
     ];
   } else if (user?.role === 'electrician') {
     navLinks = [
-      { icon: Zap, label: 'Technical Hub', path: '/electrician-dashboard' },
-      { icon: Wrench, label: 'Task Ledger', path: '/electrician-dashboard/tasks' },
+      { icon: Zap, label: 'Dashboard', path: '/electrician-dashboard' },
+      { icon: Wrench, label: 'Tasks', path: '/electrician-dashboard/tasks' },
       { icon: HelpCircle, label: 'Help', path: '/help' },
     ];
   } else if (user?.role === 'student') {

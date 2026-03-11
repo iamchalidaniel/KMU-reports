@@ -18,22 +18,22 @@ const STATUS_CONFIG: Record<string, { bg: string; text: string; icon: any; label
   // Case statuses
   'approved': { bg: 'bg-emerald-50 dark:bg-emerald-950', text: 'text-emerald-700 dark:text-emerald-300', icon: CheckCircle2, label: 'Approved' },
   'rejected': { bg: 'bg-red-50 dark:bg-red-950', text: 'text-red-700 dark:text-red-300', icon: XCircle, label: 'Rejected' },
-  'pending': { bg: 'bg-amber-50 dark:bg-amber-950', text: 'text-amber-700 dark:text-amber-300', icon: Clock, label: 'Pending' },
-  'in_review': { bg: 'bg-blue-50 dark:bg-blue-950', text: 'text-blue-700 dark:text-blue-300', icon: Eye, label: 'In Review' },
-  'dismissed': { bg: 'bg-gray-50 dark:bg-gray-900', text: 'text-gray-700 dark:text-gray-300', icon: Trash2, label: 'Dismissed' },
-  'resolved': { bg: 'bg-emerald-50 dark:bg-emerald-950', text: 'text-emerald-700 dark:text-emerald-300', icon: CheckCircle2, label: 'Resolved' },
-  'completed': { bg: 'bg-emerald-50 dark:bg-emerald-950', text: 'text-emerald-700 dark:text-emerald-300', icon: CheckCircle2, label: 'Completed' },
+  'pending': { bg: 'bg-amber-50 dark:bg-amber-950', text: 'text-amber-700 dark:text-amber-300', icon: Clock, label: 'Waiting' },
+  'in_review': { bg: 'bg-blue-50 dark:bg-blue-950', text: 'text-blue-700 dark:text-blue-300', icon: Eye, label: 'Under Review' },
+  'dismissed': { bg: 'bg-gray-50 dark:bg-gray-900', text: 'text-gray-700 dark:text-gray-300', icon: Trash2, label: 'Closed' },
+  'resolved': { bg: 'bg-emerald-50 dark:bg-emerald-950', text: 'text-emerald-700 dark:text-emerald-300', icon: CheckCircle2, label: 'Done' },
+  'completed': { bg: 'bg-emerald-50 dark:bg-emerald-950', text: 'text-emerald-700 dark:text-emerald-300', icon: CheckCircle2, label: 'Done' },
   'in_progress': { bg: 'bg-blue-50 dark:bg-blue-950', text: 'text-blue-700 dark:text-blue-300', icon: Clock, label: 'In Progress' },
-  'escalated': { bg: 'bg-orange-50 dark:bg-orange-950', text: 'text-orange-700 dark:text-orange-300', icon: AlertCircle, label: 'Escalated' },
-  'open': { bg: 'bg-blue-50 dark:bg-blue-950', text: 'text-blue-700 dark:text-blue-300', icon: Eye, label: 'Open' },
+  'escalated': { bg: 'bg-orange-50 dark:bg-orange-950', text: 'text-orange-700 dark:text-orange-300', icon: AlertCircle, label: 'Urgent' },
+  'open': { bg: 'bg-blue-50 dark:bg-blue-950', text: 'text-blue-700 dark:text-blue-300', icon: Eye, label: 'Active' },
   'closed': { bg: 'bg-gray-50 dark:bg-gray-900', text: 'text-gray-700 dark:text-gray-300', icon: XCircle, label: 'Closed' },
 };
 
 const SEVERITY_CONFIG: Record<string, { bg: string; text: string; icon: any; label: string }> = {
-  'critical': { bg: 'bg-red-50 dark:bg-red-950', text: 'text-red-700 dark:text-red-300', icon: AlertCircle, label: 'Critical' },
-  'high': { bg: 'bg-orange-50 dark:bg-orange-950', text: 'text-orange-700 dark:text-orange-300', icon: AlertCircle, label: 'High' },
-  'medium': { bg: 'bg-amber-50 dark:bg-amber-950', text: 'text-amber-700 dark:text-amber-300', icon: Clock, label: 'Medium' },
-  'low': { bg: 'bg-blue-50 dark:bg-blue-950', text: 'text-blue-700 dark:text-blue-300', icon: CheckCircle2, label: 'Low' },
+  'critical': { bg: 'bg-red-50 dark:bg-red-950', text: 'text-red-700 dark:text-red-300', icon: AlertCircle, label: 'Urgent' },
+  'high': { bg: 'bg-orange-50 dark:bg-orange-950', text: 'text-orange-700 dark:text-orange-300', icon: AlertCircle, label: 'Important' },
+  'medium': { bg: 'bg-amber-50 dark:bg-amber-950', text: 'text-amber-700 dark:text-amber-300', icon: Clock, label: 'Normal' },
+  'low': { bg: 'bg-blue-50 dark:bg-blue-950', text: 'text-blue-700 dark:text-blue-300', icon: CheckCircle2, label: 'Minor' },
 };
 
 const SIZE_CONFIG = {

@@ -170,17 +170,17 @@ export default function StudentDashboardPage() {
                 <AlertTriangle className="w-5 h-5 shrink-0" />
                 <span className="text-sm font-medium">
                   {pendingAppeals.length > 0 && openCases.length > 0
-                    ? `${pendingAppeals.length} appeal(s) pending · ${openCases.length} case(s) open`
+                    ? `You have ${pendingAppeals.length} appeal(s) waiting and ${openCases.length} active case(s)`
                     : pendingAppeals.length > 0
-                      ? `${pendingAppeals.length} appeal(s) pending review`
-                      : `${openCases.length} case(s) in progress`}
+                      ? `You have ${pendingAppeals.length} appeal(s) waiting for review`
+                      : `You have ${openCases.length} active case(s)`}
                 </span>
               </div>
               <Link
                 href="/student-dashboard/records"
                 className="inline-flex items-center gap-1 text-sm font-semibold text-amber-700 dark:text-amber-300 hover:underline"
               >
-                View records
+                See all
                 <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
@@ -225,21 +225,21 @@ export default function StudentDashboardPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <StatCard
-                title="Cases"
+                title="My Cases"
                 value={cases.length}
                 color="red"
                 path="/student-dashboard/records?tab=cases"
                 icon={FolderOpen}
               />
               <StatCard
-                title="Statements"
+                title="My Reports"
                 value={reports.length}
                 color="green"
                 path="/student-dashboard/records?tab=statements"
                 icon={FileText}
               />
               <StatCard
-                title="Appeals"
+                title="Waiting"
                 value={pendingAppeals.length}
                 color="orange"
                 path="/student-dashboard/records?tab=appeals"
@@ -262,9 +262,9 @@ export default function StudentDashboardPage() {
                   </div>
                   <div className="min-w-0">
                     <div className="font-semibold text-sm text-gray-900 dark:text-white group-hover:text-kmuGreen transition-colors">
-                      Report Incident
+                      Report Issue
                     </div>
-                    <div className="text-xs text-gray-500">Log a security matter</div>
+                    <div className="text-xs text-gray-500">Tell us what happened</div>
                   </div>
                 </Link>
                 <Link
@@ -276,9 +276,9 @@ export default function StudentDashboardPage() {
                   </div>
                   <div className="min-w-0">
                     <div className="font-semibold text-sm text-gray-900 dark:text-white group-hover:text-kmuGreen transition-colors">
-                      Request Repair
+                      Request Fix
                     </div>
-                    <div className="text-xs text-gray-500">Maintenance & facilities</div>
+                    <div className="text-xs text-gray-500">Broken or damaged item</div>
                   </div>
                 </Link>
               </div>
@@ -287,7 +287,7 @@ export default function StudentDashboardPage() {
             {/* Status card */}
             <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex items-center justify-between flex-wrap gap-4">
               <div>
-                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Student Status</h3>
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Your Status</h3>
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   <span className="text-xl font-bold text-gray-900 dark:text-white uppercase tracking-wide">
@@ -336,9 +336,9 @@ export default function StudentDashboardPage() {
           {!loadingStats && reports.length === 0 && cases.length === 0 && appeals.length === 0 && (
             <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-8 text-center">
               <CheckCircle2 className="w-12 h-12 text-kmuGreen mx-auto mb-3" />
-              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1">You&apos;re all set</h3>
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1">Great news!</h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                No statements, cases, or appeals on record. Use the actions above to report an incident or request a repair.
+                You don't have any records yet. If you need to report something or request a fix, use the buttons above.
               </p>
               <Link
                 href="/student-dashboard/report-incident"

@@ -52,9 +52,9 @@ interface Appeal {
 }
 
 const TABS = [
-  { id: 'statements', label: 'Statements', icon: FileText },
-  { id: 'cases', label: 'Cases', icon: FolderOpen },
-  { id: 'appeals', label: 'Appeals', icon: Scale },
+  { id: 'statements', label: 'My Reports', icon: FileText },
+  { id: 'cases', label: 'My Cases', icon: FolderOpen },
+  { id: 'appeals', label: 'Waiting', icon: Scale },
 ] as const;
 
 type TabId = (typeof TABS)[number]['id'];
