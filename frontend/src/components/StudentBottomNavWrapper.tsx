@@ -10,6 +10,7 @@ import HallWardenBottomNav from './HallWardenBottomNav';
 import SecretaryBottomNav from './SecretaryBottomNav';
 import ChiefSecurityOfficerBottomNav from './ChiefSecurityOfficerBottomNav';
 import ElectricianBottomNav from './ElectricianBottomNav';
+import AdminBottomNav from './AdminBottomNav';
 
 export default function StudentBottomNavWrapper() {
   const pathname = usePathname();
@@ -46,6 +47,13 @@ export default function StudentBottomNavWrapper() {
 
   if (user?.role === 'electrician' && pathname.startsWith('/electrician-dashboard')) {
     return <ElectricianBottomNav />;
+  }
+
+  if (
+    user?.role === 'admin' ||
+    ['/admin', '/reports', '/cases', '/students', '/maintenance'].some(p => pathname.startsWith(p)) && user?.role === 'admin'
+  ) {
+    return <AdminBottomNav />;
   }
 
   return null;

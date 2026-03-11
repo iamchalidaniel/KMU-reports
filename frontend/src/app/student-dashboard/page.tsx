@@ -72,7 +72,7 @@ export default function StudentDashboardPage() {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [profile, setProfile] = useState<any>(null);
 
-  const { data: statsData, isLoading: loadingStats } = useStudentStats(user?.studentId);
+  const { data: statsData, isLoading: loadingStats } = useStudentStats(user?.studentId || user?.username);
   const reports = statsData?.reports || [];
   const cases = statsData?.cases || [];
   const appeals = statsData?.appeals || [];

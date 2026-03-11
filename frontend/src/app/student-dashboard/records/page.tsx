@@ -99,14 +99,18 @@ function RecordsContent() {
   }, [authLoading, token, user, router]);
 
   useEffect(() => {
-    if (!user?.studentId) return;
+    const sId = user?.studentId || user?.username;
+    if (!sId) {
+      if (user && !authLoading) setLoading(false);
+      return;
+    }
     async function fetchAll() {
       setLoading(true);
       try {
         const [reportsRes, casesRes, appealsRes] = await Promise.all([
           fetch(`${API_BASE_URL}/student-reports`, { headers: { ...authHeaders() } }),
-          fetch(`${API_BASE_URL}/cases?studentId=${user?.studentId}`, { headers: { ...authHeaders() } }),
-          fetch(`${API_BASE_URL}/api/appeals?studentId=${user?.studentId}`, { headers: { ...authHeaders() } }),
+          fetch(`${API_BASE_URL}/cases?studentId=${sId}`, { headers: { ...authHeaders() } }),
+          fetch(`${API_BASE_URL}/api/appeals?studentId=${sId}`, { headers: { ...authHeaders() } }),
         ]);
         if (reportsRes.ok) {
           const data = await reportsRes.json();
