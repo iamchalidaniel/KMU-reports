@@ -22,7 +22,7 @@ interface AuditLog {
 }
 
 export default function AuditLogsPage() {
-  const { user, isCheckingAuth, authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,10 +30,10 @@ export default function AuditLogsPage() {
   const [actionFilter, setActionFilter] = useState('all');
 
   useEffect(() => {
-    if (!isCheckingAuth && !user) {
+    if (!authLoading && !user) {
       router.push('/login');
     }
-  }, [isCheckingAuth, user, router]);
+  }, [authLoading, user, router]);
 
   useEffect(() => {
     if (!user || user.role !== 'secretary') return;
@@ -67,7 +67,7 @@ export default function AuditLogsPage() {
     return matchesSearch && matchesFilter;
   });
 
-  if (isCheckingAuth || (authLoading && !user)) {
+  if (authLoading && !user) {
     return (
       <div className="flex items-center justify-center min-h-screen text-kmuGreen">
         <Loader2 className="w-12 h-12 animate-spin" />
