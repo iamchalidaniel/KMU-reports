@@ -19,6 +19,7 @@ import {
   ChevronRight,
   CheckCircle2,
 } from 'lucide-react';
+import { SkeletonDashboard } from '../../components/SkeletonLoader';
 
 interface Report {
   _id: string;
@@ -217,17 +218,7 @@ export default function StudentDashboardPage() {
 
           {/* Overview stats */}
           {loadingStats ? (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-5 animate-pulse"
-                >
-                  <div className="h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded mb-3" />
-                  <div className="h-8 w-12 bg-gray-200 dark:bg-gray-700 rounded" />
-                </div>
-              ))}
-            </div>
+            <SkeletonDashboard />
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <StatCard
