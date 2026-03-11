@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
+import { Loader2 } from 'lucide-react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -152,12 +153,16 @@ export default function SecurityDashboard() {
     setFilteredCases(result);
   }, [search, cases, programFilter]);
 
-  if (isCheckingAuth) {
-    return <div className="text-center text-kmuGreen p-12">Loading...</div>;
+  if (isCheckingAuth || (authLoading && !user)) {
+    return (
+      <div className="flex items-center justify-center min-h-screen text-kmuGreen">
+        <Loader2 className="w-12 h-12 animate-spin" />
+      </div>
+    );
   }
 
   if (!user || user.role !== 'security_officer') {
-    return <div className="text-red-600 p-12">Access denied.</div>;
+    return <div className="p-12 text-center text-red-600">Access denied.</div>;
   }
 
   const offenceCounts: Record<string, number> = {};

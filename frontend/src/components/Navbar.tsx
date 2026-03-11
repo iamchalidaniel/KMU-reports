@@ -6,12 +6,15 @@ import { useSidebar } from '../context/SidebarContext';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import DarkModeToggle from './DarkModeToggle';
+import NotificationCenter from './NotificationCenter';
+import Tooltip from './Tooltip';
 import { Menu, ChevronDown, Settings, LogOut, AlertTriangle, Wrench } from 'lucide-react';
 
 export default function Navbar() {
     const { user, logout } = useAuth();
     const { isSidebarOpen, setIsSidebarOpen } = useSidebar();
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [notifications, setNotifications] = useState<any[]>([]);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const pathname = usePathname();
     const router = useRouter();
@@ -67,8 +70,24 @@ export default function Navbar() {
                                 </Link>
                             </>
                         )}
-                        {/* Theme Toggle */}
-                        <DarkModeToggle />
+                        {/* Notifications */}
+                        <NotificationCenter
+                          notifications={notifications}
+                          onMarkAsRead={(id) => {
+                            setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+                          }}
+                          onDismiss={(id) => {
+                            setNotifications(prev => prev.filter(n => n.id !== id));
+                          }}
+                          onMarkAllAsRead={() => {
+                            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+                          }}
+                        />
+
+                        {/* Theme Toggle with Tooltip */}
+                        <Tooltip content="Toggle dark mode" position="bottom">
+                          <DarkModeToggle />
+                        </Tooltip>
 
                         {/* Profile Dropdown */}
                         <div className="relative" ref={dropdownRef}>

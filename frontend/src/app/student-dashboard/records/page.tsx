@@ -14,6 +14,10 @@ import {
   ChevronRight,
   Loader2,
 } from 'lucide-react';
+import StatusBadge from '../../../components/StatusBadge';
+import EmptyState from '../../../components/EmptyState';
+import { SkeletonTable } from '../../../components/SkeletonLoader';
+import Breadcrumb from '../../../components/Breadcrumb';
 
 interface Report {
   _id: string;
@@ -48,9 +52,9 @@ interface Appeal {
 }
 
 const TABS = [
-  { id: 'statements', label: 'Statements', icon: FileText },
-  { id: 'cases', label: 'Cases', icon: FolderOpen },
-  { id: 'appeals', label: 'Appeals', icon: Scale },
+  { id: 'statements', label: 'My Reports', icon: FileText },
+  { id: 'cases', label: 'My Cases', icon: FolderOpen },
+  { id: 'appeals', label: 'Waiting', icon: Scale },
 ] as const;
 
 type TabId = (typeof TABS)[number]['id'];
@@ -136,6 +140,7 @@ function RecordsContent() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-24 md:pb-12">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <Breadcrumb items={[{ label: 'Dashboard', href: '/student-dashboard' }, { label: 'Records' }]} />
         <div className="animate-in fade-in duration-300 space-y-6">
           <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
@@ -180,9 +185,7 @@ function RecordsContent() {
 
           {/* Tab content */}
           {loading ? (
-            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-12 flex justify-center">
-              <Loader2 className="w-10 h-10 animate-spin text-kmuGreen" />
-            </div>
+            <SkeletonTable />
           ) : activeTab === 'statements' ? (
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
               <div className="overflow-x-auto">
@@ -236,7 +239,7 @@ function RecordsContent() {
                           <div className="text-xs text-gray-500 mt-0.5 line-clamp-1">{c.description}</div>
                         </td>
                         <td className="px-6 py-4 text-center">
-                          <StatusBadge status={c.status} variant="case" />
+                          <StatusBadge status={c.status} />
                         </td>
                         <td className="px-6 py-4 text-center">
                           <Link
@@ -275,7 +278,7 @@ function RecordsContent() {
                         </h3>
                         <p className="text-[10px] text-gray-500 mt-1">Submitted: {formatDate(appeal.createdAt)}</p>
                       </div>
-                      <StatusBadge status={appeal.status} variant="appeal" />
+                      <StatusBadge status={appeal.status} />
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">&quot;{appeal.reason}&quot;</p>
                     {appeal.adminResponse && (
@@ -311,71 +314,7 @@ function RecordsContent() {
   );
 }
 
-function StatusBadge({ status, variant = 'default' }: { status: string; variant?: 'default' | 'case' | 'appeal' }) {
-  const isResolved = status === 'Resolved' || status === 'Completed' || status === 'Approved';
-  const isRejected = status === 'Rejected' || status === 'Denied';
 
-  const base = 'px-2.5 py-1 rounded-full font-medium text-[10px] uppercase border';
-  if (variant === 'case') {
-    return (
-      <span
-        className={`${base} ${
-          isResolved
-            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800'
-            : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800'
-        }`}
-      >
-        {status}
-      </span>
-    );
-  }
-  if (variant === 'appeal') {
-    return (
-      <span
-        className={`${base} ${
-          isResolved
-            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-200'
-            : isRejected
-              ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200'
-              : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200'
-        }`}
-      >
-        {status}
-      </span>
-    );
-  }
-  return (
-    <span
-      className={`${base} ${
-        isResolved
-          ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-200'
-          : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200'
-      }`}
-    >
-      {status}
-    </span>
-  );
-}
-
-function EmptyState({
-  icon: Icon,
-  title,
-  description,
-}: {
-  icon: typeof FileText;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-      <div className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400 dark:text-gray-500 mb-4">
-        <Icon className="w-7 h-7" />
-      </div>
-      <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1">{title}</h3>
-      <p className="text-sm text-gray-500 dark:text-gray-400 max-w-sm">{description}</p>
-    </div>
-  );
-}
 
 export default function StudentRecordsPage() {
   return (

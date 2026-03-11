@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { saveAs } from 'file-saver';
 import { Bar, Line } from 'react-chartjs-2';
+import { Loader2 } from 'lucide-react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -179,11 +180,17 @@ export default function SecretaryDashboard() {
     }
   }
 
-  if (isCheckingAuth) {
-    return <div className="text-center text-kmuGreen p-12">Loading...</div>;
+  if (isCheckingAuth || (authLoading && !user)) {
+    return (
+      <div className="flex items-center justify-center min-h-screen text-kmuGreen">
+        <Loader2 className="w-12 h-12 animate-spin" />
+      </div>
+    );
   }
 
-  if (!user || user.role !== 'secretary') return <div className="text-red-600 p-12">Access denied.</div>;
+  if (!user || user.role !== 'secretary') {
+    return <div className="p-12 text-center text-red-600">Access denied.</div>;
+  }
 
   const staffData = profile || user;
 

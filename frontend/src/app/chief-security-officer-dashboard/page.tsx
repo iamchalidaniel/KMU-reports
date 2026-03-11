@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { saveAs } from 'file-saver';
 import { Bar } from 'react-chartjs-2';
+import { Loader2 } from 'lucide-react';
 import { CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, Chart as ChartJS } from 'chart.js';
 import { useAuth } from '../../context/AuthContext';
 import { API_BASE_URL } from '../../config/constants';
@@ -111,8 +112,16 @@ export default function ChiefSecurityOfficerDashboard() {
     }
   }
 
-  if (isCheckingAuth || authLoading) {
-    return <div className="text-center text-kmuGreen p-12">Loading...</div>;
+  if (isCheckingAuth || (authLoading && !user)) {
+    return (
+      <div className="flex items-center justify-center min-h-screen text-kmuGreen">
+        <Loader2 className="w-12 h-12 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user || user.role !== 'chief_security_officer') {
+    return <div className="p-12 text-center text-red-600">Access denied.</div>;
   }
 
   return (
