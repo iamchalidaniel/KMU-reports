@@ -1,0 +1,4 @@
+app/(admin)/cases.tsx(262,20): error TS1128: Declaration or statement expected.
+app/(admin)/cases.tsx(262,21): error TS1128: Declaration or statement expected.
+app/(admin)/cases.tsx(263,1): error TS1128: Declaration or statement expected.
+app/(admin)/cases.tsx(263,2): error TS1128: Declaration or statement expected.

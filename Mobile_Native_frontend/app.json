@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "KMU Reports",
+    "slug": "kmu-reports-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/kmu_official.png",
+    "scheme": "kmu-reports",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/kmu_official.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B1120"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0a0f1e",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ]
+  }
+}
