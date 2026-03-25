@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { API_BASE_URL } from '../config/constants';
 import { authHeaders } from '../utils/api';
 import Notification, { useNotification } from './Notification';
+import AIAssistant from './AIAssistant';
 
 const CATEGORIES = [
     'Electrical',
@@ -32,6 +33,7 @@ interface MaintenanceRequestFormProps {
 export default function MaintenanceRequestForm({ onSuccess }: MaintenanceRequestFormProps) {
     const { notification, showNotification, hideNotification } = useNotification();
     const [loading, setLoading] = useState(false);
+    const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
     const [form, setForm] = useState({
         category: '',
         description: '',
@@ -71,6 +73,7 @@ export default function MaintenanceRequestForm({ onSuccess }: MaintenanceRequest
                 location: { hall: '', room: '' },
                 priority: 'Medium'
             });
+            setAiSuggestion(null);
             if (onSuccess) onSuccess();
         } catch (err: any) {
             showNotification('error', err.message || 'Failed to submit report');
@@ -151,6 +154,42 @@ export default function MaintenanceRequestForm({ onSuccess }: MaintenanceRequest
                         onChange={e => setForm({ ...form, description: e.target.value })}
                         required
                     />
+                    <div className="flex items-center justify-end gap-3">
+                        {aiSuggestion && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const next = form.description.trim()
+                                        ? `${form.description.trim()}\n\n${aiSuggestion.trim()}`
+                                        : aiSuggestion.trim();
+                                    setForm({ ...form, description: next });
+                                    setAiSuggestion(null);
+                                }}
+                                className="text-[10px] font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-300 hover:underline"
+                            >
+                                Apply AI suggestion
+                            </button>
+                        )}
+                    </div>
+                    {aiSuggestion && (
+                        <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40">
+                            <div className="flex items-center justify-between gap-3">
+                                <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-300">
+                                    AI suggestion ready
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setAiSuggestion(null)}
+                                    className="text-[10px] font-bold uppercase tracking-widest text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100"
+                                >
+                                    Dismiss
+                                </button>
+                            </div>
+                            <div className="mt-2 text-xs text-emerald-900 dark:text-emerald-200 whitespace-pre-wrap line-clamp-4">
+                                {aiSuggestion}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <button
@@ -168,5 +207,13 @@ export default function MaintenanceRequestForm({ onSuccess }: MaintenanceRequest
                 <Notification type={notification.type} message={notification.message} isVisible={notification.isVisible} onClose={hideNotification} />
             )}
         </div>
+        <AIAssistant
+            formType="maintenance"
+            onSuggestionReceived={(suggestion) => {
+                const s = suggestion?.trim();
+                if (!s) return;
+                setAiSuggestion(s);
+            }}
+        />
     );
 }

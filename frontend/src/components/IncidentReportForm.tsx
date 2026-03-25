@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { API_BASE_URL } from '../config/constants';
 import { authHeaders } from '../utils/api';
 import Notification, { useNotification } from './Notification';
+import AIAssistant from './AIAssistant';
 
 const OFFENSE_TYPES = [
     'Theft',
@@ -22,6 +23,7 @@ interface IncidentReportFormProps {
 export default function IncidentReportForm({ onSuccess }: IncidentReportFormProps) {
     const { notification, showNotification, hideNotification } = useNotification();
     const [loading, setLoading] = useState(false);
+    const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
     const [form, setForm] = useState({
         incident_date: new Date().toISOString().split('T')[0],
         description: '',
@@ -30,10 +32,27 @@ export default function IncidentReportForm({ onSuccess }: IncidentReportFormProp
         is_anonymous: false
     });
 
+    const getErrorMessageFromResponse = async (res: Response) => {
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+            const data = await res.json().catch(() => null);
+            if (data && typeof data === 'object') {
+                const msg = (data as any).error || (data as any).message;
+                if (typeof msg === 'string' && msg.trim()) return msg;
+            }
+        }
+        const text = await res.text().catch(() => '');
+        return text?.trim() || `Request failed with status ${res.status}`;
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!form.offense_type || !form.description) {
             showNotification('error', 'Please fill in all required fields');
+            return;
+        }
+        if (form.description.trim().length < 10) {
+            showNotification('error', 'Detailed statement must be at least 10 characters');
             return;
         }
 
@@ -49,7 +68,7 @@ export default function IncidentReportForm({ onSuccess }: IncidentReportFormProp
             });
 
             if (!res.ok) {
-                throw new Error(await res.text());
+                throw new Error(await getErrorMessageFromResponse(res));
             }
 
             showNotification('success', 'Incident report submitted successfully');
@@ -60,9 +79,10 @@ export default function IncidentReportForm({ onSuccess }: IncidentReportFormProp
                 severity: 'Medium',
                 is_anonymous: false
             });
+            setAiSuggestion(null);
             if (onSuccess) onSuccess();
         } catch (err: any) {
-            showNotification(err.message || 'Failed to submit report', 'error');
+            showNotification('error', err?.message || 'Failed to submit report');
         } finally {
             setLoading(false);
         }
@@ -111,6 +131,45 @@ export default function IncidentReportForm({ onSuccess }: IncidentReportFormProp
                         onChange={e => setForm({ ...form, description: e.target.value })}
                         required
                     />
+                    <div className="flex items-center justify-between gap-3">
+                        <div className={`text-[10px] font-bold uppercase tracking-widest ${form.description.trim().length < 10 ? 'text-amber-600 dark:text-amber-400' : 'text-gray-400'}`}>
+                            {form.description.trim().length}/10 min
+                        </div>
+                        {aiSuggestion && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const next = form.description.trim()
+                                        ? `${form.description.trim()}\n\n${aiSuggestion.trim()}`
+                                        : aiSuggestion.trim();
+                                    setForm({ ...form, description: next });
+                                    setAiSuggestion(null);
+                                }}
+                                className="text-[10px] font-bold uppercase tracking-widest text-indigo-700 dark:text-indigo-300 hover:underline"
+                            >
+                                Apply AI suggestion
+                            </button>
+                        )}
+                    </div>
+                    {aiSuggestion && (
+                        <div className="p-3 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40">
+                            <div className="flex items-center justify-between gap-3">
+                                <div className="text-[10px] font-bold uppercase tracking-widest text-indigo-700 dark:text-indigo-300">
+                                    AI suggestion ready
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setAiSuggestion(null)}
+                                    className="text-[10px] font-bold uppercase tracking-widest text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100"
+                                >
+                                    Dismiss
+                                </button>
+                            </div>
+                            <div className="mt-2 text-xs text-indigo-900 dark:text-indigo-200 whitespace-pre-wrap line-clamp-4">
+                                {aiSuggestion}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-100 dark:border-gray-800">
@@ -138,6 +197,15 @@ export default function IncidentReportForm({ onSuccess }: IncidentReportFormProp
             {notification?.isVisible && (
                 <Notification type={notification.type} message={notification.message} isVisible={notification.isVisible} onClose={hideNotification} />
             )}
+
+            <AIAssistant
+                formType="case"
+                onSuggestionReceived={(suggestion) => {
+                    const s = suggestion?.trim();
+                    if (!s) return;
+                    setAiSuggestion(s);
+                }}
+            />
         </div>
     );
 }
