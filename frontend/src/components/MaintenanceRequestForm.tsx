@@ -83,7 +83,8 @@ export default function MaintenanceRequestForm({ onSuccess }: MaintenanceRequest
     };
 
     return (
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm">
+        <>
+            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-6">
                 <span className="text-2xl">🔧</span>
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white uppercase tracking-tight">Report Maintenance Issue</h2>
@@ -206,14 +207,15 @@ export default function MaintenanceRequestForm({ onSuccess }: MaintenanceRequest
             {notification?.isVisible && (
                 <Notification type={notification.type} message={notification.message} isVisible={notification.isVisible} onClose={hideNotification} />
             )}
-        </div>
-        <AIAssistant
-            formType="maintenance"
-            onSuggestionReceived={(suggestion) => {
-                const s = suggestion?.trim();
-                if (!s) return;
-                setAiSuggestion(s);
-            }}
-        />
+            </div>
+            <AIAssistant
+                formType="maintenance"
+                onSuggestionReceived={(suggestion) => {
+                    const s = suggestion?.trim();
+                    if (!s) return;
+                    setAiSuggestion(s);
+                }}
+            />
+        </>
     );
 }
