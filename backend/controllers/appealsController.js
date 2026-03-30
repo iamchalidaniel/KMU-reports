@@ -75,12 +75,23 @@ export const getAppeal = async (req, res) => {
 };
 
 // Submit appeal on a case (students only)
+// SECURITY FIX: Authorization check moved BEFORE database update
 export const submitAppeal = async (req, res) => {
     try {
         const { appeal_reason } = req.body;
 
         if (!appeal_reason) {
             return res.status(400).json({ error: 'Appeal reason is required' });
+        }
+
+        // Check authorization BEFORE updating database to prevent unauthorized mutations
+        const caseItem = await CaseModel.findById(req.params.id);
+        if (!caseItem) {
+            return res.status(404).json({ error: 'Case not found' });
+        }
+
+        if (caseItem.student_id !== req.user.id.toString()) {
+            return res.status(403).json({ error: 'Unauthorized' });
         }
 
         const appeal = await CaseModel.findByIdAndUpdate(
@@ -93,15 +104,6 @@ export const submitAppeal = async (req, res) => {
             },
             { new: true }
         );
-
-        if (!appeal) {
-            return res.status(404).json({ error: 'Case not found' });
-        }
-
-        // Check authorization
-        if (appeal.student_id !== req.user.id.toString()) {
-            return res.status(403).json({ error: 'Unauthorized' });
-        }
 
         res.json({
             message: 'Appeal submitted successfully',

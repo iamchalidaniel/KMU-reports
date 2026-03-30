@@ -139,7 +139,7 @@ export default function AdminMaintenancePage() {
         setReports(reports.map(r => (r._id === reportId || r.id === reportId) ? { ...r, status: newStatus as any } : r));
 
         try {
-            const res = await fetch(`${API_BASE_URL}/api/maintenance/${reportId}`, {
+            const res = await fetch(`${API_BASE_URL}/maintenance/${reportId}`, {
                 method: 'PUT',
                 headers: {
                     ...authHeaders(),
@@ -165,7 +165,7 @@ export default function AdminMaintenancePage() {
         } : r));
 
         try {
-            const res = await fetch(`${API_BASE_URL}/api/maintenance/${reportId}`, {
+            const res = await fetch(`${API_BASE_URL}/maintenance/${reportId}`, {
                 method: 'PUT',
                 headers: {
                     ...authHeaders(),

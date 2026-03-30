@@ -110,8 +110,9 @@ function RecordsContent() {
         const [reportsRes, casesRes, appealsRes] = await Promise.all([
           fetch(`${API_BASE_URL}/student-reports`, { headers: { ...authHeaders() } }),
           fetch(`${API_BASE_URL}/cases?studentId=${sId}`, { headers: { ...authHeaders() } }),
-          fetch(`${API_BASE_URL}/api/appeals?studentId=${sId}`, { headers: { ...authHeaders() } }),
+          fetch(`${API_BASE_URL}/appeals?studentId=${sId}`, { headers: { ...authHeaders() } }),
         ]);
+        // All URLs are correct: API_BASE_URL already includes /api prefix
         if (reportsRes.ok) {
           const data = await reportsRes.json();
           setReports(data.reports || []);

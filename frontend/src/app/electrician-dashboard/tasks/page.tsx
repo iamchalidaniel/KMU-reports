@@ -113,7 +113,7 @@ export default function ElectricianTasks() {
         setReports(reports.map(r => (r._id === reportId || r.id === reportId) ? { ...r, status: newStatus as any } : r));
 
         try {
-            const res = await fetch(`${API_BASE_URL}/api/maintenance/${reportId}`, {
+            const res = await fetch(`${API_BASE_URL}/maintenance/${reportId}`, {
                 method: 'PUT',
                 headers: { ...authHeaders(), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: newStatus }),
@@ -128,7 +128,7 @@ export default function ElectricianTasks() {
     }
 
     if (authLoading || loading) {
-        return <div className="text-center p-12 text-blue-600 uppercase font-black tracking-widest">Retrieving technical data...</div>;
+        return <div className="text-center p-12 text-kmuGreen font-medium">Loading your tasks...</div>;
     }
 
     return (
@@ -138,22 +138,22 @@ export default function ElectricianTasks() {
 
                     <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4">
                         <div>
-                            <h1 className="text-2xl font-black uppercase tracking-tight">Technical Task Ledger</h1>
-                            <p className="text-xs text-blue-600 font-black uppercase tracking-widest mt-1">Electrical Maintenance Registry</p>
+                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Electrical Tasks</h1>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">View and manage your assigned maintenance work</p>
                         </div>
-                        <Link href="/electrician-dashboard" className="text-xs font-black text-blue-600 hover:underline uppercase tracking-widest transition-all">← Dashboard Overview</Link>
+                        <Link href="/electrician-dashboard" className="text-sm font-medium text-kmuGreen hover:underline transition-all">← Back to Dashboard</Link>
                     </div>
 
                     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
                         <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row gap-4">
                             <input
-                                placeholder="Search location or failure details..."
-                                className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-xs font-bold uppercase w-full md:w-96 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                placeholder="Search by location or description..."
+                                className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-sm w-full md:w-96 focus:ring-2 focus:ring-kmuGreen outline-none transition-all"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                             />
                             <select
-                                className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-xs font-bold uppercase focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-kmuGreen outline-none transition-all"
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
                             >
@@ -166,40 +166,41 @@ export default function ElectricianTasks() {
                             
                             {/* Desktop Table View */}
                             <table className="w-full text-xs hidden md:table">
-                                <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-400 text-[9px] font-black uppercase tracking-[0.2em] border-b border-gray-100 dark:border-gray-800">
+                                <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider border-b border-gray-100 dark:border-gray-800">
                                     <tr>
-                                        <th className="px-8 py-6 text-left">Location Telemetry</th>
-                                        <th className="px-8 py-6 text-left">Failure Specification</th>
-                                        <th className="px-8 py-6 text-center">Status Control</th>
-                                        <th className="px-8 py-6 text-right">Audit</th>
+                                        <th className="px-6 py-4 text-left">Location</th>
+                                        <th className="px-6 py-4 text-left">Issue</th>
+                                        <th className="px-6 py-4 text-center">Status</th>
+                                        <th className="px-6 py-4 text-right">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-50 dark:divide-gray-800/50">
                                     {filteredReports.map((report, i) => {
                                         const reportId = report._id || report.id;
                                         return (
-                                            <tr key={reportId} className="hover:bg-blue-50/5 transition-colors group">
-                                                <td className="px-8 py-6">
-                                                    <div className="font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight group-hover:text-blue-600 transition-colors">
+                                            <tr key={reportId} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                                <td className="px-6 py-4">
+                                                    <div className="font-semibold text-gray-900 dark:text-gray-100">
                                                         {report.location.hall}
                                                     </div>
-                                                    <div className="text-[9px] font-black text-gray-400 mt-1 uppercase">Unit {report.location.room || 'N/A'}</div>
+                                                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Room {report.location.room || 'N/A'}</div>
                                                 </td>
-                                                <td className="px-8 py-6">
-                                                    <div className="font-black text-gray-700 dark:text-gray-300 uppercase text-[10px] mb-1">{report.category}</div>
-                                                    <div className="text-[10px] text-gray-400 italic line-clamp-1 italic">"{report.description}"</div>
+                                                <td className="px-6 py-4">
+                                                    <div className="font-medium text-gray-700 dark:text-gray-300 text-sm mb-1 capitalize">{report.category}</div>
+                                                    <div className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1">{report.description}</div>
                                                 </td>
-                                                <td className="px-8 py-6 text-center">
+                                                <td className="px-6 py-4 text-center">
                                                     <select
                                                         value={report.status}
                                                         onChange={(e) => updateStatus(reportId!, e.target.value)}
-                                                        className={`text-[9px] font-black uppercase tracking-widest bg-transparent border-none outline-none cursor-pointer hover:underline transition-all ${report.status === 'Completed' ? 'text-green-600' : 'text-blue-600'
-                                                            }`}
+                                                        className={`text-sm font-medium bg-transparent border-none outline-none cursor-pointer hover:underline transition-all ${
+                                                            report.status === 'Completed' ? 'text-green-600' : report.status === 'In Progress' ? 'text-kmuGreen' : 'text-gray-600'
+                                                        }`}
                                                     >
                                                         {STATUSES.map(s => <option key={s.value} value={s.value} className="bg-white dark:bg-gray-900 font-sans">{s.label}</option>)}
                                                     </select>
                                                 </td>
-                                                <td className="px-8 py-6 text-right font-black text-[9px] text-gray-300 uppercase tracking-widest">
+                                                <td className="px-6 py-4 text-right text-xs text-gray-500">
                                                     {reportId?.slice(-8).toUpperCase()}
                                                 </td>
                                             </tr>
@@ -209,37 +210,38 @@ export default function ElectricianTasks() {
                             </table>
 
                             {/* Mobile Card View */}
-                            <div className="md:hidden divide-y divide-gray-100 dark:divide-gray-800 font-sans">
+                            <div className="md:hidden divide-y divide-gray-100 dark:divide-gray-800">
                                 {filteredReports.map((report, i) => {
                                     const reportId = report._id || report.id;
                                     return (
-                                        <div key={reportId} className="p-4 hover:bg-blue-50/5 transition-colors group">
+                                        <div key={reportId} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                                             <div className="flex justify-between items-start mb-3">
                                                 <div>
-                                                    <div className="font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight group-hover:text-blue-600 transition-colors">
+                                                    <div className="font-semibold text-gray-900 dark:text-gray-100">
                                                         {report.location.hall}
                                                     </div>
-                                                    <div className="text-[9px] font-black text-gray-400 mt-1 uppercase">Unit {report.location.room || 'N/A'}</div>
+                                                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Room {report.location.room || 'N/A'}</div>
                                                 </div>
-                                                <div className="px-8 py-6 text-right font-black text-[9px] text-gray-300 uppercase tracking-widest hidden">
-                                                    {reportId?.slice(-8).toUpperCase()}
-                                                </div>
-                                                <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest border ${report.status === 'Completed' ? 'bg-green-50 text-green-600 border-green-200' : 'bg-blue-50 text-blue-600 border-blue-200'}`}>
+                                                <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                                    report.status === 'Completed' ? 'bg-green-100 text-green-700' : report.status === 'In Progress' ? 'bg-kmuGreen/10 text-kmuGreen' : 'bg-gray-100 text-gray-700'
+                                                }`}>
                                                     {report.status}
                                                 </span>
                                             </div>
                                             
-                                            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 mb-3 border-l-2 border-blue-400">
-                                                <div className="font-black text-gray-700 dark:text-gray-300 uppercase text-[10px] mb-1">{report.category}</div>
-                                                <div className="text-[10px] text-gray-500 italic">"{report.description}"</div>
+                                            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 mb-3 border-l-2 border-kmuGreen">
+                                                <div className="font-medium text-gray-700 dark:text-gray-300 text-sm mb-1 capitalize">{report.category}</div>
+                                                <div className="text-sm text-gray-600 dark:text-gray-400">{report.description}</div>
                                             </div>
                                             
                                             <div className="flex justify-between items-center border-t border-gray-100 dark:border-gray-800 pt-3">
-                                                <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Update Status:</span>
+                                                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Status:</span>
                                                 <select
                                                     value={report.status}
                                                     onChange={(e) => updateStatus(reportId!, e.target.value)}
-                                                    className={`text-[10px] font-black uppercase tracking-widest bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-blue-500 transition-all ${report.status === 'Completed' ? 'text-green-600' : 'text-blue-600'}`}
+                                                    className={`text-sm font-medium bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-kmuGreen transition-all ${
+                                                        report.status === 'Completed' ? 'text-green-600' : report.status === 'In Progress' ? 'text-kmuGreen' : 'text-gray-600'
+                                                    }`}
                                                 >
                                                     {STATUSES.map(s => <option key={s.value} value={s.value} className="bg-white dark:bg-gray-900 font-sans">{s.label}</option>)}
                                                 </select>
@@ -250,7 +252,7 @@ export default function ElectricianTasks() {
                             </div>
                             
                             {filteredReports.length === 0 && (
-                                <div className="text-center py-32 text-gray-400 italic font-black uppercase tracking-widest">No technical tasks recorded.</div>
+                                <div className="text-center py-12 text-gray-500">No tasks found. Great job staying on top of maintenance!</div>
                             )}
                         </div>
                     </div>

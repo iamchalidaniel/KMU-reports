@@ -1,4 +1,5 @@
 import MaintenanceReportModel from '../models/maintenanceReport.js';
+import { default as db } from '../models/db.js';
 
 export async function listMaintenanceReports(req, res) {
     try {
@@ -58,6 +59,7 @@ export async function listMaintenanceReports(req, res) {
 export async function getMaintenanceReport(req, res) {
     try {
         const { id } = req.params;
+        const dbType = process.env.DB_TYPE || 'mongo';
         let report;
 
         if (dbType === 'mongo') {
@@ -120,6 +122,7 @@ export async function createMaintenanceReport(req, res) {
 export async function updateMaintenanceReport(req, res) {
     try {
         const { id } = req.params;
+        const dbType = process.env.DB_TYPE || 'mongo';
         const updateData = {
             ...req.body,
             updated_at: new Date()

@@ -112,7 +112,7 @@ export default function HallWardenMaintenance() {
         setReports(reports.map(r => (r._id === reportId || r.id === reportId) ? { ...r, status: newStatus as any } : r));
 
         try {
-            const res = await fetch(`${API_BASE_URL}/api/maintenance/${reportId}`, {
+            const res = await fetch(`${API_BASE_URL}/maintenance/${reportId}`, {
                 method: 'PUT',
                 headers: { ...authHeaders(), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: newStatus }),
@@ -133,7 +133,7 @@ export default function HallWardenMaintenance() {
         setReports(reports.map(r => (r._id === reportId || r.id === reportId) ? { ...r, status: 'Assigned' as any, assigned_to: { staff_id: electricianId, name: electricianName, role: 'electrician' } } : r));
 
         try {
-            const res = await fetch(`${API_BASE_URL}/api/maintenance/${reportId}`, {
+            const res = await fetch(`${API_BASE_URL}/maintenance/${reportId}`, {
                 method: 'PUT',
                 headers: { ...authHeaders(), 'Content-Type': 'application/json' },
                 body: JSON.stringify({

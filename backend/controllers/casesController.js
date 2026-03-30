@@ -101,69 +101,84 @@ export async function listCases(req, res) {
 export async function getCase(req, res) {
     try {
         let caseItem = await CaseModel.findById(req.params.id);
-        if (caseItem) {
-            // Populate student or staff information
-            const StudentModel = (await import('../models/student.js')).default;
-            const StaffModel = (await import('../models/staff.js')).default;
-            caseItem = caseItem.toObject();
+        if (!caseItem) {
+            return res.status(404).json({ error: 'Case not found' });
+        }
 
-            // Handle student cases
-            if (caseItem.student_ids && caseItem.student_ids.length > 0) {
-                // Multiple students case - get all students
-                const students = await StudentModel.find({ studentId: { $in: caseItem.student_ids } });
-                caseItem.students = students.map(s => s.toObject());
-                // Keep first student for backward compatibility
-                caseItem.student = students.length > 0 ? students[0].toObject() : null;
-            } else if (caseItem.student_id) {
-                // Single student case
-                const student = await StudentModel.findOne({ studentId: caseItem.student_id });
-                if (student) {
-                    caseItem.student = student.toObject();
-                    caseItem.students = [student.toObject()]; // Add students array for consistency
-                } else {
-                    caseItem.student = null;
-                    caseItem.students = [];
-                }
+        // SECURITY FIX: Add role-based authorization
+        // Students can only view their own cases
+        if (req.user && req.user.role === 'student') {
+            const studentId = req.user.studentId || req.user.id;
+            const caseStudentIds = caseItem.student_ids || (caseItem.student_id ? [caseItem.student_id] : []);
+            
+            // Check if the student is involved in this case
+            if (!caseStudentIds.includes(studentId)) {
+                return res.status(403).json({ error: 'Unauthorized' });
             }
-            // Handle staff cases
-            else if (caseItem.staff_ids && caseItem.staff_ids.length > 0) {
-                // Multiple staff case - get all staff
-                const staffMembers = await StaffModel.find({ staffId: { $in: caseItem.staff_ids } });
-                caseItem.staffMembers = staffMembers.map(s => s.toObject());
-                // Keep first staff for single staff compatibility
-                caseItem.staff = staffMembers.length > 0 ? staffMembers[0].toObject() : null;
-            } else if (caseItem.staff_id) {
-                // Single staff case
-                const staff = await StaffModel.findOne({ staffId: caseItem.staff_id });
-                if (staff) {
-                    caseItem.staff = staff.toObject();
-                    caseItem.staffMembers = [staff.toObject()]; // Add staffMembers array for consistency
-                } else {
-                    caseItem.staff = null;
-                    caseItem.staffMembers = [];
-                }
+        }
+        // Staff can view all cases (already authenticated)
+
+        // Populate student or staff information
+        const StudentModel = (await import('../models/student.js')).default;
+        const StaffModel = (await import('../models/staff.js')).default;
+        caseItem = caseItem.toObject();
+
+        // Handle student cases
+        if (caseItem.student_ids && caseItem.student_ids.length > 0) {
+            // Multiple students case - get all students
+            const students = await StudentModel.find({ studentId: { $in: caseItem.student_ids } });
+            caseItem.students = students.map(s => s.toObject());
+            // Keep first student for backward compatibility
+            caseItem.student = students.length > 0 ? students[0].toObject() : null;
+        } else if (caseItem.student_id) {
+            // Single student case
+            const student = await StudentModel.findOne({ studentId: caseItem.student_id });
+            if (student) {
+                caseItem.student = student.toObject();
+                caseItem.students = [student.toObject()]; // Add students array for consistency
             } else {
                 caseItem.student = null;
                 caseItem.students = [];
+            }
+        }
+        // Handle staff cases
+        else if (caseItem.staff_ids && caseItem.staff_ids.length > 0) {
+            // Multiple staff case - get all staff
+            const staffMembers = await StaffModel.find({ staffId: { $in: caseItem.staff_ids } });
+            caseItem.staffMembers = staffMembers.map(s => s.toObject());
+            // Keep first staff for single staff compatibility
+            caseItem.staff = staffMembers.length > 0 ? staffMembers[0].toObject() : null;
+        } else if (caseItem.staff_id) {
+            // Single staff case
+            const staff = await StaffModel.findOne({ staffId: caseItem.staff_id });
+            if (staff) {
+                caseItem.staff = staff.toObject();
+                caseItem.staffMembers = [staff.toObject()]; // Add staffMembers array for consistency
+            } else {
                 caseItem.staff = null;
                 caseItem.staffMembers = [];
             }
-
-            // Transform field names to camelCase for frontend
-            caseItem = {
-                ...caseItem,
-                incidentDate: caseItem.incident_date,
-                offenseType: caseItem.offense_type,
-                createdBy: caseItem.created_by,
-                createdAt: caseItem.created_at,
-                updatedAt: caseItem.updated_at,
-                appealStatus: caseItem.appeal_status,
-                appealReason: caseItem.appeal_reason,
-                appealDate: caseItem.appeal_date,
-                appealDecision: caseItem.appeal_decision
-            };
+        } else {
+            caseItem.student = null;
+            caseItem.students = [];
+            caseItem.staff = null;
+            caseItem.staffMembers = [];
         }
-        if (!caseItem) return res.status(404).json({ error: 'Case not found' });
+
+        // Transform field names to camelCase for frontend
+        caseItem = {
+            ...caseItem,
+            incidentDate: caseItem.incident_date,
+            offenseType: caseItem.offense_type,
+            createdBy: caseItem.created_by,
+            createdAt: caseItem.created_at,
+            updatedAt: caseItem.updated_at,
+            appealStatus: caseItem.appeal_status,
+            appealReason: caseItem.appeal_reason,
+            appealDate: caseItem.appeal_date,
+            appealDecision: caseItem.appeal_decision
+        };
+
         res.json(caseItem);
     } catch (err) {
         console.error('Error in getCase:', err);
@@ -241,15 +256,15 @@ export async function createCase(req, res) {
             } else {
                 caseItem.student = null; // Set to null if student not found
             }
-            caseItem.students = caseItem.student ? [caseItem.student] : []; // Add students array for consistency
+            caseItem.students = [caseItem.student]; // Add students array for consistency
         } else if (isMultipleStaff) {
             // For multiple staff, populate all staff
             const staffMembers = await StaffModel.find({ staffId: { $in: caseItem.staff_ids } });
             caseItem = caseItem.toObject();
             caseItem.staffMembers = staffMembers.map(s => s.toObject());
-            caseItem.staff = null; // Keep null for single staff compatibility
+            caseItem.staff = null; // Keep null for backward compatibility
         } else if (isSingleStaff) {
-            // For single staff, populate single staff
+            // For single staff, populate single staff (backward compatibility)
             const staff = await StaffModel.findOne({ staffId: caseItem.staff_id });
             caseItem = caseItem.toObject();
             if (staff) {
@@ -257,42 +272,13 @@ export async function createCase(req, res) {
             } else {
                 caseItem.staff = null; // Set to null if staff not found
             }
-            caseItem.staffMembers = caseItem.staff ? [caseItem.staff] : []; // Add staffMembers array for consistency
+            caseItem.staffMembers = [caseItem.staff]; // Add staffMembers array for consistency
         }
 
-        // Transform field names to camelCase for frontend
-        caseItem = {
-            ...caseItem,
-            incidentDate: caseItem.incident_date,
-            offenseType: caseItem.offense_type,
-            createdBy: caseItem.created_by,
-            createdAt: caseItem.createdAt,
-            updatedAt: caseItem.updatedAt
-        };
+        // Log audit trail
+        logAudit(req.user.id, 'CREATE_CASE', `Created case: ${caseItem._id}`, 'case');
 
-        // Audit log for case creation
-        await logAudit({
-            action: 'case_created',
-            entity: 'case',
-            entityId: caseItem._id || caseItem.id,
-            user: (req.user && req.user.username) || req.body.created_by || 'unknown',
-            details: {
-                caseData: {
-                    incidentDate: caseData.incident_date,
-                    offenseType: caseData.offense_type,
-                    severity: caseData.severity,
-                    status: caseData.status,
-                    caseType: caseData.case_type,
-                    studentCount: isMultipleStudents ? req.body.student_ids.length : (isSingleStudent ? 1 : 0),
-                    staffCount: isMultipleStaff ? req.body.staff_ids.length : (isSingleStaff ? 1 : 0)
-                },
-                timestamp: new Date().toISOString()
-            },
-            ipAddress: req.ip,
-            userAgent: req.get('User-Agent')
-        });
-
-        res.json(caseItem);
+        res.status(201).json(caseItem);
     } catch (err) {
         console.error('Error in createCase:', err);
         res.status(500).json({ error: 'Server error' });
@@ -301,67 +287,19 @@ export async function createCase(req, res) {
 
 export async function updateCase(req, res) {
     try {
-        // Fetch old case for status comparison
-        const oldCase = await CaseModel.findById(req.params.id);
-        const oldStatus = oldCase ? oldCase.status : undefined;
-        let caseItem = await CaseModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (caseItem) {
-            // Populate student information
-            const StudentModel = (await import('../models/student.js')).default;
-            const student = await StudentModel.findOne({ studentId: caseItem.student_id });
-            caseItem = caseItem.toObject();
-            if (student) {
-                caseItem.student = student.toObject();
-            } else {
-                caseItem.student = null; // Set to null if student not found
-            }
-            // Transform field names to camelCase for frontend
-            caseItem = {
-                ...caseItem,
-                incidentDate: caseItem.incident_date,
-                offenseType: caseItem.offense_type,
-                createdBy: caseItem.created_by,
-                createdAt: caseItem.created_at,
-                updatedAt: caseItem.updated_at,
-                appealStatus: caseItem.appeal_status,
-                appealReason: caseItem.appeal_reason,
-                appealDate: caseItem.appeal_date,
-                appealDecision: caseItem.appeal_decision
-            };
-        }
-        // Audit log for status change
-        if (req.body.status && oldStatus && req.body.status !== oldStatus) {
-            await logAudit({
-                action: 'status_change',
-                entity: 'case',
-                entityId: req.params.id,
-                user: (req.user && req.user.username) || req.body.user || 'unknown',
-                details: {
-                    oldStatus,
-                    newStatus: req.body.status,
-                    changes: req.body,
-                    timestamp: new Date().toISOString()
-                },
-                ipAddress: req.ip,
-                userAgent: req.get('User-Agent')
-            });
+        const caseItem = await CaseModel.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true }
+        );
+
+        if (!caseItem) {
+            return res.status(404).json({ error: 'Case not found' });
         }
 
-        // Audit log for other updates
-        if (Object.keys(req.body).length > 0) {
-            await logAudit({
-                action: 'case_updated',
-                entity: 'case',
-                entityId: req.params.id,
-                user: (req.user && req.user.username) || req.body.user || 'unknown',
-                details: {
-                    changes: req.body,
-                    timestamp: new Date().toISOString()
-                },
-                ipAddress: req.ip,
-                userAgent: req.get('User-Agent')
-            });
-        }
+        // Log audit trail
+        logAudit(req.user.id, 'UPDATE_CASE', `Updated case: ${caseItem._id}`, 'case');
+
         res.json(caseItem);
     } catch (err) {
         console.error('Error in updateCase:', err);
@@ -371,22 +309,18 @@ export async function updateCase(req, res) {
 
 export async function deleteCase(req, res) {
     try {
-        await CaseModel.findByIdAndDelete(req.params.id);
-        // Audit log for deletion
-        await logAudit({
-            action: 'case_deleted',
-            entity: 'case',
-            entityId: req.params.id,
-            user: (req.user && req.user.username) || req.body.user || 'unknown',
-            details: {
-                timestamp: new Date().toISOString(),
-                reason: 'Case permanently deleted'
-            },
-            ipAddress: req.ip,
-            userAgent: req.get('User-Agent')
-        });
-        res.json({ success: true });
+        const caseItem = await CaseModel.findByIdAndDelete(req.params.id);
+
+        if (!caseItem) {
+            return res.status(404).json({ error: 'Case not found' });
+        }
+
+        // Log audit trail
+        logAudit(req.user.id, 'DELETE_CASE', `Deleted case: ${caseItem._id}`, 'case');
+
+        res.json({ message: 'Case deleted successfully' });
     } catch (err) {
+        console.error('Error in deleteCase:', err);
         res.status(500).json({ error: 'Server error' });
     }
 }
